@@ -1,0 +1,1159 @@
+# -*- coding: utf-8 -*-
+"""
+QGas - Interactive Map Interface
+
+================================================================================
+ACADEMIC SOFTWARE DESCRIPTION
+================================================================================
+
+This application provides an interactive web-based visualization interface for
+European gas pipeline infrastructure data. The system serves processed pipeline
+network data through an integrated web server with real-time updates.
+
+Key Functionalities:
+- Interactive web-based visualization with Folium mapping interface
+- Local HTTP server for serving map data
+- WebSocket support for real-time updates
+- Data caching and compression for optimized performance
+- Manual change management for pipeline data
+
+Technical Implementation:
+The system uses a tkinter-based GUI with an integrated HTTP server and WebSocket
+support for serving interactive maps. Data is cached in memory for performance
+and can be updated in real-time through the web interface.
+
+================================================================================
+Development Information:
+- Primary Author: Marco Quantschnig, BSc.
+- Institution: Institute of Electricity Economics and Energy Innovation (IEE), 
+               Graz University of Technology (TU Graz)
+- Created: August 2025
+- License: See LICENSE file
+================================================================================
+"""
+
+import sys
+import subprocess
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox, scrolledtext
+import os
+import sys
+import threading
+import importlib.util
+from datetime import datetime
+import http.server
+import socketserver
+import webbrowser
+import json
+import gzip
+import asyncio
+import websockets
+from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse, parse_qs
+
+class CombinedGUI:
+    def __init__(self, root):
+        print("Initializing QGas Map Interface...")
+        self.root = root
+        self.root.title("QGas - Interactive Map")
+        
+        # Set optimal window size for modern tile interface - further increased for full visibility
+        window_width = 1200
+        window_height = 750  # Reduced for compact layout with compressed tiles
+        
+        # Get screen dimensions for centering
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        
+        # Calculate position for centering - ensure window fits on screen
+        x = (screen_width - window_width) // 2
+        y = max(20, (screen_height - window_height) // 2)  # Ensure minimum 20px from top
+        
+        # Make sure window doesn't go off screen
+        if y + window_height > screen_height - 40:  # Leave 40px at bottom
+            y = screen_height - window_height - 40
+        
+        # Set window size and position
+        self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        
+        # Set minimum window size to ensure content remains readable - reduced for compact layout
+        self.root.minsize(1000, 650)
+        
+        # Configure window state
+        self.root.state('normal')  # Start in normal state, not maximized
+        
+        print(f"Window configured: {window_width}x{window_height}, centered at ({x}, {y})")
+        print("Window properties set")
+        
+        # === APPLICATION SETUP ===
+        # Determine if running as exe or script - this affects path resolution
+        if getattr(sys, 'frozen', False):
+            # Running as compiled exe - use executable directory
+            self.app_dir = os.path.dirname(sys.executable)
+        else:
+            # Running as Python script - use script directory
+            self.app_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # === MAP SERVER VARIABLES ===
+        # Configuration for the local HTTP server that serves the interactive map
+        self.PORT = 8000  # Port number for the local web server
+        self.WEBSOCKET_PORT = 8001  # Port for WebSocket server
+        self.filename = "Map.html"  # HTML file containing the interactive map
+        self.url = f"http://localhost:{self.PORT}/{self.filename}"  # Complete URL for map access
+        self.script_dir = self.app_dir  # Directory containing map files
+        self.server_thread = None  # Thread object for running HTTP server in background
+        self.websocket_thread = None  # Thread object for running WebSocket server
+        self.httpd = None  # HTTP server instance
+        self.websocket_server = None  # WebSocket server instance
+        
+        # === OPTIMIZATION FEATURES ===
+        self.executor = ThreadPoolExecutor(max_workers=4)  # Thread pool for parallel processing
+        self.data_cache = {}  # In-memory cache for GeoJSON data
+        self.websocket_clients = set()  # Connected WebSocket clients
+        self.selected_project = "Standard"  # Currently selected project folder
+        print("Map server variables initialized")
+        
+        # Ensure all required directories exist before proceeding
+        self.ensure_directories()
+        
+        print("Creating widgets...")
+        self.create_widgets()
+
+    def ensure_directories(self):
+        """
+        Create any missing required directories for the application.
+        Since we now use Input project folders, Output directories are no longer needed.
+        """
+        # No directories need to be created - Input folders already exist
+        pass
+        
+    def create_widgets(self):
+        """
+        Create the main GUI layout with the QGas Interactive Map interface.
+        Modern design with logo and tile-based layout optimized for larger window.
+        """
+        print("Creating modern QGas Interactive Map interface...")
+        
+        # Configure root window styling
+        self.root.configure(bg='#f8f9fa')
+        
+        # === MAIN CONTAINER ===
+        main_container = tk.Frame(self.root, bg='#f8f9fa')
+        main_container.pack(fill=tk.BOTH, expand=True, padx=40, pady=30)
+        
+        # === HEADER SECTION ===
+        self.create_header(main_container)
+        
+        # === MAIN CONTENT AREA ===
+        content_frame = tk.Frame(main_container, bg='#f8f9fa')
+        content_frame.pack(fill=tk.BOTH, expand=True, pady=(25, 0))
+        
+        # === CONTROL TILES ===
+        self.create_control_tiles(content_frame)
+        
+        # Status bar removed - status now only in header
+        
+        print("Modern widget creation completed successfully")
+    
+    def create_header(self, parent):
+        """Create modern header with logo and title"""
+        header_frame = tk.Frame(parent, bg='#ffffff', relief='flat', bd=2)
+        header_frame.pack(fill=tk.X, pady=(0, 20))
+        
+        # Add shadow effect
+        shadow_frame = tk.Frame(parent, bg='#e9ecef', height=2)
+        shadow_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        # Header content
+        header_content = tk.Frame(header_frame, bg='#ffffff')
+        header_content.pack(fill=tk.X, padx=30, pady=20)
+        
+        # Logo section
+        logo_frame = tk.Frame(header_content, bg='#ffffff')
+        logo_frame.pack(side=tk.LEFT, padx=(0, 20))
+        
+        try:
+            # Load and display logo
+            logo_path = os.path.join(self.app_dir, "QGas_Logo.jpg")
+            if os.path.exists(logo_path):
+                from PIL import Image, ImageTk
+                logo_image = Image.open(logo_path)
+                logo_image = logo_image.resize((80, 80), Image.Resampling.LANCZOS)
+                self.logo_photo = ImageTk.PhotoImage(logo_image)
+                logo_label = tk.Label(logo_frame, image=self.logo_photo, bg='#ffffff')
+                logo_label.pack()
+            else:
+                # Fallback logo placeholder
+                logo_label = tk.Label(logo_frame, text="🏭", font=("Arial", 48), bg='#ffffff', fg='#007bff')
+                logo_label.pack()
+        except ImportError:
+            # If PIL is not available, use text placeholder
+            logo_label = tk.Label(logo_frame, text="🏭", font=("Arial", 48), bg='#ffffff', fg='#007bff')
+            logo_label.pack()
+        
+        # Title section
+        title_frame = tk.Frame(header_content, bg='#ffffff')
+        title_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        title_label = tk.Label(title_frame, text="QGas Interactive Map", 
+                              font=("Segoe UI", 24, "bold"), 
+                              bg='#ffffff', fg='#2c3e50')
+        title_label.pack(anchor=tk.W)
+        
+        subtitle_label = tk.Label(title_frame, text="Pipeline Network Visualization Platform", 
+                                 font=("Segoe UI", 12), 
+                                 bg='#ffffff', fg='#6c757d')
+        subtitle_label.pack(anchor=tk.W, pady=(5, 0))
+        
+        # LED Status section (right side)
+        status_frame = tk.Frame(header_content, bg='#ffffff')
+        status_frame.pack(side=tk.RIGHT, padx=(20, 0))
+        
+        # LED Status label
+        led_label = tk.Label(status_frame, text="Server Status", 
+                            font=("Segoe UI", 10, "bold"), 
+                            bg='#ffffff', fg='#495057')
+        led_label.pack()
+        
+        # LED indicator frame
+        led_indicator_frame = tk.Frame(status_frame, bg='#ffffff')
+        led_indicator_frame.pack(pady=(5, 0))
+        
+        # LED circle (using Canvas for better control)
+        self.led_canvas = tk.Canvas(led_indicator_frame, width=20, height=20, bg='#ffffff', highlightthickness=0)
+        self.led_canvas.pack(side=tk.LEFT, padx=(0, 8))
+        
+        # Initial LED state (stopped/red)
+        self.led_circle = self.led_canvas.create_oval(2, 2, 18, 18, fill='#dc3545', outline='#a71e2a', width=2)
+        
+        # Status text next to LED
+        self.led_status_text = tk.Label(led_indicator_frame, text="Stopped", 
+                                       font=("Segoe UI", 11, "bold"), 
+                                       bg='#ffffff', fg='#dc3545')
+        self.led_status_text.pack(side=tk.LEFT)
+        
+        # Version info under the LED
+        version_frame = tk.Frame(status_frame, bg='#ffffff')
+        version_frame.pack(pady=(8, 0))
+        
+        version_label = tk.Label(version_frame, text="QGas v2.0", 
+                                font=("Segoe UI", 9), 
+                                bg='#ffffff', fg='#6c757d')
+        version_label.pack()
+    
+    def create_control_tiles(self, parent):
+        """Create modern tile-based control interface with larger action tiles"""
+        tiles_frame = tk.Frame(parent, bg='#f8f9fa')
+        tiles_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Configure grid weights for responsive layout - give more space to action tiles
+        tiles_frame.grid_columnconfigure(0, weight=1)
+        tiles_frame.grid_columnconfigure(1, weight=1)
+        tiles_frame.grid_columnconfigure(2, weight=1)
+        tiles_frame.grid_rowconfigure(0, weight=3)  # Action tiles get 3x more space
+        tiles_frame.grid_rowconfigure(1, weight=1)  # Info tile gets less space
+        
+        # Tile 1: Start Server
+        self.create_action_tile(tiles_frame, 
+                               title="Start Server",
+                               description="Initialize the map server and WebSocket connection for pipeline visualization",
+                               icon="🚀",
+                               button_text="Start Server",
+                               command=self.start_server,
+                               color="#28a745",
+                               row=0, column=0)
+        
+        # Tile 2: Open Map
+        self.create_action_tile(tiles_frame,
+                               title="Open Map",
+                               description="Launch the interactive pipeline map in your default web browser",
+                               icon="🌐",
+                               button_text="Open Map",
+                               command=self.open_browser,
+                               color="#007bff",
+                               row=0, column=1)
+        
+        # Tile 3: Stop Server
+        self.create_action_tile(tiles_frame,
+                               title="Stop Server",
+                               description="Shutdown the server and close all active connections safely",
+                               icon="⏹️",
+                               button_text="Stop Server",
+                               command=self.stop_server,
+                               color="#dc3545",
+                               row=0, column=2)
+        
+        # Info Tile (spans all columns) - smaller
+        self.create_info_tile(tiles_frame)
+    
+    def create_action_tile(self, parent, title, description, icon, button_text, command, color, row, column):
+        """Create a modern action tile with compressed height and minimal spacing"""
+        tile_frame = tk.Frame(parent, bg='#ffffff', relief='flat', bd=1, highlightbackground='#dee2e6', highlightthickness=1)
+        tile_frame.grid(row=row, column=column, padx=12, pady=10, sticky='nsew', ipadx=20, ipady=12)
+        
+        # Configure parent grid weights for better responsiveness
+        parent.grid_rowconfigure(row, weight=1)
+        
+        # Configure tile grid
+        tile_frame.grid_rowconfigure(0, weight=1)
+        tile_frame.grid_columnconfigure(0, weight=1)
+        
+        # Tile content with compressed vertical padding
+        content_frame = tk.Frame(tile_frame, bg='#ffffff')
+        content_frame.grid(row=0, column=0, sticky='nsew', padx=25, pady=15)
+        
+        # Icon - smaller with reduced spacing
+        icon_label = tk.Label(content_frame, text=icon, font=("Arial", 32), bg='#ffffff')
+        icon_label.pack(pady=(0, 8))
+        
+        # Title - reduced spacing
+        title_label = tk.Label(content_frame, text=title, 
+                              font=("Segoe UI", 16, "bold"), 
+                              bg='#ffffff', fg='#2c3e50')
+        title_label.pack(pady=(0, 6))
+        
+        # Description with minimal spacing
+        short_descriptions = {
+            "Initialize the map server and WebSocket connection for pipeline visualization": "Start HTTP and WebSocket servers for interactive map",
+            "Launch the interactive pipeline map in your default web browser": "Open the pipeline map in your browser",
+            "Shutdown the server and close all active connections safely": "Stop all servers and close connections"
+        }
+        
+        short_desc = short_descriptions.get(description, description)
+        
+        desc_label = tk.Label(content_frame, text=short_desc, 
+                             font=("Segoe UI", 11), 
+                             bg='#ffffff', fg='#6c757d', 
+                             wraplength=220, justify=tk.CENTER,
+                             relief='flat')
+        desc_label.pack(pady=(0, 12))
+        
+        # Action Button - compact spacing
+        button = tk.Button(content_frame, text=button_text,
+                          font=("Segoe UI", 12, "bold"),
+                          bg=color, fg='white',
+                          relief='flat', bd=0,
+                          padx=25, pady=10,
+                          cursor='hand2',
+                          command=command)
+        button.pack()
+        
+        # Hover effects
+        def on_enter(e):
+            button.config(bg=self.darken_color(color))
+            
+        def on_leave(e):
+            button.config(bg=color)
+            
+        button.bind("<Enter>", on_enter)
+        button.bind("<Leave>", on_leave)
+    
+    def create_info_tile(self, parent):
+        """Create compact information display tile with minimal height"""
+        info_frame = tk.Frame(parent, bg='#ffffff', relief='flat', bd=1, highlightbackground='#dee2e6', highlightthickness=1)
+        info_frame.grid(row=1, column=0, columnspan=3, padx=20, pady=(10, 15), sticky='ew', ipadx=15, ipady=8)
+        
+        # Info content - compressed spacing
+        content_frame = tk.Frame(info_frame, bg='#ffffff')
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=12)
+        
+        # Info icon and title - smaller
+        header_frame = tk.Frame(content_frame, bg='#ffffff')
+        header_frame.pack(fill=tk.X, pady=(0, 8))
+        
+        info_icon = tk.Label(header_frame, text="ℹ️", font=("Arial", 18), bg='#ffffff')
+        info_icon.pack(side=tk.LEFT, padx=(0, 10))
+        
+        info_title = tk.Label(header_frame, text="Server Information", 
+                             font=("Segoe UI", 13, "bold"), 
+                             bg='#ffffff', fg='#2c3e50')
+        info_title.pack(side=tk.LEFT, anchor=tk.W)
+        
+        # Info grid with minimal spacing
+        info_grid = tk.Frame(content_frame, bg='#ffffff')
+        info_grid.pack(fill=tk.X)
+        
+        # Configure grid columns - 3 columns for more compact layout
+        info_grid.grid_columnconfigure(0, weight=1)
+        info_grid.grid_columnconfigure(1, weight=1)
+        info_grid.grid_columnconfigure(2, weight=1)
+        
+        # Info items - more compact
+        info_items = [
+            ("Map File:", self.filename),
+            ("HTTP Port:", str(self.PORT)),
+            ("WebSocket Port:", str(self.WEBSOCKET_PORT)),
+            ("Server URL:", self.url),
+            ("Working Dir:", os.path.basename(self.script_dir)),
+            ("Features:", "Pipelines, Nodes, Storage, LNG, Consumption")
+        ]
+        
+        for i, (label, value) in enumerate(info_items):
+            row = i // 3
+            col = i % 3
+            
+            item_frame = tk.Frame(info_grid, bg='#ffffff')
+            item_frame.grid(row=row, column=col, sticky='w', padx=(0, 20), pady=2)
+            
+            # Compact layout - stack label and value vertically with minimal spacing
+            label_widget = tk.Label(item_frame, text=label, 
+                                   font=("Segoe UI", 9, "bold"), 
+                                   bg='#ffffff', fg='#495057',
+                                   relief='flat')
+            label_widget.pack(anchor=tk.W)
+            
+            # Truncate long values for compact display
+            display_value = value
+            if len(value) > 25:
+                display_value = value[:22] + "..."
+                
+            value_widget = tk.Label(item_frame, text=display_value, 
+                                   font=("Segoe UI", 9), 
+                                   bg='#ffffff', fg='#6c757d',
+                                   relief='flat')
+            value_widget.pack(anchor=tk.W)
+    
+    def darken_color(self, color):
+        """Utility function to darken colors for hover effects"""
+        color_map = {
+            "#28a745": "#218838",  # Green darker
+            "#007bff": "#0056b3",  # Blue darker  
+            "#dc3545": "#c82333",  # Red darker
+        }
+        return color_map.get(color, color)
+    
+    def update_status(self, status, is_running=False):
+        """Update only the header LED indicator (no status bar)"""
+        if is_running:
+            # Update LED to green (running) - only in header
+            if hasattr(self, 'led_canvas') and hasattr(self, 'led_circle'):
+                self.led_canvas.itemconfig(self.led_circle, fill='#28a745', outline='#1e7e34')
+            if hasattr(self, 'led_status_text'):
+                self.led_status_text.config(text="Running", fg='#28a745')
+        else:
+            # Update LED to red (stopped) - only in header
+            if hasattr(self, 'led_canvas') and hasattr(self, 'led_circle'):
+                self.led_canvas.itemconfig(self.led_circle, fill='#dc3545', outline='#a71e2a')
+            if hasattr(self, 'led_status_text'):
+                self.led_status_text.config(text="Stopped", fg='#dc3545')
+    
+    # ========================
+    # MAP SERVER TAB METHODS  
+    # ========================
+    def create_map_tab(self, parent):
+        # This method is now handled by create_widgets
+        pass
+    
+    # ========================
+    # MAP SERVER METHODS
+    # ========================
+    class ReusableTCPServer(socketserver.TCPServer):
+        allow_reuse_address = True
+    
+    def start_server(self):
+        if self.httpd is not None:
+            messagebox.showinfo("Info", "Server is already running.")
+            return
+        
+        try:
+            os.chdir(self.script_dir)
+            
+            # Optimized handler with compression and API endpoints
+            class OptimizedHandler(http.server.SimpleHTTPRequestHandler):
+                def __init__(self, *args, gui_instance=None, **kwargs):
+                    self.gui_instance = gui_instance
+                    super().__init__(*args, **kwargs)
+                
+                def end_headers(self):
+                    # Add cache-control headers to prevent caching
+                    self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
+                    self.send_header('Pragma', 'no-cache')
+                    self.send_header('Expires', '0')
+                    super().end_headers()
+                
+                def do_GET(self):
+                    from urllib.parse import urlparse, parse_qs
+                    parsed_path = urlparse(self.path)
+                    path = parsed_path.path
+                    
+                    # API Endpoints für optimierte Datenabfrage
+                    if path.startswith('/api/'):
+                        self.handle_api_request(path, parsed_path.query)
+                    # Komprimierte GeoJSON-Dateien
+                    elif path.endswith('.geojson'):
+                        self.handle_geojson_request(path)
+                    # Standard Dateien
+                    else:
+                        super().do_GET()
+                
+                def handle_api_request(self, path, query):
+                    """Behandelt API-Anfragen für spezifische Daten"""
+                    try:
+                        import json
+                        from urllib.parse import parse_qs
+                        
+                        params = parse_qs(query)
+                        
+                        if path == '/api/layers':
+                            # Gibt verfügbare Layer zurück
+                            layers = ['pipelines', 'nodes', 'compressors', 'storages', 'powerplants', 'lng']
+                            self.send_json_response({'layers': layers})
+                            
+                        elif path == '/api/layer_stats':
+                            # Gibt Layer-Statistiken zurück (ohne Geometrie für Performance)
+                            layer_name = params.get('name', [''])[0]
+                            stats = self.get_layer_statistics(layer_name)
+                            self.send_json_response(stats)
+                            
+                    except Exception as e:
+                        self.send_error(500, f"API Error: {str(e)}")
+                
+                def handle_geojson_request(self, path):
+                    """Behandelt GeoJSON-Anfragen mit dynamischer Projekt-Pfad-Umleitung"""
+                    try:
+                        import json
+                        import gzip
+                        
+                        file_path = path.lstrip('/')
+                        
+                        # Dynamic project path routing - redirect Output/ requests to Input/{project}/
+                        if file_path.startswith('Output/') and hasattr(self.gui_instance, 'selected_project'):
+                            # Redirect Output/xyz.geojson to Input/{project}/xyz.geojson
+                            geojson_filename = file_path.replace('Output/', '')
+                            project_file_path = f"Input/{self.gui_instance.selected_project}/{geojson_filename}"
+                            
+                            if os.path.exists(project_file_path):
+                                file_path = project_file_path
+                                print(f"Redirected {path} -> {project_file_path}")
+                        
+                        if os.path.exists(file_path):
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                data = json.load(f)
+                            
+                            # Komprimiere große GeoJSON-Dateien
+                            json_data = json.dumps(data, ensure_ascii=False)
+                            
+                            # Komprimiere wenn Datei > 1MB
+                            if len(json_data.encode('utf-8')) > 1024 * 1024:
+                                compressed_data = gzip.compress(json_data.encode('utf-8'))
+                                
+                                self.send_response(200)
+                                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                                self.send_header('Content-Encoding', 'gzip')
+                                self.send_header('Content-Length', str(len(compressed_data)))
+                                self.end_headers()
+                                self.wfile.write(compressed_data)
+                            else:
+                                self.send_json_response(data)
+                        else:
+                            self.send_error(404, "File not found")
+                            
+                    except Exception as e:
+                        self.send_error(500, f"GeoJSON Error: {str(e)}")
+                
+                def send_json_response(self, data):
+                    """Sendet JSON-Antwort"""
+                    import json
+                    json_data = json.dumps(data, ensure_ascii=False)
+                    
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.send_header('Content-Length', str(len(json_data.encode('utf-8'))))
+                    self.end_headers()
+                    self.wfile.write(json_data.encode('utf-8'))
+                
+                def get_layer_statistics(self, layer_name):
+                    """Gibt Layer-Statistiken zurück ohne Geometrie-Daten"""
+                    try:
+                        import json
+                        
+                        file_mapping = {
+                            'pipelines': 'Output/PL_Pipelines.geojson',
+                            'nodes': 'Output/N_Nodes.geojson',
+                            'compressors': 'Output/C_Compressors.geojson',
+                            'storages': 'Output/S_Storages.geojson',
+                            'powerplants': 'Output/P_Powerplants.geojson',
+                            'lng': 'Output/L_LNG.geojson'
+                        }
+                        
+                        file_path = file_mapping.get(layer_name)
+                        if not file_path or not os.path.exists(file_path):
+                            return {'error': 'Layer not found', 'count': 0}
+                        
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        
+                        features = data.get('features', [])
+                        return {
+                            'layer': layer_name,
+                            'count': len(features),
+                            'file_size': os.path.getsize(file_path),
+                            'last_modified': os.path.getmtime(file_path)
+                        }
+                    except Exception as e:
+                        return {'error': str(e), 'count': 0}
+            
+            # Erstelle Handler mit GUI-Referenz
+            Handler = lambda *args, **kwargs: OptimizedHandler(*args, gui_instance=self, **kwargs)
+            
+            self.httpd = self.ReusableTCPServer(("", self.PORT), Handler)
+            self.server_thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
+            self.server_thread.start()
+            
+            # Start WebSocket server
+            self.start_websocket_server()
+            
+            import time
+            time.sleep(1)  # Short delay to ensure servers are running
+            
+            self.update_status(f"Running - HTTP:{self.PORT} WS:{self.WEBSOCKET_PORT}", is_running=True)
+            messagebox.showinfo("Info", f"Servers started - HTTP: {self.PORT}, WebSocket: {self.WEBSOCKET_PORT}")
+            
+            # Show project selection dialog after server start
+            self.show_project_selection_after_start()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to start servers: {str(e)}")
+    
+    def show_project_selection_after_start(self):
+        """Show project selection dialog after server start to reset any cached state."""
+        try:
+            # Get available projects
+            input_dir = os.path.join(self.app_dir, "Input")
+            projects = [d for d in os.listdir(input_dir) 
+                       if os.path.isdir(os.path.join(input_dir, d))]
+            
+            if len(projects) > 1:
+                # Show project selection dialog
+                selected_project = self.show_project_selection_dialog()
+                if selected_project:
+                    # Store selected project for server routing instead of modifying Map.html
+                    self.selected_project = selected_project
+                    print(f"Project selected for new session: {selected_project}")
+            elif len(projects) == 1:
+                # Automatically use the only available project
+                self.selected_project = projects[0]
+                print(f"Auto-selected project: {projects[0]}")
+            else:
+                self.selected_project = "Standard"  # Fallback
+                
+        except Exception as e:
+            print(f"Error in project selection after start: {e}")
+            self.selected_project = "Standard"  # Fallback
+    
+    def start_websocket_server(self):
+        """Startet WebSocket Server in separatem Thread"""
+        def run_websocket_server():
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
+                async def websocket_handler(websocket, path):
+                    await self.handle_websocket_connection(websocket, path)
+                
+                # Starte WebSocket Server
+                start_server = websockets.serve(
+                    websocket_handler, 
+                    "localhost", 
+                    self.WEBSOCKET_PORT
+                )
+                
+                loop.run_until_complete(start_server)
+                loop.run_forever()
+                
+            except Exception as e:
+                print(f"WebSocket server error: {e}")
+        
+        self.websocket_thread = threading.Thread(target=run_websocket_server, daemon=True)
+        self.websocket_thread.start()
+    
+    async def handle_websocket_connection(self, websocket, path):
+        """Behandelt WebSocket-Verbindungen"""
+        self.websocket_clients.add(websocket)
+        print(f"WebSocket client connected: {websocket.remote_address}")
+        
+        try:
+            async for message in websocket:
+                data = json.loads(message)
+                await self.handle_websocket_message(websocket, data)
+        except websockets.exceptions.ConnectionClosed:
+            pass
+        except Exception as e:
+            print(f"WebSocket error: {e}")
+        finally:
+            self.websocket_clients.remove(websocket)
+            print(f"WebSocket client disconnected")
+    
+    async def handle_websocket_message(self, websocket, data):
+        """Behandelt WebSocket-Nachrichten"""
+        action = data.get('action')
+        
+        try:
+            if action == 'get_layer_data':
+                layer_name = data.get('layer_name')
+                bbox = data.get('bbox')
+                
+                # Lade Daten in Thread Pool
+                loop = asyncio.get_event_loop()
+                layer_data = await loop.run_in_executor(
+                    self.executor, 
+                    self.get_cached_layer_data, 
+                    layer_name, 
+                    bbox
+                )
+                
+                response = {
+                    'action': 'layer_data_response',
+                    'layer_name': layer_name,
+                    'data': layer_data
+                }
+                await websocket.send(json.dumps(response))
+                
+            elif action == 'update_feature':
+                # Feature-Update von der Karte
+                feature = data.get('feature')
+                layer_name = data.get('layer_name')
+                
+                # Update in Thread Pool
+                loop = asyncio.get_event_loop()
+                success = await loop.run_in_executor(
+                    self.executor,
+                    self.update_layer_feature,
+                    layer_name,
+                    feature
+                )
+                
+                if success:
+                    # Broadcast Update an alle verbundenen Clients
+                    await self.broadcast_feature_update(layer_name, feature)
+                    
+            elif action == 'clear_cache':
+                # Cache leeren
+                self.data_cache.clear()
+                response = {'action': 'cache_cleared', 'success': True}
+                await websocket.send(json.dumps(response))
+                
+        except Exception as e:
+            error_response = {
+                'action': 'error',
+                'message': str(e)
+            }
+            await websocket.send(json.dumps(error_response))
+    
+    async def broadcast_feature_update(self, layer_name, feature):
+        """Sendet Feature-Updates an alle verbundenen Clients"""
+        if self.websocket_clients:
+            message = {
+                'action': 'feature_updated',
+                'layer_name': layer_name,
+                'feature': feature
+            }
+            await asyncio.gather(
+                *[client.send(json.dumps(message)) for client in self.websocket_clients],
+                return_exceptions=True
+            )
+    
+    def get_cached_layer_data(self, layer_name, bbox=None):
+        """Lädt Layer-Daten mit Caching und optionaler Bounding-Box-Filterung"""
+        cache_key = f"{layer_name}_{bbox}" if bbox else layer_name
+        
+        # Prüfe Cache
+        if cache_key in self.data_cache:
+            return self.data_cache[cache_key]
+        
+        # Lade Daten
+        file_mapping = {
+            'pipelines': 'Output/PL_Pipelines.geojson',
+            'nodes': 'Output/N_Nodes.geojson',
+            'compressors': 'Output/C_Compressors.geojson',
+            'storages': 'Output/S_Storages.geojson',
+            'powerplants': 'Output/P_Powerplants.geojson',
+            'lng': 'Output/L_LNG.geojson'
+        }
+        
+        file_path = file_mapping.get(layer_name)
+        if not file_path or not os.path.exists(file_path):
+            return {'type': 'FeatureCollection', 'features': []}
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Bounding Box Filterung (falls gewünscht)
+            if bbox:
+                data = self.filter_data_by_bbox(data, bbox)
+            
+            # Cache Ergebnis
+            self.data_cache[cache_key] = data
+            return data
+            
+        except Exception as e:
+            print(f"Error loading {layer_name}: {e}")
+            return {'type': 'FeatureCollection', 'features': []}
+    
+    def filter_data_by_bbox(self, geojson_data, bbox_str):
+        """Filtert GeoJSON-Daten nach Bounding Box"""
+        try:
+            # Parse bbox: "minX,minY,maxX,maxY"
+            minX, minY, maxX, maxY = map(float, bbox_str.split(','))
+            
+            filtered_features = []
+            for feature in geojson_data.get('features', []):
+                geometry = feature.get('geometry', {})
+                coordinates = geometry.get('coordinates', [])
+                
+                # Einfache Punkt-Prüfung
+                if geometry.get('type') == 'Point':
+                    x, y = coordinates
+                    if minX <= x <= maxX and minY <= y <= maxY:
+                        filtered_features.append(feature)
+                elif geometry.get('type') == 'LineString' and coordinates:
+                    # Prüfe ersten Punkt der Linie
+                    x, y = coordinates[0]
+                    if minX <= x <= maxX and minY <= y <= maxY:
+                        filtered_features.append(feature)
+                else:
+                    # Für andere Geometrien: Alles durchlassen
+                    filtered_features.append(feature)
+            
+            return {
+                'type': 'FeatureCollection',
+                'features': filtered_features
+            }
+        except:
+            # Bei Fehlern: Originaldata zurückgeben
+            return geojson_data
+    
+    def update_layer_feature(self, layer_name, feature):
+        """Updated ein Feature in den Layer-Daten"""
+        try:
+            print(f"Updating feature in {layer_name}: {feature.get('id', 'unknown')}")
+            
+            # Hier würde die tatsächliche Update-Logik stehen
+            # z.B. Schreiben in Export-Datei oder Datenbank
+            
+            # Cache für diesen Layer invalidieren
+            keys_to_remove = [key for key in self.data_cache.keys() if key.startswith(layer_name)]
+            for key in keys_to_remove:
+                del self.data_cache[key]
+            
+            return True
+        except Exception as e:
+            print(f"Error updating feature: {e}")
+            return False
+    
+    def stop_server(self):
+        # Stop HTTP Server
+        if self.httpd is not None:
+            self.httpd.shutdown()
+            self.httpd.server_close()
+            self.httpd = None
+        
+        # Stop WebSocket Server (if running)
+        if self.websocket_thread is not None and self.websocket_thread.is_alive():
+            # WebSocket server wird automatisch gestoppt wenn der Thread beendet wird (daemon=True)
+            pass
+        
+        # Clear cache
+        self.data_cache.clear()
+        
+        # Close WebSocket connections
+        if self.websocket_clients:
+            self.websocket_clients.clear()
+        
+        # Update UI
+        self.update_status("Stopped", is_running=False)
+        
+        # Reset selected project
+        self.selected_project = "Standard"
+        
+        messagebox.showinfo("Info", "All servers stopped and cache cleared.")
+    
+    def open_browser(self):
+        """Open the map in browser with optional project selection."""
+        # Check for project selection first
+        if not self.select_project():
+            return  # User cancelled project selection
+            
+        try:
+            # Try to open in Edge
+            edge_path = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+            webbrowser.register('edge', None, webbrowser.BackgroundBrowser(edge_path))
+            webbrowser.get('edge').open(self.url)
+            print("Opening map in Microsoft Edge...")
+        except Exception as e:
+            print(f"Could not open in Edge: {e}")
+            print("Opening in default browser...")
+            webbrowser.open(self.url)
+    
+    def select_project(self):
+        """Show project selection dialog if multiple projects exist."""
+        input_path = os.path.join(self.app_dir, "Input")
+        
+        if not os.path.exists(input_path):
+            messagebox.showerror("Error", "Input folder not found!")
+            return False
+        
+        # Get all subdirectories in Input folder
+        try:
+            subdirs = [d for d in os.listdir(input_path) 
+                      if os.path.isdir(os.path.join(input_path, d))]
+            
+            if not subdirs:
+                messagebox.showerror("Error", "No project folders found in Input directory!")
+                return False
+            
+            # If only Standard folder exists, use it automatically
+            if len(subdirs) == 1 and "Standard" in subdirs:
+                self.selected_project = "Standard"
+                print(f"Using default project: {self.selected_project}")
+                self.update_map_paths("Standard")
+                return True
+            
+            # Multiple projects - show selection dialog
+            return self.show_project_selection_dialog(subdirs)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not read Input directory: {e}")
+            return False
+    
+    def show_project_selection_dialog(self, projects):
+        """Show project selection dialog with dropdown."""
+        import tkinter.ttk as ttk
+        
+        # Create modal dialog with even larger size for better button visibility
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Select Project")
+        dialog.geometry("450x380")  # Further increased height for button space
+        dialog.resizable(False, False)
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Center dialog properly with screen bounds checking
+        screen_width = dialog.winfo_screenwidth()
+        screen_height = dialog.winfo_screenheight()
+        dialog_width = 450
+        dialog_height = 380
+        
+        # Calculate center position
+        x = (screen_width - dialog_width) // 2
+        y = (screen_height - dialog_height) // 2
+        
+        # Ensure dialog doesn't go off screen
+        x = max(20, min(x, screen_width - dialog_width - 20))
+        y = max(20, min(y, screen_height - dialog_height - 60))  # Extra space at bottom
+        
+        dialog.geometry(f"{dialog_width}x{dialog_height}+{x}+{y}")
+        
+        self.selected_project = None
+        self.dialog_result = False
+        
+        # Dialog content with more padding
+        main_frame = tk.Frame(dialog, bg='#ffffff', padx=40, pady=30)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Title with more space
+        title_label = tk.Label(main_frame, text="Select Project", 
+                              font=("Segoe UI", 18, "bold"),
+                              bg='#ffffff', fg='#2c3e50')
+        title_label.pack(pady=(0, 15))
+        
+        # Description with better spacing
+        desc_label = tk.Label(main_frame, 
+                             text="Multiple projects found in Input folder.\nPlease select which project to load:",
+                             font=("Segoe UI", 12),
+                             bg='#ffffff', fg='#6c757d',
+                             justify=tk.CENTER)
+        desc_label.pack(pady=(0, 25))
+        
+        # Project selection with more space
+        selection_frame = tk.Frame(main_frame, bg='#ffffff')
+        selection_frame.pack(fill=tk.X, pady=(0, 25))
+        
+        project_label = tk.Label(selection_frame, text="Available Projects:", 
+                                font=("Segoe UI", 12, "bold"),
+                                bg='#ffffff', fg='#495057')
+        project_label.pack(anchor=tk.W, pady=(0, 8))
+        
+        project_var = tk.StringVar()
+        project_combo = ttk.Combobox(selection_frame, textvariable=project_var, 
+                                    values=sorted(projects), state="readonly",
+                                    font=("Segoe UI", 12), width=35, height=8)
+        project_combo.pack(fill=tk.X, pady=(0, 5))
+        
+        # Set default selection (Standard if available, otherwise first)
+        if "Standard" in projects:
+            project_combo.set("Standard")
+        else:
+            project_combo.set(projects[0])
+        
+        # Buttons with much better spacing and larger size for full visibility
+        button_frame = tk.Frame(main_frame, bg='#ffffff')
+        button_frame.pack(fill=tk.X, pady=(30, 10))  # More space above buttons
+        
+        def on_ok():
+            self.selected_project = project_var.get()
+            if self.selected_project:
+                self.dialog_result = True
+                self.update_map_paths(self.selected_project)
+                print(f"Selected project: {self.selected_project}")
+            dialog.destroy()
+        
+        def on_cancel():
+            self.dialog_result = False
+            dialog.destroy()
+        
+        cancel_btn = tk.Button(button_frame, text="Cancel",
+                              font=("Segoe UI", 13),
+                              bg='#6c757d', fg='white',
+                              relief='flat', padx=30, pady=4,
+                              command=on_cancel)
+        cancel_btn.pack(side=tk.RIGHT, padx=(20, 0))
+        
+        ok_btn = tk.Button(button_frame, text="Load Project",
+                          font=("Segoe UI", 13, "bold"),
+                          bg='#007bff', fg='white',
+                          relief='flat', padx=30, pady=4,
+                          command=on_ok)
+        ok_btn.pack(side=tk.RIGHT)
+        
+        # Handle dialog close
+        dialog.protocol("WM_DELETE_WINDOW", on_cancel)
+        
+        # Wait for dialog to close
+        dialog.wait_window()
+        
+        return self.dialog_result
+    
+    def update_map_paths(self, project_name):
+        """Update the map HTML file to use the selected project paths."""
+        import re
+        try:
+            map_file_path = os.path.join(self.app_dir, "Map.html")
+            
+            if not os.path.exists(map_file_path):
+                print("Map.html not found!")
+                return
+            
+            # Read current map file
+            with open(map_file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # First, normalize any existing Input/project/ patterns back to Input/
+            # This prevents accumulating project paths like Input/Standard/Standard/
+            normalized_content = re.sub(r"Input/[^/'\")]+/", "Input/", content)
+            
+            # Also normalize any Output/ paths back to Input/ since data is in Input folders
+            normalized_content = re.sub(r"fetch\('Output/", "fetch('Input/", normalized_content)
+            
+            # Now update all Input/ paths to Input/{project_name}/
+            # Only replace in fetch() calls and similar contexts
+            updated_content = re.sub(r"fetch\('Input/", f"fetch('Input/{project_name}/", normalized_content)
+            
+            # Write updated content back
+            with open(map_file_path, 'w', encoding='utf-8') as f:
+                f.write(updated_content)
+                
+            print(f"Updated map paths to use project: {project_name}")
+            
+        except Exception as e:
+            print(f"Error updating map paths: {e}")
+            messagebox.showerror("Error", f"Could not update map for project {project_name}: {e}")
+    
+    def reset_map_paths(self):
+        """Reset map paths back to Output/ (original default state)."""
+        try:
+            map_file_path = os.path.join(self.app_dir, "Map.html")
+            
+            if not os.path.exists(map_file_path):
+                return
+            
+            # Read current map file
+            with open(map_file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Reset all Input/{project}/ paths back to Output/
+            import re
+            updated_content = re.sub(r"fetch\('Input/[^/]+/", "fetch('Output/", content)
+            
+            # Write updated content back
+            with open(map_file_path, 'w', encoding='utf-8') as f:
+                f.write(updated_content)
+                
+            print("Reset map paths to original Output/ structure")
+            
+        except Exception as e:
+            print(f"Error resetting map paths: {e}")
+    
+    def clear_browser_cache(self):
+        """Add cache-busting parameters to Map.html to force browser reload."""
+        try:
+            import time
+            cache_buster = str(int(time.time()))
+            map_file_path = os.path.join(self.app_dir, "Map.html")
+            
+            if not os.path.exists(map_file_path):
+                return
+            
+            # Read current map file
+            with open(map_file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Update cache buster parameter in all fetch calls
+            import re
+            updated_content = re.sub(r'\?v=\d+', f'?v={cache_buster}', content)
+            
+            # If no cache buster exists, add one
+            if '?v=' not in updated_content:
+                updated_content = re.sub(r"\.geojson'", f".geojson?v={cache_buster}'", updated_content)
+            
+            # Write updated content back
+            with open(map_file_path, 'w', encoding='utf-8') as f:
+                f.write(updated_content)
+                
+            print(f"Updated browser cache buster to: {cache_buster}")
+            
+        except Exception as e:
+            print(f"Error clearing browser cache: {e}")
+        
+    # ========================
+    # CLEANUP METHODS
+    # ========================
+    def on_closing(self):
+        """
+        Handle application shutdown gracefully.
+        Stops the map server if running and cleans up any background processes
+        before closing the application window.
+        """
+        # Stop map server if currently running
+        if self.httpd is not None:
+            self.stop_server()
+        
+        # Close the main application window
+        self.root.destroy()
+
+def main():
+    """
+    Main entry point for the QGas Interactive Map application.
+    Initializes the Tkinter GUI, creates the application instance, and starts
+    the main event loop. Includes error handling for startup issues.
+    """
+    try:
+        print("Starting QGas Interactive Map Interface...")
+        root = tk.Tk()
+        print("Tkinter root window created successfully")
+        app = CombinedGUI(root)
+        print("QGas GUI application initialized successfully")
+        
+        # Set up proper application shutdown handling
+        root.protocol("WM_DELETE_WINDOW", app.on_closing)
+        
+        print("Starting main loop...")
+        root.mainloop()
+    except Exception as e:
+        print(f"Error starting QGas GUI: {e}")
+        import traceback
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    main()
