@@ -1045,7 +1045,7 @@
 </div>
 
 <!-- New Contributor Form Modal -->
-<div id="new-contributor-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 10001; justify-content: center; align-items: center;">
+<div id="new-contributor-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 100001; justify-content: center; align-items: center;">
   <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <h2 style="margin-top: 0; color: #333;">Create New Contributor</h2>
     
@@ -2224,7 +2224,7 @@
         // Pipeline-Layer neu laden
         if (pipelineLayer) {
           map.removeLayer(pipelineLayer);
-          fetch('Input/Standard/PL_Pipelines.geojson?v=' + Date.now())
+          fetch('Input/Test_Project/PL_Pipelines.geojson?v=' + Date.now())
             .then(response => response.json())
             .then(data => {
               pipelineLayer = L.geoJSON(data, {
@@ -2563,7 +2563,7 @@
     });
   }
 
-  fetch('Input/Standard/PL_Pipelines.geojson?v=' + Date.now())
+  fetch('Input/Test_Project/PL_Pipelines.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       pipelineLayer = L.geoJSON(data, {
@@ -2589,7 +2589,7 @@
     })
 
 
- fetch('Input/Standard/N_Nodes.geojson?v=' + Date.now())
+ fetch('Input/Test_Project/N_Nodes.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       nodeLayer = L.geoJSON(data, {
@@ -2618,7 +2618,7 @@
     })
     
 
- fetch('Input/Standard/P_Powerplants.geojson?v=' + Date.now())
+ fetch('Input/Test_Project/P_Powerplants.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       powerplantsLayer = L.geoJSON(data, {
@@ -2646,7 +2646,7 @@
     })
     
 
- fetch('Input/Standard/C_Compressors.geojson?v=' + Date.now())
+ fetch('Input/Test_Project/C_Compressors.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       compressorsLayer = L.geoJSON(data, {
@@ -2674,7 +2674,7 @@
     })
     
 
- fetch('Input/Standard/L_LNG.geojson?v=' + Date.now())
+ fetch('Input/Test_Project/L_LNG.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       lngLayer = L.geoJSON(data, {
@@ -2702,7 +2702,7 @@
     })
     
 
- fetch('Input/Standard/S_Storages.geojson?v=' + Date.now())
+ fetch('Input/Test_Project/S_Storages.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       storageLayer = L.geoJSON(data, {
@@ -2730,7 +2730,7 @@
     })
     
 // NUTS3 Centroids Layer (Consumption)
-fetch('Input/Standard/NUTS3_Centroids.geojson?v=' + Date.now())
+fetch('Input/Test_Project/NUTS3_Centroids.geojson?v=' + Date.now())
   .then(res => res.json())
   .then(data => {
     consumptionLayer = L.geoJSON(data, {
@@ -5144,7 +5144,14 @@ document.getElementById('contributor-form').addEventListener('submit', function(
     
     // Update dropdown and select the new contributor
     populateContributorSelect();
-    document.getElementById('existing-contributor-select').value = contributor.id;
+    
+    // Select the newly created contributor in the radio button list
+    const radioButtons = document.querySelectorAll('input[name="contributor-select"]');
+    radioButtons.forEach(radio => {
+      if (radio.value === contributor.id) {
+        radio.checked = true;
+      }
+    });
     
     // Close modal and popup
     closeNewContributorModal();
