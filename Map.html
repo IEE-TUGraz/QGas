@@ -2339,7 +2339,8 @@
           map.removeLayer(pipelineLayer);
           pipelineLayer = L.geoJSON(deleteModeBackup.pipelines, {
             style: { color: '#3388ff', weight: 3, opacity: 0.8 },
-            onEachFeature: function(feature, layer) { setPipelineInteraction(layer); }
+            onEachFeature: function(feature, layer) { setPipelineInteraction(layer); },
+            tolerance: 40
           });
           pipelineLayer.addTo(map);
           console.log('✅ Pipeline Layer wiederhergestellt mit', deleteModeBackup.pipelines.length, 'Elementen');
@@ -2351,7 +2352,70 @@
           map.removeLayer(nodeLayer);
           nodeLayer = L.geoJSON(deleteModeBackup.nodes, {
             pointToLayer: function(feature, latlng) {
-              return L.circleMarker(latlng, { radius: 6, fillColor: '#ff7800', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.8 });
+              // Sichtbarer Marker (wie ursprünglich)
+              const visibleMarker = L.circleMarker(latlng, { 
+                radius: 6, 
+                fillColor: '#ff7800', 
+                color: '#000', 
+                weight: 1, 
+                opacity: 1, 
+                fillOpacity: 0.8 
+              });
+              
+              // Unsichtbarer größerer Marker für bessere Klickbarkeit
+              const clickMarker = L.circleMarker(latlng, {
+                radius: 12, // Größerer Klickbereich
+                fillColor: '#ff7800',
+                color: '#000',
+                weight: 0,
+                opacity: 0,
+                fillOpacity: 0
+              });
+              
+              // Feature-Eigenschaft an beide Marker binden
+              visibleMarker.feature = feature;
+              clickMarker.feature = feature;
+              
+              // Klick-Handler an beide Marker binden
+              const clickHandler = function(e) {
+                if (currentMode === 'info') {
+                  console.log('Node geklickt (Wiederherstellung):', this.feature.properties.ID);
+                  
+                  // Element hervorheben
+                  highlightElement(this);
+                  
+                  // Modal mit Node-Details anzeigen
+                  const content = createModalPopupContent(this.feature.properties, this);
+                  const title = `Node: ${this.feature.properties.ID || this.feature.properties.Name || 'Unnamed'}`;
+                  showElementModal(title, content, this);
+                  
+                  // Save-Button Event nach Modal-Anzeige
+                  setTimeout(() => {
+                    const btn = document.getElementById('save-attr-btn');
+                    if (btn) {
+                      btn.onclick = function () {
+                        const inputs = document.querySelectorAll('#modal-body input[data-key]');
+                        let changed = false;
+                        inputs.forEach(input => {
+                          const key = input.getAttribute('data-key');
+                          if (this.feature.properties[key] !== input.value) changed = true;
+                          this.feature.properties[key] = input.value;
+                        });
+                        if (changed) this.feature.properties.modified = true;
+                        closeElementModal();
+                      }.bind(this);
+                    }
+                  }, 100);
+                }
+              };
+              
+              visibleMarker.on('click', clickHandler);
+              clickMarker.on('click', clickHandler);
+              
+              // Erstelle eine Layer-Gruppe
+              const nodeGroup = L.layerGroup([visibleMarker, clickMarker]);
+              
+              return nodeGroup;
             },
             onEachFeature: function(feature, layer) { setNodeInteraction(layer); }
           });
@@ -2537,17 +2601,13 @@
     }
   }
 
-  function setupPipelineInteractions() {
-    if (pipelineLayer) {
-      pipelineLayer.eachLayer(layer => {
-        setPipelineInteraction(layer);
-      });
+  function setNodeInteraction(layer) {
+    layer.off('click');
+    
+    if (currentMode === 'info') {
+      // Nodes haben im Info-Modus keine spezielle Interaktion
+      // Event-Handler werden dynamisch über setupNodeClickHandlers gesetzt
     }
-    drawnItems.eachLayer(layer => {
-      if (layer.feature && layer.feature.geometry.type === "LineString") {
-        setPipelineInteraction(layer);
-      }
-    });
   }
 
   fetch('Input/Standard/PL_Pipelines.geojson?v=' + Date.now())
@@ -2565,7 +2625,7 @@
           lineCap: 'round',
           lineJoin: 'round'
         },
-        tolerance: 12 // Erhöhte Klick-Toleranz für besseren Klickbereich
+        tolerance: 40 // Weitere Erhöhung der Klick-Toleranz für besseren Klickbereich
       });
       pipelineLayer.addTo(map);
       // Store original pipeline layer for filtering
@@ -2581,7 +2641,8 @@
     .then(data => {
       nodeLayer = L.geoJSON(data, {
         pointToLayer: (feature, latlng) => {
-          const marker = L.circleMarker(latlng, {
+          // Sichtbarer kleiner Marker
+          const visibleMarker = L.circleMarker(latlng, {
             radius: 2,
             fillColor: "#f03",
             color: "#900",
@@ -2589,7 +2650,61 @@
             opacity: 1,
             fillOpacity: 0.7
           });
-          return marker;
+          
+          // Unsichtbarer größerer Marker für bessere Klickbarkeit
+          const clickMarker = L.circleMarker(latlng, {
+            radius: 8, // Größerer Klickbereich
+            fillColor: "#f03",
+            color: "#900",
+            weight: 0,
+            opacity: 0,
+            fillOpacity: 0
+          });
+          
+          // Feature-Eigenschaft an beide Marker binden
+          visibleMarker.feature = feature;
+          clickMarker.feature = feature;
+          
+          // Klick-Handler an beide Marker binden
+          const clickHandler = function(e) {
+            if (currentMode === 'info') {
+              console.log('Node geklickt:', this.feature.properties.ID);
+              
+              // Element hervorheben
+              highlightElement(this);
+              
+              // Modal mit Node-Details anzeigen
+              const content = createModalPopupContent(this.feature.properties, this);
+              const title = `Node: ${this.feature.properties.ID || this.feature.properties.Name || 'Unnamed'}`;
+              showElementModal(title, content, this);
+              
+              // Save-Button Event nach Modal-Anzeige
+              setTimeout(() => {
+                const btn = document.getElementById('save-attr-btn');
+                if (btn) {
+                  btn.onclick = function () {
+                    const inputs = document.querySelectorAll('#modal-body input[data-key]');
+                    let changed = false;
+                    inputs.forEach(input => {
+                      const key = input.getAttribute('data-key');
+                      if (this.feature.properties[key] !== input.value) changed = true;
+                      this.feature.properties[key] = input.value;
+                    });
+                    if (changed) this.feature.properties.modified = true;
+                    closeElementModal();
+                  }.bind(this);
+                }
+              }, 100);
+            }
+          };
+          
+          visibleMarker.on('click', clickHandler);
+          clickMarker.on('click', clickHandler);
+          
+          // Erstelle eine Layer-Gruppe
+          const nodeGroup = L.layerGroup([visibleMarker, clickMarker]);
+          
+          return nodeGroup;
         }
       });
       nodeLayer.addTo(map);
@@ -3628,7 +3743,20 @@ function highlightElement(layer) {
   currentPopupLayer = layer;
   
   // Highlighte das Element je nach Typ
-  if (layer instanceof L.CircleMarker) {
+  if (layer instanceof L.LayerGroup) {
+    // Für Layer-Gruppen (Nodes mit erweitertem Klickbereich)
+    layer.eachLayer(subLayer => {
+      if (subLayer instanceof L.CircleMarker && subLayer.options.fillOpacity > 0) {
+        // Nur den sichtbaren Marker highlighten
+        subLayer.setStyle({
+          color: "#ff0000",
+          weight: 3,
+          fillColor: subLayer.options.fillColor,
+          fillOpacity: subLayer.options.fillOpacity
+        });
+      }
+    });
+  } else if (layer instanceof L.CircleMarker) {
     // Für CircleMarkers (Nodes, etc.)
     layer.setStyle({
       color: "#ff0000",
@@ -3652,7 +3780,25 @@ function highlightElement(layer) {
 function resetElementStyle(layer) {
   console.log('resetElementStyle aufgerufen für Layer:', layer);
   
-  if (layer instanceof L.CircleMarker) {
+  if (layer instanceof L.LayerGroup) {
+    // Für Layer-Gruppen (Nodes mit erweitertem Klickbereich)
+    layer.eachLayer(subLayer => {
+      if (subLayer instanceof L.CircleMarker && subLayer.options.fillOpacity > 0) {
+        // Nur den sichtbaren Marker zurücksetzen
+        let originalColor = "#900";
+        let originalFillColor = "#f03";
+        let originalRadius = 2;
+        
+        subLayer.setStyle({
+          color: originalColor,
+          weight: 1,
+          fillColor: originalFillColor,
+          fillOpacity: 0.7,
+          radius: originalRadius
+        });
+      }
+    });
+  } else if (layer instanceof L.CircleMarker) {
     // Bestimme ursprüngliche Farben durch Prüfung in welchem Layer das Element ist
     let originalColor = "#666"; // Default
     let originalFillColor = "#ccc"; // Default
@@ -5834,7 +5980,7 @@ function openExportDialog() {
 function openScreenshotMode() {
   showCustomPopup(
     '📸 Screenshot Mode',
-    '<p style="text-align: center; margin: 15px 0;">Click elements to highlight them, then take a screenshot.</p>',
+    '<p style="text-align: center; margin: 15px 0;">Click elements to highlight them, then take a screenshot.<br><strong>Press ESC to exit Screenshot Mode.</strong></p>',
     [
       {
         text: 'Activate Screenshot Mode',
@@ -6811,7 +6957,8 @@ function dividePipelineAtPoint(selectedPipelineLayer, supportIndex) {
     if (pipelineLayer) {
       // Erstes Segment
       const firstLayer = L.geoJSON(firstPipeline, {
-        style: { color: "#0070f3", weight: 3 }
+        style: { color: "#0070f3", weight: 3 },
+        tolerance: 40
       });
       firstLayer.eachLayer(layer => {
         layer.feature = firstPipeline;
@@ -6821,7 +6968,8 @@ function dividePipelineAtPoint(selectedPipelineLayer, supportIndex) {
       
       // Zweites Segment  
       const secondLayer = L.geoJSON(secondPipeline, {
-        style: { color: "#0070f3", weight: 3 }
+        style: { color: "#0070f3", weight: 3 },
+        tolerance: 40
       });
       secondLayer.eachLayer(layer => {
         layer.feature = secondPipeline;
@@ -7247,6 +7395,52 @@ function activateInfoMode() {
       }
     });
     
+    // Node-Interaktionen für Info Mode
+    if (nodeLayer) {
+      nodeLayer.eachLayer(layer => {
+        if (layer instanceof L.LayerGroup) {
+          layer.off('click');
+          layer.on('click', function (e) {
+            try {
+              console.log('Node geklickt in Info Mode:', layer);
+              
+              // Element hervorheben
+              highlightElement(layer);
+              
+              // Modal mit Node-Details anzeigen
+              const content = createModalPopupContent(layer.feature.properties, layer);
+              const title = `Node: ${layer.feature.properties.ID || layer.feature.properties.Name || 'Unnamed'}`;
+              showElementModal(title, content, layer);
+              
+              // Save-Button Event nach Modal-Anzeige
+              setTimeout(() => {
+                const btn = document.getElementById('save-attr-btn');
+                if (btn) {
+                  btn.onclick = function () {
+                    try {
+                      const inputs = document.querySelectorAll('#modal-body input[data-key]');
+                      let changed = false;
+                      inputs.forEach(input => {
+                        const key = input.getAttribute('data-key');
+                        if (layer.feature.properties[key] !== input.value) changed = true;
+                        layer.feature.properties[key] = input.value;
+                      });
+                      if (changed) layer.feature.properties.modified = true;
+                      closeElementModal();
+                    } catch (error) {
+                      console.error('Error saving node attributes:', error);
+                    }
+                  };
+                }
+              }, 100);
+            } catch (error) {
+              console.error('Error in node click:', error);
+            }
+          });
+        }
+      });
+    }
+    
     // Element-Interaktionen für Info Mode
     updateAllElementInteractions();
   } catch (error) {
@@ -7265,6 +7459,11 @@ function updateAllElementInteractions() {
     [nodeLayer, powerplantsLayer, compressorsLayer, lngLayer, storageLayer, consumptionLayer].forEach(elementLayer => {
       if (elementLayer) {
         elementLayer.eachLayer(layer => {
+          // Überspringe Layer-Gruppen, da diese bereits ihre eigenen Handler haben
+          if (layer instanceof L.LayerGroup) {
+            return;
+          }
+          
           layer.off('click');
           layer.unbindPopup();
           if (currentMode === 'info' && layer.feature && layer.feature.properties) {
@@ -7602,10 +7801,8 @@ function deactivateAllModes() {
           map.removeLayer(layer._arrowDecorator);
           delete layer._arrowDecorator;
         }
-        // Zurück zum normalen Stil (falls im Change Direction Mode war)
-        if (currentMode === 'change-direction') {
-          layer.setStyle({ color: '#0070f3', weight: 3, dashArray: null });
-        }
+        // Zurück zum normalen Stil
+        layer.setStyle({ color: '#0070f3', weight: 3, dashArray: null });
       });
     }
     
@@ -7718,11 +7915,20 @@ function activateScreenshotMode() {
       window._citeBtnWasVisible = true;
     }
 
-    // Logo-Rahmen anpassen (Padding auf 0 setzen)
+    // Data and Licensing Button ausblenden
+    const dataLicensingBtn = document.getElementById('data-licensing-btn');
+    if (dataLicensingBtn) {
+      window._dataLicensingBtnDisplay = dataLicensingBtn.style.display; // Original speichern
+      dataLicensingBtn.style.display = 'none';
+      window._dataLicensingBtnWasVisible = true;
+    }
+
+    // Logo komplett ausblenden
     const topLogo = document.getElementById('top-logo');
     if (topLogo) {
-      window._logoPadding = topLogo.style.padding || '8px'; // Original speichern
-      topLogo.style.padding = '0px';
+      window._logoDisplay = topLogo.style.display || ''; // Original speichern
+      topLogo.style.display = 'none';
+      window._logoWasVisible = true;
     }
 
     // Export und Screenshot Buttons ausblenden
@@ -7806,15 +8012,24 @@ function exitScreenshotMode() {
       delete window._citeBtnWasVisible;
     }
 
-    // Logo-Padding wiederherstellen
-    const topLogo = document.getElementById('top-logo');
-    if (topLogo && window._logoPadding !== undefined) {
-      if (window._logoPadding === '8px' || window._logoPadding === '') {
-        topLogo.style.padding = ''; // Zurück zu CSS Standard
-      } else {
-        topLogo.style.padding = window._logoPadding;
+    // Data and Licensing Button wieder anzeigen
+    if (window._dataLicensingBtnWasVisible) {
+      const dataLicensingBtn = document.getElementById('data-licensing-btn');
+      if (dataLicensingBtn && window._dataLicensingBtnDisplay !== undefined) {
+        dataLicensingBtn.style.display = window._dataLicensingBtnDisplay; // Original wiederherstellen
+        delete window._dataLicensingBtnDisplay;
       }
-      delete window._logoPadding;
+      delete window._dataLicensingBtnWasVisible;
+    }
+
+    // Logo wieder anzeigen
+    if (window._logoWasVisible) {
+      const topLogo = document.getElementById('top-logo');
+      if (topLogo && window._logoDisplay !== undefined) {
+        topLogo.style.display = window._logoDisplay; // Original wiederherstellen
+        delete window._logoDisplay;
+      }
+      delete window._logoWasVisible;
     }
 
     // Export und Screenshot Buttons wieder anzeigen
@@ -7832,6 +8047,8 @@ function exitScreenshotMode() {
     if (legendControl && window._originalLegendHTML) {
       legendControl.innerHTML = window._originalLegendHTML;
       delete window._originalLegendHTML;
+      // Event-Handler für Checkboxen wieder hinzufügen
+      createLegendEventHandlers();
     }
 
     // Escape-Event-Listener entfernen
@@ -10995,7 +11212,8 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
         weight: 2,
         opacity: 0.8
       };
-    }
+    },
+    tolerance: 40
   });
   const secondPipelineLayer = L.geoJSON(secondPipeline, {
     style: function(feature) {
@@ -11004,7 +11222,8 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
         weight: 2,
         opacity: 0.8
       };
-    }
+    },
+    tolerance: 40
   });
   
   // Neue Pipeline-Segmente zum pipelineLayer hinzufügen
