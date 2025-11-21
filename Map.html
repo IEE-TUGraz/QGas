@@ -3,7 +3,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Pipeline Editor</title>
+  <title>QGas - Toolkit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Cache verhindern -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -16,10 +16,10 @@
     html, body, #map {
       height: 100%;
       margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
     }
 
     .popup-table {
-      font-family: sans-serif;
       font-size: 13px;
       max-width: 500px;
     }
@@ -1051,19 +1051,6 @@
     
     <form id="contributor-form">
       <div style="margin-bottom: 15px;">
-        <label for="contributor-title" style="display: block; margin-bottom: 5px; font-weight: bold;">Title:</label>
-        <select id="contributor-title" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-          <option value="">-- Select Title --</option>
-          <option value="Dr.">Dr.</option>
-          <option value="Prof.">Prof.</option>
-          <option value="Prof. Dr.">Prof. Dr.</option>
-          <option value="Dipl.-Ing.">Dipl.-Ing.</option>
-          <option value="M.Sc.">M.Sc.</option>
-          <option value="B.Sc.">B.Sc.</option>
-        </select>
-      </div>
-      
-      <div style="margin-bottom: 15px;">
         <label for="contributor-firstname" style="display: block; margin-bottom: 5px; font-weight: bold;">First Name:</label>
         <input type="text" id="contributor-firstname" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
       </div>
@@ -1095,7 +1082,7 @@
       If you use QGas in your research, please cite it as follows:
     </p>
     
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border: 1px solid #dee2e6; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.4; overflow-x: auto;">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border: 1px solid #dee2e6; font-family: monospace; font-size: 12px; line-height: 1.4; overflow-x: auto;">
       <pre id="bibtex-content">@software{quantschnig_qgas_2025,
   author       = {Quantschnig, Marco and
                   Klatzer, Thomas and
@@ -1319,43 +1306,12 @@
     maxZoom: 18
   }).addTo(map);
 
-  async function loadContributors() {
+  function loadContributors() {
     // Load from localStorage (persistent until browser cache is cleared)
     const stored = localStorage.getItem('qgas_contributors');
     if (stored) {
       contributors = JSON.parse(stored);
       console.log('Contributors loaded from browser localStorage');
-    } else {
-      // Try to load initial contributors from file
-      try {
-        const response = await fetch('./contributors.txt');
-        if (response.ok) {
-          const text = await response.text();
-          const lines = text.trim().split('\n');
-
-          lines.forEach(line => {
-            const parts = line.split('|');
-            if (parts.length >= 6) {
-              const contributor = {
-                id: parts[0],
-                title: parts[1] || '',
-                firstName: parts[2],
-                surname: parts[3],
-                fullName: `${parts[2]} ${parts[3]}`,
-                institution: parts[4],
-                created: parts[5]
-              };
-              contributors.push(contributor);
-            }
-          });
-
-          // Save to localStorage for future use
-          localStorage.setItem('qgas_contributors', JSON.stringify(contributors));
-          console.log('Initial contributors loaded from contributors.txt and saved to localStorage');
-        }
-      } catch (error) {
-        console.log('Could not load initial contributors.txt:', error.message);
-      }
     }
 
     return contributors;
@@ -1367,11 +1323,10 @@
     console.log('Contributors saved to browser localStorage');
   }
 
-  function addContributor(title, firstName, surname, institution) {
+  function addContributor(firstName, surname, institution) {
     const fullName = `${firstName} ${surname}`;
     const contributor = {
       id: Date.now().toString(),
-      title: title,
       firstName: firstName,
       surname: surname,
       fullName: fullName,
@@ -1422,7 +1377,7 @@
         margin: 0;
         font-size: 14px;
       `;
-      label.textContent = `${contributor.title ? contributor.title + ' ' : ''}${contributor.fullName} (${contributor.institution})`;
+      label.textContent = `${contributor.fullName} (${contributor.institution})`;
       label.onclick = () => radio.click();
 
       const deleteBtn = document.createElement('button');
@@ -1652,50 +1607,82 @@
 
     // Generate HTML content
     const content = `
-      <h3 style="margin-top: 0; color: #495057;">Infrastructure Counts:</h3>
-      <div style="margin-bottom: 15px;">
-        <strong>Number of Pipeline Elements:</strong> ${stats.pipelineElements}<br>
-        <strong>Total Length of Pipeline Elements:</strong> ${stats.totalLength.toFixed(2)} km<br>
-        <strong>Number of Nodes:</strong> ${stats.nodes || 0}<br>
-        <strong>Number of Storages:</strong> ${stats.storages}<br>
-        <strong>Number of LNG Terminals:</strong> ${stats.lngTerminals}<br>
-        <strong>Number of Powerplants:</strong> ${stats.powerplants}<br>
-        <strong>Number of Compressors:</strong> ${stats.compressors}
-      </div>
+      <h3 style="margin-top: 0; color: #495057;">Infrastructure Counts</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+        <tbody>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Number of pipeline elements</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${stats.pipelineElements}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Total length of pipeline elements (km)</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${Math.round(stats.totalLength).toLocaleString('en-US')}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Number of nodes</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${stats.nodes || 0}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Number of storages</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${stats.storages}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Number of LNG terminals</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${stats.lngTerminals}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Number of power plants</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${stats.powerplants}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Number of compressors</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${stats.compressors}</td>
+          </tr>
+        </tbody>
+      </table>
       
-      <h3 style="color: #495057;">Pipeline Data Completeness:</h3>
-      <div style="margin-bottom: 15px; display: flex; gap: 20px;">
-        <div style="flex: 1;">
-          <strong>Diameter available:</strong><br>
-          &nbsp;&nbsp;• Lengthwise: ${diameterPercentLengthwise.toFixed(1)}%<br>
-          &nbsp;&nbsp;• Elementwise: ${diameterPercentElementwise.toFixed(1)}%
-        </div>
-        <div style="flex: 1;">
-          <strong>Name available:</strong><br>
-          &nbsp;&nbsp;• Lengthwise: ${namePercentLengthwise.toFixed(1)}%<br>
-          &nbsp;&nbsp;• Elementwise: ${namePercent.toFixed(1)}%
-        </div>
-        <div style="flex: 1;">
-          <strong>Pressure available:</strong><br>
-          &nbsp;&nbsp;• Lengthwise: ${pressurePercentLengthwise.toFixed(1)}%<br>
-          &nbsp;&nbsp;• Elementwise: ${pressurePercentElementwise.toFixed(1)}%
-        </div>
-      </div>
+      <h3 style="color: #495057;">Pipeline Data Completeness</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+        <thead>
+          <tr>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: left; font-weight: bold;">Attribute</th>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: center; font-weight: bold;">Lengthwise</th>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: center; font-weight: bold;">Elementwise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Diameter</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${diameterPercentLengthwise.toFixed(1)}%</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${diameterPercentElementwise.toFixed(1)}%</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Name</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${namePercentLengthwise.toFixed(1)}%</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${namePercent.toFixed(1)}%</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Maximum Pressure</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${pressurePercentLengthwise.toFixed(1)}%</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${pressurePercentElementwise.toFixed(1)}%</td>
+          </tr>
+        </tbody>
+      </table>
       
       <h3 style="color: #495057;">Pipeline Data Sources:</h3>
       <div style="margin-bottom: 15px;">
         <div style="display: flex; gap: 20px; align-items: stretch; margin-bottom: 15px;">
           <div style="flex: 1; display: flex; flex-direction: column;">
-            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #495057;">By Element Count:</h4>
             <div style="position: relative; flex: 1; min-height: 200px;">
               <canvas id="pipelineSourcesChartElements" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
             </div>
+            <div style="text-align: center; margin-top: 5px; font-size: 14px; color: #495057; font-weight: bold;">By element count</div>
           </div>
           <div style="flex: 1; display: flex; flex-direction: column;">
-            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #495057;">By Length (km):</h4>
             <div style="position: relative; flex: 1; min-height: 200px;">
               <canvas id="pipelineSourcesChartLength" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
             </div>
+            <div style="text-align: center; margin-top: 5px; font-size: 14px; color: #495057; font-weight: bold;">By length (km)</div>
           </div>
         </div>
         <div id="charts-legend" style="text-align: center; margin-top: 10px;"></div>
@@ -1937,7 +1924,7 @@
                   const contributor = contributors.find(c => c.id === selectedId);
                   console.log('Found contributor:', contributor);
                   if (contributor) {
-                    const fullName = `${contributor.title ? contributor.title + ' ' : ''}${contributor.fullName}`;
+                    const fullName = contributor.fullName;
                     document.getElementById('contributor-input').value = fullName;
                     contributorName = fullName;
                     contributorInitials = contributor.fullName.split(/\s+/).map(n => n[0] ? n[0].toUpperCase() : '').join('');
@@ -2224,7 +2211,7 @@
         // Pipeline-Layer neu laden
         if (pipelineLayer) {
           map.removeLayer(pipelineLayer);
-          fetch('Input/Test_Project/PL_Pipelines.geojson?v=' + Date.now())
+          fetch('Input/Standard/PL_Pipelines.geojson?v=' + Date.now())
             .then(response => response.json())
             .then(data => {
               pipelineLayer = L.geoJSON(data, {
@@ -2563,7 +2550,7 @@
     });
   }
 
-  fetch('Input/Test_Project/PL_Pipelines.geojson?v=' + Date.now())
+  fetch('Input/Standard/PL_Pipelines.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       pipelineLayer = L.geoJSON(data, {
@@ -2589,7 +2576,7 @@
     })
 
 
- fetch('Input/Test_Project/N_Nodes.geojson?v=' + Date.now())
+ fetch('Input/Standard/N_Nodes.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       nodeLayer = L.geoJSON(data, {
@@ -2618,7 +2605,7 @@
     })
     
 
- fetch('Input/Test_Project/P_Powerplants.geojson?v=' + Date.now())
+ fetch('Input/Standard/P_Powerplants.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       powerplantsLayer = L.geoJSON(data, {
@@ -2646,7 +2633,7 @@
     })
     
 
- fetch('Input/Test_Project/C_Compressors.geojson?v=' + Date.now())
+ fetch('Input/Standard/C_Compressors.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       compressorsLayer = L.geoJSON(data, {
@@ -2674,7 +2661,7 @@
     })
     
 
- fetch('Input/Test_Project/L_LNG.geojson?v=' + Date.now())
+ fetch('Input/Standard/L_LNG.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       lngLayer = L.geoJSON(data, {
@@ -2702,7 +2689,7 @@
     })
     
 
- fetch('Input/Test_Project/S_Storages.geojson?v=' + Date.now())
+ fetch('Input/Standard/S_Storages.geojson?v=' + Date.now())
     .then(res => res.json())
     .then(data => {
       storageLayer = L.geoJSON(data, {
@@ -2730,7 +2717,7 @@
     })
     
 // NUTS3 Centroids Layer (Consumption)
-fetch('Input/Test_Project/NUTS3_Centroids.geojson?v=' + Date.now())
+fetch('Input/Standard/NUTS3_Centroids.geojson?v=' + Date.now())
   .then(res => res.json())
   .then(data => {
     consumptionLayer = L.geoJSON(data, {
@@ -5114,7 +5101,7 @@ document.getElementById('contributor-form').addEventListener('submit', function(
     return;
   }
   
-  const title = document.getElementById('contributor-title').value;
+  const title = ''; // Removed title field
   const firstName = document.getElementById('contributor-firstname').value.trim();
   const surname = document.getElementById('contributor-surname').value.trim();
   const institution = document.getElementById('contributor-institution').value.trim();
@@ -5134,8 +5121,8 @@ document.getElementById('contributor-form').addEventListener('submit', function(
   
   try {
     // Add new contributor
-    const contributor = addContributor(title, firstName, surname, institution);
-    const fullName = `${title ? title + ' ' : ''}${contributor.fullName}`;
+    const contributor = addContributor(firstName, surname, institution);
+    const fullName = contributor.fullName;
     
     // Set as current contributor
     document.getElementById('contributor-input').value = fullName;

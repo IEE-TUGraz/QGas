@@ -55,7 +55,7 @@ class CombinedGUI:
     def __init__(self, root):
         print("Initializing QGas Map Interface...")
         self.root = root
-        self.root.title("QGas - Interactive Map")
+        self.root.title("QGas - Interactive Gas Infrastructure Toolkit")
         
         # Set optimal window size for modern tile interface - further increased for full visibility
         window_width = 1200
@@ -172,6 +172,9 @@ class CombinedGUI:
         logo_frame = tk.Frame(header_content, bg='#ffffff')
         logo_frame.pack(side=tk.LEFT, padx=(0, 20))
         
+        # Ensure Tkinter is ready for image creation
+        self.root.update()
+        
         try:
             # Load and display logo
             logo_path = os.path.join(self.app_dir, "QGas_Logo.jpg")
@@ -186,8 +189,8 @@ class CombinedGUI:
                 # Fallback logo placeholder
                 logo_label = tk.Label(logo_frame, text="🏭", font=("Arial", 48), bg='#ffffff', fg='#007bff')
                 logo_label.pack()
-        except ImportError:
-            # If PIL is not available, use text placeholder
+        except Exception as e:
+            # If any error occurs (PIL not available, image loading fails, etc.), use text placeholder
             logo_label = tk.Label(logo_frame, text="🏭", font=("Arial", 48), bg='#ffffff', fg='#007bff')
             logo_label.pack()
         
@@ -195,15 +198,10 @@ class CombinedGUI:
         title_frame = tk.Frame(header_content, bg='#ffffff')
         title_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
-        title_label = tk.Label(title_frame, text="QGas Interactive Map", 
+        title_label = tk.Label(title_frame, text="QGas - Interactive Gas Infrastructure Toolkit", 
                               font=("Segoe UI", 24, "bold"), 
                               bg='#ffffff', fg='#2c3e50')
         title_label.pack(anchor=tk.W)
-        
-        subtitle_label = tk.Label(title_frame, text="Pipeline Network Visualization Platform", 
-                                 font=("Segoe UI", 12), 
-                                 bg='#ffffff', fg='#6c757d')
-        subtitle_label.pack(anchor=tk.W, pady=(5, 0))
         
         # LED Status section (right side)
         status_frame = tk.Frame(header_content, bg='#ffffff')
@@ -236,7 +234,7 @@ class CombinedGUI:
         version_frame = tk.Frame(status_frame, bg='#ffffff')
         version_frame.pack(pady=(8, 0))
         
-        version_label = tk.Label(version_frame, text="QGas v2.0", 
+        version_label = tk.Label(version_frame, text="QGas v1.0", 
                                 font=("Segoe UI", 9), 
                                 bg='#ffffff', fg='#6c757d')
         version_label.pack()
@@ -315,7 +313,7 @@ class CombinedGUI:
         # Description with minimal spacing
         short_descriptions = {
             "Initialize the map server and WebSocket connection for pipeline visualization": "Start HTTP and WebSocket servers for interactive map",
-            "Launch the interactive pipeline map in your default web browser": "Open the pipeline map in your browser",
+            "Launch the interactive pipeline map in your default web browser": "Open the gas infrastructure map in your browser",
             "Shutdown the server and close all active connections safely": "Stop all servers and close connections"
         }
         
