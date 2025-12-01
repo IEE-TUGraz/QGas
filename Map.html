@@ -589,7 +589,7 @@
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.6);
-  z-index: 2500;
+  z-index: 10100;
   pointer-events: auto;
 }
 
@@ -602,7 +602,7 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  z-index: 2501;
+  z-index: 10101;
   padding: 25px;
   min-width: 350px;
   max-width: 500px;
@@ -1277,7 +1277,7 @@
       🔄<br>Change Direction
     </button>
     <button class="tool-tile" data-mode="short-pipe" onclick="selectTool('short-pipe')">
-      📏<br>Short Pipe
+      📏<br>Short-Pipe
     </button>
     <button class="tool-tile" data-mode="delete" onclick="selectTool('delete')">
       🗑️<br>Delete
@@ -1487,7 +1487,9 @@
     contributors.push(contributor);
     saveContributors();
     return contributor;
-  }  function deleteContributor(contributorId) {
+  }
+  
+  function deleteContributor(contributorId) {
     if (confirm('Are you sure you want to delete this contributor?')) {
       contributors = contributors.filter(c => c.id !== contributorId);
       saveContributors();
@@ -2482,23 +2484,16 @@
     const btn = document.createElement('button');
     btn.id = 'save-delete-btn';
     btn.textContent = 'Save Changes';
-    btn.style.position = 'absolute';
-    btn.style.top = '20px';
-    btn.style.left = 'calc(50% - 100px)';
-    btn.style.transform = 'translateX(0)';
-    btn.style.zIndex = 1000;
-    btn.style.padding = '10px 20px';
-    btn.style.background = '#0070f3';
-    btn.style.color = 'white';
-    btn.style.border = 'none';
-    btn.style.borderRadius = '5px';
-    btn.style.fontSize = '16px';
-    btn.style.cursor = 'pointer';
-    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    btn.className = 'main-menu-btn edit-action-btn';
+    btn.style.display = 'block';
+    btn.style.width = '140px';
+    btn.style.margin = '0';
+    btn.style.padding = '8px 16px';
+    btn.style.boxSizing = 'border-box';
+    btn.style.background = '#28a745';
 
     btn.onclick = function () {
-      // Löschungen bestätigen - Arrays werden beim nächsten "Apply Changes" in der GUI verarbeitet
-      // Für jetzt: Arrays leeren und zurück zum Info Mode
+      // Löschungen bestätigen - jetzt tatsächlich aus den Layern entfernen
       console.log('Löschungen bestätigt:', {
         pipelines: deletedPipelines.length,
         nodes: deletedNodes.length,
@@ -2508,13 +2503,34 @@
         storages: deletedStorages.length
       });
 
-      // Arrays bleiben erhalten für die GUI-Verarbeitung
-      // deletedPipelines = [];
-      // deletedNodes = [];
-      // deletedPowerplants = [];
-      // deletedCompressors = [];
-      // deletedLNGs = [];
-      // deletedStorages = [];
+      // Actually remove all marked elements from layers
+      deletedPipelines.forEach(item => {
+        if (item.layer && item.parentLayer) {
+          item.parentLayer.removeLayer(item.layer);
+        }
+      });
+      
+      deletedNodes.forEach(item => {
+        if (item.layer && nodeLayer) {
+          nodeLayer.removeLayer(item.layer);
+        }
+      });
+      
+      deletedPowerplants.forEach(item => {
+        if (item.layer && powerplantsLayer) powerplantsLayer.removeLayer(item.layer);
+      });
+      
+      deletedCompressors.forEach(item => {
+        if (item.layer && compressorsLayer) compressorsLayer.removeLayer(item.layer);
+      });
+      
+      deletedLNGs.forEach(item => {
+        if (item.layer && lngLayer) lngLayer.removeLayer(item.layer);
+      });
+      
+      deletedStorages.forEach(item => {
+        if (item.layer && storageLayer) storageLayer.removeLayer(item.layer);
+      });
 
       // Backup zurücksetzen (nicht mehr benötigt)
       deleteModeBackup = null;
@@ -2526,7 +2542,8 @@
       activateInfoMode(); // Zurück zum Info Mode
     };
 
-    document.body.appendChild(btn);
+    const toolsSection = document.getElementById('tools-section');
+    toolsSection.appendChild(btn);
   }
 
   // Discard Button für Delete Mode
@@ -2541,180 +2558,57 @@
     const btn = document.createElement('button');
     btn.id = 'discard-delete-btn';
     btn.textContent = 'Discard Changes';
-    btn.style.position = 'absolute';
-    btn.style.top = '70px';
-    btn.style.left = 'calc(50% - 100px)';
-    btn.style.transform = 'translateX(0)';
-    btn.style.zIndex = 1000;
-    btn.style.padding = '10px 20px';
+    btn.className = 'main-menu-btn edit-action-btn';
+    btn.style.display = 'block';
+    btn.style.width = '140px';
+    btn.style.margin = '0';
+    btn.style.padding = '8px 16px';
+    btn.style.boxSizing = 'border-box';
     btn.style.background = '#dc3545';
-    btn.style.color = 'white';
-    btn.style.border = 'none';
-    btn.style.borderRadius = '5px';
-    btn.style.fontSize = '16px';
-    btn.style.cursor = 'pointer';
-    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
 
     btn.onclick = function () {
-      console.log('=== DISCARD DELETE BUTTON GEKLICKT ===');
-      
-      if (!deleteModeBackup) {
-        console.error('❌ Kein Backup verfügbar!');
-        alert('Fehler: Kein Backup verfügbar!');
-        return;
-      }
-      
-      console.log('✅ Backup verfügbar, starte Wiederherstellung...');
-      console.log('Backup Details:', deleteModeBackup);
+      console.log('=== DISCARD DELETE BUTTON CLICKED ===');
       
       try {
-        // Pipeline Layer wiederherstellen
-        if (pipelineLayer && deleteModeBackup.pipelines) {
-          console.log('🔄 Stelle Pipeline Layer wieder her...');
-          map.removeLayer(pipelineLayer);
-          pipelineLayer = L.geoJSON(deleteModeBackup.pipelines, {
-            style: { color: '#3388ff', weight: 3, opacity: 0.8 },
-            onEachFeature: function(feature, layer) { setPipelineInteraction(layer); },
-            tolerance: 40
-          });
-          pipelineLayer.addTo(map);
-          console.log('✅ Pipeline Layer wiederhergestellt mit', deleteModeBackup.pipelines.length, 'Elementen');
-        }
-
-        // Node Layer wiederherstellen
-        if (nodeLayer && deleteModeBackup.nodes) {
-          console.log('🔄 Stelle Node Layer wieder her...');
-          map.removeLayer(nodeLayer);
-          nodeLayer = L.geoJSON(deleteModeBackup.nodes, {
-            pointToLayer: function(feature, latlng) {
-              // Sichtbarer Marker (wie ursprünglich)
-              const visibleMarker = L.circleMarker(latlng, { 
-                radius: 6, 
-                fillColor: '#ff7800', 
-                color: '#000', 
-                weight: 1, 
-                opacity: 1, 
-                fillOpacity: 0.8 
-              });
-              
-              // Unsichtbarer größerer Marker für bessere Klickbarkeit
-              const clickMarker = L.circleMarker(latlng, {
-                radius: 12, // Größerer Klickbereich
-                fillColor: '#ff7800',
-                color: '#000',
-                weight: 0,
-                opacity: 0,
-                fillOpacity: 0
-              });
-              
-              // Feature-Eigenschaft an beide Marker binden
-              visibleMarker.feature = feature;
-              clickMarker.feature = feature;
-              
-              // Klick-Handler an beide Marker binden
-              const clickHandler = function(e) {
-                if (currentMode === 'info') {
-                  console.log('Node geklickt (Wiederherstellung):', this.feature.properties.ID);
-                  
-                  // Element hervorheben
-                  highlightElement(this);
-                  
-                  // Modal mit Node-Details anzeigen
-                  const content = createModalPopupContent(this.feature.properties, this);
-                  const title = `Node: ${this.feature.properties.ID || this.feature.properties.Name || 'Unnamed'}`;
-                  showElementModal(title, content, this);
-                  
-                  // Save-Button Event nach Modal-Anzeige
-                  setTimeout(() => {
-                    const btn = document.getElementById('save-attr-btn');
-                    if (btn) {
-                      btn.onclick = function () {
-                        const inputs = document.querySelectorAll('#modal-body input[data-key]');
-                        let changed = false;
-                        inputs.forEach(input => {
-                          const key = input.getAttribute('data-key');
-                          if (this.feature.properties[key] !== input.value) changed = true;
-                          this.feature.properties[key] = input.value;
-                        });
-                        if (changed) this.feature.properties.modified = true;
-                        closeElementModal();
-                      }.bind(this);
-                    }
-                  }, 100);
-                }
-              };
-              
-              visibleMarker.on('click', clickHandler);
-              clickMarker.on('click', clickHandler);
-              
-              // Erstelle eine Layer-Gruppe
-              const nodeGroup = L.layerGroup([visibleMarker, clickMarker]);
-              
-              return nodeGroup;
-            },
-            onEachFeature: function(feature, layer) { setNodeInteraction(layer); }
-          });
-          nodeLayer.addTo(map);
-          console.log('✅ Node Layer wiederhergestellt mit', deleteModeBackup.nodes.length, 'Elementen');
-        }
-
-        // Powerplant Layer wiederherstellen
-        if (powerplantsLayer && deleteModeBackup.powerplants) {
-          console.log('🔄 Stelle Powerplant Layer wieder her...');
-          map.removeLayer(powerplantsLayer);
-          powerplantsLayer = L.geoJSON(deleteModeBackup.powerplants, {
-            pointToLayer: function(feature, latlng) {
-              return L.circleMarker(latlng, { radius: 8, fillColor: '#8B4513', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.8 });
-            },
-            onEachFeature: function(feature, layer) { setPowerplantInteraction(layer); }
-          });
-          powerplantsLayer.addTo(map);
-          console.log('✅ Powerplant Layer wiederhergestellt mit', deleteModeBackup.powerplants.length, 'Elementen');
-        }
-
-        // Compressor Layer wiederherstellen
-        if (compressorsLayer && deleteModeBackup.compressors) {
-          console.log('🔄 Stelle Compressor Layer wieder her...');
-          map.removeLayer(compressorsLayer);
-          compressorsLayer = L.geoJSON(deleteModeBackup.compressors, {
-            pointToLayer: function(feature, latlng) {
-              return L.circleMarker(latlng, { radius: 7, fillColor: '#FF6347', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.8 });
-            },
-            onEachFeature: function(feature, layer) { setCompressorInteraction(layer); }
-          });
-          compressorsLayer.addTo(map);
-          console.log('✅ Compressor Layer wiederhergestellt mit', deleteModeBackup.compressors.length, 'Elementen');
-        }
-
-        // LNG Layer wiederherstellen
-        if (lngLayer && deleteModeBackup.lngs) {
-          console.log('🔄 Stelle LNG Layer wieder her...');
-          map.removeLayer(lngLayer);
-          lngLayer = L.geoJSON(deleteModeBackup.lngs, {
-            pointToLayer: function(feature, latlng) {
-              return L.circleMarker(latlng, { radius: 9, fillColor: '#00CED1', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.8 });
-            },
-            onEachFeature: function(feature, layer) { setLNGInteraction(layer); }
-          });
-          lngLayer.addTo(map);
-          console.log('✅ LNG Layer wiederhergestellt mit', deleteModeBackup.lngs.length, 'Elementen');
-        }
-
-        // Storage Layer wiederherstellen
-        if (storageLayer && deleteModeBackup.storages) {
-          console.log('🔄 Stelle Storage Layer wieder her...');
-          map.removeLayer(storageLayer);
-          storageLayer = L.geoJSON(deleteModeBackup.storages, {
-            pointToLayer: function(feature, latlng) {
-              return L.circleMarker(latlng, { radius: 8, fillColor: '#9370DB', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.8 });
-            },
-            onEachFeature: function(feature, layer) { setStorageInteraction(layer); }
-          });
-          storageLayer.addTo(map);
-          console.log('✅ Storage Layer wiederhergestellt mit', deleteModeBackup.storages.length, 'Elementen');
-        }
-
-        // Arrays leeren und Backup zurücksetzen
+        // Restore all deleted pipelines
+        deletedPipelines.forEach(item => {
+          if (item.layer && item.layer._deletedInSession) {
+            const isShortPipe = item.parentLayer === shortPipeLayer;
+            item.layer.setStyle({ 
+              color: isShortPipe ? '#ff8800' : '#3388ff', 
+              weight: 3, 
+              opacity: 0.8
+            });
+            delete item.layer._deletedInSession;
+          }
+        });
+        
+        // Restore all deleted nodes
+        deletedNodes.forEach(item => {
+          if (item.layer && item.layer._deletedInSession) {
+            item.layer.setStyle({ 
+              color: '#000',
+              weight: 1,
+              fillColor: '#ff7800',
+              opacity: 1, 
+              fillOpacity: 0.8 
+            });
+            delete item.layer._deletedInSession;
+          }
+        });
+        
+        // Restore all deleted infrastructure
+        [...deletedPowerplants, ...deletedCompressors, ...deletedLNGs, ...deletedStorages].forEach(item => {
+          if (item.layer && item.layer._deletedInSession) {
+            item.layer.setStyle({ 
+              weight: 1,
+              opacity: 1, 
+              fillOpacity: 0.8 
+            });
+            delete item.layer._deletedInSession;
+          }
+        });
+        // Clear deleted arrays
         deletedPipelines = [];
         deletedNodes = [];
         deletedPowerplants = [];
@@ -2722,28 +2616,25 @@
         deletedLNGs = [];
         deletedStorages = [];
         deleteModeBackup = null;
-
-        console.log('🎉 Wiederherstellung abgeschlossen, Arrays und Backup geleert');
         
-        // Buttons entfernen
+        // Remove buttons
         const discardBtn = document.getElementById('discard-delete-btn');
         const saveBtn = document.getElementById('save-delete-btn');
         if (discardBtn) discardBtn.remove();
         if (saveBtn) saveBtn.remove();
         
-        // Zurück zum Info Mode
-        currentMode = 'info';
-        updateActiveToolDisplay('info');
-        console.log('📍 Modus gewechselt zu:', currentMode);
-        
+        // Switch back to Info Mode (this will restore all click handlers)
+        deactivateAllModes();
+        activateInfoMode();
       } catch (error) {
-        console.error('❌ Fehler bei der Wiederherstellung:', error);
-        alert('Fehler bei der Wiederherstellung: ' + error.message);
+        console.error('❌ Error restoring deleted items:', error);
+        alert('Error restoring items: ' + error.message);
       }
     };
 
-    console.log('Appending discard button to body');
-    document.body.appendChild(btn);
+    console.log('Appending discard button to tools section');
+    const toolsSection = document.getElementById('tools-section');
+    toolsSection.appendChild(btn);
   }
 
   function setPipelineInteraction(layer) {
@@ -2795,43 +2686,8 @@
       });
       layer.closePopup();
     } else if (currentMode === 'delete') {
-      layer.on('click', function () {
-        // --- PIPELINES ---
-        if (pipelineLayer && pipelineLayer.hasLayer(layer)) {
-          if (layer.feature) deletedPipelines.push(layer.feature);
-          pipelineLayer.removeLayer(layer);
-        }
-        // --- SHORTPIPES ---
-        if (shortPipeLayer && shortPipeLayer.hasLayer(layer)) {
-          if (layer.feature) deletedPipelines.push(layer.feature); // or separate array if desired
-          shortPipeLayer.removeLayer(layer);
-        }
-        // --- NODES ---
-        if (nodeLayer && nodeLayer.hasLayer(layer)) {
-          if (layer.feature) deletedNodes.push(layer.feature);
-          nodeLayer.removeLayer(layer);
-        }
-        // --- POWERPLANTS ---
-        if (powerplantsLayer && powerplantsLayer.hasLayer(layer)) {
-          if (layer.feature) deletedPowerplants.push(layer.feature);
-          powerplantsLayer.removeLayer(layer);
-        }
-        // --- COMPRESSORS ---
-        if (compressorsLayer && compressorsLayer.hasLayer(layer)) {
-          if (layer.feature) deletedCompressors.push(layer.feature);
-          compressorsLayer.removeLayer(layer);
-        }
-        // --- LNGs ---
-        if (lngLayer && lngLayer.hasLayer(layer)) {
-          if (layer.feature) deletedLNGs.push(layer.feature);
-          lngLayer.removeLayer(layer);
-        }
-        // --- STORAGES ---
-        if (storageLayer && storageLayer.hasLayer(layer)) {
-          if (layer.feature) deletedStorages.push(layer.feature);
-          storageLayer.removeLayer(layer);
-        }
-      });
+      // Delete mode handlers are set by activateDeleteMode() function
+      // This section is left empty to allow activateDeleteMode to control all delete interactions
     } else if (divisionMode && currentMode === 'divide-pipeline') {
       setPipelineDivisionInteraction(layer);
     }
@@ -2862,31 +2718,20 @@
 
   loadLayer('N_Nodes.geojson', 'nodeLayer', {
     pointToLayer: (feature, latlng) => {
-      // Sichtbarer größerer Marker
-      const visibleMarker = L.circleMarker(latlng, {
-        radius: 4,
-        fillColor: "#f03",
-        color: "#900",
-        weight: 2,
+      // Create a single CircleMarker (matching createNewNode style)
+      const nodeMarker = L.circleMarker(latlng, {
+        radius: 6,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
         opacity: 1,
         fillOpacity: 0.8
       });
       
-      // Unsichtbarer größerer Marker für bessere Klickbarkeit
-      const clickMarker = L.circleMarker(latlng, {
-        radius: 20, // Viel größerer Klickbereich für Node-Position-Edit
-        fillColor: "#f03",
-        color: "#900",
-        weight: 0,
-        opacity: 0,
-        fillOpacity: 0
-      });
+      // Feature-Eigenschaft an Marker binden
+      nodeMarker.feature = feature;
       
-      // Feature-Eigenschaft an beide Marker binden
-      visibleMarker.feature = feature;
-      clickMarker.feature = feature;
-      
-      // Klick-Handler an beide Marker binden
+      // Klick-Handler an Marker binden
       const clickHandler = function(e) {
         console.log('Node click handler called, currentMode:', currentMode, 'hasCallback:', !!window.nodeSelectionCallback);
         console.log('Clicked on node:', this.feature ? this.feature.properties.ID : 'no feature');
@@ -2925,13 +2770,9 @@
         }
       };
       
-      visibleMarker.on('click', clickHandler);
-      clickMarker.on('click', clickHandler);
+      nodeMarker.on('click', clickHandler);
       
-      // Erstelle eine Layer-Gruppe
-      const nodeGroup = L.layerGroup([visibleMarker, clickMarker]);
-      
-      return nodeGroup;
+      return nodeMarker;
     }
   });
     
@@ -3133,7 +2974,8 @@ map.on(L.Draw.Event.CREATED, function (e) {
     if (!ctx.hasStartNode && latlngs.length > 0) {
       const startPos = latlngs[0];
       const newNodeId = `${contributorInitials}_N_${getNextIdNumber("Node")}`;
-      createNewNode(startPos, newNodeId);
+      const startNodeGroup = createNewNode(startPos, newNodeId);
+      if (nodeLayer) nodeLayer.addLayer(startNodeGroup);
       startNodeId = newNodeId;
     }
     
@@ -3141,7 +2983,8 @@ map.on(L.Draw.Event.CREATED, function (e) {
     if (!ctx.hasEndNode && latlngs.length > 0) {
       const endPos = latlngs[latlngs.length - 1];
       const newNodeId = `${contributorInitials}_N_${getNextIdNumber("Node")}`;
-      createNewNode(endPos, newNodeId);
+      const endNodeGroup = createNewNode(endPos, newNodeId);
+      if (nodeLayer) nodeLayer.addLayer(endNodeGroup);
       endNodeId = newNodeId;
     }
 
@@ -3846,7 +3689,7 @@ function exportCompleteDataset() {
     
     // Legend content
     const legendContent = '<label><input type="checkbox" id="toggle-pipelines" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line"></div></span><span style="margin-left: 6px;">Pipelines</span></label><br>' +
-      '<label><input type="checkbox" id="toggle-nodes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#f03;"></span></span><span style="margin-left: 6px;">Nodes</span></label><br>' +
+      '<label><input type="checkbox" id="toggle-nodes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#ff7800;"></span></span><span style="margin-left: 6px;">Nodes</span></label><br>' +
       '<label><input type="checkbox" id="toggle-powerplants" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#090;"></span></span><span style="margin-left: 6px;">Power Plants</span></label><br>' +
       '<label><input type="checkbox" id="toggle-compressors" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#009;"></span></span><span style="margin-left: 6px;">Compressors</span></label><br>' +
       '<label><input type="checkbox" id="toggle-lng" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#099;"></span></span><span style="margin-left: 6px;">LNG Terminals</span></label><br>' +
@@ -4010,9 +3853,9 @@ function resetElementStyle(layer) {
     layer.eachLayer(subLayer => {
       if (subLayer instanceof L.CircleMarker && subLayer.options.fillOpacity > 0) {
         // Nur den sichtbaren Marker zurücksetzen
-        let originalColor = "#900";
-        let originalFillColor = "#f03";
-        let originalRadius = 2;
+        let originalColor = "#000";
+        let originalFillColor = "#ff7800";
+        let originalRadius = 6;
         
         subLayer.setStyle({
           color: originalColor,
@@ -4033,9 +3876,9 @@ function resetElementStyle(layer) {
     let foundInLayer = false;
     
     if (nodeLayer && nodeLayer.hasLayer && nodeLayer.hasLayer(layer)) {
-      originalColor = "#900";
-      originalFillColor = "#f03";
-      originalRadius = 2;
+      originalColor = "#000";
+      originalFillColor = "#ff7800";
+      originalRadius = 6;
       foundInLayer = true;
     } else if (powerplantsLayer && powerplantsLayer.hasLayer && powerplantsLayer.hasLayer(layer)) {
       originalColor = "#090";
@@ -4228,17 +4071,28 @@ function resetPipelineStyle(layer) {
     } else {
       // Layer hat keinen Click-Layer, setze normalen Main Layer Style
       // Standard-Reset für Layer ohne Click-Layer (drawn items)
+      
+      // Check if this is a Short-Pipe (in shortPipeLayer)
+      let isShortPipe = false;
+      if (shortPipeLayer && shortPipeLayer.hasLayer(layer)) {
+        isShortPipe = true;
+      }
+      
+      // Set color based on whether it's a Short-Pipe or normal pipeline
+      const pipelineColor = isShortPipe ? "#ff8800" : "#0070f3";
+      const pipelineWeight = isShortPipe ? 4 : 3;
+      
       layer.setStyle({ 
-        color: "#0070f3", 
-        weight: 3, 
+        color: pipelineColor, 
+        weight: pipelineWeight, 
         opacity: 0.8,
         dashArray: null 
       });
       
       // Erzwinge Redraw
       if (layer._path) {
-        layer._path.style.stroke = "#0070f3";
-        layer._path.style.strokeWidth = "3px";
+        layer._path.style.stroke = pipelineColor;
+        layer._path.style.strokeWidth = pipelineWeight + "px";
         layer._path.style.opacity = "0.8";
       }
     }
@@ -4448,14 +4302,30 @@ function setupDeleteAttributeDialogEvents(overlay, layer, elementType) {
     if (e.target.classList.contains('delete-attr-btn')) {
       const attributeName = e.target.getAttribute('data-attr');
       
-      if (confirm(`Are you sure you want to delete the attribute "${attributeName}" from all ${elementType} elements?`)) {
-        deleteAttributeFromAllElements(elementType, attributeName);
-        
-        // Update the attribute list
-        document.getElementById('delete-attribute-list').innerHTML = generateAttributeList(layer);
-        
-        alert(`Attribute "${attributeName}" deleted from all ${elementType} elements.`);
-      }
+      showCustomPopup(
+        '⚠️ Delete Attribute',
+        '<p style="text-align: center; margin: 15px 0;">Are you sure you want to delete the attribute "' + attributeName + '" from all ' + elementType + ' elements?</p>',
+        [
+          {
+            text: 'Delete',
+            type: 'primary',
+            keepOpen: false,
+            onClick: () => {
+              deleteAttributeFromAllElements(elementType, attributeName);
+              
+              // Update the attribute list
+              document.getElementById('delete-attribute-list').innerHTML = generateAttributeList(layer);
+              
+              showCustomPopup(
+                '✅ Success',
+                '<p style="text-align: center; margin: 15px 0;">Attribute "' + attributeName + '" deleted from all ' + elementType + ' elements.</p>',
+                [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+              );
+            }
+          },
+          {text: 'Cancel', type: 'secondary', keepOpen: false, onClick: () => {}}
+        ]
+      );
     }
   };
 }
@@ -4894,14 +4764,30 @@ function setupAttributeDialogEvents(overlay, layer, elementType) {
     if (e.target.classList.contains('delete-attr-btn')) {
       const attributeName = e.target.getAttribute('data-attr');
       
-      if (confirm(`Are you sure you want to delete the attribute "${attributeName}" from all ${elementType} elements?`)) {
-        deleteAttributeFromAllElements(elementType, attributeName);
-        
-        // Update the attribute list
-        document.getElementById('attribute-list').innerHTML = generateAttributeList(layer);
-        
-        alert(`Attribute "${attributeName}" deleted from all ${elementType} elements.`);
-      }
+      showCustomPopup(
+        '⚠️ Delete Attribute',
+        '<p style="text-align: center; margin: 15px 0;">Are you sure you want to delete the attribute "' + attributeName + '" from all ' + elementType + ' elements?</p>',
+        [
+          {
+            text: 'Delete',
+            type: 'primary',
+            keepOpen: false,
+            onClick: () => {
+              deleteAttributeFromAllElements(elementType, attributeName);
+              
+              // Update the attribute list
+              document.getElementById('attribute-list').innerHTML = generateAttributeList(layer);
+              
+              showCustomPopup(
+                '✅ Success',
+                '<p style="text-align: center; margin: 15px 0;">Attribute "' + attributeName + '" deleted from all ' + elementType + ' elements.</p>',
+                [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+              );
+            }
+          },
+          {text: 'Cancel', type: 'secondary', keepOpen: false, onClick: () => {}}
+        ]
+      );
     }
   };
 }
@@ -5079,43 +4965,8 @@ function setPipelineInteraction(layer) {
     });
     layer.closePopup();
   } else if (currentMode === 'delete') {
-    layer.on('click', function () {
-      // --- PIPELINES ---
-      if (pipelineLayer && pipelineLayer.hasLayer(layer)) {
-        if (layer.feature) deletedPipelines.push(layer.feature);
-        pipelineLayer.removeLayer(layer);
-      }
-      // --- SHORTPIPES ---
-      if (shortPipeLayer && shortPipeLayer.hasLayer(layer)) {
-        if (layer.feature) deletedPipelines.push(layer.feature); // or separate array if desired
-        shortPipeLayer.removeLayer(layer);
-      }
-      // --- NODES ---
-      if (nodeLayer && nodeLayer.hasLayer(layer)) {
-        if (layer.feature) deletedNodes.push(layer.feature);
-        nodeLayer.removeLayer(layer);
-      }
-      // --- POWERPLANTS ---
-      if (powerplantsLayer && powerplantsLayer.hasLayer(layer)) {
-        if (layer.feature) deletedPowerplants.push(layer.feature);
-        powerplantsLayer.removeLayer(layer);
-      }
-      // --- COMPRESSORS ---
-      if (compressorsLayer && compressorsLayer.hasLayer(layer)) {
-        if (layer.feature) deletedCompressors.push(layer.feature);
-        compressorsLayer.removeLayer(layer);
-      }
-      // --- LNGs ---
-      if (lngLayer && lngLayer.hasLayer(layer)) {
-        if (layer.feature) deletedLNGs.push(layer.feature);
-        lngLayer.removeLayer(layer);
-      }
-      // --- STORAGES ---
-      if (storageLayer && storageLayer.hasLayer(layer)) {
-        if (layer.feature) deletedStorages.push(layer.feature);
-        storageLayer.removeLayer(layer);
-      }
-    });
+    // Delete mode handlers are set by activateDeleteMode() function
+    // This section is left empty to allow activateDeleteMode to control all delete interactions
   }
 }
 
@@ -5630,10 +5481,12 @@ function checkAndDeleteOrphanedNodes(nodeIds) {
     // Node löschen falls nicht mehr verwendet
     if (!isUsed) {
       nodeLayer.eachLayer(nodeLayerItem => {
-        if (nodeLayerItem.feature && nodeLayerItem.feature.properties.ID === nodeId) {
+        if (nodeLayerItem.feature && nodeLayerItem.feature.properties.ID === nodeId && !nodeLayerItem._deletedInSession) {
           console.log('Lösche verwaisten Node:', nodeId);
-          if (nodeLayerItem.feature) deletedNodes.push(nodeLayerItem.feature);
-          nodeLayer.removeLayer(nodeLayerItem);
+          deletedNodes.push({ feature: nodeLayerItem.feature, layer: nodeLayerItem });
+          nodeLayerItem.setStyle({ opacity: 0, fillOpacity: 0 });
+          nodeLayerItem.off('click');
+          nodeLayerItem._deletedInSession = true;
         }
       });
     }
@@ -5642,38 +5495,27 @@ function checkAndDeleteOrphanedNodes(nodeIds) {
 
 // Hilfsfunktion zum Erstellen eines neuen Nodes
 function createNewNode(latlng, nodeId) {
-  // Sichtbarer kleiner Marker
-  const visibleMarker = L.circleMarker(latlng, {
-    radius: 2,
-    fillColor: "#f03",
-    color: "#900",
+  // Create a single visible CircleMarker (matching existing node style)
+  const nodeMarker = L.circleMarker(latlng, {
+    radius: 6,
+    fillColor: "#ff7800",
+    color: "#000",
     weight: 1,
     opacity: 1,
-    fillOpacity: 0.7
-  });
-  
-  // Unsichtbarer größerer Marker für bessere Klickbarkeit
-  const clickMarker = L.circleMarker(latlng, {
-    radius: 8, // Größerer Klickbereich
-    fillColor: "#f03",
-    color: "#900",
-    weight: 0,
-    opacity: 0,
-    fillOpacity: 0
+    fillOpacity: 0.8
   });
   
   const defaultAttrs = getDefaultPointAttributes('Node');
   const properties = { ...defaultAttrs, Type: 'Node', ID: nodeId, modified: true };
   
-  // Feature-Eigenschaft an beide Marker binden
-  visibleMarker.feature = {
+  // Feature-Eigenschaft an Marker binden
+  nodeMarker.feature = {
     type: "Feature",
     properties: properties,
     geometry: { type: "Point", coordinates: [latlng.lng, latlng.lat] }
   };
-  clickMarker.feature = visibleMarker.feature;
   
-  // Klick-Handler an beide Marker binden
+  // Klick-Handler an Marker binden
   const clickHandler = function(e) {
     console.log('Node click handler called, currentMode:', currentMode, 'hasCallback:', !!window.nodeSelectionCallback);
     console.log('Clicked on node:', this.feature ? this.feature.properties.ID : 'no feature');
@@ -5712,24 +5554,17 @@ function createNewNode(latlng, nodeId) {
     }
   };
   
-  visibleMarker.on('click', clickHandler);
-  clickMarker.on('click', clickHandler);
-  
-  // Erstelle eine Layer-Gruppe
-  const nodeGroup = L.layerGroup([visibleMarker, clickMarker]);
+  nodeMarker.on('click', clickHandler);
   
   console.log('Neuer Node erstellt:', nodeId);
-  return nodeGroup;
+  return nodeMarker;
 }
 
 // Manuelle Infrastructure Placement (OHNE Leaflet.Draw!)
 function activateManualInfrastructurePlacement() {
-  // Positionierungsmeldung
-  alert('Please select position for infrastructure point');
-  
   // Cursor ändern
   map.getContainer().style.cursor = 'crosshair';
-  
+
   // Einmaliger Map-Click-Handler
   map.once('click', function(e) {
     const latlng = e.latlng;
@@ -5737,9 +5572,36 @@ function activateManualInfrastructurePlacement() {
     // Cursor zurücksetzen
     map.getContainer().style.cursor = '';
     
-    // Typ-Auswahl Popup erstellen
-    const typeOptions = ['Node', 'LNG Terminal', 'Storage', 'Power plant'];
+    // Collect all point infrastructure layers (excluding Compressors)
+    const pointLayers = [
+      {name: 'Node', layer: nodeLayer},
+      {name: 'LNG Terminal', layer: lngLayer},
+      {name: 'Storage', layer: storageLayer},
+      {name: 'Power plant', layer: powerplantsLayer}
+    ];
+    
+    // Add custom point layers
+    if (window.customLayers) {
+      Object.entries(window.customLayers).forEach(([name, layer]) => {
+        // Check if it's a point layer by checking first feature
+        let isPointLayer = false;
+        layer.eachLayer(l => {
+          if (l.feature && l.feature.geometry && l.feature.geometry.type === 'Point') {
+            isPointLayer = true;
+          }
+        });
+        if (isPointLayer || layer.getLayers().length === 0) { // Include empty layers
+          pointLayers.push({name: name, layer: layer});
+        }
+      });
+    }
+    
     let selectedType = null;
+    
+    // Build options HTML
+    const optionsHtml = pointLayers.map(pl => 
+      `<option value="${pl.name}">${pl.name}</option>`
+    ).join('');
     
     // Popup HTML erstellen
     const popupDiv = document.createElement('div');
@@ -5747,10 +5609,7 @@ function activateManualInfrastructurePlacement() {
     popupDiv.innerHTML = `
       <h4 style="margin-top: 0;">Select Infrastructure Type</h4>
       <select id="type-selector" style="width: 100%; padding: 5px; margin-bottom: 10px;">
-        <option value="Node">Node</option>
-        <option value="LNG Terminal">LNG Terminal</option>
-        <option value="Storage">Storage</option>
-        <option value="Power plant">Power plant</option>
+        ${optionsHtml}
       </select>
       <button id="type-confirm-btn" style="width: 100%; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">Confirm</button>
       <button id="type-cancel-btn" style="width: 100%; padding: 8px; margin-top: 5px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">Cancel</button>
@@ -5766,18 +5625,10 @@ function activateManualInfrastructurePlacement() {
     document.getElementById('type-confirm-btn').onclick = function() {
       selectedType = document.getElementById('type-selector').value;
       map.closePopup(popup);
-      
-      // ID eingeben
-      const autoId = `${contributorInitials}_${facilityTypeMap[selectedType]}_${getNextIdNumber(selectedType)}`;
-      const userId = prompt('Enter ID:', autoId);
-      if (!userId) {
-        alert('ID is required');
-        return;
-      }
-      
+
       // Standard-Attribute holen
       const defaultAttrs = getDefaultPointAttributes(selectedType);
-      
+
       // Stil basierend auf Typ
       let markerStyle = {};
       switch (selectedType) {
@@ -5794,54 +5645,115 @@ function activateManualInfrastructurePlacement() {
           markerStyle = { radius: 6, fillColor: "#090", color: "#090", weight: 1, opacity: 1, fillOpacity: 0.7 };
           break;
       }
-      
-      // Marker erstellen
-      const circleMarker = L.circleMarker(latlng, markerStyle);
-      
-      // Properties setzen
-      const properties = { ...defaultAttrs, Type: selectedType, ID: userId, modified: true };
-      
-      // Node-Verbindung hinzufügen falls vorhanden
-      if (window.selectedNodeForInfrastructure) {
-        properties.Node = window.selectedNodeForInfrastructure;
-        console.log('Node-Verbindung hinzugefügt:', window.selectedNodeForInfrastructure);
-        window.selectedNodeForInfrastructure = null;
-      }
-      
-      // Feature setzen
-      circleMarker.feature = {
-        type: "Feature",
-        properties: properties,
-        geometry: { type: "Point", coordinates: [latlng.lng, latlng.lat] }
-      };
-      
-      // Zum richtigen Layer hinzufügen
-      switch (selectedType) {
-        case 'Node': if (nodeLayer) nodeLayer.addLayer(circleMarker); break;
-        case 'LNG Terminal': if (lngLayer) lngLayer.addLayer(circleMarker); break;
-        case 'Storage': if (storageLayer) storageLayer.addLayer(circleMarker); break;
-        case 'Power plant': if (powerplantsLayer) powerplantsLayer.addLayer(circleMarker); break;
-      }
-      
-      // Info Mode aktivieren
-      currentMode = 'info';
-      activateInfoMode();
+
+      // ID eingeben
+      const autoId = `${contributorInitials}_${facilityTypeMap[selectedType]}_${getNextIdNumber(selectedType)}`;
+      showCustomPopup(
+        '🆔 Enter Infrastructure ID',
+        '<p style="text-align: center; margin: 15px 0;">Enter an ID for the ' + selectedType + ':</p><input type="text" id="infrastructure-id-input" value="' + autoId + '" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-top: 10px; font-size: 14px; box-sizing: border-box;">',
+        [
+          {
+            text: 'Create',
+            type: 'primary',
+            keepOpen: false,
+            onClick: () => {
+              const userId = document.getElementById('infrastructure-id-input').value.trim();
+              if (!userId) {
+                showCustomPopup(
+                  '❌ Error',
+                  '<p style="text-align: center; margin: 15px 0;">ID is required!</p>',
+                  [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+                );
+                return;
+              }
+
+              // Fortfahren mit der Erstellung
+              createInfrastructurePoint(userId, selectedType, latlng, defaultAttrs, markerStyle);
+            }
+          },
+          {
+            text: 'Cancel',
+            type: 'secondary',
+            keepOpen: false,
+            onClick: () => {}
+          }
+        ]
+      );
+    };
       
       // Info Mode Button markieren
       const infoBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Info Mode');
       if (infoBtn) setActiveBtn(infoBtn);
       
-      console.log('Infrastructure point created:', userId);
-      
       // Update statistics after adding infrastructure
       updateStatistics();
-    };
-    
+      
     // Event Handler für Cancel Button
     document.getElementById('type-cancel-btn').onclick = function() {
       map.closePopup(popup);
     };
   });
+}
+
+// Funktion zum Erstellen des Infrastructure Points
+function createInfrastructurePoint(userId, selectedType, latlng, defaultAttrs, markerStyle) {
+  // Properties setzen
+  const properties = { ...defaultAttrs, Type: selectedType, ID: userId, modified: true };
+  
+  // Node-Verbindung hinzufügen falls vorhanden
+  if (window.selectedNodeForInfrastructure) {
+    properties.Node = window.selectedNodeForInfrastructure;
+    console.log('Node-Verbindung hinzugefügt:', window.selectedNodeForInfrastructure);
+    window.selectedNodeForInfrastructure = null;
+  }
+  
+  let marker;
+  
+  // For Nodes, use the createNewNode function to ensure consistency
+  if (selectedType === 'Node') {
+    marker = createNewNode(latlng, userId);
+    // Update properties on the marker
+    marker.feature.properties = properties;
+    marker.feature.properties.modified = true;
+    marker.isNew = true;
+  } else {
+    // For other infrastructure, create a simple CircleMarker
+    marker = L.circleMarker(latlng, markerStyle);
+    marker.feature = {
+      type: "Feature",
+      properties: properties,
+      geometry: { type: "Point", coordinates: [latlng.lng, latlng.lat] }
+    };
+    marker.isNew = true;
+  }
+  
+  // Zum richtigen Layer hinzufügen (check standard layers first, then custom)
+  let added = false;
+  switch (selectedType) {
+    case 'Node': 
+      if (nodeLayer) { nodeLayer.addLayer(marker); added = true; }
+      break;
+    case 'LNG Terminal': 
+      if (lngLayer) { lngLayer.addLayer(marker); added = true; }
+      break;
+    case 'Storage': 
+      if (storageLayer) { storageLayer.addLayer(marker); added = true; }
+      break;
+    case 'Power plant': 
+      if (powerplantsLayer) { powerplantsLayer.addLayer(marker); added = true; }
+      break;
+  }
+  
+  // If not added to standard layer, check custom layers
+  if (!added && window.customLayers && window.customLayers[selectedType]) {
+    window.customLayers[selectedType].addLayer(marker);
+  }
+  
+  // Info Mode aktivieren
+  currentMode = 'info';
+  activateInfoMode();
+  
+  console.log('Infrastructure point created:', selectedType, userId);
 }
 
 // Mapping FacilityType → Kürzel
@@ -5921,7 +5833,12 @@ shortPipeLayer = L.featureGroup().addTo(map);
 function startShortPipeSelection() {
   shortPipeSelectionActive = true;
   selectedShortPipes = [];
-  alert("Click on pipeline segments to mark as Short-Pipe. Then click 'Save Short-Pipe' at the top center.");
+  
+  showCustomPopup(
+    '📏 Short-Pipe Mode',
+    '<p style="text-align: center; margin: 15px 0;">Click on pipeline segments to mark as Short-Pipe. Then click \'Save Short-Pipe\' at the top center.</p>',
+    [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+  );
 
   // Markiere auswählbare Pipelines
   pipelineLayer.eachLayer(layer => {
@@ -5949,30 +5866,41 @@ function startShortPipeSelection() {
 
 function showShortPipeSaveBtn() {
   removeShortPipeSaveBtn();
-  const btn = document.createElement('button');
-  btn.id = 'shortpipe-save-btn';
-  btn.textContent = 'Save Short-Pipe';
-  btn.style.position = 'absolute';
-  btn.style.left = '50%';
-  btn.style.transform = 'translateX(-50%)';
-  btn.style.top = '20px';
-  btn.style.zIndex = 1200;
-  btn.style.padding = '12px 24px';
-  btn.style.background = '#ff8800';
-  btn.style.color = 'white';
-  btn.style.border = 'none';
-  btn.style.borderRadius = '5px';
-  btn.style.fontSize = '16px';
-  btn.style.cursor = 'pointer';
-  btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-  btn.style.fontWeight = 'bold';
-  document.body.appendChild(btn);
+  
+  // Save button
+  const saveBtn = document.createElement('button');
+  saveBtn.id = 'shortpipe-save-btn';
+  saveBtn.textContent = 'Save Changes';
+  saveBtn.className = 'main-menu-btn edit-action-btn';
+  saveBtn.style.display = 'block';
+  saveBtn.style.width = '140px';
+  saveBtn.style.margin = '0';
+  saveBtn.style.padding = '8px 16px';
+  saveBtn.style.boxSizing = 'border-box';
+  saveBtn.style.background = '#28a745';
 
-  btn.onclick = function () {
+  saveBtn.onclick = function () {
     // Entferne aus pipelineLayer, füge zu shortPipeLayer hinzu
     selectedShortPipes.forEach(layer => {
       pipelineLayer.removeLayer(layer);
       shortPipeLayer.addLayer(layer);
+      // Setze Short-Pipe Attribute (handle both uppercase and lowercase)
+      if (layer.feature && layer.feature.properties) {
+        const props = layer.feature.properties;
+        // Set Diameter (handle both Diameter_mm and diameter_mm)
+        if ('Diameter_mm' in props) {
+          props.Diameter_mm = 9999;
+        } else if ('diameter_mm' in props) {
+          props.diameter_mm = 9999;
+        }
+        // Set Length (handle both Length_km and length_km)
+        if ('Length_km' in props) {
+          props.Length_km = 0;
+        } else if ('length_km' in props) {
+          props.length_km = 0;
+        }
+        props.modified = true;
+      }
       // Orange, durchgezogen, nicht strichliert:
       layer.setStyle({ color: "#ff8800", weight: 4, dashArray: null });
       layer.off('click');
@@ -5989,12 +5917,56 @@ function showShortPipeSaveBtn() {
     shortPipeSelectionActive = false;
     selectedShortPipes = [];
     removeShortPipeSaveBtn();
+    
+    // Switch back to info mode
+    currentMode = 'info';
+    activateInfoMode();
+    selectTool('info');
   };
+  
+  // Discard button
+  const discardBtn = document.createElement('button');
+  discardBtn.id = 'shortpipe-discard-btn';
+  discardBtn.textContent = 'Discard Changes';
+  discardBtn.className = 'main-menu-btn edit-action-btn';
+  discardBtn.style.display = 'block';
+  discardBtn.style.width = '140px';
+  discardBtn.style.margin = '0';
+  discardBtn.style.padding = '8px 16px';
+  discardBtn.style.boxSizing = 'border-box';
+  discardBtn.style.background = '#dc3545';
+  
+  discardBtn.onclick = function () {
+    // Reset Styles und Info-Handler für alle Pipelines (inkl. selected)
+    pipelineLayer.eachLayer(layer => {
+      layer.setStyle({ color: "#0070f3", weight: 3, dashArray: null });
+      layer.off('click');
+      // Info-Handler wieder aktivieren:
+      layer.on('click', function () {
+        openInfoOverlay(layer);
+      });
+    });
+    shortPipeSelectionActive = false;
+    selectedShortPipes = [];
+    removeShortPipeSaveBtn();
+    
+    // Switch back to info mode
+    currentMode = 'info';
+    activateInfoMode();
+    selectTool('info');
+  };
+  
+  // Add buttons to tools section
+  const toolsSection = document.getElementById('tools-section');
+  toolsSection.appendChild(saveBtn);
+  toolsSection.appendChild(discardBtn);
 }
 
 function removeShortPipeSaveBtn() {
-  const btn = document.getElementById('shortpipe-save-btn');
-  if (btn) btn.remove();
+  const saveBtn = document.getElementById('shortpipe-save-btn');
+  if (saveBtn) saveBtn.remove();
+  const discardBtn = document.getElementById('shortpipe-discard-btn');
+  if (discardBtn) discardBtn.remove();
 }
 
 const shortpipes = [];
@@ -6011,6 +5983,9 @@ let directionChangeBackup = null;
 const reversedPipelines = [];
 
 function activateChangeDirectionMode() {
+  // Reset all highlights from Info mode
+  resetAllPipelineHighlights();
+  
   // Backup des aktuellen Zustands
   directionChangeBackup = pipelineLayer ? getLayerFeatures(pipelineLayer) : [];
   reversedPipelines.length = 0; // Array leeren
@@ -6025,10 +6000,24 @@ function activateChangeDirectionMode() {
     if (hasNodes) {
       // Pipeline mit Pfeil darstellen (grün = normal) - dashArray explizit auf null setzen
       layer.setStyle({ color: '#00aa00', weight: 5, dashArray: null, opacity: 1 });
+      // Force DOM update to override any previous styling
+      if (layer._path) {
+        layer._path.style.stroke = '#00aa00';
+        layer._path.style.strokeWidth = '5px';
+        layer._path.style.opacity = '1';
+        layer._path.style.strokeDasharray = '';
+      }
       addArrowDecorator(layer, '#00aa00');
     } else {
       // Keine Nodes definiert - nur grau darstellen
       layer.setStyle({ color: '#999999', weight: 3, dashArray: '5, 5', opacity: 1 });
+      // Force DOM update
+      if (layer._path) {
+        layer._path.style.stroke = '#999999';
+        layer._path.style.strokeWidth = '3px';
+        layer._path.style.opacity = '1';
+        layer._path.style.strokeDasharray = '5, 5';
+      }
     }
     
     // Click-Handler zum Umkehren
@@ -6124,9 +6113,14 @@ function showSaveDirectionButton() {
   removeDirectionButtons();
   const btn = document.createElement('button');
   btn.id = 'save-direction-btn';
-  btn.textContent = 'Save Direction Changes';
-  btn.style.cssText = 'position: absolute; left: 50%; transform: translateX(-50%); top: 20px; z-index: 1200; padding: 12px 24px; background: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-weight: bold;';
-  document.body.appendChild(btn);
+  btn.textContent = 'Save Changes';
+  btn.className = 'main-menu-btn edit-action-btn';
+  btn.style.display = 'block';
+  btn.style.width = '140px';
+  btn.style.margin = '0';
+  btn.style.padding = '8px 16px';
+  btn.style.boxSizing = 'border-box';
+  btn.style.background = '#28a745';
   
   btn.onclick = function() {
     // Pfeile entfernen
@@ -6147,17 +6141,30 @@ function showSaveDirectionButton() {
     const infoBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Info Mode');
     if (infoBtn) setActiveBtn(infoBtn);
     
-    alert('Direction changes saved!');
+    showCustomPopup(
+      '✅ Success',
+      '<p style="text-align: center; margin: 15px 0;">Direction changes saved!</p>',
+      [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+    );
     console.log('Saved', reversedPipelines.length, 'direction changes');
   };
+  
+  // Add button to tools section
+  const toolsSection = document.getElementById('tools-section');
+  toolsSection.appendChild(btn);
 }
 
 function showDiscardDirectionButton() {
   const btn = document.createElement('button');
   btn.id = 'discard-direction-btn';
   btn.textContent = 'Discard Changes';
-  btn.style.cssText = 'position: absolute; left: 50%; transform: translateX(calc(-50% + 220px)); top: 20px; z-index: 1200; padding: 12px 24px; background: #f44336; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-weight: bold;';
-  document.body.appendChild(btn);
+  btn.className = 'main-menu-btn edit-action-btn';
+  btn.style.display = 'block';
+  btn.style.width = '140px';
+  btn.style.margin = '0';
+  btn.style.padding = '8px 16px';
+  btn.style.boxSizing = 'border-box';
+  btn.style.background = '#dc3545';
   
   btn.onclick = function() {
     // Zuerst alle Pfeile entfernen
@@ -6191,8 +6198,16 @@ function showDiscardDirectionButton() {
     const infoBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Info Mode');
     if (infoBtn) setActiveBtn(infoBtn);
     
-    alert('Direction changes discarded.');
+    showCustomPopup(
+      '❌ Discarded',
+      '<p style="text-align: center; margin: 15px 0;">Direction changes discarded.</p>',
+      [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+    );
   };
+  
+  // Add button to tools section
+  const toolsSection = document.getElementById('tools-section');
+  toolsSection.appendChild(btn);
 }
 
 function removeDirectionButtons() {
@@ -6585,6 +6600,7 @@ function selectTool(mode) {
     case 'delete':
       if (!checkContributorName()) return;
       deactivateAllModes();
+      currentMode = 'delete'; // Set mode before popup
       showCustomPopup(
         '🗑️ Delete Mode',
         '<p style="text-align: center; margin: 15px 0;">Click "Start" to begin deleting elements.</p>',
@@ -6600,7 +6616,11 @@ function selectTool(mode) {
               showDiscardDeleteButton();
             }
           },
-          {text: 'Cancel', type: 'secondary', onClick: () => {}}
+          {text: 'Cancel', type: 'secondary', onClick: () => {
+            // Reset to info mode if cancelled
+            currentMode = 'info';
+            activateInfoMode();
+          }}
         ]
       );
       break;
@@ -6735,60 +6755,73 @@ function proceedWithAddPipeline() {
 
         showCustomPopup(
           '🎯 Select End Node',
-          '<p style="text-align: center; margin: 15px 0;">Click "Start Selection" to select the END node.</p>',
+          '<p style="text-align: center; margin: 15px 0;">Click on a node to select it as the END node for the pipeline.</p>',
           [
             {
-              text: 'Start Selection',
+              text: 'OK',
               type: 'primary',
-              keepOpen: true,
-              onClick: () => {
-                closeCustomPopup();
-                currentMode = 'select-end-node';
-                showCustomPopup(
-                  '🎯 Select End Node',
-                  '<p style="text-align: center; margin: 15px 0;">Click on a node to select it as the END node for the pipeline.</p>',
-                  [
-                    {text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}},
-                    {
-                      text: 'Cancel',
-                      type: 'secondary',
-                      keepOpen: false,
-                      onClick: () => {
-                        removeEndNodeSelectionHandlers();
-                        currentMode = 'add-pipeline';
-                      }
-                    }
-                  ]
-                );
-                
-                // Event-Handler für End-Node-Auswahl hinzufügen
-                if (nodeLayer) {
-                  nodeLayer.eachLayer(layerGroup => {
-                    layerGroup.eachLayer(marker => {
-                      marker.off('click');
-                      marker.on('click', function(e) {
-                        L.DomEvent.stopPropagation(e);
-                        endNodeId = marker.feature.properties.ID;
-                        endLatLng = marker.getLatLng();
-                        console.log('End node selected:', endNodeId);
-                        
-                        // Event-Handler entfernen
-                        removeEndNodeSelectionHandlers();
-                        closeCustomPopup();
-                        
-                        // Pipeline erstellen
-                        createDirectPipeline();
-                      });
-                    });
-                  });
-                }
-              }
+              keepOpen: false,
+              onClick: () => {}
             },
-            {text: 'Cancel', type: 'secondary', onClick: () => {}}
+            {
+              text: 'Cancel',
+              type: 'secondary',
+              keepOpen: false,
+              onClick: () => {
+                currentMode = 'add-pipeline';
+                removeEndNodeSelectionHandlers();
+              }
+            }
           ]
         );
+
+        // Event-Handler für End-Node-Auswahl direkt aktivieren
+        currentMode = 'select-end-node';
+        if (nodeLayer) {
+          nodeLayer.eachLayer(marker => {
+            marker.off('click');
+            marker.on('click', function(e) {
+              L.DomEvent.stopPropagation(e);
+              endNodeId = marker.feature.properties.ID;
+              endLatLng = marker.getLatLng();
+              console.log('End node selected:', endNodeId);
+
+              // Event-Handler entfernen
+              removeEndNodeSelectionHandlers();
+              closeCustomPopup();
+
+              // Prüfen ob Start-Node bereits ausgewählt wurde
+              if (hasStartNode && startNodeId) {
+                // Start-Node ist bereits ausgewählt - Pipeline direkt erstellen
+                createDirectPipeline();
+              } else {
+                // Start-Node muss noch platziert werden
+                currentMode = 'create-start-node';
+                showCustomPopup(
+                  '🎯 Place Start Node',
+                  '<p style="text-align: center; margin: 15px 0;">Click on the map to place the START node for the pipeline.</p>',
+                  [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+                );
+
+                map.once('click', function(e) {
+                  const latlng = e.latlng;
+                  startLatLng = latlng;
+                  console.log('Start position set:', startLatLng);
+                  closeCustomPopup();
+
+                  // Pipeline erstellen
+                  createDirectPipeline();
+                });
+              }
+            });
+          });
+        }
       } else {
+        // Kein End-Node - direkt mit Pipeline-Zeichnen starten
         closeCustomPopup();
+        hasEndNode = false;
+
+        // Pipeline zeichnen starten - erster Klick setzt Start-Node und beginnt Zeichnen
         startPipelineDrawing();
       }
       
@@ -6861,23 +6894,21 @@ function proceedWithAddPipeline() {
               
               // Event-Handler für Node-Auswahl hinzufügen
               if (nodeLayer) {
-                nodeLayer.eachLayer(layerGroup => {
-                  layerGroup.eachLayer(marker => {
-                    marker.off('click');
-                    marker.on('click', function(e) {
-                      L.DomEvent.stopPropagation(e);
-                      startNodeId = marker.feature.properties.ID;
-                      startLatLng = marker.getLatLng();
-                      console.log('Start node selected:', startNodeId);
-                      
-                      // Event-Handler entfernen
-                      nodeLayer.eachLayer(lg => {
-                        lg.eachLayer(m => m.off('click'));
-                      });
-                      
-                      // Zum nächsten Schritt
-                      askForEndNode();
+                nodeLayer.eachLayer(marker => {
+                  marker.off('click');
+                  marker.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    startNodeId = marker.feature.properties.ID;
+                    startLatLng = marker.getLatLng();
+                    console.log('Start node selected:', startNodeId);
+                    
+                    // Event-Handler entfernen
+                    nodeLayer.eachLayer(m => {
+                      m.off('click');
                     });
+                    
+                    // Zum nächsten Schritt
+                    askForEndNode();
                   });
                 });
               }
@@ -6892,20 +6923,8 @@ function proceedWithAddPipeline() {
         ]
       );
     } else {
-      // Direkt mit Map-Klick für Start-Node-Erstellung starten
-      closeCustomPopup();
-      currentMode = 'create-start-node';
-      
-      // Event-Handler für Map-Klick hinzufügen
-      map.once('click', function(e) {
-        const latlng = e.latlng;
-        
-        startLatLng = latlng;
-        console.log('Start position set:', startLatLng);
-        
-        // Zum nächsten Schritt
-        askForEndNode();
-      });
+      // Direkt die Frage nach dem End-Node stellen
+      askForEndNode();
     }
   }
 }
@@ -6947,7 +6966,7 @@ function selectElementType(type) {
 function startAddNewElement() {
   showCustomPopup(
     '➕ Add New Element',
-    '<p style="text-align: center; margin: 15px 0;">Choose the type of element to create:</p><select id="element-type-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"><option value="pipeline">Line Layer</option><option value="infrastructure">Point Layer</option><option value="inline">In-Line Element Layer</option></select><br><br><label for="element-name-input" style="display: block; margin-bottom: 5px;">Layer Name:</label><input type="text" id="element-name-input" placeholder="Enter layer name" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">',
+    '<p style="text-align: center; margin: 15px 0;">Choose the type of element to create:</p><select id="element-type-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"><option value="pipeline">Line Layer</option><option value="infrastructure">Point Layer</option><option value="inline">In-Line Element Layer</option></select><br><br><label for="element-name-input" style="display: block; margin-bottom: 5px;">Layer Name:</label><input type="text" id="element-name-input" placeholder="Enter layer name" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">',
     [
       {
         text: 'Create',
@@ -6958,13 +6977,21 @@ function startAddNewElement() {
           const name = document.getElementById('element-name-input').value.trim();
           
           if (!name) {
-            alert('Please enter a layer name');
+            showCustomPopup(
+              '⚠️ Error',
+              '<p style="text-align: center; margin: 15px 0;">Please enter a layer name</p>',
+              [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+            );
             return;
           }
           
           // Check if layer name already exists
           if (window.customLayers && window.customLayers[name]) {
-            alert('A layer with this name already exists');
+            showCustomPopup(
+              '⚠️ Error',
+              '<p style="text-align: center; margin: 15px 0;">A layer with this name already exists</p>',
+              [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+            );
             return;
           }
           
@@ -7061,14 +7088,13 @@ function createNewLayer(type, name) {
   
   // Layer speichern
   if (!window.customLayers) window.customLayers = {};
-  window.customLayers[name] = {
-    type: type,
-    layer: layerGroup,
-    name: name,
-    isInline: isInline
-  };
+  window.customLayers[name] = layerGroup;
   
-  alert(`Layer "${name}" created successfully!`);
+  showCustomPopup(
+    '✅ Success',
+    '<p style="text-align: center; margin: 15px 0;">Layer "' + name + '" created successfully!</p>',
+    [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+  );
   currentMode = 'info';
   activateInfoMode();
 }
@@ -7093,9 +7119,9 @@ function addToLegend(name, layerType) {
   const checkbox = legendItem.querySelector('input');
   checkbox.addEventListener('change', function() {
     if (this.checked) {
-      map.addLayer(window.customLayers[name].layer);
+      map.addLayer(window.customLayers[name]);
     } else {
-      map.removeLayer(window.customLayers[name].layer);
+      map.removeLayer(window.customLayers[name]);
     }
   });
 }
@@ -7110,6 +7136,52 @@ function toggleOptionsPanel() {
 
 // ==================== Pipeline Grouping Functions ====================
 
+function finalizeGrouping() {
+  // Finalize grouping without start/end node selection
+  // Calculate total length (handle both Length_km and length_km)
+  let totalLength = 0;
+  selectedPipelinesForGroup.forEach(p => {
+    const length = p.layer.feature.properties.Length_km || p.layer.feature.properties.length_km || 0;
+    totalLength += parseFloat(length);
+  });
+  
+  // Create group without start/end points
+  const newGroup = {
+    name: currentGroupName,
+    pipelines: selectedPipelinesForGroup.map(p => p.id),
+    totalLength: totalLength.toFixed(2),
+    numElements: selectedPipelinesForGroup.length
+  };
+  
+  pipelineGroups.push(newGroup);
+  
+  // Reset colors using direct DOM manipulation
+  selectedPipelinesForGroup.forEach(p => {
+    if (p.layer._path) {
+      p.layer._path.style.stroke = '#3388ff';
+      p.layer._path.style.strokeWidth = '3';
+    }
+    p.layer.setStyle({color: '#3388ff', weight: 3});
+  });
+  
+  // Reset variables
+  groupingMode = false;
+  selectedPipelinesForGroup = [];
+  currentGroupName = '';
+  
+  showCustomPopup(
+    '✅ Group Created',
+    `<p style="text-align: center; margin: 15px 0;">Group "<strong>${newGroup.name}</strong>" created successfully!<br><br>Elements: ${newGroup.numElements}<br>Total Length: ${newGroup.totalLength} km</p>`,
+    [{text: 'OK', type: 'primary', onClick: () => {
+      // Switch back to info mode
+      deactivateAllModes();
+      activateInfoMode();
+    }}]
+  );
+  
+  console.log('Pipeline group created:', newGroup);
+}
+
 function startPipelineGrouping() {
   deactivateAllModes();
   
@@ -7123,6 +7195,7 @@ function startPipelineGrouping() {
   groupNameInput.style.borderRadius = '4px';
   groupNameInput.style.marginTop = '10px';
   groupNameInput.style.fontSize = '14px';
+  groupNameInput.style.boxSizing = 'border-box';
   
   showCustomPopup(
     '📦 Group Pipelines - Step 1',
@@ -7175,6 +7248,9 @@ function startPipelineSelection() {
 function activatePipelineSelection() {
   groupingMode = true;
   
+  // Reset all pipeline highlights first
+  resetAllPipelineHighlights();
+  
   // Finish Selection Button erstellen (floating)
   const finishBtn = document.createElement('button');
   finishBtn.id = 'finish-selection-btn';
@@ -7210,7 +7286,7 @@ function activatePipelineSelection() {
       return;
     }
     document.body.removeChild(finishBtn);
-    selectStartPoint();
+    finalizeGrouping();
   };
   
   document.body.appendChild(finishBtn);
@@ -7231,10 +7307,22 @@ function activatePipelineSelection() {
             id: pipelineId,
             layer: layer
           });
+          // Use direct DOM manipulation for styling
+          if (layer._path) {
+            layer._path.style.stroke = 'orange';
+            layer._path.style.strokeWidth = '5';
+          }
+          // Also try setStyle as fallback
           layer.setStyle({color: 'orange', weight: 5});
         } else {
           // Entfernen
           selectedPipelinesForGroup.splice(index, 1);
+          // Use direct DOM manipulation for styling
+          if (layer._path) {
+            layer._path.style.stroke = '#3388ff';
+            layer._path.style.strokeWidth = '3';
+          }
+          // Also try setStyle as fallback
           layer.setStyle({color: '#3388ff', weight: 3});
         }
         
@@ -7413,8 +7501,12 @@ function orderPipelinesByFlow(pipelines, startNode, endNode) {
 function cancelGrouping() {
   groupingMode = false;
   
-  // Farben zurücksetzen
+  // Farben zurücksetzen using direct DOM manipulation
   selectedPipelinesForGroup.forEach(p => {
+    if (p.layer._path) {
+      p.layer._path.style.stroke = '#3388ff';
+      p.layer._path.style.strokeWidth = '3';
+    }
     p.layer.setStyle({color: '#3388ff', weight: 3});
   });
   
@@ -7463,8 +7555,7 @@ function openGroupsPanel() {
         <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">📦 ${group.name}</div>
         <div style="color: #666; font-size: 14px;">
           Elements: ${group.numElements} pipelines<br>
-          Total Length: ${group.totalLength} km<br>
-          Start: ${group.startPoint} → End: ${group.endPoint}
+          Total Length: ${group.totalLength} km
         </div>
       </div>
     `;
@@ -8163,16 +8254,61 @@ function activateInfoMode() {
       }
     });
     
+    // Short-Pipe-Interaktionen für Info Mode
+    if (shortPipeLayer) {
+      shortPipeLayer.eachLayer(layer => {
+        layer.off('click');
+        layer.unbindPopup();
+        layer.on('click', function (e) {
+          try {
+            console.log('Short-Pipe geklickt in Info Mode:', layer);
+            
+            // Highlighte die angeklickte Short-Pipe
+            highlightPipeline(layer);
+            
+            // Modal mit Short-Pipe-Details anzeigen
+            const content = createModalPopupContent(layer.feature.properties, layer);
+            const title = `Short-Pipe: ${layer.feature.properties.ID || 'Unnamed'}`;
+            showElementModal(title, content, layer);
+            
+            // Save-Button Event nach Modal-Anzeige
+            setTimeout(() => {
+              const btn = document.getElementById('save-attr-btn');
+              if (btn) {
+                btn.onclick = function () {
+                  try {
+                    const inputs = document.querySelectorAll('#modal-body input[data-key]');
+                    let changed = false;
+                    inputs.forEach(input => {
+                      const key = input.getAttribute('data-key');
+                      if (layer.feature.properties[key] !== input.value) changed = true;
+                      layer.feature.properties[key] = input.value;
+                    });
+                    if (changed) layer.feature.properties.modified = true;
+                    closeElementModal();
+                    // Restore orange color for Short-Pipe
+                    layer.setStyle({ color: "#ff8800", weight: 4, dashArray: null, opacity: 0.8 });
+                  } catch (error) {
+                    console.error('Error saving short-pipe attributes:', error);
+                  }
+                };
+              }
+            }, 100);
+          } catch (error) {
+            console.error('Error in short-pipe click:', error);
+          }
+        });
+      });
+    }
+    
     // Node-Interaktionen für Info Mode
     if (nodeLayer) {
-      nodeLayer.eachLayer(layerGroup => {
-        if (layerGroup instanceof L.LayerGroup) {
-          layerGroup.eachLayer(marker => {
-            marker.off('click');
-            marker.on('click', function (e) {
-              try {
-                L.DomEvent.stopPropagation(e);
-                console.log('Node geklickt in Info Mode:', marker.feature.properties.ID);
+      nodeLayer.eachLayer(marker => {
+        marker.off('click');
+        marker.on('click', function (e) {
+          try {
+            L.DomEvent.stopPropagation(e);
+            console.log('Node geklickt in Info Mode:', marker.feature.properties.ID);
                 
                 // Element hervorheben
                 highlightElement(marker);
@@ -8206,9 +8342,7 @@ function activateInfoMode() {
               } catch (error) {
                 console.error('Error in node click:', error);
               }
-            });
-          });
-        }
+        });
       });
     }
     
@@ -8480,13 +8614,11 @@ function activateNodePositionEdit() {
   
   // Aktiviere Node-Click-Handler
   if (nodeLayer) {
-    nodeLayer.eachLayer(layerGroup => {
-      layerGroup.eachLayer(marker => {
-        marker.off('click');
-        marker.on('click', function(e) {
-          L.DomEvent.stopPropagation(e);
-          selectNodeForPositionEdit(marker);
-        });
+    nodeLayer.eachLayer(marker => {
+      marker.off('click');
+      marker.on('click', function(e) {
+        L.DomEvent.stopPropagation(e);
+        selectNodeForPositionEdit(marker);
       });
     });
   }
@@ -8695,12 +8827,10 @@ function enableNodeDragging(nodeMarker, nodeId, connectedPipelines) {
     
     // Verschiebe ALLE Marker für diesen Node (sichtbar und unsichtbar)
     if (nodeLayer) {
-      nodeLayer.eachLayer(layerGroup => {
-        layerGroup.eachLayer(marker => {
-          if (marker.feature && marker.feature.properties.ID === nodeId) {
-            marker.setLatLng(newLatLng);
-          }
-        });
+      nodeLayer.eachLayer(marker => {
+        if (marker.feature && marker.feature.properties.ID === nodeId) {
+          marker.setLatLng(newLatLng);
+        }
       });
     }
     
@@ -8745,15 +8875,13 @@ function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
   // Knoten finden und verschieben
   let nodeFound = false;
   if (nodeLayer) {
-    nodeLayer.eachLayer(layerGroup => {
-      layerGroup.eachLayer(marker => {
-        if (marker.feature && marker.feature.properties.ID === nodeId) {
-          marker.setLatLng(newLatLng);
-          marker.feature.geometry.coordinates = [newLatLng.lng, newLatLng.lat];
-          console.log('Node moved:', nodeId);
-          nodeFound = true;
-        }
-      });
+    nodeLayer.eachLayer(marker => {
+      if (marker.feature && marker.feature.properties.ID === nodeId) {
+        marker.setLatLng(newLatLng);
+        marker.feature.geometry.coordinates = [newLatLng.lng, newLatLng.lat];
+        console.log('Node moved:', nodeId);
+        nodeFound = true;
+      }
     });
   }
   if (!nodeFound) console.log('Node not found:', nodeId);
@@ -8899,7 +9027,7 @@ function activateDeleteMode() {
       powerplants: powerplantsLayer ? getLayerFeatures(powerplantsLayer) : [],
       compressors: compressorsLayer ? getLayerFeatures(compressorsLayer) : [],
       lngs: lngLayer ? getLayerFeatures(lngLayer) : [],
-      storages: storagesLayer ? getLayerFeatures(storagesLayer) : []
+      storages: storageLayer ? getLayerFeatures(storageLayer) : []
     };
     console.log('Backup erstellt:', {
       pipelines: deleteModeBackup.pipelines.length,
@@ -8914,64 +9042,114 @@ function activateDeleteMode() {
     updateActiveToolDisplay('delete');
     console.log('Delete Mode aktiviert');
     
-    // Alle Layer für Delete Mode vorbereiten
-    [pipelineLayer, nodeLayer, powerplantsLayer, compressorsLayer, lngLayer, storageLayer].forEach(elementLayer => {
+    // Setup delete handlers for pipeline layers
+    [pipelineLayer, shortPipeLayer].forEach(elementLayer => {
       if (elementLayer) {
         elementLayer.eachLayer(layer => {
           layer.off('click');
           layer.unbindPopup();
-          layer.on('click', function () {
+          layer.on('click', function (e) {
+            L.DomEvent.stopPropagation(e);
             try {
-              // Spezielle Logik für Pipeline-Löschung
-              if (pipelineLayer && pipelineLayer.hasLayer(layer)) {
-                if (layer.feature) {
-                  deletedPipelines.push(layer.feature);
-                  
-                  // Node-Verbindungen prüfen
-                  const startNodeId = layer.feature.properties.Start_Node;
-                  const endNodeId = layer.feature.properties.End_Node;
-                  
-                  pipelineLayer.removeLayer(layer);
-                  
-                  // Nodes ohne Verbindung löschen
-                  checkAndDeleteOrphanedNodes([startNodeId, endNodeId]);
-                }
+              if (layer.feature && !layer._deletedInSession) {
+                deletedPipelines.push({ feature: layer.feature, layer: layer, parentLayer: elementLayer });
+                
+                // Node-Verbindungen prüfen
+                const startNodeId = layer.feature.properties.Start_Node;
+                const endNodeId = layer.feature.properties.End_Node;
+                
+                // Hide the layer
+                layer.setStyle({ opacity: 0, fillOpacity: 0 });
+                layer.off('click');
+                layer._deletedInSession = true;
+                
+                // Nodes ohne Verbindung löschen
+                checkAndDeleteOrphanedNodes([startNodeId, endNodeId]);
               }
-              // Delete-Logik für andere Elemente
-              else if (nodeLayer && nodeLayer.hasLayer(layer)) {
-                if (layer.feature) deletedNodes.push(layer.feature);
-                nodeLayer.removeLayer(layer);
-              }
-              else if (powerplantsLayer && powerplantsLayer.hasLayer(layer)) {
-                if (layer.feature) deletedPowerplants.push(layer.feature);
-                powerplantsLayer.removeLayer(layer);
-              }
-              else if (compressorsLayer && compressorsLayer.hasLayer(layer)) {
-                if (layer.feature) deletedCompressors.push(layer.feature);
-                compressorsLayer.removeLayer(layer);
-              }
-              else if (lngLayer && lngLayer.hasLayer(layer)) {
-                if (layer.feature) deletedLNGs.push(layer.feature);
-                lngLayer.removeLayer(layer);
-              }
-              else if (storageLayer && storageLayer.hasLayer(layer)) {
-                if (layer.feature) deletedStorages.push(layer.feature);
-                storageLayer.removeLayer(layer);
-              }
-              
-              // Auch aus drawnItems entfernen
-              if (drawnItems.hasLayer(layer)) {
-                drawnItems.removeLayer(layer);
-              }
-              
               window.hasUnsavedChanges = true;
             } catch (error) {
-              console.error('Error in delete click:', error);
+              console.error('Error in delete pipeline click:', error);
             }
           });
         });
       }
     });
+    
+    // Setup delete handlers for node layer (CircleMarkers)
+    if (nodeLayer) {
+      nodeLayer.eachLayer(marker => {
+        marker.off('click');
+        marker.on('click', function (e) {
+          L.DomEvent.stopPropagation(e);
+          try {
+            if (marker.feature && !marker._deletedInSession) {
+              deletedNodes.push({ feature: marker.feature, layer: marker });
+              // Hide the marker
+              marker.setStyle({ opacity: 0, fillOpacity: 0 });
+              marker.off('click');
+              marker._deletedInSession = true;
+              window.hasUnsavedChanges = true;
+            }
+          } catch (error) {
+            console.error('Error in delete node click:', error);
+          }
+        });
+      });
+    }
+    
+    // Setup delete handlers for infrastructure layers
+    [powerplantsLayer, compressorsLayer, lngLayer, storageLayer].forEach(elementLayer => {
+      if (elementLayer) {
+        elementLayer.eachLayer(layer => {
+          layer.off();
+          layer.unbindPopup();
+          layer.on('click', function (e) {
+            L.DomEvent.stopPropagation(e);
+            try {
+              if (layer.feature && !layer._deletedInSession) {
+                if (powerplantsLayer && powerplantsLayer.hasLayer(layer)) {
+                  deletedPowerplants.push({ feature: layer.feature, layer: layer });
+                } else if (compressorsLayer && compressorsLayer.hasLayer(layer)) {
+                  deletedCompressors.push({ feature: layer.feature, layer: layer });
+                } else if (lngLayer && lngLayer.hasLayer(layer)) {
+                  deletedLNGs.push({ feature: layer.feature, layer: layer });
+                } else if (storageLayer && storageLayer.hasLayer(layer)) {
+                  deletedStorages.push({ feature: layer.feature, layer: layer });
+                }
+                // Hide the layer
+                layer.setStyle({ opacity: 0, fillOpacity: 0 });
+                layer.off('click');
+                layer._deletedInSession = true;
+                window.hasUnsavedChanges = true;
+              }
+            } catch (error) {
+              console.error('Error in delete infrastructure click:', error);
+            }
+          });
+        });
+      }
+    });
+    
+    // Setup delete handlers for custom layers
+    if (window.customLayers) {
+      Object.values(window.customLayers).forEach(customLayer => {
+        if (customLayer) {
+          customLayer.eachLayer(layer => {
+            layer.off();
+            layer.unbindPopup();
+            layer.on('click', function (e) {
+              L.DomEvent.stopPropagation(e);
+              try {
+                customLayer.removeLayer(layer);
+                window.hasUnsavedChanges = true;
+              } catch (error) {
+                console.error('Error in delete custom layer click:', error);
+              }
+            });
+          });
+        }
+      });
+    }
     
     // Drawn Items Delete-Interaktionen
     drawnItems.eachLayer(layer => {
@@ -9860,12 +10038,12 @@ function tryActivateInfoModeWhenReady(maxAttempts = 30, delay = 300) {
 // Starte sofort den Versuch, Info Mode zu aktivieren
 tryActivateInfoModeWhenReady(20, 300);
 
-const deletedPipelines = [];
-const deletedNodes = [];
-const deletedCompressors = [];
-const deletedStorages = [];
-const deletedLNGs = [];
-const deletedPowerplants = [];
+let deletedPipelines = [];
+let deletedNodes = [];
+let deletedCompressors = [];
+let deletedStorages = [];
+let deletedLNGs = [];
+let deletedPowerplants = [];
 
 // Modal-System Funktionen
 let currentLayer = null;
