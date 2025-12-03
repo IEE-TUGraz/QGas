@@ -1157,54 +1157,11 @@
 <!-- Data and Licensing Modal -->
 <div id="data-licensing-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 10002; justify-content: center; align-items: center;">
   <div style="background: white; padding: 30px; border-radius: 10px; max-width: 700px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto;">
-    <h2 style="margin-top: 0; color: #333; text-align: center;">Data Sources and Licensing</h2>
+    <h2 style="margin-top: 0; color: #333; text-align: center;">Data and Licensing</h2>
     
-    <p style="color: #666; text-align: center; margin-bottom: 20px;">
-      QGas uses data from the following sources. Please acknowledge these sources in your work:
-    </p>
-    
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border: 1px solid #dee2e6; line-height: 1.6;">
-      <h3 style="color: #495057; margin-top: 0;">Data Sources:</h3>
-      
-      <div style="margin-bottom: 15px;">
-        <strong>ENTSOG Transparency Map</strong><br>
-        European Network of Transmission System Operators for Gas<br>
-        The PDF map was used as the basis for the network topology, from which the network was manually extracted.<br>
-        <a href="https://www.entsog.eu/sites/default/files/2024-02/ENTSOG_GIE_SYSCAP_2024_Update%20Feb.pdf" target="_blank" style="color: #007bff;">https://www.entsog.eu/sites/default/files/2024-02/ENTSOG_GIE_SYSCAP_2024_Update%20Feb.pdf</a><br>
-        <em>License:</em> Available under ENTSOG's terms of use
-      </div>
-      
-      <div style="margin-bottom: 15px;">
-        <strong>OpenStreetMap</strong><br>
-        OpenStreetMap contributors<br>
-        Used for the attributes of all pipelines marked with Source = OpenStreetMap and for the background map of QGas.<br>
-        <a href="https://www.openstreetmap.org/" target="_blank" style="color: #007bff;">https://www.openstreetmap.org/</a><br>
-        <em>License:</em> Open Data Commons Open Database License (ODbL) 1.0
-      </div>
-      
-      <div style="margin-bottom: 15px;">
-        <strong>Global Energy Monitor</strong><br>
-        Global Energy Monitor's Global Gas Infrastructure Tracker<br>
-        Used for the attributes of pipelines marked with Source = Global Energy Monitor and for LNG terminals.<br>
-        <a href="https://globalenergymonitor.org/" target="_blank" style="color: #007bff;">https://globalenergymonitor.org/</a><br>
-        <em>License:</em> Creative Commons Attribution 4.0 International (CC BY 4.0)
-      </div>
-      
-      <div style="margin-bottom: 15px;">
-        <strong>GIE Europe</strong><br>
-        Gas Infrastructure Europe<br>
-        Used for the attributes of gas storage facilities. The locations come from manual research.<br>
-        <a href="https://www.gie.eu/transparency/databases/storage-database/" target="_blank" style="color: #007bff;">https://www.gie.eu/transparency/databases/storage-database/</a><br>
-        <em>License:</em> Available under GIE's terms of use
-      </div>
-      
-      <div style="margin-bottom: 15px;">
-        <strong>PYPSA-Eur</strong><br>
-        Python for Power System Analysis - Europe<br>
-        The Powerplant Matching was used for data on gas-fired power plants.<br>
-        <a href="https://github.com/PyPSA/powerplantmatching" target="_blank" style="color: #007bff;">https://github.com/PyPSA/powerplantmatching</a><br>
-        <em>License:</em> MIT License
-      </div>
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border: 1px solid #dee2e6; line-height: 1.8;">
+      <!-- Content will be loaded dynamically from 01_Data_and_Licensing.txt -->
+      <p style="color: #666; text-align: center;">Loading...</p>
     </div>
     
     <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -1337,10 +1294,32 @@
   let contributors = [];
   
   // Project variable
-  let currentProject = 'Standard'; // Default project
+  let currentProject = 'SciGrid_IGGIELGNC_1'; // Default project
+  
+  // Layer configuration from Excel
+  let layerConfig = [];
+  let dynamicLayers = {}; // Store all dynamically loaded layers
   
   // Country Filter Variablen
   let selectedCountries = new Set();
+  
+  // Keep references for backward compatibility
+  let pipelineLayer = null;
+  let nodeLayer = null;
+  let powerplantsLayer = null;
+  let compressorsLayer = null;
+  let lngLayer = null;
+  let storageLayer = null;
+  let consumptionLayer = null;
+  let shortPipeLayer = null;
+  let borderpointsLayer = null;
+  let demandsLayer = null;
+  let productionsLayer = null;
+  let hydrogenPipeLayer = null;
+  let electrolyzersLayer = null;
+  let nodePositionEditActive = false;
+  
+  // Original layers for filtering
   let originalPipelineLayer = null;
   let originalEstimatedPipelinesLayer = null;
   let originalNodeLayer = null;
@@ -1350,17 +1329,6 @@
   let originalStorageLayer = null;
   let originalConsumptionLayer = null;
   let originalShortPipeLayer = null;
-  
-  // New additional layers
-  let borderpointsLayer = null;
-  let demandsLayer = null;
-  let productionsLayer = null;
-  let hydrogenPipeLayer = null;
-  let electrolyzersLayer = null;
-  
-  // Additional Datasets Variablen
-  let additionalDatasets = {}; // {filename: {layer: LayerObject, data: GeoJSONData}}
-  let availableDatasetFiles = []; // Array von verfügbaren Dateinamen
   
   // Pipeline Grouping Variablen
   let pipelineGroups = []; // Array von {name, pipelines: [], startPoint, endPoint, totalLength}
@@ -1377,26 +1345,46 @@
     maxZoom: 18
   }).addTo(map);
 
+  // Dedicated panes to control layer stacking order
+  const pipelinePane = map.createPane('pipelinePane');
+  pipelinePane.style.zIndex = 350;
+  const nodePane = map.createPane('nodePane');
+  nodePane.style.zIndex = 360;
+
   // Function to load a layer if the file exists
   function loadLayer(fileName, layerName, styleOptions, onEachFeatureCallback, onLoadCallback) {
-    const url = `Output/${fileName}?v=${Date.now()}`;
+    styleOptions = styleOptions || {};
+    const url = `Input/${currentProject}/${fileName}?v=${Date.now()}`;
+    console.log(`Loading layer from: ${url}`);
     fetch(url)
       .then(response => {
         if (!response.ok) {
-          console.log(`File ${fileName} not found, skipping.`);
+          console.log(`File ${fileName} not found at ${url}, skipping.`);
           return null;
         }
         return response.json();
       })
       .then(data => {
         if (data) {
-          let layer = L.geoJSON(data, {
+          const paneName = styleOptions.pane || 'overlayPane';
+          const geoJsonOptions = {
+            pane: paneName,
             style: styleOptions.style || {},
-            pointToLayer: styleOptions.pointToLayer,
             onEachFeature: onEachFeatureCallback || function(feature, layer) {
               handleFeature(feature, layer);
             }
-          });
+          };
+          if (styleOptions.pointToLayer) {
+            geoJsonOptions.pointToLayer = function(feature, latlng) {
+              const marker = styleOptions.pointToLayer(feature, latlng);
+              if (marker && marker.options && !marker.options.pane) {
+                marker.options.pane = paneName;
+              }
+              return marker;
+            };
+          }
+
+          let layer = L.geoJSON(data, geoJsonOptions);
           layer.addTo(map);
           
           // Assign to global variable
@@ -1446,8 +1434,10 @@
             activateInfoMode();
           }
           
+          // Store in dynamicLayers for configuration-based access
+          dynamicLayers[layerName] = layer;
+          
           console.log(`Loaded ${fileName}`);
-          updateLegendControl();
           
           if (onLoadCallback) onLoadCallback();
         }
@@ -1455,6 +1445,110 @@
       .catch(error => {
         console.log(`Error loading ${fileName}:`, error);
       });
+  }
+
+  // Load layer configuration from Excel
+  async function loadLayerConfiguration() {
+    try {
+      const configUrl = `Input/${currentProject}/02_Input_and_Configuration.xlsx?v=${Date.now()}`;
+      console.log(`Loading configuration from: ${configUrl}`);
+      const response = await fetch(configUrl);
+      if (!response.ok) {
+        console.log('Configuration file not found, using defaults');
+        return getDefaultLayerConfiguration();
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      
+      const sheetName = 'Input_Files';
+      if (!workbook.SheetNames.includes(sheetName)) {
+        console.log('Input_Files sheet not found, using defaults');
+        return getDefaultLayerConfiguration();
+      }
+      
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      const config = [];
+      const defaultColors = ['#3388ff', '#ff7800', '#8B4513', '#FF6347', '#00CED1', '#9370DB', '#ff8800', '#800080', '#ff0000', '#00ff00', '#ffff00', '#ff00ff'];
+      let colorIndex = 0;
+      
+      // Start from row 3 (index 2)
+      for (let i = 2; i < data.length; i++) {
+        const row = data[i];
+        if (!row || row.length === 0) continue; // Skip empty rows
+        
+        // Debug: Log first few rows to understand structure
+        if (i <= 4) {
+          console.log(`Row ${i}:`, row);
+        }
+        
+        // Based on current behavior: row[1] has legend names like "Compressors", "Demands" etc.
+        // So the actual structure must be different. Let's check all columns:
+        // We need to find which column has the .geojson filenames
+        
+        let filename = null;
+        let legendName = null;
+        
+        // Search for the column that contains .geojson files
+        for (let col = 0; col < row.length; col++) {
+          if (row[col] && typeof row[col] === 'string' && row[col].includes('.geojson')) {
+            filename = row[col];
+            // Legend name is probably in column B (index 1)
+            legendName = row[1] || filename.replace('.geojson', '');
+            break;
+          }
+        }
+        
+        if (!filename) {
+          if (i <= 4) console.warn('No .geojson file found in row', i);
+          continue;
+        }
+        
+        // Now map the rest - Excel structure: [filename, legendName, color, markerType, size, layerType]
+        // Row indices: [0, 1, 2, 3, 4, 5]
+        const color = row[2] || defaultColors[colorIndex++ % defaultColors.length];
+        const markerType = row[3] || 'circle';
+        const size = parseInt(row[4]) || (row[5] === 'Line' ? 3 : 6);  // Line=3, Point=6
+        const layerType = row[5] || 'Point';
+        
+        config.push({
+          filename: filename,
+          legendName: legendName,
+          color: color,
+          markerType: markerType,
+          size: size,
+          type: layerType,
+          enabled: true
+        });
+      }
+      
+      console.log('✓ Loaded layer configuration from Excel:', config);
+      console.log(`Total layers configured: ${config.length}`);
+      
+      // Log which files are configured
+      config.forEach(c => console.log(`  - ${c.filename}: ${c.legendName} (${c.type}, ${c.color})`));
+      
+      return config;
+      
+    } catch (error) {
+      console.error('Error loading configuration:', error);
+      return getDefaultLayerConfiguration();
+    }
+  }
+  
+  function getDefaultLayerConfiguration() {
+    console.log('Using default layer configuration');
+    return [
+      { filename: 'PL_Pipelines.geojson', legendName: 'Pipelines', color: '#3388ff', markerType: 'line', size: 3, type: 'Line', enabled: true },
+      { filename: 'N_Nodes.geojson', legendName: 'Nodes', color: '#ff7800', markerType: 'circle', size: 6, type: 'Point', enabled: true },
+      { filename: 'P_Powerplants.geojson', legendName: 'Power Plants', color: '#8B4513', markerType: 'circle', size: 8, type: 'Point', enabled: true },
+      { filename: 'C_Compressors.geojson', legendName: 'Compressors', color: '#FF6347', markerType: 'circle', size: 7, type: 'In-Line', enabled: true },
+      { filename: 'L_LNG.geojson', legendName: 'LNG Terminals', color: '#00CED1', markerType: 'circle', size: 9, type: 'Point', enabled: true },
+      { filename: 'S_Storages.geojson', legendName: 'Storage Sites', color: '#9370DB', markerType: 'circle', size: 8, type: 'Point', enabled: true },
+      { filename: 'NUTS3_Centroids.geojson', legendName: 'Consumption', color: '#ff8800', markerType: 'circle', size: 4, type: 'Point', enabled: true }
+    ];
   }
 
   function loadContributors() {
@@ -1602,8 +1696,103 @@
   }
 
   // Data and Licensing Modal Functions
-  function openDataLicensingModal() {
-    document.getElementById('data-licensing-modal').style.display = 'flex';
+  async function openDataLicensingModal() {
+    const modal = document.getElementById('data-licensing-modal');
+    const contentDiv = modal.querySelector('div[style*="background: #f8f9fa"]');
+    
+    try {
+      // Load the data and licensing file from the current project folder
+      const response = await fetch(`Input/${currentProject}/01_Data_and_Licensing.txt?v=${Date.now()}`);
+      
+      if (response.ok) {
+        const text = await response.text();
+        
+        if (text.trim()) {
+          // Parse the file content
+          const lines = text.split('\n');
+          let htmlContent = '<div style="line-height: 1.8;">';
+          let currentSection = '';
+          
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            
+            if (line === 'Text:') {
+              currentSection = 'text';
+              continue;
+            } else if (line === 'Citation:') {
+              currentSection = 'citation';
+              htmlContent += '<div style="margin-top: 25px;"><strong style="color: #495057;">Citation:</strong><br>';
+              continue;
+            } else if (line === 'License:') {
+              currentSection = 'license';
+              htmlContent += '</div><div style="margin-top: 25px;"><strong style="color: #495057;">License:</strong><br>';
+              continue;
+            }
+            
+            if (line) {
+              let processedLine = line;
+              
+              // Remove any existing HTML tags/attributes from the text file
+              processedLine = processedLine.replace(/(<a href="|" target="_blank" style="color: #[0-9a-fA-F]+;">|<\/a>)/g, '');
+              
+              // Now make URLs clickable
+              // Match DOI links
+              processedLine = processedLine.replace(
+                /(https?:\/\/doi\.org\/[^\s]+)/g,
+                '<a href="$1" target="_blank" style="color: #007bff;">$1</a>'
+              );
+              
+              // Match other URLs (but not if already in a link)
+              processedLine = processedLine.replace(
+                /(?<!href=")(https?:\/\/(?!doi\.org)[^\s<]+)/g,
+                '<a href="$1" target="_blank" style="color: #007bff;">$1</a>'
+              );
+              
+              if (currentSection === 'text') {
+                htmlContent += `<p style="color: #495057; margin-bottom: 15px;">${processedLine}</p>`;
+              } else {
+                htmlContent += `<span style="color: #666;">${processedLine}</span><br>`;
+              }
+            } else if (currentSection) {
+              // Empty line adds spacing
+              htmlContent += '<br>';
+            }
+          }
+          
+          htmlContent += '</div></div>';
+          contentDiv.innerHTML = htmlContent;
+        } else {
+          // File is empty, use default content
+          contentDiv.innerHTML = getDefaultDataLicensingContent();
+        }
+      } else {
+        // File not found, use default content
+        contentDiv.innerHTML = getDefaultDataLicensingContent();
+      }
+    } catch (error) {
+      console.error('Error loading data and licensing file:', error);
+      contentDiv.innerHTML = getDefaultDataLicensingContent();
+    }
+    
+    modal.style.display = 'flex';
+  }
+  
+  function getDefaultDataLicensingContent() {
+    return `
+      <p style="color: #495057; margin-bottom: 25px;">
+        In order to demonstrate the features and advances of the QGas toolkit, the SciGRID_gas IGGIELGNC-1 dataset was translated in a QGas suitable format. The dataset is contained in the input folder of the toolkit.
+      </p>
+      
+      <div style="margin-bottom: 25px;">
+        <strong style="color: #495057;">Cite:</strong><br>
+        <span style="color: #666;">Diettrich, J., Pluta, A., Medjroubi, W., Dasenbrock, J., & Sandoval, J. E. (2021). SciGRID_gas IGGIELGNC-1 (0.2) [Data set]. Zenodo. <a href="https://doi.org/10.5281/zenodo.5509988" target="_blank" style="color: #007bff;">https://doi.org/10.5281/zenodo.5509988</a></span>
+      </div>
+      
+      <div>
+        <strong style="color: #495057;">Link:</strong><br>
+        <a href="https://zenodo.org/records/5509988" target="_blank" style="color: #007bff;">https://zenodo.org/records/5509988</a>
+      </div>
+    `;
   }
 
   function closeDataLicensingModal() {
@@ -2188,14 +2377,16 @@
     if (currentMode === 'draw-pipeline') {
       // Entferne von drawnItems und füge zu selectedPipelineLayer hinzu
       drawnItems.removeLayer(layer);
-      if (window.selectedPipelineLayer && window.selectedPipelineLayer !== drawnItems) {
-        window.selectedPipelineLayer.addLayer(layer);
-      } else {
-        drawnItems.addLayer(layer); // Fallback
-      }
-      
+      layer.options = layer.options || {};
+      layer.options.pane = 'pipelinePane';
+      const targetGroup = (window.selectedPipelineLayer && window.selectedPipelineLayer !== drawnItems) ? window.selectedPipelineLayer : drawnItems;
+
       // Pipeline fertigstellen
       finalizeDrawnPipeline(layer);
+      targetGroup.addLayer(layer);
+      if (typeof layer.bringToBack === 'function') {
+        layer.bringToBack();
+      }
       
       // Drawer deaktivieren
       if (window.polylineDrawer) {
@@ -2377,11 +2568,57 @@
 
   function handleFeature(feature, layer) {
     drawnItems.addLayer(layer);
+    
+    // Set up interaction based on geometry type
+    const geomType = feature.geometry.type;
+    
+    if (geomType === 'LineString' || geomType === 'MultiLineString') {
+      // Pipeline interaction
+      setPipelineInteraction(layer);
+    } else if (geomType === 'Point' || geomType === 'MultiPoint') {
+      // Point interaction (nodes, powerplants, etc.)
+      setPointInteraction(layer);
+    }
+  }
+  
+  // Universal point interaction handler
+  function setPointInteraction(layer) {
+    layer.off('click');
+    
+    if (currentMode === 'info') {
+      layer.on('click', function() {
+        highlightElement(this);
+        const content = createModalPopupContent(this.feature.properties, this);
+        const elementType = this.feature.properties.Type || 'Element';
+        const title = `${elementType}: ${this.feature.properties.ID || this.feature.properties.Name || 'Unnamed'}`;
+        showElementModal(title, content, this);
+        
+        setTimeout(() => {
+          const btn = document.getElementById('save-attr-btn');
+          if (btn) {
+            btn.onclick = function() {
+              const inputs = document.querySelectorAll('#modal-body input[data-key]');
+              let changed = false;
+              inputs.forEach(input => {
+                const key = input.getAttribute('data-key');
+                if (this.feature.properties[key] !== input.value) changed = true;
+                this.feature.properties[key] = input.value;
+              });
+              if (changed) this.feature.properties.modified = true;
+              closeElementModal();
+            }.bind(this);
+          }
+        }, 100);
+      });
+    } else if (currentMode === 'delete') {
+      // Delete mode handling
+      layer.on('click', function(e) {
+        // Will be handled by delete mode logic
+      });
+    }
   }
 
-  let pipelineLayer, nodeLayer;
-  let powerplantsLayer, compressorsLayer, lngLayer, storageLayer, consumptionLayer;
-  let estimatedPipelinesLayer, shortPipeLayer;
+  // Layer variables now declared globally at line ~1307
   let currentMode = 'info';  // Info Mode als Standard
   updateActiveToolDisplay('info');  // Aktives Tool Display initialisieren
   let editingLayer = null;
@@ -2444,7 +2681,7 @@
         // Pipeline-Layer neu laden
         if (pipelineLayer) {
           map.removeLayer(pipelineLayer);
-          fetch('Input/SciGrid_IGGIELGNC_1/PL_Pipelines.geojson?v=' + Date.now())
+          fetch(`Input/${currentProject}/PL_Pipelines.geojson?v=${Date.now()}`)
             .then(response => response.json())
             .then(data => {
               pipelineLayer = L.geoJSON(data, {
@@ -2702,227 +2939,135 @@
     }
   }
 
-  loadLayer('PL_Pipelines.geojson', 'pipelineLayer', {
-    style: { 
-      color: "#0070f3", 
-      weight: 3,
-      opacity: 0.8,
-      lineCap: 'round',
-      lineJoin: 'round'
-    },
-    tolerance: 40
-  }, function(feature, layer) {
-    handleFeature(feature, layer);
-  });
-
-
-  loadLayer('N_Nodes.geojson', 'nodeLayer', {
-    pointToLayer: (feature, latlng) => {
-      // Create a single CircleMarker (matching createNewNode style)
-      const nodeMarker = L.circleMarker(latlng, {
-        radius: 6,
-        fillColor: "#ff7800",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      });
+  // Dynamic layer loading based on configuration
+  async function loadAllLayersFromConfig() {
+    console.log('=== Starting dynamic layer loading ===');
+    console.log('Current project:', currentProject);
+    layerConfig = await loadLayerConfiguration();
+    console.log('Configuration loaded, will load', layerConfig.length, 'layers');
+    
+    for (const config of layerConfig) {
+      if (!config.enabled) continue;
       
-      // Feature-Eigenschaft an Marker binden
-      nodeMarker.feature = feature;
+      const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      const lowerFilename = config.filename.toLowerCase();
+      const isPipelineLayer = lowerFilename.includes('pipeline') || lowerFilename.startsWith('pl_');
+      const isNodeLayer = lowerFilename.includes('node') || lowerFilename.startsWith('n_');
+      const targetPane = isPipelineLayer ? 'pipelinePane' : (isNodeLayer ? 'nodePane' : null);
       
-      // Klick-Handler an Marker binden
-      const clickHandler = function(e) {
-        console.log('Node click handler called, currentMode:', currentMode, 'hasCallback:', !!window.nodeSelectionCallback);
-        console.log('Clicked on node:', this.feature ? this.feature.properties.ID : 'no feature');
-        if (currentMode === 'info') {
-          console.log('Node geklickt:', this.feature.properties.ID);
-          
-          // Element hervorheben
-          highlightElement(this);
-          
-          // Modal mit Node-Details anzeigen
-          const content = createModalPopupContent(this.feature.properties, this);
-          const title = `Node: ${this.feature.properties.ID || this.feature.properties.Name || 'Unnamed'}`;
-          showElementModal(title, content, this);
-          
-          // Save-Button Event nach Modal-Anzeige
-          setTimeout(() => {
-            const btn = document.getElementById('save-attr-btn');
-            if (btn) {
-              btn.onclick = function () {
-                const inputs = document.querySelectorAll('#modal-body input[data-key]');
-                let changed = false;
-                inputs.forEach(input => {
-                  const key = input.getAttribute('data-key');
-                  if (this.feature.properties[key] !== input.value) changed = true;
-                  this.feature.properties[key] = input.value;
-                });
-                if (changed) this.feature.properties.modified = true;
-                closeElementModal();
-              }.bind(this);
+      if (config.type === 'Line') {
+        loadLayer(config.filename, layerName, {
+          pane: targetPane,
+          style: {
+            color: config.color,
+            weight: config.size,
+            opacity: 0.8,
+            lineCap: 'round',
+            lineJoin: 'round'
+          },
+          tolerance: 40
+        }, function(feature, layer) {
+          // Store original style for reset
+          layer._originalColor = config.color;
+          layer._originalWeight = config.size;
+          handleFeature(feature, layer);
+        });
+      } else {
+        // Point or In-Line
+        loadLayer(config.filename, layerName, {
+          pane: targetPane,
+          pointToLayer: (feature, latlng) => {
+            const marker = L.circleMarker(latlng, {
+              pane: targetPane || 'overlayPane',
+              radius: config.size,
+              fillColor: config.color,
+              color: '#000',
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.85
+            });
+            marker.feature = feature;
+            captureOriginalMarkerStyle(marker, 'default');
+            return marker;
+          },
+          onEachFeature: (feature, layer) => {
+            // Call handleFeature for all point layers to set up interactions
+            handleFeature(feature, layer);
+            
+            // Special handling for nodes - add pipeline connection callback
+            if (config.filename === 'N_Nodes.geojson') {
+              const originalClick = layer._events?.click?.[0]?.fn;
+              layer.on('click', function(e) {
+                // Handle add-pipeline mode
+                if (currentMode === 'add-pipeline' && window.nodeSelectionCallback) {
+                  window.nodeSelectionCallback(this.feature.properties.ID, this.getLatLng());
+                  e.stopPropagation();
+                } else if (originalClick) {
+                  // Call the original click handler from handleFeature
+                  originalClick.call(this, e);
+                }
+              });
             }
-          }, 100);
-        } else if (currentMode === 'add-pipeline' && window.nodeSelectionCallback) {
-          console.log('Node für Pipeline ausgewählt:', this.feature.properties.ID);
-          window.nodeSelectionCallback(this.feature.properties.ID, this.getLatLng());
-          e.stopPropagation();
+          }
+        }, null, config.filename === 'NUTS3_Centroids.geojson' ? function() {
+          setTimeout(() => {
+            loadAdditionalDatasets();
+          }, 1000);
+        } : null);
+      }
+      
+      // Store layer reference - will be set by loadLayer
+      dynamicLayers[layerName] = null;
+      
+      // Set legacy layer references dynamically for backward compatibility
+      setTimeout(() => {
+        const layer = dynamicLayers[layerName];
+        if (!layer) return;
+        
+        if (lowerFilename.includes('pipeline') || lowerFilename.startsWith('pl_')) {
+          pipelineLayer = layer;
+          originalPipelineLayer = layer;
+        } else if (lowerFilename.includes('node') || lowerFilename.startsWith('n_')) {
+          nodeLayer = layer;
+          originalNodeLayer = layer;
+        } else if (lowerFilename.includes('powerplant') || lowerFilename.startsWith('p_')) {
+          powerplantsLayer = layer;
+          originalPowerplantsLayer = layer;
+        } else if (lowerFilename.includes('compressor') || lowerFilename.startsWith('c_')) {
+          compressorsLayer = layer;
+          originalCompressorsLayer = layer;
+        } else if (lowerFilename.includes('lng') || lowerFilename.startsWith('l_')) {
+          lngLayer = layer;
+          originalLngLayer = layer;
+        } else if (lowerFilename.includes('storage') || lowerFilename.startsWith('s_')) {
+          storageLayer = layer;
+          originalStorageLayer = layer;
+        } else if (lowerFilename.includes('demand') || lowerFilename.startsWith('d_')) {
+          demandsLayer = layer;
+        } else if (lowerFilename.includes('production') || lowerFilename.startsWith('pr_')) {
+          productionsLayer = layer;
+        } else if (lowerFilename.includes('borderpoint') || lowerFilename.startsWith('b_')) {
+          borderpointsLayer = layer;
+        } else if (lowerFilename.includes('nuts3') || lowerFilename.includes('consumption')) {
+          consumptionLayer = layer;
+          originalConsumptionLayer = layer;
         }
-      };
-      
-      nodeMarker.on('click', clickHandler);
-      
-      return nodeMarker;
+      }, 200);
     }
-  });
     
-
-  loadLayer('P_Powerplants.geojson', 'powerplantsLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 6,
-        fillColor: "#090",
-        color: "#090",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
-    
-
-  loadLayer('C_Compressors.geojson', 'compressorsLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 6,
-        fillColor: "#009",
-        color: "#009",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
-    
-
-  loadLayer('L_LNG.geojson', 'lngLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 6,
-        fillColor: "#099",
-        color: "#099",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
-    
-
-  loadLayer('S_Storages.geojson', 'storageLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 6,
-        fillColor: "#990",
-        color: "#990",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
-    
-// NUTS3 Centroids Layer (Consumption)
-  loadLayer('NUTS3_Centroids.geojson', 'consumptionLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 4,
-        fillColor: "#ff8800",
-        color: "#ff8800",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      });
-      return marker;
-    }
-  }, null, function() {
-    // Additional Datasets laden
-    console.log('About to load additional datasets...');
+    // Update legend after all layers configured
     setTimeout(() => {
-      loadAdditionalDatasets();
-    }, 1000); // 1 Sekunde Verzögerung
-  });
-
-  // Load new additional layers
-  loadLayer('B_Borderpoints.geojson', 'borderpointsLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 5,
-        fillColor: "#800080",
-        color: "#800080",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
-
-  loadLayer('D_Demands.geojson', 'demandsLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 5,
-        fillColor: "#ff0000",
-        color: "#ff0000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
-
-  loadLayer('PR_Productions.geojson', 'productionsLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 5,
-        fillColor: "#00ff00",
-        color: "#00ff00",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
-
-  loadLayer('PLH2_HydrogenPipe.geojson', 'hydrogenPipeLayer', {
-    style: { 
-      color: "#ff00ff", 
-      weight: 3,
-      opacity: 0.8,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }
-  });
-
-  loadLayer('E_Electrolyzers.geojson', 'electrolyzersLayer', {
-    pointToLayer: (feature, latlng) => {
-      const marker = L.circleMarker(latlng, {
-        radius: 5,
-        fillColor: "#ffff00",
-        color: "#ffff00",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.7
-      });
-      return marker;
-    }
-  });
+      updateLegendControl();
+    }, 2000);
+  }
+  
+  // Start loading layers
+  loadAllLayersFromConfig();
+  
+  /* OLD LOADING CODE - REPLACED BY DYNAMIC LOADING
+  loadLayer('PL_Pipelines.geojson', 'pipelineLayer', {
+  */
+  // END OLD LOADING CODE
 
 map.on(L.Draw.Event.CREATED, function (e) {
   if (window.pipelineDrawContext) {
@@ -2934,10 +3079,15 @@ map.on(L.Draw.Event.CREATED, function (e) {
 
   if (e.layerType === 'polyline') {
     // Pipeline sofort zur Karte hinzufügen!
+    layer.options = layer.options || {};
+    layer.options.pane = 'pipelinePane';
     drawnItems.addLayer(layer);
     
     // Setze dünnen visuellen Stil
     layer.setStyle({ color: '#0070f3', weight: 3 });
+    if (typeof layer.bringToBack === 'function') {
+      layer.bringToBack();
+    }
     
     // Erstelle unsichtbare dickere Linie für Klickbereich
     const feature = layer.toGeoJSON();
@@ -2974,8 +3124,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
     if (!ctx.hasStartNode && latlngs.length > 0) {
       const startPos = latlngs[0];
       const newNodeId = `${contributorInitials}_N_${getNextIdNumber("Node")}`;
-      const startNodeGroup = createNewNode(startPos, newNodeId);
-      if (nodeLayer) nodeLayer.addLayer(startNodeGroup);
+      createNewNode(startPos, newNodeId);
       startNodeId = newNodeId;
     }
     
@@ -2983,13 +3132,13 @@ map.on(L.Draw.Event.CREATED, function (e) {
     if (!ctx.hasEndNode && latlngs.length > 0) {
       const endPos = latlngs[latlngs.length - 1];
       const newNodeId = `${contributorInitials}_N_${getNextIdNumber("Node")}`;
-      const endNodeGroup = createNewNode(endPos, newNodeId);
-      if (nodeLayer) nodeLayer.addLayer(endNodeGroup);
+      createNewNode(endPos, newNodeId);
       endNodeId = newNodeId;
     }
 
     // ID-Vorschlag nach Schema
-    const pipelineId = `${contributorInitials}_${facilityTypeMap["Pipeline"]}_${getNextIdNumber("Pipeline")}`;
+    const pipelinePrefix = getFacilityPrefix("Pipeline");
+    const pipelineId = `${contributorInitials}_${pipelinePrefix}_${getNextIdNumber("Pipeline")}`;
     const popupDiv = document.createElement('div');
     popupDiv.innerHTML = `
       <label>ID: <input id="pipeline-id" type="text" value="${pipelineId}" style="width:20ch"></label><br>
@@ -3049,13 +3198,14 @@ map.on(L.Draw.Event.CREATED, function (e) {
     // WICHTIG: NICHT zu drawnItems hinzufügen, sondern direkt zur Map
     // Das verhindert Drawing-Cursor-Probleme
     let circleMarker = L.circleMarker(latlng, {
-      radius: 5,
+      radius: 6,
       fillColor: "#ccc",
-      color: "#666",
+      color: "#000",
       weight: 1,
       opacity: 1,
-      fillOpacity: 0.7
+      fillOpacity: 0.85
     }).addTo(map);  // Direkt zur Map statt zu drawnItems
+    captureOriginalMarkerStyle(circleMarker, 'default');
 
     // 1. Popup mit Typ-Auswahl anzeigen
     const popupContent = document.createElement('div');
@@ -3092,7 +3242,8 @@ map.on(L.Draw.Event.CREATED, function (e) {
       }
 
       // 2. ID-Vorschlag nach Typ generieren
-      const autoId = `${contributorInitials}_${facilityTypeMap[selectedType]}_${getNextIdNumber(selectedType)}`;
+      const typePrefix = getFacilityPrefix(selectedType);
+      const autoId = `${contributorInitials}_${typePrefix}_${getNextIdNumber(selectedType)}`;
       const userId = prompt("Enter new point ID:", autoId);
       if (!userId) {
         alert("Point ID is required.");
@@ -3546,8 +3697,8 @@ function exportFilteredData(folderName) {
   });
 }
 
-// Function to export complete dataset (all current features)
-function exportCompleteDataset() {
+// Function to export complete dataset (all current features) - DYNAMIC VERSION
+async function exportCompleteDataset() {
   const zip = new JSZip();
 
   // Helper function to add GeoJSON to ZIP
@@ -3567,113 +3718,104 @@ function exportCompleteDataset() {
     zip.file(filename, JSON.stringify(geojson, null, 2));
   }
 
-  // Collect all data from current layers (including modifications)
-  const pipelines = [];
-  const nodes = [];
-  const powerplants = [];
-  const compressors = [];
-  const lngs = [];
-  const storages = [];
-  const consumption = [];
-  const shortpipes = [];
-
-  // Collect pipelines (both regular and estimated)
-  if (pipelineLayer) {
-    pipelineLayer.eachLayer(layer => {
-      if (layer.feature) {
-        pipelines.push(layer.feature);
+  // Collect data dynamically from all layers in layerConfig
+  layerConfig.forEach(config => {
+    const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    const layer = dynamicLayers[layerName];
+    
+    if (layer) {
+      const features = [];
+      layer.eachLayer(l => {
+        if (l.feature) {
+          features.push(l.feature);
+        }
+      });
+      
+      if (features.length > 0) {
+        addGeoJSONToZip(features, config.filename);
+        console.log(`Exported ${features.length} features to ${config.filename}`);
       }
-    });
-  }
-  if (estimatedPipelinesLayer) {
+    }
+  });
+
+  // Also include estimated pipelines if they exist
+  if (typeof estimatedPipelinesLayer !== 'undefined' && estimatedPipelinesLayer) {
+    const features = [];
     estimatedPipelinesLayer.eachLayer(layer => {
       if (layer.feature) {
-        pipelines.push(layer.feature);
+        features.push(layer.feature);
       }
     });
+    if (features.length > 0) {
+      addGeoJSONToZip(features, 'Estimated_Pipelines.geojson');
+    }
   }
-
-  // Collect nodes
-  if (nodeLayer) {
-    nodeLayer.eachLayer(layer => {
-      if (layer.feature) {
-        nodes.push(layer.feature);
-      }
-    });
-  }
-
-  // Collect powerplants
-  if (powerplantsLayer) {
-    powerplantsLayer.eachLayer(layer => {
-      if (layer.feature) {
-        powerplants.push(layer.feature);
-      }
-    });
-  }
-
-  // Collect compressors
-  if (compressorsLayer) {
-    compressorsLayer.eachLayer(layer => {
-      if (layer.feature) {
-        compressors.push(layer.feature);
-      }
-    });
-  }
-
-  // Collect LNG terminals
-  if (lngLayer) {
-    lngLayer.eachLayer(layer => {
-      if (layer.feature) {
-        lngs.push(layer.feature);
-      }
-    });
-  }
-
-  // Collect storage sites
-  if (storageLayer) {
-    storageLayer.eachLayer(layer => {
-      if (layer.feature) {
-        storages.push(layer.feature);
-      }
-    });
-  }
-
-  // Collect consumption points
-  if (consumptionLayer) {
-    consumptionLayer.eachLayer(layer => {
-      if (layer.feature) {
-        consumption.push(layer.feature);
-      }
-    });
-  }
-
-  // Collect short pipes
-  if (shortPipeLayer) {
+  
+  // Include short pipes if they exist
+  if (typeof shortPipeLayer !== 'undefined' && shortPipeLayer) {
+    const features = [];
     shortPipeLayer.eachLayer(layer => {
       if (layer.feature) {
-        shortpipes.push(layer.feature);
+        features.push(layer.feature);
       }
     });
+    if (features.length > 0) {
+      addGeoJSONToZip(features, 'Short_Pipes.geojson');
+    }
   }
 
-  // Add files to ZIP
-  addGeoJSONToZip(pipelines, 'PL_Pipelines.geojson');
-  addGeoJSONToZip(nodes, 'N_Nodes.geojson');
-  addGeoJSONToZip(powerplants, 'P_Powerplants.geojson');
-  addGeoJSONToZip(compressors, 'C_Compressors.geojson');
-  addGeoJSONToZip(lngs, 'L_LNG.geojson');
-  addGeoJSONToZip(storages, 'S_Storages.geojson');
-  addGeoJSONToZip(consumption, 'Consumption_Points.geojson');
-  addGeoJSONToZip(shortpipes, 'Short_Pipes.geojson');
+  // Update Excel configuration with current layer settings
+  try {
+    const workbook = XLSX.utils.book_new();
+    const wsData = [
+      ['Filename', 'Legend Name', 'Color', 'Marker Type', 'Size', 'Layer Type'],
+      []  // Empty row
+    ];
+    
+    // Add all layers from layerConfig with current settings
+    layerConfig.forEach(config => {
+      wsData.push([
+        config.filename,
+        config.legendName,
+        config.color,
+        config.markerType,
+        config.size,
+        config.type
+      ]);
+    });
+    
+    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Input_Files');
+    
+    // Convert to binary and add to ZIP
+    const excelBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    zip.file('02_Input_and_Configuration.xlsx', excelBinary);
+    console.log('Added updated Excel configuration to export');
+  } catch (error) {
+    console.error('Error creating Excel file:', error);
+  }
+
+  // Add Data and Licensing file if available
+  try {
+    const response = await fetch(`Input/${currentProject}/01_Data_and_Licensing.txt?v=${Date.now()}`);
+    if (response.ok) {
+      const text = await response.text();
+      zip.file('01_Data_and_Licensing.txt', text);
+      console.log('Added Data and Licensing file to export');
+    }
+  } catch (error) {
+    console.log('No Data and Licensing file found');
+  }
 
   // Generate and download ZIP
   zip.generateAsync({ type: "blob" }).then(function(content) {
     const url = URL.createObjectURL(content);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Complete_Dataset_${new Date().toISOString().split('T')[0]}.zip`;
+    a.download = `Complete_Dataset_${currentProject}_${new Date().toISOString().split('T')[0]}.zip`;
     a.click();
     URL.revokeObjectURL(url);
+    console.log('✓ Export completed successfully');
   });
 }
 
@@ -3793,6 +3935,36 @@ let activePipeline = null;
 let activeElement = null;
 
 // Funktion zum Highlighten eines Elements (rote Umrandung)
+function captureOriginalMarkerStyle(layer, mode = 'default') {
+  if (!layer) return;
+  if (layer instanceof L.LayerGroup) {
+    layer.eachLayer(subLayer => captureOriginalMarkerStyle(subLayer, mode));
+    return;
+  }
+  if (layer instanceof L.CircleMarker) {
+    const styleSnapshot = {
+      color: layer.options.color,
+      weight: layer.options.weight,
+      fillColor: layer.options.fillColor,
+      fillOpacity: layer.options.fillOpacity,
+      radius: layer.options.radius
+    };
+    if (mode === 'highlight') {
+      if (!layer._highlightBackupStyle) {
+        layer._highlightBackupStyle = styleSnapshot;
+      }
+    } else {
+      layer._defaultMarkerStyle = styleSnapshot;
+    }
+  }
+}
+
+if (L && L.CircleMarker && L.CircleMarker.addInitHook) {
+  L.CircleMarker.addInitHook(function() {
+    captureOriginalMarkerStyle(this, 'default');
+  });
+}
+
 function highlightElement(layer) {
   console.log('highlightElement aufgerufen für Layer:', layer);
   
@@ -3816,6 +3988,7 @@ function highlightElement(layer) {
     layer.eachLayer(subLayer => {
       if (subLayer instanceof L.CircleMarker && subLayer.options.fillOpacity > 0) {
         // Nur den sichtbaren Marker highlighten
+        captureOriginalMarkerStyle(subLayer, 'highlight');
         subLayer.setStyle({
           color: "#ff0000",
           weight: 3,
@@ -3826,6 +3999,7 @@ function highlightElement(layer) {
     });
   } else if (layer instanceof L.CircleMarker) {
     // Für CircleMarkers (Nodes, etc.)
+    captureOriginalMarkerStyle(layer, 'highlight');
     layer.setStyle({
       color: "#ff0000",
       weight: 3,
@@ -3852,121 +4026,35 @@ function resetElementStyle(layer) {
     // Für Layer-Gruppen (Nodes mit erweitertem Klickbereich)
     layer.eachLayer(subLayer => {
       if (subLayer instanceof L.CircleMarker && subLayer.options.fillOpacity > 0) {
-        // Nur den sichtbaren Marker zurücksetzen
-        let originalColor = "#000";
-        let originalFillColor = "#ff7800";
-        let originalRadius = 6;
-        
-        subLayer.setStyle({
-          color: originalColor,
-          weight: 1,
-          fillColor: originalFillColor,
-          fillOpacity: 0.7,
-          radius: originalRadius
-        });
+        const baseStyle = subLayer._highlightBackupStyle || subLayer._defaultMarkerStyle;
+        if (baseStyle) {
+          subLayer.setStyle({
+            color: baseStyle.color,
+            weight: baseStyle.weight,
+            fillColor: baseStyle.fillColor,
+            fillOpacity: baseStyle.fillOpacity
+          });
+          if (typeof subLayer.setRadius === 'function' && baseStyle.radius !== undefined) {
+            subLayer.setRadius(baseStyle.radius);
+          }
+          subLayer._highlightBackupStyle = null;
+        }
       }
     });
   } else if (layer instanceof L.CircleMarker) {
-    // Bestimme ursprüngliche Farben durch Prüfung in welchem Layer das Element ist
-    let originalColor = "#666"; // Default
-    let originalFillColor = "#ccc"; // Default
-    let originalRadius = 5; // Default
-    
-    // Prüfe in welchem Layer sich das Element befindet
-    let foundInLayer = false;
-    
-    if (nodeLayer && nodeLayer.hasLayer && nodeLayer.hasLayer(layer)) {
-      originalColor = "#000";
-      originalFillColor = "#ff7800";
-      originalRadius = 6;
-      foundInLayer = true;
-    } else if (powerplantsLayer && powerplantsLayer.hasLayer && powerplantsLayer.hasLayer(layer)) {
-      originalColor = "#090";
-      originalFillColor = "#090";
-      originalRadius = 6;
-      foundInLayer = true;
-    } else if (compressorsLayer && compressorsLayer.hasLayer && compressorsLayer.hasLayer(layer)) {
-      originalColor = "#009";
-      originalFillColor = "#009";
-      originalRadius = 6;
-      foundInLayer = true;
-    } else if (lngLayer && lngLayer.hasLayer && lngLayer.hasLayer(layer)) {
-      originalColor = "#099";
-      originalFillColor = "#099";
-      originalRadius = 6;
-      foundInLayer = true;
-    } else if (storageLayer && storageLayer.hasLayer && storageLayer.hasLayer(layer)) {
-      originalColor = "#990";
-      originalFillColor = "#990";
-      originalRadius = 6;
-      foundInLayer = true;
-    } else if (consumptionLayer && consumptionLayer.hasLayer && consumptionLayer.hasLayer(layer)) {
-      originalColor = "#ff8800";
-      originalFillColor = "#ff8800";
-      originalRadius = 4;
-      foundInLayer = true;
-    } else if (borderpointsLayer && borderpointsLayer.hasLayer && borderpointsLayer.hasLayer(layer)) {
-      originalColor = "#800080";
-      originalFillColor = "#800080";
-      originalRadius = 5;
-      foundInLayer = true;
-    } else if (demandsLayer && demandsLayer.hasLayer && demandsLayer.hasLayer(layer)) {
-      originalColor = "#ff0000";
-      originalFillColor = "#ff0000";
-      originalRadius = 5;
-      foundInLayer = true;
-    } else if (productionsLayer && productionsLayer.hasLayer && productionsLayer.hasLayer(layer)) {
-      originalColor = "#00ff00";
-      originalFillColor = "#00ff00";
-      originalRadius = 5;
-      foundInLayer = true;
-    } else if (electrolyzersLayer && electrolyzersLayer.hasLayer && electrolyzersLayer.hasLayer(layer)) {
-      originalColor = "#ffff00";
-      originalFillColor = "#ffff00";
-      originalRadius = 5;
-      foundInLayer = true;
-    }
-    
-    // Fallback: Bestimme anhand der ID wenn Layer-Prüfung nicht funktioniert
-    if (!foundInLayer && layer.feature && layer.feature.properties && layer.feature.properties.ID) {
-      if (layer.feature.properties.ID.includes('_N_')) {
-        originalColor = "#900";
-        originalFillColor = "#f03";
-        originalRadius = 2;
-      } else if (layer.feature.properties.ID.includes('_P_')) {
-        originalColor = "#090";
-        originalFillColor = "#090";
-        originalRadius = 6;
-      } else if (layer.feature.properties.ID.includes('_C_')) {
-        originalColor = "#009";
-        originalFillColor = "#009";
-        originalRadius = 6;
-      } else if (layer.feature.properties.ID.includes('_L_')) {
-        originalColor = "#099";
-        originalFillColor = "#099";
-        originalRadius = 6;
-      } else if (layer.feature.properties.ID.includes('_S_')) {
-        originalColor = "#990";
-        originalFillColor = "#990";
-        originalRadius = 6;
+    const baseStyle = layer._highlightBackupStyle || layer._defaultMarkerStyle;
+    if (baseStyle) {
+      layer.setStyle({
+        color: baseStyle.color,
+        weight: baseStyle.weight,
+        fillColor: baseStyle.fillColor,
+        fillOpacity: baseStyle.fillOpacity
+      });
+      if (typeof layer.setRadius === 'function' && baseStyle.radius !== undefined) {
+        layer.setRadius(baseStyle.radius);
       }
+      layer._highlightBackupStyle = null;
     }
-    
-    // Fallback für Consumption Points (haben NUTS3 IDs)
-    if (!foundInLayer && layer.feature && layer.feature.properties && 
-        (layer.feature.properties.NUTS_ID || layer.feature.properties.NUTS3_ID || layer.feature.properties.NUTS_CODE)) {
-      originalColor = "#ff8800";
-      originalFillColor = "#ff8800";
-      originalRadius = 4;
-    }
-    
-    layer.setStyle({
-      color: originalColor,
-      weight: 1,
-      fillColor: originalFillColor,
-      fillOpacity: 0.7,
-      radius: originalRadius
-    });
   } else if (layer instanceof L.Marker) {
     // Für normale Marker
     if (layer._icon) {
@@ -4005,7 +4093,7 @@ function highlightPipeline(layer) {
     
     // Wenn dieser Layer einen Click-Layer hat, verwende den Click-Layer für Highlighting
     if (layer._clickLayer) {
-      console.log('Layer hat Click-Layer, highlighte Click-Layer');
+      console.log('Layer hat Click-Layer, highlighte NUR Click-Layer');
       layerToHighlight = layer._clickLayer.getLayers()[0]; // Erster Layer im ClickLayer
       
       // Mache den Click-Layer sichtbar und rot
@@ -4015,6 +4103,15 @@ function highlightPipeline(layer) {
         opacity: 1,
         fillOpacity: 0
       });
+      
+      // Erzwinge DOM-Update für clickLayer
+      if (layerToHighlight._path) {
+        layerToHighlight._path.style.stroke = "#ff0000";
+        layerToHighlight._path.style.strokeWidth = "6px";
+        layerToHighlight._path.style.opacity = "1";
+        layerToHighlight._path.style.strokeDasharray = "";
+      }
+      // WICHTIG: Highlighte NICHT den Main Layer!
     } else {
       // Layer hat keinen Click-Layer, highlighte Main Layer
       // Standard-Highlighting für Layer ohne Click-Layer (drawn items)
@@ -4024,17 +4121,14 @@ function highlightPipeline(layer) {
         opacity: 1,
         dashArray: null 
       });
-    }
-    
-    // Highlighting angewendet
-    
-    // Erzwinge DOM-Update
-    if (layerToHighlight._path) {
-      // Setze _path Stil direkt
-      layerToHighlight._path.style.stroke = "#ff0000";
-      layerToHighlight._path.style.strokeWidth = "6px";
-      layerToHighlight._path.style.opacity = "1";
-      layerToHighlight._path.style.strokeDasharray = "";
+      
+      // Erzwinge DOM-Update für main layer
+      if (layerToHighlight._path) {
+        layerToHighlight._path.style.stroke = "#ff0000";
+        layerToHighlight._path.style.strokeWidth = "6px";
+        layerToHighlight._path.style.opacity = "1";
+        layerToHighlight._path.style.strokeDasharray = "";
+      }
     }
     
   } else {
@@ -4051,7 +4145,7 @@ function resetPipelineStyle(layer) {
     
     // Wenn der Layer einen Click-Layer hat, verstecke den Click-Layer wieder
     if (layer._clickLayer) {
-      console.log('Layer hat Click-Layer, verstecke Click-Layer');
+      console.log('Layer hat Click-Layer, verstecke NUR Click-Layer');
       const clickLayerToReset = layer._clickLayer.getLayers()[0];
       
       // Mache den Click-Layer wieder unsichtbar
@@ -4068,6 +4162,10 @@ function resetPipelineStyle(layer) {
         clickLayerToReset._path.style.strokeWidth = "12px";
         clickLayerToReset._path.style.opacity = "0";
       }
+      
+      // WICHTIG: Main Layer wird NICHT zurückgesetzt, weil er nie gehighlighted wurde!
+      // Der Main Layer behält seinen ursprünglichen Stil
+      
     } else {
       // Layer hat keinen Click-Layer, setze normalen Main Layer Style
       // Standard-Reset für Layer ohne Click-Layer (drawn items)
@@ -4078,9 +4176,22 @@ function resetPipelineStyle(layer) {
         isShortPipe = true;
       }
       
-      // Set color based on whether it's a Short-Pipe or normal pipeline
-      const pipelineColor = isShortPipe ? "#ff8800" : "#0070f3";
-      const pipelineWeight = isShortPipe ? 4 : 3;
+      // Get original color from stored values or fallback
+      let pipelineColor = "#0070f3"; // fallback
+      let pipelineWeight = 3; // fallback
+      
+      if (isShortPipe) {
+        pipelineColor = "#ff8800";
+        pipelineWeight = 4;
+      } else {
+        // Use the stored original style (set during loading)
+        if (layer._originalColor) {
+          pipelineColor = layer._originalColor;
+        }
+        if (layer._originalWeight) {
+          pipelineWeight = layer._originalWeight;
+        }
+      }
       
       layer.setStyle({ 
         color: pipelineColor, 
@@ -4876,99 +4987,7 @@ function deleteAttributeFromAllElements(elementType, attributeName) {
   }
 }
 
-// Im Info-Modus: Beim Klick auf ein Feature Overlay öffnen
-function setPipelineInteraction(layer) {
-  console.log('=== setPipelineInteraction called for layer:', layer);
-  layer.off('click');
-  layer.unbindPopup(); // Popup IMMER entfernen
-
-  if (currentMode === 'info') {
-    console.log('Info mode active, setting up popup');
-    // Popup wieder binden
-    if (layer.feature && layer.feature.properties) {
-      const content = createPopupContent(layer.feature.properties, layer);
-      layer.bindPopup(content, { maxWidth: 600 });
-    }
-    layer.on('click', function () {
-      // Highlighte die angeklickte Pipeline
-      highlightPipeline(layer);
-      
-      // Popup immer erst JETZT mit aktuellen Properties binden!
-      const content = createPopupContent(layer.feature.properties, layer);
-      layer.bindPopup(content, { maxWidth: 600 });
-      layer.openPopup();
-      
-      // Store current layer for Add Attribute functionality
-      currentPopupLayer = layer;
-      
-      setTimeout(() => {
-        const btn = document.getElementById('save-attr-btn');
-        if (btn) {
-          btn.onclick = function () {
-            // Alle Inputs auslesen und ins Properties-Objekt schreiben
-            const inputs = layer.getPopup().getElement().querySelectorAll('input[data-key]');
-            let changed = false;
-            inputs.forEach(input => {
-              const key = input.getAttribute('data-key');
-              if (layer.feature.properties[key] !== input.value) changed = true;
-              layer.feature.properties[key] = input.value;
-            });
-            // Als bearbeitet markieren, wenn etwas geändert wurde
-            if (changed) layer.feature.properties.modified = true;
-            layer.closePopup();
-            
-            // Pipeline-Highlight zurücksetzen wenn Popup geschlossen wird
-            resetPipelineStyle(layer);
-            activePipeline = null;
-          };
-        }
-        
-        // Add Attribute Button Event Listener
-        const addAttrBtn = document.getElementById('add-attribute-btn');
-        if (addAttrBtn) {
-          addAttrBtn.onclick = function () {
-            console.log('Add Attribute clicked for layer:', currentPopupLayer);
-            if (currentPopupLayer) {
-              currentPopupLayer.closePopup();
-              showAddAttributeDialog(currentPopupLayer);
-            }
-          };
-        }
-        
-        // Delete Attribute Button Event Listener
-        const deleteAttrBtn = document.getElementById('delete-attribute-btn');
-        if (deleteAttrBtn) {
-          deleteAttrBtn.onclick = function () {
-            console.log('Delete Attribute clicked for layer:', currentPopupLayer);
-            if (currentPopupLayer) {
-              currentPopupLayer.closePopup();
-              showDeleteAttributeDialog(currentPopupLayer);
-            }
-          };
-        }
-      }, 100);
-    });
-  } else if (currentMode === 'edit') {
-    layer.on('click', function () {
-      // Nur einen Layer gleichzeitig bearbeiten
-      if (window.editingLayer && window.editingLayer !== layer) {
-        window.editingLayer.editing.disable();
-        const btn = document.getElementById('save-edit-btn');
-        if (btn) btn.remove();
-      }
-      window.editingLayer = layer;
-      if (layer.editing) {
-        layer.editing.enable();
-        showSaveButton(layer);
-        showDiscardButton(layer);
-      }
-    });
-    layer.closePopup();
-  } else if (currentMode === 'delete') {
-    // Delete mode handlers are set by activateDeleteMode() function
-    // This section is left empty to allow activateDeleteMode to control all delete interactions
-  }
-}
+// OLD setPipelineInteraction REMOVED - using the correct one at line ~2850
 
 // Hilfsfunktion: Hole die Attributnamen einer bestehenden Pipeline
 function getDefaultPipelineAttributes() {
@@ -5494,16 +5513,69 @@ function checkAndDeleteOrphanedNodes(nodeIds) {
 }
 
 // Hilfsfunktion zum Erstellen eines neuen Nodes
+function findSampleNodeMarker() {
+  let sample = null;
+  const layerGroup = resolveNodeLayer();
+  if (!layerGroup || typeof layerGroup.eachLayer !== 'function') {
+    return sample;
+  }
+
+  const traverse = (layer) => {
+    if (sample || !layer) {
+      return;
+    }
+    const isGroup = layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON;
+    if (isGroup && typeof layer.eachLayer === 'function') {
+      layer.eachLayer(child => traverse(child));
+      return;
+    }
+    if (layer instanceof L.CircleMarker || (layer.feature && layer.feature.geometry && layer.feature.geometry.type === 'Point')) {
+      sample = layer;
+    }
+  };
+
+  layerGroup.eachLayer(layer => traverse(layer));
+  return sample;
+}
+
+function getDefaultNodeStyleOptions() {
+  const fallback = { pane: 'nodePane', radius: 6, fillColor: '#ff7800', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.85 };
+  const sample = findSampleNodeMarker();
+
+  if (sample && sample.options) {
+    return {
+      pane: sample.options.pane || fallback.pane,
+      radius: sample.options.radius ?? fallback.radius,
+      fillColor: sample.options.fillColor || fallback.fillColor,
+      color: sample.options.color || fallback.color,
+      weight: sample.options.weight ?? fallback.weight,
+      opacity: sample.options.opacity ?? fallback.opacity,
+      fillOpacity: sample.options.fillOpacity ?? fallback.fillOpacity
+    };
+  }
+
+  if (Array.isArray(layerConfig)) {
+    const nodeConfig = layerConfig.find(cfg => (cfg.filename || '').toLowerCase().includes('node'));
+    if (nodeConfig) {
+      return {
+        pane: 'nodePane',
+        radius: nodeConfig.size || fallback.radius,
+        fillColor: nodeConfig.color || fallback.fillColor,
+        color: fallback.color,
+        weight: fallback.weight,
+        opacity: fallback.opacity,
+        fillOpacity: fallback.fillOpacity
+      };
+    }
+  }
+
+  return { ...fallback };
+}
+
 function createNewNode(latlng, nodeId) {
-  // Create a single visible CircleMarker (matching existing node style)
-  const nodeMarker = L.circleMarker(latlng, {
-    radius: 6,
-    fillColor: "#ff7800",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8
-  });
+  const nodeStyle = getDefaultNodeStyleOptions();
+  const nodeMarker = L.circleMarker(latlng, nodeStyle);
+  captureOriginalMarkerStyle(nodeMarker, 'default');
   
   const defaultAttrs = getDefaultPointAttributes('Node');
   const properties = { ...defaultAttrs, Type: 'Node', ID: nodeId, modified: true };
@@ -5556,6 +5628,12 @@ function createNewNode(latlng, nodeId) {
   
   nodeMarker.on('click', clickHandler);
   
+  const targetLayer = resolveNodeLayer({ createIfMissing: true });
+  if (targetLayer && typeof targetLayer.addLayer === 'function') {
+    targetLayer.addLayer(nodeMarker);
+  } else {
+    nodeMarker.addTo(map);
+  }
   console.log('Neuer Node erstellt:', nodeId);
   return nodeMarker;
 }
@@ -5565,6 +5643,103 @@ function activateManualInfrastructurePlacement() {
   // Cursor ändern
   map.getContainer().style.cursor = 'crosshair';
 
+  const showLayerSelection = (latlng) => {
+    const pointLayerOptions = buildPointLayerOptions();
+
+    if (!pointLayerOptions.length) {
+      showCustomPopup(
+        '⚠️ No Point Layers',
+        '<p style="text-align: center; margin: 15px 0;">No point-based layers are available. Please load or create a point layer first.</p>',
+        [{ text: 'OK', type: 'primary', keepOpen: false, onClick: () => { currentMode = 'info'; activateInfoMode(); } }]
+      );
+      return;
+    }
+
+    const selectId = 'infrastructure-layer-select';
+    const optionsHtml = pointLayerOptions.map(option => `<option value="${option.id}">${option.label}</option>`).join('');
+    const selectionContent = `
+      <p style="text-align: center; margin: 15px 0;">Choose the layer that should receive the new infrastructure point.</p>
+      <label for="${selectId}" style="display:block; font-weight:600; margin-bottom:6px;">Target Layer</label>
+      <select id="${selectId}" style="width: 100%; padding: 12px; border: 1px solid #d0d5dd; border-radius: 6px; background: #f8fafc; font-size: 14px;">
+        ${optionsHtml}
+      </select>
+    `;
+
+    showCustomPopup(
+      '🏗️ Select Target Layer',
+      selectionContent,
+      [
+        {
+          text: 'Next',
+          type: 'primary',
+          keepOpen: true,
+          onClick: () => {
+            const selectEl = document.getElementById(selectId);
+            const selectedId = selectEl ? selectEl.value : null;
+            const selectedOption = pointLayerOptions.find(opt => opt.id === selectedId);
+            if (!selectedOption) {
+              alert('Please select a layer');
+              return;
+            }
+            showIdDialog(latlng, selectedOption);
+          }
+        },
+        {
+          text: 'Cancel',
+          type: 'secondary',
+          keepOpen: false,
+          onClick: () => {
+            currentMode = 'info';
+            activateInfoMode();
+          }
+        }
+      ]
+    );
+  };
+
+  const showIdDialog = (latlng, layerOption) => {
+    const defaultAttrs = getDefaultAttributesForLayerOption(layerOption);
+    const autoId = generateInfrastructureAutoId(layerOption);
+    const content = `
+      <p style="text-align: center; margin: 15px 0;">Provide an ID for the new element in <strong>${layerOption.label}</strong>.</p>
+      <label for="infrastructure-id-input" style="display:block; font-weight:600; margin-bottom:6px;">Element ID</label>
+      <input type="text" id="infrastructure-id-input" value="${autoId}" style="width: 100%; padding: 12px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 14px;" />
+    `;
+
+    showCustomPopup(
+      '🆔 Configure Element',
+      content,
+      [
+        {
+          text: 'Create',
+          type: 'primary',
+          keepOpen: false,
+          onClick: () => {
+            const input = document.getElementById('infrastructure-id-input');
+            const userId = input ? input.value.trim() : '';
+            if (!userId) {
+              showCustomPopup(
+                '❌ Error',
+                '<p style="text-align: center; margin: 15px 0;">ID is required!</p>',
+                [{ text: 'OK', type: 'primary', keepOpen: false, onClick: () => {} }]
+              );
+              return;
+            }
+            createInfrastructurePoint(userId, layerOption, latlng, defaultAttrs);
+          }
+        },
+        {
+          text: 'Back',
+          type: 'secondary',
+          keepOpen: false,
+          onClick: () => {
+            showLayerSelection(latlng);
+          }
+        }
+      ]
+    );
+  };
+
   // Einmaliger Map-Click-Handler
   map.once('click', function(e) {
     const latlng = e.latlng;
@@ -5572,131 +5747,13 @@ function activateManualInfrastructurePlacement() {
     // Cursor zurücksetzen
     map.getContainer().style.cursor = '';
     
-    // Collect all point infrastructure layers (excluding Compressors)
-    const pointLayers = [
-      {name: 'Node', layer: nodeLayer},
-      {name: 'LNG Terminal', layer: lngLayer},
-      {name: 'Storage', layer: storageLayer},
-      {name: 'Power plant', layer: powerplantsLayer}
-    ];
-    
-    // Add custom point layers
-    if (window.customLayers) {
-      Object.entries(window.customLayers).forEach(([name, layer]) => {
-        // Check if it's a point layer by checking first feature
-        let isPointLayer = false;
-        layer.eachLayer(l => {
-          if (l.feature && l.feature.geometry && l.feature.geometry.type === 'Point') {
-            isPointLayer = true;
-          }
-        });
-        if (isPointLayer || layer.getLayers().length === 0) { // Include empty layers
-          pointLayers.push({name: name, layer: layer});
-        }
-      });
-    }
-    
-    let selectedType = null;
-    
-    // Build options HTML
-    const optionsHtml = pointLayers.map(pl => 
-      `<option value="${pl.name}">${pl.name}</option>`
-    ).join('');
-    
-    // Popup HTML erstellen
-    const popupDiv = document.createElement('div');
-    popupDiv.style.cssText = 'background: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);';
-    popupDiv.innerHTML = `
-      <h4 style="margin-top: 0;">Select Infrastructure Type</h4>
-      <select id="type-selector" style="width: 100%; padding: 5px; margin-bottom: 10px;">
-        ${optionsHtml}
-      </select>
-      <button id="type-confirm-btn" style="width: 100%; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">Confirm</button>
-      <button id="type-cancel-btn" style="width: 100%; padding: 8px; margin-top: 5px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">Cancel</button>
-    `;
-    
-    // Popup an der geklickten Position anzeigen
-    const popup = L.popup({ closeButton: false, autoClose: false, closeOnClick: false })
-      .setLatLng(latlng)
-      .setContent(popupDiv)
-      .openOn(map);
-    
-    // Event Handler für Confirm Button
-    document.getElementById('type-confirm-btn').onclick = function() {
-      selectedType = document.getElementById('type-selector').value;
-      map.closePopup(popup);
-
-      // Standard-Attribute holen
-      const defaultAttrs = getDefaultPointAttributes(selectedType);
-
-      // Stil basierend auf Typ
-      let markerStyle = {};
-      switch (selectedType) {
-        case 'Node':
-          markerStyle = { radius: 2, fillColor: "#f03", color: "#900", weight: 1, opacity: 1, fillOpacity: 0.7 };
-          break;
-        case 'LNG Terminal':
-          markerStyle = { radius: 6, fillColor: "#099", color: "#099", weight: 1, opacity: 1, fillOpacity: 0.7 };
-          break;
-        case 'Storage':
-          markerStyle = { radius: 6, fillColor: "#990", color: "#990", weight: 1, opacity: 1, fillOpacity: 0.7 };
-          break;
-        case 'Power plant':
-          markerStyle = { radius: 6, fillColor: "#090", color: "#090", weight: 1, opacity: 1, fillOpacity: 0.7 };
-          break;
-      }
-
-      // ID eingeben
-      const autoId = `${contributorInitials}_${facilityTypeMap[selectedType]}_${getNextIdNumber(selectedType)}`;
-      showCustomPopup(
-        '🆔 Enter Infrastructure ID',
-        '<p style="text-align: center; margin: 15px 0;">Enter an ID for the ' + selectedType + ':</p><input type="text" id="infrastructure-id-input" value="' + autoId + '" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-top: 10px; font-size: 14px; box-sizing: border-box;">',
-        [
-          {
-            text: 'Create',
-            type: 'primary',
-            keepOpen: false,
-            onClick: () => {
-              const userId = document.getElementById('infrastructure-id-input').value.trim();
-              if (!userId) {
-                showCustomPopup(
-                  '❌ Error',
-                  '<p style="text-align: center; margin: 15px 0;">ID is required!</p>',
-                  [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
-                );
-                return;
-              }
-
-              // Fortfahren mit der Erstellung
-              createInfrastructurePoint(userId, selectedType, latlng, defaultAttrs, markerStyle);
-            }
-          },
-          {
-            text: 'Cancel',
-            type: 'secondary',
-            keepOpen: false,
-            onClick: () => {}
-          }
-        ]
-      );
-    };
-      
-      // Info Mode Button markieren
-      const infoBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Info Mode');
-      if (infoBtn) setActiveBtn(infoBtn);
-      
-      // Update statistics after adding infrastructure
-      updateStatistics();
-      
-    // Event Handler für Cancel Button
-    document.getElementById('type-cancel-btn').onclick = function() {
-      map.closePopup(popup);
-    };
+    showLayerSelection(latlng);
   });
 }
 
 // Funktion zum Erstellen des Infrastructure Points
-function createInfrastructurePoint(userId, selectedType, latlng, defaultAttrs, markerStyle) {
+function createInfrastructurePoint(userId, layerOption, latlng, defaultAttrs) {
+  const selectedType = layerOption?.typeKey || layerOption?.label || 'Custom Element';
   // Properties setzen
   const properties = { ...defaultAttrs, Type: selectedType, ID: userId, modified: true };
   
@@ -5718,7 +5775,9 @@ function createInfrastructurePoint(userId, selectedType, latlng, defaultAttrs, m
     marker.isNew = true;
   } else {
     // For other infrastructure, create a simple CircleMarker
-    marker = L.circleMarker(latlng, markerStyle);
+    const style = layerOption?.style ? { ...layerOption.style, pane: layerOption.style.pane || 'nodePane' } : derivePointLayerStyle(layerOption?.layer);
+    marker = L.circleMarker(latlng, style);
+    captureOriginalMarkerStyle(marker, 'default');
     marker.feature = {
       type: "Feature",
       properties: properties,
@@ -5727,31 +5786,19 @@ function createInfrastructurePoint(userId, selectedType, latlng, defaultAttrs, m
     marker.isNew = true;
   }
   
-  // Zum richtigen Layer hinzufügen (check standard layers first, then custom)
-  let added = false;
-  switch (selectedType) {
-    case 'Node': 
-      if (nodeLayer) { nodeLayer.addLayer(marker); added = true; }
-      break;
-    case 'LNG Terminal': 
-      if (lngLayer) { lngLayer.addLayer(marker); added = true; }
-      break;
-    case 'Storage': 
-      if (storageLayer) { storageLayer.addLayer(marker); added = true; }
-      break;
-    case 'Power plant': 
-      if (powerplantsLayer) { powerplantsLayer.addLayer(marker); added = true; }
-      break;
-  }
-  
-  // If not added to standard layer, check custom layers
-  if (!added && window.customLayers && window.customLayers[selectedType]) {
-    window.customLayers[selectedType].addLayer(marker);
+  if (selectedType !== 'Node') {
+    const targetLayer = layerOption?.layer;
+    if (targetLayer && typeof targetLayer.addLayer === 'function') {
+      targetLayer.addLayer(marker);
+    } else {
+      marker.addTo(map);
+    }
   }
   
   // Info Mode aktivieren
   currentMode = 'info';
   activateInfoMode();
+  updateStatistics();
   
   console.log('Infrastructure point created:', selectedType, userId);
 }
@@ -5765,9 +5812,31 @@ const facilityTypeMap = {
   "LNG Terminal": "L"
 };
 
+function generatePrefixFromName(name) {
+  if (!name) return 'X';
+  const cleaned = name.replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
+  if (!cleaned) return 'X';
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return 'X';
+  let prefix = words.map(word => word.charAt(0).toUpperCase()).join('');
+  if (prefix.length < 2) {
+    prefix = cleaned.replace(/\s+/g, '').substring(0, 3).toUpperCase();
+  }
+  return prefix || 'X';
+}
+
+function getFacilityPrefix(type) {
+  if (!facilityTypeMap[type]) {
+    facilityTypeMap[type] = generatePrefixFromName(type);
+  }
+  return facilityTypeMap[type];
+}
+
 // Hilfsfunktion: nächste freie Nummer für diesen Typ finden
-function getNextIdNumber(type) {
+function getNextIdNumber(type, layerOverride = null) {
   const existingNumbers = new Set();
+  const typePrefix = getFacilityPrefix(type);
+  const regex = new RegExp(`^${contributorInitials}_${typePrefix}_(\\d+)$`);
 
   // Funktion zum Sammeln von IDs aus einem Layer
   const collectIdsFromLayer = (layer) => {
@@ -5775,7 +5844,6 @@ function getNextIdNumber(type) {
       layer.eachLayer(subLayer => {
         if (subLayer.feature && subLayer.feature.properties && subLayer.feature.properties.ID) {
           const id = subLayer.feature.properties.ID;
-          const regex = new RegExp(`^${contributorInitials}_${facilityTypeMap[type]}_(\\d+)$`);
           const match = id.match(regex);
           if (match) {
             existingNumbers.add(parseInt(match[1]));
@@ -5785,7 +5853,6 @@ function getNextIdNumber(type) {
           subLayer.eachLayer(grandSubLayer => {
             if (grandSubLayer.feature && grandSubLayer.feature.properties && grandSubLayer.feature.properties.ID) {
               const id = grandSubLayer.feature.properties.ID;
-              const regex = new RegExp(`^${contributorInitials}_${facilityTypeMap[type]}_(\\d+)$`);
               const match = id.match(regex);
               if (match) {
                 existingNumbers.add(parseInt(match[1]));
@@ -5800,23 +5867,27 @@ function getNextIdNumber(type) {
   // Sammle IDs aus drawnItems
   collectIdsFromLayer(drawnItems);
 
-  // Sammle IDs aus den entsprechenden ursprünglichen Layern
-  switch(type) {
-    case 'Storage':
-      collectIdsFromLayer(storageLayer);
-      break;
-    case 'LNG Terminal':
-      collectIdsFromLayer(lngLayer);
-      break;
-    case 'Power plant':
-      collectIdsFromLayer(powerplantsLayer);
-      break;
-    case 'Node':
-      collectIdsFromLayer(nodeLayer);
-      break;
-    case 'Pipeline':
-      collectIdsFromLayer(pipelineLayer);
-      break;
+  if (layerOverride) {
+    collectIdsFromLayer(layerOverride);
+  } else {
+    // Sammle IDs aus den entsprechenden ursprünglichen Layern
+    switch(type) {
+      case 'Storage':
+        collectIdsFromLayer(storageLayer);
+        break;
+      case 'LNG Terminal':
+        collectIdsFromLayer(lngLayer);
+        break;
+      case 'Power plant':
+        collectIdsFromLayer(powerplantsLayer);
+        break;
+      case 'Node':
+        collectIdsFromLayer(nodeLayer);
+        break;
+      case 'Pipeline':
+        collectIdsFromLayer(pipelineLayer);
+        break;
+    }
   }
 
   // Finde die niedrigste verfügbare Nummer (beginnend bei 1)
@@ -5826,6 +5897,175 @@ function getNextIdNumber(type) {
   }
 
   return nextNum;
+}
+
+function layerHasPointGeometry(layer) {
+  let hasPoint = false;
+  if (!layer || typeof layer.eachLayer !== 'function') {
+    return false;
+  }
+
+  const inspect = candidate => {
+    if (!candidate || hasPoint) return;
+    if (candidate instanceof L.LayerGroup || candidate instanceof L.FeatureGroup || candidate instanceof L.GeoJSON) {
+      candidate.eachLayer(child => inspect(child));
+      return;
+    }
+    if (candidate.feature && candidate.feature.geometry && candidate.feature.geometry.type === 'Point') {
+      hasPoint = true;
+    }
+  };
+
+  layer.eachLayer(inspect);
+  return hasPoint;
+}
+
+function derivePointLayerStyle(layer, fallbackColor = '#3388ff', fallbackSize = 6) {
+  const defaultStyle = {
+    pane: 'nodePane',
+    radius: fallbackSize,
+    fillColor: fallbackColor,
+    color: '#000',
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.85
+  };
+
+  if (!layer || typeof layer.eachLayer !== 'function') {
+    return { ...defaultStyle };
+  }
+
+  let sample = null;
+  layer.eachLayer(candidate => {
+    if (sample || !candidate || !candidate.options) return;
+    if (candidate instanceof L.CircleMarker) {
+      sample = candidate;
+      return;
+    }
+    if (candidate.eachLayer) {
+      candidate.eachLayer(inner => {
+        if (!sample && inner instanceof L.CircleMarker) sample = inner;
+      });
+    }
+  });
+
+  if (sample && sample.options) {
+    return {
+      pane: sample.options.pane || 'nodePane',
+      radius: sample.options.radius ?? fallbackSize,
+      fillColor: sample.options.fillColor || fallbackColor,
+      color: sample.options.color || '#000',
+      weight: sample.options.weight ?? 1,
+      opacity: sample.options.opacity ?? 1,
+      fillOpacity: sample.options.fillOpacity ?? 0.85
+    };
+  }
+
+  return { ...defaultStyle };
+}
+
+function inferTypeKeyFromConfig(config) {
+  const filename = (config.filename || '').toLowerCase();
+  if (filename.includes('node')) return 'Node';
+  if (filename.includes('lng')) return 'LNG Terminal';
+  if (filename.includes('storage')) return 'Storage';
+  if (filename.includes('power')) return 'Power plant';
+  if (filename.includes('compressor')) return 'Compressor';
+  if (filename.includes('demand')) return 'Demand';
+  if (filename.includes('production')) return 'Production';
+  if (filename.includes('border')) return 'Border Point';
+  return config.legendName || config.filename?.replace('.geojson', '') || 'Custom Layer';
+}
+
+function buildPointLayerOptions() {
+  const options = [];
+  const seen = new Set();
+
+  const addOption = (option) => {
+    if (!option || !option.layer) return;
+    option.id = option.id || `${option.label}-${options.length}`;
+    const key = `${option.layer._leaflet_id || option.id}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    option.style = option.style || derivePointLayerStyle(option.layer, option.color, option.size);
+    option.typeKey = option.typeKey || option.label;
+    options.push(option);
+  };
+
+  const nodeLayerRef = resolveNodeLayer({ createIfMissing: true });
+  if (nodeLayerRef) {
+    addOption({
+      id: 'core:nodes',
+      label: 'Nodes',
+      layer: nodeLayerRef,
+      typeKey: 'Node',
+      color: '#ff7800',
+      style: getDefaultNodeStyleOptions()
+    });
+  }
+  if (lngLayer) addOption({ id: 'core:lng', label: 'LNG Terminals', layer: lngLayer, typeKey: 'LNG Terminal', color: '#00CED1' });
+  if (storageLayer) addOption({ id: 'core:storage', label: 'Storages', layer: storageLayer, typeKey: 'Storage', color: '#9370DB' });
+  if (powerplantsLayer) addOption({ id: 'core:powerplants', label: 'Power Plants', layer: powerplantsLayer, typeKey: 'Power plant', color: '#8B4513' });
+  if (compressorsLayer) addOption({ id: 'core:compressors', label: 'Compressors', layer: compressorsLayer, typeKey: 'Compressor', color: '#FF6347' });
+
+  if (Array.isArray(layerConfig)) {
+    layerConfig.forEach(config => {
+      if (!config || config.type === 'Line') return;
+      const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      const targetLayer = dynamicLayers[layerName];
+      if (!targetLayer) return;
+      if (!layerHasPointGeometry(targetLayer)) {
+        const isEmpty = typeof targetLayer.getLayers === 'function' && targetLayer.getLayers().length === 0;
+        if (!isEmpty) return;
+      }
+      addOption({
+        id: `config:${layerName}`,
+        label: config.legendName || config.filename.replace('.geojson', ''),
+        layer: targetLayer,
+        typeKey: inferTypeKeyFromConfig(config),
+        color: config.color,
+        size: config.size
+      });
+    });
+  }
+
+  if (window.customLayers) {
+    Object.entries(window.customLayers).forEach(([name, layer]) => {
+      if (!layer) return;
+      const hasPoints = layerHasPointGeometry(layer);
+      const isEmpty = typeof layer.getLayers === 'function' && layer.getLayers().length === 0;
+      if (hasPoints || isEmpty) {
+        addOption({ id: `custom:${name}`, label: name, layer: layer, typeKey: name });
+      }
+    });
+  }
+
+  return options;
+}
+
+function getDefaultAttributesForLayerOption(option) {
+  if (!option) return {};
+  const attrs = {};
+  if (option.layer && typeof option.layer.eachLayer === 'function') {
+    option.layer.eachLayer(layer => {
+      if (layer.feature && layer.feature.properties) {
+        Object.keys(layer.feature.properties).forEach(key => {
+          if (key !== 'modified') attrs[key] = '';
+        });
+      }
+    });
+  }
+  if (Object.keys(attrs).length === 0) {
+    Object.assign(attrs, getDefaultPointAttributes(option.typeKey));
+  }
+  return attrs;
+}
+
+function generateInfrastructureAutoId(option) {
+  const typeKey = option?.typeKey || option?.label || 'Custom';
+  const prefix = getFacilityPrefix(typeKey);
+  const nextNumber = getNextIdNumber(typeKey, option?.layer);
+  return `${contributorInitials}_${prefix}_${nextNumber}`;
 }
 
 shortPipeLayer = L.featureGroup().addTo(map);
@@ -6257,6 +6497,7 @@ function splitNode(nodeLayerObj) {
       opacity: 1,
       fillOpacity: 0.7
     });
+    captureOriginalMarkerStyle(marker, 'default');
     marker.feature = {
       type: "Feature",
       properties: newProps,
@@ -6684,6 +6925,120 @@ function getAvailablePipelineLayers() {
   return layers;
 }
 
+function detectExistingNodeLayer() {
+  if (!dynamicLayers) {
+    return null;
+  }
+  for (const [name, layer] of Object.entries(dynamicLayers)) {
+    if (!layer) continue;
+    const nameMatches = name && name.toLowerCase().includes('node');
+    let featureMatches = false;
+    if (!nameMatches && typeof layer.eachLayer === 'function') {
+      layer.eachLayer(child => {
+        if (featureMatches || !child || !child.feature || !child.feature.properties) {
+          return;
+        }
+        const props = child.feature.properties;
+        if ((props.Type && props.Type.toLowerCase() === 'node') || /node/i.test(props.ID || props.Name || '')) {
+          featureMatches = true;
+        }
+      });
+    }
+    if (nameMatches || featureMatches) {
+      return layer;
+    }
+  }
+  return null;
+}
+
+function resolveNodeLayer(options = {}) {
+  const { createIfMissing = false } = options;
+  if (nodeLayer) {
+    return nodeLayer;
+  }
+  if (originalNodeLayer) {
+    nodeLayer = originalNodeLayer;
+    return nodeLayer;
+  }
+  const detected = detectExistingNodeLayer();
+  if (detected) {
+    nodeLayer = detected;
+    if (!originalNodeLayer) {
+      originalNodeLayer = detected;
+    }
+    return nodeLayer;
+  }
+  if (createIfMissing && map) {
+    nodeLayer = L.layerGroup().addTo(map);
+    if (!originalNodeLayer) {
+      originalNodeLayer = nodeLayer;
+    }
+    return nodeLayer;
+  }
+  return null;
+}
+
+function forEachNodeMarker(callback) {
+  if (typeof callback !== 'function') {
+    return;
+  }
+  const layerGroup = resolveNodeLayer();
+  if (!layerGroup) {
+    return;
+  }
+
+  const traverse = (layer) => {
+    if (!layer) {
+      return;
+    }
+
+    const isGroup = layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON;
+    if (isGroup && typeof layer.eachLayer === 'function') {
+      layer.eachLayer(child => traverse(child));
+      return;
+    }
+
+    if (layer.feature && layer.feature.geometry && layer.feature.geometry.type === 'Point') {
+      callback(layer);
+    }
+  };
+
+  traverse(layerGroup);
+}
+
+function setNodeSelectionHandlers(handler) {
+  if (typeof handler !== 'function') {
+    return;
+  }
+
+  forEachNodeMarker(marker => {
+    marker.off('click');
+    marker.on('click', function(e) {
+      if (e) {
+        L.DomEvent.stopPropagation(e);
+      }
+      handler(marker, e);
+    });
+  });
+}
+
+function clearNodeSelectionHandlers() {
+  forEachNodeMarker(marker => marker.off('click'));
+}
+
+function getNodeLatLng(layer) {
+  if (!layer) {
+    return null;
+  }
+  if (typeof layer.getLatLng === 'function') {
+    return layer.getLatLng();
+  }
+  if (typeof layer.getBounds === 'function') {
+    return layer.getBounds().getCenter();
+  }
+  return null;
+}
+
 function proceedWithAddPipeline() {
   console.log('proceedWithAddPipeline called');
   currentMode = 'add-pipeline'; // Sicherstellen, dass der Modus richtig gesetzt ist
@@ -6746,11 +7101,7 @@ function proceedWithAddPipeline() {
       
       if (hasEndNode) {
         const removeEndNodeSelectionHandlers = () => {
-          if (nodeLayer) {
-            nodeLayer.eachLayer(lg => {
-              lg.eachLayer(m => m.off('click'));
-            });
-          }
+          clearNodeSelectionHandlers();
         };
 
         showCustomPopup(
@@ -6777,45 +7128,33 @@ function proceedWithAddPipeline() {
 
         // Event-Handler für End-Node-Auswahl direkt aktivieren
         currentMode = 'select-end-node';
-        if (nodeLayer) {
-          nodeLayer.eachLayer(marker => {
-            marker.off('click');
-            marker.on('click', function(e) {
-              L.DomEvent.stopPropagation(e);
-              endNodeId = marker.feature.properties.ID;
-              endLatLng = marker.getLatLng();
-              console.log('End node selected:', endNodeId);
+        setNodeSelectionHandlers(marker => {
+          endNodeId = marker.feature.properties.ID;
+          endLatLng = getNodeLatLng(marker);
+          console.log('End node selected:', endNodeId);
 
-              // Event-Handler entfernen
-              removeEndNodeSelectionHandlers();
+          removeEndNodeSelectionHandlers();
+          closeCustomPopup();
+
+          if (hasStartNode && startNodeId) {
+            createDirectPipeline();
+          } else {
+            currentMode = 'create-start-node';
+            showCustomPopup(
+              '🎯 Place Start Node',
+              '<p style="text-align: center; margin: 15px 0;">Click on the map to place the START node for the pipeline.</p>',
+              [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
+            );
+
+            map.once('click', function(e) {
+              startLatLng = e.latlng;
+              console.log('Start position set:', startLatLng);
               closeCustomPopup();
 
-              // Prüfen ob Start-Node bereits ausgewählt wurde
-              if (hasStartNode && startNodeId) {
-                // Start-Node ist bereits ausgewählt - Pipeline direkt erstellen
-                createDirectPipeline();
-              } else {
-                // Start-Node muss noch platziert werden
-                currentMode = 'create-start-node';
-                showCustomPopup(
-                  '🎯 Place Start Node',
-                  '<p style="text-align: center; margin: 15px 0;">Click on the map to place the START node for the pipeline.</p>',
-                  [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
-                );
-
-                map.once('click', function(e) {
-                  const latlng = e.latlng;
-                  startLatLng = latlng;
-                  console.log('Start position set:', startLatLng);
-                  closeCustomPopup();
-
-                  // Pipeline erstellen
-                  createDirectPipeline();
-                });
-              }
+              createDirectPipeline();
             });
-          });
-        }
+          }
+        });
       } else {
         // Kein End-Node - direkt mit Pipeline-Zeichnen starten
         closeCustomPopup();
@@ -6827,8 +7166,20 @@ function proceedWithAddPipeline() {
       
       function createDirectPipeline() {
         const latlngs = [startLatLng, endLatLng];
-        const polyline = L.polyline(latlngs, { color: '#0070f3', weight: 3 }).addTo(window.selectedPipelineLayer || drawnItems);
-        const pipelineId = `${contributorInitials}_${facilityTypeMap["Pipeline"]}_${getNextIdNumber("Pipeline")}`;
+        const pipelineStyle = getPipelineStyleOptions();
+        const polyline = L.polyline(latlngs, {
+          pane: 'pipelinePane',
+          color: pipelineStyle.color,
+          weight: pipelineStyle.weight,
+          opacity: pipelineStyle.opacity ?? 0.8
+        }).addTo(window.selectedPipelineLayer || drawnItems);
+        if (typeof polyline.bringToBack === 'function') {
+          polyline.bringToBack();
+        }
+        polyline._originalColor = pipelineStyle.color;
+        polyline._originalWeight = pipelineStyle.weight;
+        const pipelinePrefix = getFacilityPrefix("Pipeline");
+        const pipelineId = `${contributorInitials}_${pipelinePrefix}_${getNextIdNumber("Pipeline")}`;
         const defaultAttrs = getDefaultPipelineAttributes();
         const lengthKm = calculatePipelineLength(polyline);
         const properties = { ...defaultAttrs, ID: pipelineId, modified: true, Start_Node: startNodeId, End_Node: endNodeId, Length_km: lengthKm };
@@ -6847,7 +7198,8 @@ function proceedWithAddPipeline() {
         if (window.polylineDrawer) {
           window.polylineDrawer.disable();
         }
-        window.polylineDrawer = new L.Draw.Polyline(map, { shapeOptions: { color: '#0070f3', weight: 3 } });
+        const pipelineStyle = getPipelineStyleOptions();
+        window.polylineDrawer = new L.Draw.Polyline(map, { shapeOptions: { pane: 'pipelinePane', color: pipelineStyle.color, weight: pipelineStyle.weight } });
         currentMode = 'draw-pipeline'; // Modus für Pipeline-Zeichnen setzen
         
         if (hasStartNode && startLatLng) {
@@ -6890,35 +7242,34 @@ function proceedWithAddPipeline() {
             type: 'primary',
             keepOpen: false,
             onClick: () => {
-              currentMode = 'select-start-node';
-              
-              // Event-Handler für Node-Auswahl hinzufügen
-              if (nodeLayer) {
-                nodeLayer.eachLayer(marker => {
-                  marker.off('click');
-                  marker.on('click', function(e) {
-                    L.DomEvent.stopPropagation(e);
-                    startNodeId = marker.feature.properties.ID;
-                    startLatLng = marker.getLatLng();
-                    console.log('Start node selected:', startNodeId);
-                    
-                    // Event-Handler entfernen
-                    nodeLayer.eachLayer(m => {
-                      m.off('click');
-                    });
-                    
-                    // Zum nächsten Schritt
-                    askForEndNode();
-                  });
-                });
+              const availableNodeLayer = resolveNodeLayer();
+              if (!availableNodeLayer) {
+                alert('Node layer is not available yet. Please load nodes before selecting one.');
+                currentMode = 'info';
+                activateInfoMode();
+                return;
               }
+
+              currentMode = 'select-start-node';
+              setNodeSelectionHandlers(marker => {
+                startNodeId = marker.feature.properties.ID;
+                startLatLng = getNodeLatLng(marker);
+                console.log('Start node selected:', startNodeId);
+                
+                clearNodeSelectionHandlers();
+                askForEndNode();
+              });
             }
           },
           {
             text: 'Cancel',
             type: 'secondary',
             keepOpen: false,
-            onClick: () => {}
+            onClick: () => {
+              clearNodeSelectionHandlers();
+              currentMode = 'info';
+              activateInfoMode();
+            }
           }
         ]
       );
@@ -7008,6 +7359,62 @@ function startAddNewElement() {
   );
 }
 
+function findSamplePipelineLayer(layerGroup) {
+  let sample = null;
+  if (!layerGroup) {
+    return sample;
+  }
+
+  const traverse = (layer) => {
+    if (sample || !layer) {
+      return;
+    }
+    const isGroup = layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON;
+    if (isGroup && typeof layer.eachLayer === 'function') {
+      layer.eachLayer(child => traverse(child));
+      return;
+    }
+    if (layer instanceof L.Polyline) {
+      sample = layer;
+    }
+  };
+
+  if (typeof layerGroup.eachLayer === 'function') {
+    layerGroup.eachLayer(child => traverse(child));
+  } else if (layerGroup instanceof L.Polyline) {
+    sample = layerGroup;
+  }
+
+  return sample;
+}
+
+function getPipelineStyleOptions() {
+  const fallback = { color: '#3388ff', weight: 3, opacity: 0.8 };
+  const targetLayer = window.selectedPipelineLayer || pipelineLayer || drawnItems;
+  const sample = findSamplePipelineLayer(targetLayer);
+
+  if (sample && sample.options) {
+    return {
+      color: sample._originalColor || sample.options.color || fallback.color,
+      weight: sample._originalWeight || sample.options.weight || fallback.weight,
+      opacity: fallback.opacity
+    };
+  }
+
+  if (Array.isArray(layerConfig)) {
+    const pipelineConfig = layerConfig.find(cfg => cfg.type === 'Line' && (cfg.filename || '').toLowerCase().includes('pipeline'));
+    if (pipelineConfig) {
+      return {
+        color: pipelineConfig.color || fallback.color,
+        weight: pipelineConfig.size || fallback.weight,
+        opacity: fallback.opacity
+      };
+    }
+  }
+
+  return { ...fallback };
+}
+
 function finalizeDrawnPipeline(polyline) {
   const context = window.pipelineDrawContext;
   if (!context) return;
@@ -7031,8 +7438,7 @@ function finalizeDrawnPipeline(polyline) {
     console.log('Creating new start node');
     startLatLng = latlngs[0];
     startNodeIdLocal = `${contributorInitials}_N_${getNextIdNumber("Node")}`;
-    const startNodeGroup = createNewNode(startLatLng, startNodeIdLocal);
-    if (nodeLayer) nodeLayer.addLayer(startNodeGroup);
+    createNewNode(startLatLng, startNodeIdLocal);
   }
 
   // End-Node: Verwende ausgewählten, sonst neuen erstellen
@@ -7044,18 +7450,32 @@ function finalizeDrawnPipeline(polyline) {
     console.log('Creating new end node');
     const endLatLng = latlngs[latlngs.length - 1];
     endNodeIdLocal = `${contributorInitials}_N_${getNextIdNumber("Node")}`;
-    const endNodeGroup = createNewNode(endLatLng, endNodeIdLocal);
-    if (nodeLayer) nodeLayer.addLayer(endNodeGroup);
+    createNewNode(endLatLng, endNodeIdLocal);
   }
   
   // Pipeline-Eigenschaften setzen
-  const pipelineId = `${contributorInitials}_${facilityTypeMap["Pipeline"]}_${getNextIdNumber("Pipeline")}`;
+  const pipelinePrefix = getFacilityPrefix("Pipeline");
+  const pipelineId = `${contributorInitials}_${pipelinePrefix}_${getNextIdNumber("Pipeline")}`;
   const defaultAttrs = getDefaultPipelineAttributes();
   const lengthKm = calculatePipelineLength(polyline);
   console.log('Setting pipeline properties - Start_Node:', startNodeIdLocal, 'End_Node:', endNodeIdLocal);
   const properties = { ...defaultAttrs, ID: pipelineId, modified: true, Start_Node: startNodeIdLocal, End_Node: endNodeIdLocal, Length_km: lengthKm };
   polyline.feature = { type: "Feature", properties: properties, geometry: polyline.toGeoJSON().geometry };
   polyline.isNew = true;
+
+  polyline.options = polyline.options || {};
+  polyline.options.pane = 'pipelinePane';
+  const pipelineStyle = getPipelineStyleOptions();
+  polyline.setStyle({
+    color: pipelineStyle.color,
+    weight: pipelineStyle.weight,
+    opacity: pipelineStyle.opacity ?? 0.8
+  });
+  if (typeof polyline.bringToBack === 'function') {
+    polyline.bringToBack();
+  }
+  polyline._originalColor = pipelineStyle.color;
+  polyline._originalWeight = pipelineStyle.weight;
   
   setPipelineInteraction(polyline);
   currentMode = 'info';
@@ -7979,7 +8399,7 @@ function assignPipelinesToSubnodes(subnodes, origId) {
 function resetNodeClicks() {
   // Setze Info-Handler wieder
   if (!nodeLayer) return;
-  nodeLayer.eachLayer(layer => {
+  forEachNodeMarker(layer => {
     layer.off('click');
     layer.on('click', function () {
       openInfoOverlay(layer);
@@ -8360,45 +8780,26 @@ function updateLegendControl() {
   
   let legendContent = '';
   
-  // Check each layer and add to legend if loaded
-  if (pipelineLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-pipelines" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line"></div></span><span style="margin-left: 6px;">Pipelines</span></label><br>';
-  }
-  if (nodeLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-nodes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#f03;"></span></span><span style="margin-left: 6px;">Nodes</span></label><br>';
-  }
-  if (powerplantsLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-powerplants" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#090;"></span></span><span style="margin-left: 6px;">Power Plants</span></label><br>';
-  }
-  if (compressorsLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-compressors" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#009;"></span></span><span style="margin-left: 6px;">Compressors</span></label><br>';
-  }
-  if (lngLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-lng" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#099;"></span></span><span style="margin-left: 6px;">LNG Terminals</span></label><br>';
-  }
-  if (storageLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-storages" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#990;"></span></span><span style="margin-left: 6px;">Storage Sites</span></label><br>';
-  }
+  // Generate legend dynamically from layerConfig
+  layerConfig.forEach(config => {
+    const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    const layer = dynamicLayers[layerName];
+    
+    // Show legend entry even if layer not yet loaded (will be filled when loaded)
+    const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    if (config.type === 'Line') {
+      // Line layer
+      legendContent += `<label><input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line" style="background:${config.color};"></div></span><span style="margin-left: 6px;">${config.legendName}</span></label><br>`;
+    } else {
+      // Point or In-Line layer
+      legendContent += `<label><input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:${config.color};"></span></span><span style="margin-left: 6px;">${config.legendName}</span></label><br>`;
+    }
+  });
+  
+  // Add shortPipeLayer if exists (dynamically created layer)
   if (shortPipeLayer) {
     legendContent += '<label><input type="checkbox" id="toggle-shortpipes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><span class="legend-line" style="background:#ff8800; border-radius:2px; border:1px dashed #ff8800;"></span></span><span style="margin-left: 6px;">Short-Pipes</span></label><br>';
-  }
-  if (consumptionLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-consumption" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#ff8800;"></span></span><span style="margin-left: 6px;">Consumption</span></label><br>';
-  }
-  if (borderpointsLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-borderpoints" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#800080;"></span></span><span style="margin-left: 6px;">Border Points</span></label><br>';
-  }
-  if (demandsLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-demands" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#ff0000;"></span></span><span style="margin-left: 6px;">Demands</span></label><br>';
-  }
-  if (productionsLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-productions" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#00ff00;"></span></span><span style="margin-left: 6px;">Productions</span></label><br>';
-  }
-  if (hydrogenPipeLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-hydrogenpipes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line" style="background:#ff00ff;"></div></span><span style="margin-left: 6px;">Hydrogen Pipes</span></label><br>';
-  }
-  if (electrolyzersLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-electrolyzers" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#ffff00;"></span></span><span style="margin-left: 6px;">Electrolyzers</span></label><br>';
   }
   
   // Add Select All button
@@ -8598,8 +8999,48 @@ function activatePipelineRouteEdit() {
 }
 
 // Aktiviert den Node-Position-Edit-Modus
+  function getAllNodeLayers() {
+    const layers = [];
+    if (nodeLayer) layers.push(nodeLayer);
+    Object.keys(dynamicLayers).forEach(layerName => {
+      const layer = dynamicLayers[layerName];
+      if (layer && layerName.toLowerCase().includes('node')) {
+        layers.push(layer);
+      }
+    });
+    return layers;
+  }
+
+  function storeOriginalNodeClickHandlers(marker) {
+    if (!marker || marker._nodePositionOriginalClicks) return;
+    if (marker._events && marker._events.click && marker._events.click.length) {
+      marker._nodePositionOriginalClicks = marker._events.click.map(evt => ({ fn: evt.fn, ctx: evt.ctx }));
+    } else {
+      marker._nodePositionOriginalClicks = [];
+    }
+  }
+
+  function restoreOriginalNodeClickHandlers(marker) {
+    if (!marker || !marker._nodePositionOriginalClicks) return;
+    marker.off('click');
+    marker._nodePositionOriginalClicks.forEach(handler => {
+      marker.on('click', handler.fn, handler.ctx);
+    });
+    marker._nodePositionOriginalClicks = null;
+  }
+
+  function restoreNodePositionInteractions() {
+    getAllNodeLayers().forEach(layerGroup => {
+      if (!layerGroup) return;
+      layerGroup.eachLayer(marker => {
+        restoreOriginalNodeClickHandlers(marker);
+      });
+    });
+  }
+
 function activateNodePositionEdit() {
   currentMode = 'edit-node-position';
+  nodePositionEditActive = true;
   
   // Deaktiviere Pipeline-Klicks um Node-Klicks zu ermöglichen
   [pipelineLayer, drawnItems].forEach(layerGroup => {
@@ -8612,16 +9053,21 @@ function activateNodePositionEdit() {
     }
   });
   
-  // Aktiviere Node-Click-Handler
-  if (nodeLayer) {
-    nodeLayer.eachLayer(marker => {
-      marker.off('click');
-      marker.on('click', function(e) {
-        L.DomEvent.stopPropagation(e);
-        selectNodeForPositionEdit(marker);
+  // Aktiviere Node-Click-Handler für alle Node-Layer (legacy und dynamic)
+  const nodeLayers = getAllNodeLayers();
+  
+  nodeLayers.forEach(nLayer => {
+    if (nLayer) {
+      nLayer.eachLayer(marker => {
+        storeOriginalNodeClickHandlers(marker);
+        marker.off('click');
+        marker.on('click', function(e) {
+          L.DomEvent.stopPropagation(e);
+          selectNodeForPositionEdit(marker);
+        });
       });
-    });
-  }
+    }
+  });
   
   showCustomPopup(
     '📍 Change Node Position',
@@ -8638,7 +9084,7 @@ function selectNodeForPositionEdit(nodeMarker) {
   // Entferne vorherige Highlights
   resetAllPipelineHighlights();
   if (window.selectedNodeMarker) {
-    window.selectedNodeMarker.setStyle({fillColor: "#f03", color: "#900"});
+    resetElementStyle(window.selectedNodeMarker);
   }
   
   // Speichere Originalpositionen für Discard
@@ -8646,6 +9092,7 @@ function selectNodeForPositionEdit(nodeMarker) {
   const originalPipelineCoords = {};
   
   // Markiere den ausgewählten Node (größer und grün)
+  captureOriginalMarkerStyle(nodeMarker, 'highlight');
   nodeMarker.setStyle({fillColor: "#00ff00", color: "#00aa00", radius: 10, weight: 3});
   window.selectedNodeMarker = nodeMarker;
   window.selectedNodeConnectedPipelines = [];
@@ -8775,16 +9222,17 @@ function showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, originalNod
 
 // Cleanup-Funktion für Node Edit
 function cleanupNodeEdit(nodeMarker) {
-  if (window.selectedNodeMarker) {
-    window.selectedNodeMarker.setStyle({fillColor: "#f03", color: "#900", radius: 4, weight: 2});
-    window.selectedNodeMarker = null;
+  const marker = nodeMarker || window.selectedNodeMarker;
+  if (marker) {
+    resetElementStyle(marker);
+    marker.off('mousedown');
   }
+  window.selectedNodeMarker = null;
   
   // Setze verbundene Pipelines zurück und aktiviere Interaktionen wieder
   if (window.selectedNodeConnectedPipelines) {
     window.selectedNodeConnectedPipelines.forEach(layer => {
       resetPipelineStyle(layer);
-      // Aktiviere Pipeline-Interaktionen wieder
       if (layer.getElement()) {
         layer.getElement().style.pointerEvents = '';
       }
@@ -8795,9 +9243,10 @@ function cleanupNodeEdit(nodeMarker) {
   // Entferne alle Event-Listener
   map.off('mousemove');
   map.off('mouseup');
-  if (nodeMarker) {
-    nodeMarker.off('mousedown');
-  }
+  map.dragging.enable();
+  
+  restoreNodePositionInteractions();
+  nodePositionEditActive = false;
 }
 
 // Aktiviert Dragging für einen Node und synchronisiert verbundene Pipelines
@@ -8825,14 +9274,26 @@ function enableNodeDragging(nodeMarker, nodeId, connectedPipelines) {
     
     const newLatLng = e.latlng;
     
-    // Verschiebe ALLE Marker für diesen Node (sichtbar und unsichtbar)
-    if (nodeLayer) {
-      nodeLayer.eachLayer(marker => {
-        if (marker.feature && marker.feature.properties.ID === nodeId) {
-          marker.setLatLng(newLatLng);
-        }
-      });
-    }
+    // Verschiebe ALLE Marker für diesen Node (in legacy und dynamic layers)
+    const allNodeLayers = [nodeLayer];
+    
+    // Füge alle dynamischen Node-Layer hinzu
+    Object.keys(dynamicLayers).forEach(layerName => {
+      const layer = dynamicLayers[layerName];
+      if (layer && layerName.toLowerCase().includes('node')) {
+        allNodeLayers.push(layer);
+      }
+    });
+    
+    allNodeLayers.forEach(nLayer => {
+      if (nLayer) {
+        nLayer.eachLayer(marker => {
+          if (marker.feature && marker.feature.properties.ID === nodeId) {
+            marker.setLatLng(newLatLng);
+          }
+        });
+      }
+    });
     
     // Aktualisiere alle verbundenen Pipelines
     connectedPipelines.forEach(pipelineLayer => {
@@ -8872,18 +9333,31 @@ function enableNodeDragging(nodeMarker, nodeId, connectedPipelines) {
 function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
   console.log('Moving node and connected pipelines:', nodeId, newLatLng);
   
-  // Knoten finden und verschieben
+  // Knoten finden und verschieben (in legacy und dynamic layers)
   let nodeFound = false;
-  if (nodeLayer) {
-    nodeLayer.eachLayer(marker => {
-      if (marker.feature && marker.feature.properties.ID === nodeId) {
-        marker.setLatLng(newLatLng);
-        marker.feature.geometry.coordinates = [newLatLng.lng, newLatLng.lat];
-        console.log('Node moved:', nodeId);
-        nodeFound = true;
-      }
-    });
-  }
+  const allNodeLayers = [nodeLayer];
+  
+  // Füge alle dynamischen Node-Layer hinzu
+  Object.keys(dynamicLayers).forEach(layerName => {
+    const layer = dynamicLayers[layerName];
+    if (layer && layerName.toLowerCase().includes('node')) {
+      allNodeLayers.push(layer);
+    }
+  });
+  
+  allNodeLayers.forEach(nLayer => {
+    if (nLayer) {
+      nLayer.eachLayer(marker => {
+        if (marker.feature && marker.feature.properties.ID === nodeId) {
+          marker.setLatLng(newLatLng);
+          marker.feature.geometry.coordinates = [newLatLng.lng, newLatLng.lat];
+          console.log('Node moved:', nodeId);
+          nodeFound = true;
+        }
+      });
+    }
+  });
+  
   if (!nodeFound) console.log('Node not found:', nodeId);
   
   // Alle Pipelines finden, die diesen Knoten als Start oder End haben, und Enden anpassen
@@ -9184,6 +9658,11 @@ function deactivateAllModes() {
     if (editingLayer && editingLayer.editing) {
       editingLayer.editing.disable();
       editingLayer = null;
+    }
+    
+    // Node-Positionsmodus verlassen falls aktiv
+    if (nodePositionEditActive) {
+      cleanupNodeEdit();
     }
     
     // Change Direction Pfeile entfernen
@@ -9848,6 +10327,9 @@ try {
       const addPipelineBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Add Pipeline');
       if (addPipelineBtn) setActiveBtn(addPipelineBtn);
       currentMode = 'add-pipeline';
+      if (!window.selectedPipelineLayer) {
+        window.selectedPipelineLayer = drawnItems;
+      }
       
       // Ask if pipeline starts at existing node
       const hasStartNode = confirm('Does the pipeline start at an existing node?');
@@ -9872,20 +10354,14 @@ try {
       }
       
       function setupNodeSelectionHandlers() {
-        if (nodeLayer) {
-          nodeLayer.eachLayer(layer => {
-            layer.off('click');
-            layer.on('click', function(e) {
-              e.stopPropagation();
-              const nodeId = layer.feature.properties.ID;
-              const latLng = layer.getLatLng ? layer.getLatLng() : layer.getBounds().getCenter();
-              console.log('Node clicked for selection:', nodeId);
-              if (window.nodeSelectionCallback && currentMode === 'add-pipeline') {
-                window.nodeSelectionCallback(nodeId, latLng);
-              }
-            });
-          });
-        }
+        setNodeSelectionHandlers(layer => {
+          const nodeId = layer.feature?.properties?.ID;
+          const latLng = getNodeLatLng(layer);
+          console.log('Node clicked for selection:', nodeId);
+          if (window.nodeSelectionCallback && currentMode === 'add-pipeline') {
+            window.nodeSelectionCallback(nodeId, latLng);
+          }
+        });
       }
       
       function startPipelineDrawingWithStart(nodeId, latLng) {
@@ -9895,9 +10371,10 @@ try {
           startLatLng: latLng,
           hasEndNode: false
         };
+        const pipelineStyle = getPipelineStyleOptions();
         
         if (!window.polylineDrawer) {
-          window.polylineDrawer = new L.Draw.Polyline(map, { shapeOptions: { color: '#0070f3', weight: 3 } });
+          window.polylineDrawer = new L.Draw.Polyline(map, { shapeOptions: { pane: 'pipelinePane', color: pipelineStyle.color, weight: pipelineStyle.weight } });
         }
         
         window.polylineDrawer.enable();
@@ -9915,9 +10392,10 @@ try {
           hasStartNode: false,
           hasEndNode: false
         };
+        const pipelineStyle = getPipelineStyleOptions();
         
         if (!window.polylineDrawer) {
-          window.polylineDrawer = new L.Draw.Polyline(map, { shapeOptions: { color: '#0070f3', weight: 3 } });
+          window.polylineDrawer = new L.Draw.Polyline(map, { shapeOptions: { pane: 'pipelinePane', color: pipelineStyle.color, weight: pipelineStyle.weight } });
         }
         
         window.polylineDrawer.enable();
@@ -10251,64 +10729,7 @@ function clearAllFilters() {
 let selectedShape = null;
 let selectedSize = null;
 
-// Layer-Konfiguration mit aktuellen Farben, Größen und Styles
-const layerConfig = {
-  pipelines: { 
-    name: 'Pipelines', 
-    color: '#0070f3', 
-    type: 'line',
-    weight: 3,
-    opacity: 0.8
-  },
-  nodes: { 
-    name: 'Nodes', 
-    color: '#f03', 
-    type: 'circle',
-    radius: 6,
-    shape: 'circle',
-    opacity: 0.8
-  },
-  powerplants: { 
-    name: 'Power Plants', 
-    color: '#090', 
-    type: 'circle',
-    radius: 8,
-    shape: 'circle',
-    opacity: 0.8
-  },
-  compressors: { 
-    name: 'Compressors', 
-    color: '#009', 
-    type: 'circle',
-    radius: 10,
-    shape: 'circle',
-    opacity: 0.8
-  },
-  lng: { 
-    name: 'LNG Terminals', 
-    color: '#099', 
-    type: 'circle',
-    radius: 9,
-    shape: 'circle',
-    opacity: 0.8
-  },
-  storages: { 
-    name: 'Storage Sites', 
-    color: '#990', 
-    type: 'circle',
-    radius: 7,
-    shape: 'circle',
-    opacity: 0.8
-  },
-  consumption: { 
-    name: 'Consumption Points', 
-    color: '#ff8800', 
-    type: 'circle',
-    radius: 5,
-    shape: 'circle',
-    opacity: 0.8
-  }
-};
+// OLD layerConfig object - replaced by dynamic layerConfig array at line ~1300
 
 function populateLayerList() {
   const layerList = document.getElementById('layer-list');
@@ -10940,229 +11361,57 @@ function updateLegendSymbols() {
 
 // Funktion zum Erstellen der Event-Handler für Legend-Checkboxen
 function createLegendEventHandlers() {
-  const cbPipelines = document.getElementById('toggle-pipelines');
-  const cbNodes = document.getElementById('toggle-nodes');
-  const cbPowerplants = document.getElementById('toggle-powerplants');
-  const cbCompressors = document.getElementById('toggle-compressors');
-  const cbLNGs = document.getElementById('toggle-lng');
-  const cbStorages = document.getElementById('toggle-storages');
-  const cbShortPipes = document.getElementById('toggle-shortpipes');
-  const cbConsumption = document.getElementById('toggle-consumption');
-  const cbBorderpoints = document.getElementById('toggle-borderpoints');
-  const cbDemands = document.getElementById('toggle-demands');
-  const cbProductions = document.getElementById('toggle-productions');
-  const cbHydrogenPipes = document.getElementById('toggle-hydrogenpipes');
-  const cbElectrolyzers = document.getElementById('toggle-electrolyzers');
-  const activateAllBtn = document.getElementById('activate-all-btn');
-
+  // Dynamic legend event handlers based on layerConfig
+  const toggleCheckboxes = [];
+  const layerReferences = [];
+  
+  // Collect all toggle checkboxes and their corresponding layers
+  layerConfig.forEach(config => {
+    const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const checkbox = document.getElementById(toggleId);
+    const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    const layer = dynamicLayers[layerName];
+    
+    if (checkbox && layer) {
+      toggleCheckboxes.push(checkbox);
+      layerReferences.push(layer);
+      
+      // Bind change event to each checkbox
+      checkbox.onchange = function() {
+        if (this.checked) {
+          if (layer && !map.hasLayer(layer)) map.addLayer(layer);
+        } else {
+          if (layer && map.hasLayer(layer)) map.removeLayer(layer);
+        }
+      };
+    }
+  });
+  
   // Activate All Button Event Handler
+  const activateAllBtn = document.getElementById('activate-all-btn');
   if (activateAllBtn) {
     activateAllBtn.onclick = function () {
-      // Prüfen, ob alle Layer bereits aktiv sind
-      const allChecked = (cbPipelines ? cbPipelines.checked : true) &&
-                        (cbNodes ? cbNodes.checked : true) &&
-                        (cbPowerplants ? cbPowerplants.checked : true) &&
-                        (cbCompressors ? cbCompressors.checked : true) &&
-                        (cbLNGs ? cbLNGs.checked : true) &&
-                        (cbStorages ? cbStorages.checked : true) &&
-                        (cbShortPipes ? cbShortPipes.checked : true) &&
-                        (cbConsumption ? cbConsumption.checked : true) &&
-                        (cbBorderpoints ? cbBorderpoints.checked : true) &&
-                        (cbDemands ? cbDemands.checked : true) &&
-                        (cbProductions ? cbProductions.checked : true) &&
-                        (cbHydrogenPipes ? cbHydrogenPipes.checked : true) &&
-                        (cbElectrolyzers ? cbElectrolyzers.checked : true);
-
+      // Check if all layers are already active
+      const allChecked = toggleCheckboxes.every(cb => cb.checked);
+      
       if (allChecked) {
-        // Alle deaktivieren
-        if (cbPipelines) cbPipelines.checked = false;
-        if (cbNodes) cbNodes.checked = false;
-        if (cbPowerplants) cbPowerplants.checked = false;
-        if (cbCompressors) cbCompressors.checked = false;
-        if (cbLNGs) cbLNGs.checked = false;
-        if (cbStorages) cbStorages.checked = false;
-        if (cbShortPipes) cbShortPipes.checked = false;
-        if (cbConsumption) cbConsumption.checked = false;
-        if (cbBorderpoints) cbBorderpoints.checked = false;
-        if (cbDemands) cbDemands.checked = false;
-        if (cbProductions) cbProductions.checked = false;
-        if (cbHydrogenPipes) cbHydrogenPipes.checked = false;
-        if (cbElectrolyzers) cbElectrolyzers.checked = false;
-
-        // Alle Layer von der Karte entfernen
-        if (pipelineLayer && map.hasLayer(pipelineLayer)) map.removeLayer(pipelineLayer);
-        if (nodeLayer && map.hasLayer(nodeLayer)) map.removeLayer(nodeLayer);
-        if (powerplantsLayer && map.hasLayer(powerplantsLayer)) map.removeLayer(powerplantsLayer);
-        if (compressorsLayer && map.hasLayer(compressorsLayer)) map.removeLayer(compressorsLayer);
-        if (lngLayer && map.hasLayer(lngLayer)) map.removeLayer(lngLayer);
-        if (storageLayer && map.hasLayer(storageLayer)) map.removeLayer(storageLayer);
-        if (shortPipeLayer && map.hasLayer(shortPipeLayer)) map.removeLayer(shortPipeLayer);
-        if (consumptionLayer && map.hasLayer(consumptionLayer)) map.removeLayer(consumptionLayer);
-        if (borderpointsLayer && map.hasLayer(borderpointsLayer)) map.removeLayer(borderpointsLayer);
-        if (demandsLayer && map.hasLayer(demandsLayer)) map.removeLayer(demandsLayer);
-        if (productionsLayer && map.hasLayer(productionsLayer)) map.removeLayer(productionsLayer);
-        if (hydrogenPipeLayer && map.hasLayer(hydrogenPipeLayer)) map.removeLayer(hydrogenPipeLayer);
-        if (electrolyzersLayer && map.hasLayer(electrolyzersLayer)) map.removeLayer(electrolyzersLayer);
+        // Deactivate all
+        toggleCheckboxes.forEach((cb, index) => {
+          cb.checked = false;
+          const layer = layerReferences[index];
+          if (layer && map.hasLayer(layer)) {
+            map.removeLayer(layer);
+          }
+        });
       } else {
-        // Alle aktivieren
-        if (cbPipelines) cbPipelines.checked = true;
-        if (cbNodes) cbNodes.checked = true;
-        if (cbPowerplants) cbPowerplants.checked = true;
-        if (cbCompressors) cbCompressors.checked = true;
-        if (cbLNGs) cbLNGs.checked = true;
-        if (cbStorages) cbStorages.checked = true;
-        if (cbShortPipes) cbShortPipes.checked = true;
-        if (cbConsumption) cbConsumption.checked = true;
-        if (cbBorderpoints) cbBorderpoints.checked = true;
-        if (cbDemands) cbDemands.checked = true;
-        if (cbProductions) cbProductions.checked = true;
-        if (cbHydrogenPipes) cbHydrogenPipes.checked = true;
-        if (cbElectrolyzers) cbElectrolyzers.checked = true;
-
-        // Alle Layer zur Karte hinzufügen
-        if (pipelineLayer && !map.hasLayer(pipelineLayer)) map.addLayer(pipelineLayer);
-        if (nodeLayer && !map.hasLayer(nodeLayer)) map.addLayer(nodeLayer);
-        if (powerplantsLayer && !map.hasLayer(powerplantsLayer)) map.addLayer(powerplantsLayer);
-        if (compressorsLayer && !map.hasLayer(compressorsLayer)) map.addLayer(compressorsLayer);
-        if (lngLayer && !map.hasLayer(lngLayer)) map.addLayer(lngLayer);
-        if (storageLayer && !map.hasLayer(storageLayer)) map.addLayer(storageLayer);
-        if (shortPipeLayer && !map.hasLayer(shortPipeLayer)) map.addLayer(shortPipeLayer);
-        if (consumptionLayer && !map.hasLayer(consumptionLayer)) map.addLayer(consumptionLayer);
-        if (borderpointsLayer && !map.hasLayer(borderpointsLayer)) map.addLayer(borderpointsLayer);
-        if (demandsLayer && !map.hasLayer(demandsLayer)) map.addLayer(demandsLayer);
-        if (productionsLayer && !map.hasLayer(productionsLayer)) map.addLayer(productionsLayer);
-        if (hydrogenPipeLayer && !map.hasLayer(hydrogenPipeLayer)) map.addLayer(hydrogenPipeLayer);
-        if (electrolyzersLayer && !map.hasLayer(electrolyzersLayer)) map.addLayer(electrolyzersLayer);
-      }
-    };
-  }
-
-  if (cbPipelines) {
-    cbPipelines.onchange = function () {
-      if (this.checked) {
-        if (pipelineLayer && !map.hasLayer(pipelineLayer)) map.addLayer(pipelineLayer);
-      } else {
-        if (pipelineLayer && map.hasLayer(pipelineLayer)) map.removeLayer(pipelineLayer);
-      }
-    };
-  }
-
-  if (cbNodes) {
-    cbNodes.onchange = function () {
-      if (this.checked) {
-        if (nodeLayer && !map.hasLayer(nodeLayer)) map.addLayer(nodeLayer);
-      } else {
-        if (nodeLayer && map.hasLayer(nodeLayer)) map.removeLayer(nodeLayer);
-      }
-    };
-  }
-
-  if (cbPowerplants) {
-    cbPowerplants.onchange = function () {
-      if (this.checked) {
-        if (powerplantsLayer && !map.hasLayer(powerplantsLayer)) map.addLayer(powerplantsLayer);
-      } else {
-        if (powerplantsLayer && map.hasLayer(powerplantsLayer)) map.removeLayer(powerplantsLayer);
-      }
-    };
-  }
-
-  if (cbCompressors) {
-    cbCompressors.onchange = function () {
-      if (this.checked) {
-        if (compressorsLayer && !map.hasLayer(compressorsLayer)) map.addLayer(compressorsLayer);
-      } else {
-        if (compressorsLayer && map.hasLayer(compressorsLayer)) map.removeLayer(compressorsLayer);
-      }
-    };
-  }
-
-  if (cbLNGs) {
-    cbLNGs.onchange = function () {
-      if (this.checked) {
-        if (lngLayer && !map.hasLayer(lngLayer)) map.addLayer(lngLayer);
-      } else {
-        if (lngLayer && map.hasLayer(lngLayer)) map.removeLayer(lngLayer);
-      }
-    };
-  }
-
-  if (cbStorages) {
-    cbStorages.onchange = function () {
-      if (this.checked) {
-        if (storageLayer && !map.hasLayer(storageLayer)) map.addLayer(storageLayer);
-      } else {
-        if (storageLayer && map.hasLayer(storageLayer)) map.removeLayer(storageLayer);
-      }
-    };
-  }
-
-  if (cbShortPipes) {
-    cbShortPipes.onchange = function () {
-      if (this.checked) {
-        if (shortPipeLayer && !map.hasLayer(shortPipeLayer)) map.addLayer(shortPipeLayer);
-      } else {
-        if (shortPipeLayer && map.hasLayer(shortPipeLayer)) map.removeLayer(shortPipeLayer);
-      }
-    };
-  }
-
-  if (cbConsumption) {
-    cbConsumption.onchange = function () {
-      if (this.checked) {
-        if (consumptionLayer && !map.hasLayer(consumptionLayer)) map.addLayer(consumptionLayer);
-      } else {
-        if (consumptionLayer && map.hasLayer(consumptionLayer)) map.removeLayer(consumptionLayer);
-      }
-    };
-  }
-
-  if (cbBorderpoints) {
-    cbBorderpoints.onchange = function () {
-      if (this.checked) {
-        if (borderpointsLayer && !map.hasLayer(borderpointsLayer)) map.addLayer(borderpointsLayer);
-      } else {
-        if (borderpointsLayer && map.hasLayer(borderpointsLayer)) map.removeLayer(borderpointsLayer);
-      }
-    };
-  }
-
-  if (cbDemands) {
-    cbDemands.onchange = function () {
-      if (this.checked) {
-        if (demandsLayer && !map.hasLayer(demandsLayer)) map.addLayer(demandsLayer);
-      } else {
-        if (demandsLayer && map.hasLayer(demandsLayer)) map.removeLayer(demandsLayer);
-      }
-    };
-  }
-
-  if (cbProductions) {
-    cbProductions.onchange = function () {
-      if (this.checked) {
-        if (productionsLayer && !map.hasLayer(productionsLayer)) map.addLayer(productionsLayer);
-      } else {
-        if (productionsLayer && map.hasLayer(productionsLayer)) map.removeLayer(productionsLayer);
-      }
-    };
-  }
-
-  if (cbHydrogenPipes) {
-    cbHydrogenPipes.onchange = function () {
-      if (this.checked) {
-        if (hydrogenPipeLayer && !map.hasLayer(hydrogenPipeLayer)) map.addLayer(hydrogenPipeLayer);
-      } else {
-        if (hydrogenPipeLayer && map.hasLayer(hydrogenPipeLayer)) map.removeLayer(hydrogenPipeLayer);
-      }
-    };
-  }
-
-  if (cbElectrolyzers) {
-    cbElectrolyzers.onchange = function () {
-      if (this.checked) {
-        if (electrolyzersLayer && !map.hasLayer(electrolyzersLayer)) map.addLayer(electrolyzersLayer);
-      } else {
-        if (electrolyzersLayer && map.hasLayer(electrolyzersLayer)) map.removeLayer(electrolyzersLayer);
+        // Activate all
+        toggleCheckboxes.forEach((cb, index) => {
+          cb.checked = true;
+          const layer = layerReferences[index];
+          if (layer && !map.hasLayer(layer)) {
+            map.addLayer(layer);
+          }
+        });
       }
     };
   }
@@ -12104,17 +12353,21 @@ function hideOtherInfrastructureElements() {
 }
 
 function setupNodeClickHandlers() {
-  if (nodeLayer) {
-    nodeLayer.eachLayer(layer => {
-      layer.off('click');
-      layer.on('click', function(e) {
-        if (reconnectMode && selectedInfrastructureElement) {
-          reconnectToNode(layer);
-          e.stopPropagation();
-        }
-      });
-    });
+  if (!nodeLayer) {
+    return;
   }
+
+  forEachNodeMarker(layer => {
+    layer.off('click');
+    layer.on('click', function(e) {
+      if (reconnectMode && selectedInfrastructureElement) {
+        reconnectToNode(layer);
+        if (e) {
+          L.DomEvent.stopPropagation(e);
+        }
+      }
+    });
+  });
 }
 
 function reconnectToNode(nodeLayer) {

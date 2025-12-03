@@ -1,0 +1,8 @@
+Text:
+In order to demonstrate the features and advances of the QGas toolkit, the SciGRID_gas IGGIELGNC-1 dataset was translated in a QGas suitable format. The dataset is contained in the input folder of the toolkit.
+
+Citation:
+Diettrich, J., Pluta, A., Medjroubi, W., Dasenbrock, J., & Sandoval, J. E. (2021). SciGRID_gas IGGIELGNC-1 (0.2) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.5509988
+
+License:
+Creative Commons Attribution 4.0 International
