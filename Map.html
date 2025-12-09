@@ -81,6 +81,10 @@
       user-select: none;
     }
 
+    .legend-plan-entry {
+      margin-bottom: 4px;
+    }
+
     .mode-toggle-button {
       background: white;
       padding: var(--menu-btn-padding-y) var(--menu-btn-padding-x);
@@ -111,7 +115,7 @@
       display: inline-block;
       width: 20px;
       height: 4px;
-      background-color: #0070f3; /* same color as Pipelines */
+      background-color: #0070f3;
       margin-right: 6px;
       vertical-align: middle;
       border-radius: 2px;
@@ -123,14 +127,12 @@
       display: none !important;
     }
 
-    /* Verstecke alle Standard-Leaflet-Controls */
     .leaflet-control-zoom,
     .leaflet-bar,
     .leaflet-control {
       display: none !important;
     }
 
-    /* Zeige nur unsere eigenen Controls */
     .legend-control {
       display: block !important;
       z-index: 1000 !important;
@@ -160,6 +162,207 @@
       overflow-y: auto;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       position: relative;
+    }
+
+    .layer-item {
+      background: #f8f9fb;
+      border: 1px solid #e1e5eb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .layer-info-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .layer-info-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .layer-name {
+      font-weight: 600;
+      color: #1f2933;
+    }
+
+    .layer-meta {
+      font-size: 12px;
+      color: #7a8691;
+      margin-top: 2px;
+    }
+
+    .layer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .layer-controls .change-btn {
+      flex: none;
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 12px;
+      border: 1px solid #c7d0dd;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .layer-controls .change-btn:hover {
+      background: #edf2ff;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+    }
+
+    .color-picker-hint {
+      font-size: 13px;
+      color: #555;
+      margin: 0 0 12px 0;
+    }
+
+    .color-section {
+      margin-bottom: 18px;
+    }
+
+    .color-section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      gap: 8px;
+    }
+
+    .color-section-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: #222;
+    }
+
+    .color-section-hint {
+      font-size: 12px;
+      color: #888;
+      flex: 1;
+      text-align: right;
+    }
+
+    .color-swatch-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .color-swatch {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      background-clip: padding-box;
+      outline: none;
+      padding: 0;
+      background-color: transparent;
+    }
+
+    .shape-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .shape-option {
+      border: 1px solid #d2d7df;
+      border-radius: 8px;
+      padding: 10px 6px;
+      background: #fff;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      font-size: 12px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .shape-option.selected,
+    .shape-option:focus-visible {
+      border-color: #0070f3;
+      box-shadow: 0 0 0 2px rgba(0,112,243,0.2);
+      outline: none;
+    }
+
+    .shape-option button,
+    .shape-option span {
+      pointer-events: none;
+    }
+
+    .line-type-option {
+      border: 1px solid #d2d7df;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .line-type-option.selected {
+      border-color: #0070f3;
+      box-shadow: 0 0 0 2px rgba(0,112,243,0.2);
+    }
+
+    .line-type-preview {
+      width: 70px;
+      height: 6px;
+      border-radius: 3px;
+      background: #1f2933;
+    }
+
+    .color-swatch:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .color-swatch.selected {
+      border-color: #0070f3;
+      box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.25);
+    }
+
+    .custom-color-row {
+      margin-top: 10px;
+    }
+
+    .custom-color-inputs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .custom-color-inputs input[type="color"] {
+      width: 46px;
+      height: 34px;
+      padding: 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+
+    .custom-color-inputs input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      font-size: 13px;
     }
 
     .modal-close {
@@ -536,6 +739,21 @@
   max-width: 500px;
 }
 
+.custom-popup.custom-popup--bottom-right {
+  top: auto;
+  left: auto;
+  right: 24px;
+  bottom: 24px;
+  transform: none;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.custom-popup-overlay.custom-popup-overlay--nonmodal {
+  background: transparent;
+  pointer-events: none;
+}
+
 .custom-popup h3 {
   margin: 0 0 20px 0;
   color: #222;
@@ -579,6 +797,225 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+
+/* Plan Georeferencing Overlay */
+.plan-georef-overlay {
+  position: fixed;
+  top: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90vw, 1200px);
+  height: min(80vh, 720px);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  z-index: 15000;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.plan-georef-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.plan-georef-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.plan-georef-header p {
+  margin: 4px 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.plan-georef-close-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.plan-georef-body {
+  flex: 1;
+  display: flex;
+  gap: 18px;
+  padding: 18px 22px 22px 22px;
+  min-height: 0;
+}
+
+.plan-georef-viewport {
+  flex: 1.4;
+  background: #0f1115;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+  overflow: auto;
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.plan-georef-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.plan-viewport--dragging {
+  cursor: grabbing !important;
+}
+
+.plan-image-stage {
+  position: relative;
+  width: max-content;
+  height: max-content;
+  cursor: crosshair;
+}
+
+#plan-georef-image {
+  display: block;
+  max-width: none;
+  user-select: none;
+}
+
+.plan-marker-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.plan-image-marker {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ff2b2b;
+  border-radius: 50%;
+  background: rgba(255,43,43,0.12);
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.plan-image-marker.plan-image-marker--pending {
+  border-color: #ffaa33;
+  background: rgba(255,170,51,0.25);
+}
+
+.plan-georef-sidebar {
+  flex: 0.8;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plan-instructions {
+  background: #f3f6ff;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 0.92rem;
+  color: #2c3e66;
+}
+
+.plan-zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.plan-zoom-control label {
+  font-weight: 600;
+}
+
+#plan-zoom-slider {
+  flex: 1;
+}
+
+.plan-point-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.plan-point-actions button,
+.plan-georef-sidebar button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#plan-select-map-point {
+  background: #0d6efd;
+  color: #fff;
+  flex: 1;
+}
+
+#plan-clear-pending {
+  background: #f0f0f0;
+  color: #444;
+}
+
+#plan-finish-btn {
+  background: #28a745;
+  color: #fff;
+  margin-top: auto;
+}
+
+.plan-points-list {
+  flex: 1;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid #e3e3e3;
+}
+
+.plan-point-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #ececec;
+}
+
+.plan-point-item button {
+  border: none;
+  background: #ffe7e7;
+  color: #c0392b;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.plan-georef-resume-btn {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: none;
+  background: #0d6efd;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: none;
+  z-index: 15001;
+  box-shadow: 0 10px 30px rgba(13,110,253,0.35);
+}
+
 
 /* Alte Buttons ausblenden */
 #function-btns {
@@ -887,12 +1324,18 @@
     <button class="modal-close" onclick="closeColorPickerModal()">&times;</button>
     <h3 class="modal-title" id="color-picker-title">Change Layer Color</h3>
     
+    <p class="color-picker-hint">Pick a quick swatch below or enter an exact HEX value for fine control.</p>
     <div class="color-palette" id="color-palette">
       <!-- Color swatches will be dynamically inserted -->
     </div>
     
-    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Custom Color:</label>
-    <input type="color" id="custom-color-input" class="custom-color-input" value="#0070f3">
+    <div class="custom-color-row">
+      <label style="font-weight: bold; display: block;">Custom color</label>
+      <div class="custom-color-inputs">
+        <input type="color" id="custom-color-input" value="#0070f3" aria-label="Custom color picker">
+        <input type="text" id="custom-color-text" value="#0070F3" maxlength="7" placeholder="#3A86FF" aria-label="Custom color hex code">
+      </div>
+    </div>
     
     <div style="text-align: right; margin-top: 20px;">
       <button onclick="closeColorPickerModal()" style="background: #ccc; border: none; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;">Cancel</button>
@@ -907,31 +1350,31 @@
     <button class="modal-close" onclick="closeStylePickerModal()">&times;</button>
     <h3 class="modal-title" id="style-picker-title">Change Point Shape</h3>
     
-    <div class="shape-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0;">
-      <div class="shape-option" onclick="selectShape('circle')" data-shape="circle">
-        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; border-radius: 50%; margin: 0 auto 5px;"></div>
+    <div class="shape-grid">
+      <button type="button" class="shape-option" onclick="selectShape('circle', this)" data-shape="circle">
+        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; border-radius: 50%;"></div>
         <span>Circle</span>
-      </div>
-      <div class="shape-option" onclick="selectShape('square')" data-shape="square">
-        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; margin: 0 auto 5px;"></div>
+      </button>
+      <button type="button" class="shape-option" onclick="selectShape('square', this)" data-shape="square">
+        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3;"></div>
         <span>Square</span>
-      </div>
-      <div class="shape-option" onclick="selectShape('triangle')" data-shape="triangle">
-        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); margin: 0 auto 5px;"></div>
+      </button>
+      <button type="button" class="shape-option" onclick="selectShape('triangle', this)" data-shape="triangle">
+        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>
         <span>Triangle</span>
-      </div>
-      <div class="shape-option" onclick="selectShape('diamond')" data-shape="diamond">
-        <div class="shape-preview" style="width: 25px; height: 25px; background: #0070f3; transform: rotate(45deg); margin: 2.5px auto 7.5px;"></div>
+      </button>
+      <button type="button" class="shape-option" onclick="selectShape('diamond', this)" data-shape="diamond">
+        <div class="shape-preview" style="width: 25px; height: 25px; background: #0070f3; transform: rotate(45deg);"></div>
         <span>Diamond</span>
-      </div>
-      <div class="shape-option" onclick="selectShape('star')" data-shape="star">
-        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); margin: 0 auto 5px;"></div>
+      </button>
+      <button type="button" class="shape-option" onclick="selectShape('star', this)" data-shape="star">
+        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);"></div>
         <span>Star</span>
-      </div>
-      <div class="shape-option" onclick="selectShape('cross')" data-shape="cross">
-        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; clip-path: polygon(20% 0%, 80% 0%, 80% 20%, 100% 20%, 100% 80%, 80% 80%, 80% 100%, 20% 100%, 20% 80%, 0% 80%, 0% 20%, 20% 20%); margin: 0 auto 5px;"></div>
+      </button>
+      <button type="button" class="shape-option" onclick="selectShape('cross', this)" data-shape="cross">
+        <div class="shape-preview" style="width: 30px; height: 30px; background: #0070f3; clip-path: polygon(20% 0%, 80% 0%, 80% 20%, 100% 20%, 100% 80%, 80% 80%, 80% 100%, 20% 100%, 20% 80%, 0% 80%, 0% 20%, 20% 20%);"></div>
         <span>Cross</span>
-      </div>
+      </button>
     </div>
     
     <div style="text-align: right; margin-top: 20px;">
@@ -959,6 +1402,36 @@
     <div style="text-align: right; margin-top: 20px;">
       <button onclick="closeSizePickerModal()" style="background: #ccc; border: none; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;">Cancel</button>
       <button onclick="applySizeChange()" style="background: #0070f3; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Line Type Picker Modal -->
+<div id="linetype-picker-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 320px;">
+    <button class="modal-close" onclick="closeLineTypePickerModal()">&times;</button>
+    <h3 class="modal-title" id="linetype-picker-title">Change Line Type</h3>
+
+    <div id="line-type-options">
+      <div class="line-type-option" data-linetype="solid" onclick="selectLineType('solid', this)">
+        <span>Solid</span>
+        <div class="line-type-preview" style="background-image: none;"></div>
+      </div>
+      <div class="line-type-option" data-linetype="dotted" onclick="selectLineType('dotted', this)">
+        <span>Dotted</span>
+        <div class="line-type-preview" style="background-image: radial-gradient(circle, #1f2933 35%, transparent 35%);
+             background-size: 12px 12px;"></div>
+      </div>
+      <div class="line-type-option" data-linetype="segmented" onclick="selectLineType('segmented', this)">
+        <span>Segmented</span>
+        <div class="line-type-preview" style="background-image: linear-gradient(90deg, #1f2933 0 60%, transparent 60%);
+             background-size: 16px 6px;"></div>
+      </div>
+    </div>
+
+    <div style="text-align: right; margin-top: 20px;">
+      <button onclick="closeLineTypePickerModal()" style="background: #ccc; border: none; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;">Cancel</button>
+      <button onclick="applyLineTypeChange()" style="background: #0070f3; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Apply</button>
     </div>
   </div>
 </div>
@@ -1175,6 +1648,9 @@
     <button class="tool-tile" data-mode="group-pipelines" onclick="selectTool('group-pipelines')">
       📦<br>Group Pipelines
     </button>
+    <button class="tool-tile" data-mode="add-plan" onclick="selectTool('add-plan')">
+      🗺️<br>Add Infrastructure Plans
+    </button>
     <button class="tool-tile" data-mode="divide-pipeline" onclick="selectTool('divide-pipeline')">
       ✂️<br>Divide Pipeline
     </button>
@@ -1204,6 +1680,45 @@
   <div id="custom-popup-content"></div>
   <div class="custom-popup-buttons" id="custom-popup-buttons"></div>
 </div>
+
+<input type="file" id="plan-file-input" accept=".jpg,.jpeg,.png" style="display:none;" />
+
+<div id="plan-georef-overlay" class="plan-georef-overlay">
+  <div class="plan-georef-header">
+    <div>
+      <h3>🗺️ Add Infrastructure Plan</h3>
+      <p id="plan-georef-subtitle">Select control points on the plan image.</p>
+    </div>
+    <button id="plan-georef-close-btn" class="plan-georef-close-btn" title="Close">✖</button>
+  </div>
+  <div class="plan-georef-body">
+    <div class="plan-georef-viewport" id="plan-image-viewport">
+      <div class="plan-image-stage" id="plan-image-stage">
+        <img id="plan-georef-image" alt="Plan image" draggable="false" />
+        <div id="plan-marker-layer" class="plan-marker-layer"></div>
+      </div>
+    </div>
+    <div class="plan-georef-sidebar">
+      <div class="plan-instructions" id="plan-instructions-text">
+        Click a recognizable feature in the plan, then match it on the map.
+      </div>
+      <div class="plan-zoom-control">
+        <label for="plan-zoom-slider">Zoom</label>
+        <input type="range" id="plan-zoom-slider" min="25" max="200" step="5" value="100">
+      </div>
+      <div class="plan-point-actions">
+        <button id="plan-select-map-point" disabled>Select point on map</button>
+        <button id="plan-clear-pending" disabled>Clear</button>
+      </div>
+      <div class="plan-points-list" id="plan-points-list">
+        <p style="color:#666; text-align:center; margin:40px 0;">No control points yet.</p>
+      </div>
+      <button id="plan-finish-btn" disabled>Add plan to map</button>
+    </div>
+  </div>
+</div>
+
+<button id="plan-georef-resume-btn" class="plan-georef-resume-btn">Return to plan image</button>
 
 <div id="function-btns"></div>
 <div id="contributor-box">
@@ -1235,6 +1750,10 @@
   const layerMetadataRegistry = {};
   const elementKeyMetadataIndex = {};
   const elementTypeLayerMap = {};
+  let styleableLayerRegistry = new Map();
+  let styleableLayerRegistryDirty = true;
+  const editModeHiddenPointLayers = new Set();
+  let editGeometryVisibilityActive = false;
 
   const customLineColorPalette = [
     '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b',
@@ -1242,9 +1761,44 @@
     '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395', '#994499'
   ];
   const usedLineColors = new Map();
+  const quickColorCollections = [
+    {
+      title: 'Pipeline essentials',
+      description: 'High-contrast line colors',
+      colors: ['#FF5E5B', '#FFB400', '#1F77B4', '#2ECC71', '#B52B65', '#333652']
+    },
+    {
+      title: 'Bright nodes',
+      description: 'Vivid point colors',
+      colors: ['#E63946', '#F4A261', '#2A9D8F', '#3A86FF', '#8338EC', '#FF006E']
+    },
+    {
+      title: 'Soft overlays',
+      description: 'Pastel background layers',
+      colors: ['#FFCDB2', '#FFAFCC', '#BDE0FE', '#C7F9CC', '#F4E285', '#E0AAFF']
+    }
+  ];
+  const recentColorSelections = [];
+  const MAX_RECENT_COLORS = 6;
 
   function normalizeColorHex(color) {
-    return (color || '').trim().toLowerCase();
+    if (!color) return '';
+    let value = color.trim();
+    if (!value) return '';
+    const shortHex = /^#?[0-9a-fA-F]{3}$/;
+    const longHex = /^#?[0-9a-fA-F]{6}$/;
+
+    if (!value.startsWith('#')) {
+      if (shortHex.test(value) || longHex.test(value)) {
+        value = `#${value}`;
+      }
+    }
+
+    if (/^#[0-9a-fA-F]{3}$/.test(value)) {
+      value = '#' + value.substring(1).split('').map(ch => ch + ch).join('');
+    }
+
+    return value.toLowerCase();
   }
 
   function registerLineColorUsage(color) {
@@ -1269,6 +1823,41 @@
       unregisterLineColorUsage(oldColor);
     }
     registerLineColorUsage(newColor);
+  }
+
+  function recordRecentColor(color) {
+    const normalized = normalizeColorHex(color);
+    if (!/^#[0-9a-f]{6}$/.test(normalized)) return;
+    const existingIndex = recentColorSelections.findIndex(entry => normalizeColorHex(entry) === normalized);
+    if (existingIndex !== -1) {
+      recentColorSelections.splice(existingIndex, 1);
+    }
+    recentColorSelections.unshift(normalized);
+    if (recentColorSelections.length > MAX_RECENT_COLORS) {
+      recentColorSelections.length = MAX_RECENT_COLORS;
+    }
+  }
+
+  function isValidHexColor(value) {
+    if (!value) return false;
+    return /^#?[0-9a-fA-F]{6}$/.test(value.trim());
+  }
+
+  function setCustomColorInputs(color) {
+    const normalized = normalizeColorHex(color);
+    if (!/^#[0-9a-f]{6}$/.test(normalized)) return;
+    const colorInput = document.getElementById('custom-color-input');
+    if (colorInput && colorInput.value.toLowerCase() !== normalized) {
+      colorInput.value = normalized;
+    }
+    const textInput = document.getElementById('custom-color-text');
+    if (textInput && textInput.value.toLowerCase() !== normalized) {
+      textInput.value = normalized.toUpperCase();
+    }
+  }
+
+  function invalidateStyleableLayerRegistry() {
+    styleableLayerRegistryDirty = true;
   }
 
   function colorIsInUse(color) {
@@ -1419,6 +2008,9 @@
   }).addTo(map);
 
   // Dedicated panes to control layer stacking order
+  const planOverlayPane = map.createPane('planOverlayPane');
+  planOverlayPane.style.zIndex = 340;
+  planOverlayPane.style.pointerEvents = 'none';
   const pipelinePane = map.createPane('pipelinePane');
   pipelinePane.style.zIndex = 350;
   const nodePane = map.createPane('nodePane');
@@ -1765,6 +2357,18 @@
           
           // Store in dynamicLayers for configuration-based access
           dynamicLayers[layerName] = layer;
+          invalidateStyleableLayerRegistry();
+
+          // Ensure legend state (if available) is respected once the layer finishes loading
+          const toggleId = 'toggle-' + fileName.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const legendCheckbox = document.getElementById(toggleId);
+          if (legendCheckbox && !legendCheckbox.checked && map.hasLayer(layer)) {
+            map.removeLayer(layer);
+          }
+          const legendEntry = legendToggleRegistry.get(layerName);
+          if (legendEntry && typeof legendEntry.handler === 'function') {
+            legendEntry.handler();
+          }
           
           console.log(`Loaded ${fileName}`);
           
@@ -2968,6 +3572,7 @@
   let currentMode = 'info';  // Info Mode als Standard
   updateActiveToolDisplay('info');  // Aktives Tool Display initialisieren
   let editingLayer = null;
+  let nodePositionEditSession = null;
 
   // Speicher-Button für Pipeline-Bearbeitung
   function showSaveButton(layer) {
@@ -2978,13 +3583,10 @@
     btn.textContent = 'Save Changes';
     btn.className = 'main-menu-btn edit-action-btn';
     btn.style.display = 'block';
-    btn.style.width = '140px';
-    btn.style.margin = '0';
-    btn.style.padding = '8px 16px';
-    btn.style.boxSizing = 'border-box';
     btn.style.background = '#28a745';
 
     btn.onclick = function () {
+      releasePipelineEndpointLocks(layer);
       if (layer.editing) layer.editing.disable();
       // Markiere das Feature als geändert
       if (layer.feature && layer.feature.properties) {
@@ -2992,6 +3594,7 @@
         // Geometrie aktualisieren
         layer.feature.geometry = layer.toGeoJSON().geometry;
       }
+      delete layer._editSessionSnapshot;
       btn.remove();
       document.getElementById('discard-edit-btn')?.remove();
       editingLayer = null;
@@ -3068,6 +3671,41 @@
     if (!applyLock()) {
       setTimeout(applyLock, 100);
     }
+
+    if (!layer._endpointLockHooksBound) {
+      const reapply = () => {
+        setTimeout(() => {
+          if (layer.editing && layer.editing._enabled) {
+            lockPipelineEndpoints(layer);
+          }
+        }, 0);
+      };
+      layer.on('edit', reapply);
+      if (map && !layer._endpointLockMapHandler) {
+        const mapHandler = evt => {
+          if (evt?.poly === layer) {
+            reapply();
+          }
+        };
+        map.on(L.Draw.Event.EDITVERTEX, mapHandler);
+        layer._endpointLockMapHandler = mapHandler;
+      }
+      layer._endpointLockHooksBound = true;
+      layer._endpointLockReapply = reapply;
+    }
+  }
+
+  function releasePipelineEndpointLocks(layer) {
+    if (!layer) return;
+    if (layer._endpointLockReapply) {
+      layer.off('edit', layer._endpointLockReapply);
+      layer._endpointLockReapply = null;
+    }
+    if (layer._endpointLockMapHandler && map) {
+      map.off(L.Draw.Event.EDITVERTEX, layer._endpointLockMapHandler);
+      layer._endpointLockMapHandler = null;
+    }
+    layer._endpointLockHooksBound = false;
   }
 
   function restorePipelineEditStyle(layer) {
@@ -3118,6 +3756,115 @@
     }
   }
 
+  function cloneLatLngStructure(latlngs) {
+    if (Array.isArray(latlngs)) {
+      return latlngs.map(item => cloneLatLngStructure(item));
+    }
+    if (latlngs && typeof latlngs.lat === 'number' && typeof latlngs.lng === 'number') {
+      return L.latLng(latlngs.lat, latlngs.lng);
+    }
+    if (latlngs && typeof latlngs[0] === 'number' && typeof latlngs[1] === 'number') {
+      return L.latLng(latlngs[0], latlngs[1]);
+    }
+    return latlngs;
+  }
+
+  function captureLayerEditSnapshot(layer) {
+    if (!layer || typeof layer.getLatLngs !== 'function') return;
+    layer._editSessionSnapshot = {
+      latlngs: cloneLatLngStructure(layer.getLatLngs()),
+      featureGeometry: layer.feature?.geometry ? JSON.parse(JSON.stringify(layer.feature.geometry)) : null
+    };
+  }
+
+  function restoreLayerEditSnapshot(layer) {
+    const snapshot = layer?._editSessionSnapshot;
+    if (!layer || !snapshot || !snapshot.latlngs) return false;
+    if (typeof layer.setLatLngs === 'function') {
+      layer.setLatLngs(cloneLatLngStructure(snapshot.latlngs));
+    }
+    if (layer.feature && snapshot.featureGeometry) {
+      layer.feature.geometry = JSON.parse(JSON.stringify(snapshot.featureGeometry));
+    }
+    refreshEditableLayerCache(layer);
+    return true;
+  }
+
+  function refreshPolylineEditingHandlers(layer) {
+    if (!layer || !layer.editing) return;
+    try {
+      const editingActive = !!layer.editing._enabled;
+
+      if (typeof layer.editing._updateLatLngs === 'function') {
+        layer.editing._updateLatLngs({ layer });
+      } else if (Array.isArray(layer._latlngs)) {
+        layer.editing.latlngs = [layer._latlngs];
+        if (Array.isArray(layer._holes) && layer._holes.length) {
+          layer.editing.latlngs = layer.editing.latlngs.concat(layer._holes);
+        }
+      }
+
+      if (layer.editing._poly) {
+        layer.editing._poly._latlngs = layer._latlngs;
+      }
+
+      if (Array.isArray(layer.editing._verticesHandlers) && Array.isArray(layer.editing.latlngs)) {
+        layer.editing._verticesHandlers.forEach((handler, idx) => {
+          if (!handler) return;
+          handler._latlngs = layer.editing.latlngs[idx] || layer.editing.latlngs[0];
+          if (!editingActive && handler._markerGroup && typeof handler._markerGroup.clearLayers === 'function') {
+            handler._markerGroup.clearLayers();
+          }
+          if (!editingActive) {
+            handler._markers = [];
+          } else if (typeof handler.updateMarkers === 'function') {
+            handler.updateMarkers();
+          }
+        });
+      }
+
+      if (!editingActive) {
+        if (layer.editing._markerGroup && typeof layer.editing._markerGroup.clearLayers === 'function') {
+          layer.editing._markerGroup.clearLayers();
+        }
+        layer.editing._markers = [];
+      } else if (typeof layer.editing.updateMarkers === 'function') {
+        layer.editing.updateMarkers();
+      }
+    } catch (error) {
+      console.warn('Failed to refresh polyline editing handlers:', error);
+    }
+  }
+
+  function refreshEditableLayerCache(layer) {
+    if (!layer || typeof layer.getLatLngs !== 'function') return;
+    const latlngs = layer.getLatLngs();
+    if (!latlngs) return;
+    const cloned = cloneLatLngStructure(latlngs);
+    layer._originalLatLngs = cloned;
+    layer._origLatLngs = cloneLatLngStructure(latlngs);
+    if (layer.editing && layer.editing._poly) {
+      layer.editing._poly._latlngs = layer._latlngs || latlngs;
+      const refreshed = cloneLatLngStructure(layer._latlngs || latlngs);
+      layer.editing._poly._originalLatLngs = refreshed;
+      layer.editing._origLatLngs = cloneLatLngStructure(layer._latlngs || latlngs);
+      refreshPolylineEditingHandlers(layer);
+    }
+  }
+
+  function syncLayerFeatureGeometry(layer) {
+    if (!layer || typeof layer.toGeoJSON !== 'function' || !layer.feature) return;
+    try {
+      const geo = layer.toGeoJSON();
+      if (geo && geo.geometry) {
+        layer.feature.geometry = geo.geometry;
+      }
+      refreshEditableLayerCache(layer);
+    } catch (error) {
+      console.error('Failed to synchronize layer geometry:', error);
+    }
+  }
+
   // Verwerfen-Button für Pipeline-Bearbeitung
   function showDiscardButton(layer) {
     if (document.getElementById('discard-edit-btn')) return; // Nur einen Button zulassen
@@ -3127,52 +3874,13 @@
     btn.textContent = 'Discard Changes';
     btn.className = 'main-menu-btn edit-action-btn';
     btn.style.display = 'block';
-    btn.style.margin = '0 auto';
     btn.style.background = '#dc3545';
 
     btn.onclick = function () {
+      releasePipelineEndpointLocks(layer);
       if (layer.editing) layer.editing.disable();
-      // Änderungen verwerfen - Layer neu laden
-      if (layer.feature && layer.feature.properties) {
-        // Pipeline-Layer neu laden
-        if (pipelineLayer) {
-          map.removeLayer(pipelineLayer);
-          const pipelineConfigEntry = layerConfig.find(cfg => cfg.type === 'Line' && (cfg.filename.toLowerCase().includes('pipeline') || cfg.filename.toLowerCase().startsWith('pl_')));
-          const pipelineFile = pipelineConfigEntry ? pipelineConfigEntry.filename : 'PL_Pipelines.geojson';
-          const resolvedPipelinePath = resolveLayerFilePath(pipelineFile);
-          const pipelineUrl = buildInputUrl(resolvedPipelinePath, { skipProjectPrefix: true });
-          const pipelineColor = pipelineConfigEntry?.color || '#3388ff';
-          const pipelineWeight = pipelineConfigEntry?.size || 3;
-
-          if (pipelineUrl) {
-            fetch(pipelineUrl)
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error(`Pipeline file not found at ${pipelineUrl}`);
-                }
-                return response.json();
-              })
-              .then(data => {
-                pipelineLayer = L.geoJSON(data, {
-                  pane: 'pipelinePane',
-                  style: function () {
-                    return {
-                      color: pipelineColor,
-                      weight: pipelineWeight,
-                      opacity: 0.8
-                    };
-                  },
-                  onEachFeature: function(feature, layer) {
-                    setPipelineInteraction(layer);
-                  }
-                });
-                pipelineLayer.addTo(map);
-                originalPipelineLayer = pipelineLayer;
-              })
-              .catch(error => console.error('Error reloading pipeline layer:', error));
-          }
-        }
-      }
+      restoreLayerEditSnapshot(layer);
+      delete layer._editSessionSnapshot;
       btn.remove();
       document.getElementById('save-edit-btn')?.remove();
       editingLayer = null;
@@ -3453,6 +4161,7 @@
     console.log('Current project:', currentProject);
     layerConfig = await loadLayerConfiguration();
     console.log('Configuration loaded, will load', layerConfig.length, 'layers');
+    invalidateStyleableLayerRegistry();
     
     for (const config of layerConfig) {
       if (!config.enabled) continue;
@@ -3536,6 +4245,7 @@
     // Update legend after all layers configured
     setTimeout(() => {
       updateLegendControl();
+      loadPersistedInfrastructurePlans();
     }, 2000);
   }
   
@@ -4232,6 +4942,96 @@ async function exportCompleteDataset() {
     });
     if (features.length > 0) {
       addGeoJSONToZip(features, 'Short_Pipes.geojson');
+    }
+  }
+
+  // Include any georeferenced infrastructure plans
+  if (Array.isArray(planLayers) && planLayers.length) {
+    const plansFolder = zip.folder('Infrastructure_Plans');
+    const planManifestEntries = [];
+
+    const sanitizeSegment = (value, fallback) => {
+      const safe = (value || fallback || '').toString().trim();
+      const sanitized = safe.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '');
+      return sanitized || fallback || 'Plan';
+    };
+
+    const decodeDataUrl = (dataUrl) => {
+      if (!dataUrl || typeof dataUrl !== 'string') return null;
+      const match = dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+      if (!match) return null;
+      const mime = match[1];
+      const base64 = match[2];
+      try {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const extension = (mime.split('/')?.[1] || 'png').replace(/[^a-z0-9]/gi, '') || 'png';
+        return { bytes, extension };
+      } catch (error) {
+        console.warn('Failed to decode plan image for export:', error);
+        return null;
+      }
+    };
+
+    planLayers.forEach((entry, index) => {
+      if (!entry) return;
+      const planConfig = entry.config || entry.layer?._config;
+      if (!planConfig) return;
+      const folderName = sanitizeSegment(entry.name || planConfig.name, `Plan_${index + 1}`);
+      const folderLabel = `${folderName}_${index + 1}`;
+      const planFolder = plansFolder.folder(folderLabel);
+      const serializedPairs = (planConfig.controlPairs || []).map(pair => {
+        const latlng = pair.latlng || {};
+        return {
+          id: pair.id,
+          image: pair.image,
+          latlng: (latlng.lat !== undefined && latlng.lng !== undefined)
+            ? { lat: latlng.lat, lng: latlng.lng }
+            : null
+        };
+      });
+
+      let exportedImageFile = null;
+      const decoded = decodeDataUrl(planConfig.imageDataUrl);
+      if (decoded) {
+        const imageBase = sanitizeSegment((planConfig.imageName || folderName).replace(/\.[^.]+$/, ''), `Plan_${index + 1}`);
+        exportedImageFile = `${imageBase}.${decoded.extension}`;
+        planFolder.file(exportedImageFile, decoded.bytes, { binary: true });
+      }
+
+      const metadata = {
+        id: entry.id || planConfig.id,
+        name: entry.name || planConfig.name || folderName,
+        imageName: planConfig.imageName || exportedImageFile || null,
+        imageFile: exportedImageFile,
+        imageWidth: planConfig.imageWidth || null,
+        imageHeight: planConfig.imageHeight || null,
+        controlPoints: serializedPairs
+      };
+      planFolder.file('metadata.json', JSON.stringify(metadata, null, 2));
+
+      if (exportedImageFile) {
+        planManifestEntries.push({
+          id: metadata.id,
+          name: metadata.name,
+          folder: folderLabel,
+          metadataFile: 'metadata.json',
+          imageFile: exportedImageFile
+        });
+      }
+    });
+
+    if (planManifestEntries.length) {
+      const manifestPayload = {
+        version: 1,
+        generatedAt: new Date().toISOString(),
+        project: currentProject || null,
+        plans: planManifestEntries
+      };
+      plansFolder.file('plans_manifest.json', JSON.stringify(manifestPayload, null, 2));
     }
   }
 
@@ -6662,6 +7462,110 @@ function layerHasPointGeometry(layer) {
   return hasPoint;
 }
 
+function getLayerDisplayLabel(layer, fallbackName = '') {
+  if (!layer) return fallbackName || '';
+  if (layer._customLayerName) return layer._customLayerName;
+  if (layer._customLayerSettings && layer._customLayerSettings.label) {
+    return layer._customLayerSettings.label;
+  }
+  if (layer._qgasMeta && layer._qgasMeta.legendName) {
+    return layer._qgasMeta.legendName;
+  }
+  return fallbackName || '';
+}
+
+function layerRepresentsNodeCategory(layer, fallbackName = '') {
+  if (!layer) return false;
+  if (layer === nodeLayer) return true;
+  const label = getLayerDisplayLabel(layer, fallbackName).toLowerCase();
+  if (label.includes('node') || label.includes('junction')) return true;
+  if (layer._qgasMeta && layer._qgasMeta.type && layer._qgasMeta.type.toLowerCase().includes('node')) {
+    return true;
+  }
+  if (layer._qgasMeta && layer._qgasMeta.elementKey && layer._qgasMeta.elementKey.toLowerCase().includes('node')) {
+    return true;
+  }
+  const geometryClass = (getLayerGeometryClassHint(layer) || '').toLowerCase();
+  return geometryClass === 'node';
+}
+
+function shouldHideLayerInEditMode(name, layer) {
+  if (!layer || layer === nodeLayer) return false;
+  if (!layerHasPointGeometry(layer)) return false;
+  if (layerRepresentsNodeCategory(layer, name)) return false;
+  return true;
+}
+
+function gatherPointLayersForEditVisibility() {
+  const layers = [];
+  const baseLayers = [
+    powerplantsLayer,
+    compressorsLayer,
+    lngLayer,
+    storageLayer,
+    consumptionLayer,
+    borderpointsLayer,
+    demandsLayer,
+    productionsLayer,
+    electrolyzersLayer
+  ];
+
+  baseLayers.forEach(layer => {
+    if (layer) layers.push(layer);
+  });
+
+  if (dynamicLayers && typeof dynamicLayers === 'object') {
+    Object.entries(dynamicLayers).forEach(([name, layer]) => {
+      if (shouldHideLayerInEditMode(name, layer)) {
+        layers.push(layer);
+      }
+    });
+  }
+
+  if (window.customLayers && typeof window.customLayers === 'object') {
+    Object.entries(window.customLayers).forEach(([name, layer]) => {
+      if (shouldHideLayerInEditMode(name, layer)) {
+        layers.push(layer);
+      }
+    });
+  }
+
+  return layers;
+}
+
+function applyEditGeometryVisibility(restrictToLinesOnly) {
+  if (!map) return;
+  if (restrictToLinesOnly) {
+    if (editGeometryVisibilityActive) return;
+    editGeometryVisibilityActive = true;
+    const candidates = gatherPointLayersForEditVisibility();
+    candidates.forEach(layer => {
+      if (layer && map.hasLayer(layer)) {
+        try {
+          map.removeLayer(layer);
+          editModeHiddenPointLayers.add(layer);
+        } catch (error) {
+          console.error('Error hiding layer for edit mode:', error);
+        }
+      }
+    });
+  } else {
+    if (!editGeometryVisibilityActive) return;
+    editModeHiddenPointLayers.forEach(layer => {
+      if (!layer) return;
+      try {
+        if (!map.hasLayer(layer) && typeof layer.addTo === 'function') {
+          layer.addTo(map);
+        }
+      } catch (error) {
+        console.error('Error restoring layer after edit mode:', error);
+      }
+    });
+    editModeHiddenPointLayers.clear();
+    editGeometryVisibilityActive = false;
+  }
+}
+
 function getLayerGeometryClassHint(layer) {
   if (!layer) return null;
   if (layer._customLayerSettings && layer._customLayerSettings.geometryClass) {
@@ -7484,6 +8388,36 @@ let splitNodeHighlightedLayers = [];
 let splitNodeSelectionHandlers = [];
 let splitNodeConnectedNodeId = null;
 let activeSplitSubnodeMarker = null;
+const splitNodeSuppressedLayers = new Set();
+
+function suppressSplitNodeInfoHandlers(layer) {
+  if (!layer || splitNodeSuppressedLayers.has(layer)) return;
+  if (layer._events && layer._events.click) {
+    layer._splitOriginalClickHandlers = layer._events.click.map(evt => ({ fn: evt.fn, ctx: evt.ctx }));
+  } else {
+    layer._splitOriginalClickHandlers = [];
+  }
+  layer.off('click');
+  if (typeof layer.closePopup === 'function') {
+    layer.closePopup();
+  }
+  splitNodeSuppressedLayers.add(layer);
+}
+
+function restoreSplitNodeInfoHandlers() {
+  splitNodeSuppressedLayers.forEach(layer => {
+    if (!layer) return;
+    layer.off('click');
+    const handlers = Array.isArray(layer._splitOriginalClickHandlers) ? layer._splitOriginalClickHandlers : [];
+    handlers.forEach(({ fn, ctx }) => {
+      if (typeof fn === 'function') {
+        layer.on('click', fn, ctx);
+      }
+    });
+    delete layer._splitOriginalClickHandlers;
+  });
+  splitNodeSuppressedLayers.clear();
+}
 
 function replaceNodeReferenceValue(props, keys, fromId, toId) {
   if (!props || !keys || !keys.length) return false;
@@ -7681,6 +8615,7 @@ function disableSplitNodeLineSelection() {
 function enableSplitNodeLineSelection(lineEntries, selectionSet) {
   disableSplitNodeLineSelection();
   lineEntries.forEach(entry => {
+    suppressSplitNodeInfoHandlers(entry.layer);
     const handler = (e) => {
       if (e && e.originalEvent && typeof e.originalEvent.stopPropagation === 'function') {
         e.originalEvent.stopPropagation();
@@ -7697,6 +8632,7 @@ function cleanupSplitNodeState(showMessage) {
   clearSplitNodeHighlights();
   removeSplitOkBtn();
   setActiveSplitSubnodeMarker(null);
+  restoreSplitNodeInfoHandlers();
   if (typeof setupPipelineInteractions === 'function') {
     setupPipelineInteractions();
   }
@@ -7754,21 +8690,15 @@ function splitNode(nodeLayerObj) {
 
 function performSplitNode(nodeLayerObj, latlng, origId, count) {
   const subnodes = [];
-  const markerRadius = 5;
+  const baseNodeStyle = getDefaultNodeStyleOptions();
+  const markerRadius = typeof baseNodeStyle.radius === 'number' ? baseNodeStyle.radius : 5;
   const pxOffset = markerRadius * 1.5;
   for (let i = 0; i < count; i++) {
     const angle = (2 * Math.PI * i) / count;
     const suffix = String.fromCharCode(97 + i);
     const newId = `${origId}_${suffix}`;
     const newProps = { ...nodeLayerObj.feature.properties, ID: newId, Type: 'Node', modified: true };
-    const marker = L.circleMarker([latlng.lat, latlng.lng], {
-      radius: markerRadius,
-      fillColor: '#f03',
-      color: '#900',
-      weight: 1,
-      opacity: 1,
-      fillOpacity: 0.7
-    });
+    const marker = L.circleMarker([latlng.lat, latlng.lng], { ...baseNodeStyle });
     captureOriginalMarkerStyle(marker, 'default');
     marker.feature = {
       type: 'Feature',
@@ -7795,6 +8725,21 @@ function performSplitNode(nodeLayerObj, latlng, origId, count) {
 let currentActiveTool = 'info';
 
 // Custom Popup System
+function resetCustomPopupDocking() {
+  const popup = document.getElementById('custom-popup');
+  const overlay = document.getElementById('custom-popup-overlay');
+  if (popup) popup.classList.remove('custom-popup--bottom-right');
+  if (overlay) overlay.classList.remove('custom-popup-overlay--nonmodal');
+}
+
+function dockCustomPopupBottomRight() {
+  const popup = document.getElementById('custom-popup');
+  const overlay = document.getElementById('custom-popup-overlay');
+  if (popup) popup.classList.add('custom-popup--bottom-right');
+  if (overlay) overlay.classList.add('custom-popup-overlay--nonmodal');
+}
+
+// Custom Popup System
 function showCustomPopup(title, content, buttons, extraElement = null) {
   console.log('showCustomPopup called with title:', title);
   const overlay = document.getElementById('custom-popup-overlay');
@@ -7808,6 +8753,8 @@ function showCustomPopup(title, content, buttons, extraElement = null) {
     return;
   }
   
+  resetCustomPopupDocking();
+
   titleEl.textContent = title;
   contentEl.innerHTML = content;
   
@@ -7840,6 +8787,7 @@ function showCustomPopup(title, content, buttons, extraElement = null) {
 }
 
 function closeCustomPopup() {
+  resetCustomPopupDocking();
   document.getElementById('custom-popup-overlay').style.display = 'none';
   document.getElementById('custom-popup').style.display = 'none';
 }
@@ -8052,6 +9000,7 @@ function updateActiveToolDisplay(mode) {
     'short-pipe': '📏 Short Pipe',
     'delete': '🗑️ Delete',
     'group-pipelines': '📦 Group Pipelines',
+    'add-plan': '🗺️ Add Infrastructure Plans',
     'divide-pipeline': '✂️ Divide Pipeline',
     'integrate-dataset': '🔗 Integrate Dataset',
     'split-node': '🔀 Split Node',
@@ -8265,6 +9214,12 @@ function selectTool(mode) {
     case 'group-pipelines':
       if (!checkContributorName()) return;
       startPipelineGrouping();
+      break;
+    case 'add-plan':
+      if (!checkContributorName()) return;
+      deactivateAllModes();
+      currentMode = 'add-plan';
+      startAddInfrastructurePlan();
       break;
     case 'divide-pipeline':
       if (!checkContributorName()) return;
@@ -8651,20 +9606,24 @@ function proceedWithAddPipeline() {
       function createDirectPipeline() {
         const latlngs = [startLatLng, endLatLng];
         const pipelineStyle = getPipelineStyleOptions();
+        const targetLayer = window.selectedPipelineLayer || pipelineLayer || drawnItems;
+        const destinationLayer = window.selectedPipelineLayer || drawnItems;
+        const lineType = getLineStyleForLayer(targetLayer);
+        const dashArray = getDashArrayForLineType(lineType);
         const polyline = L.polyline(latlngs, {
           pane: 'pipelinePane',
           color: pipelineStyle.color,
           weight: pipelineStyle.weight,
-          opacity: pipelineStyle.opacity ?? 0.8
-        }).addTo(window.selectedPipelineLayer || drawnItems);
+          opacity: pipelineStyle.opacity ?? 0.8,
+          dashArray: dashArray || null
+        }).addTo(destinationLayer);
         if (typeof polyline.bringToBack === 'function') {
           polyline.bringToBack();
         }
         polyline._originalColor = pipelineStyle.color;
         polyline._originalWeight = pipelineStyle.weight;
         polyline._originalOpacity = pipelineStyle.opacity ?? 0.8;
-        polyline._originalDashArray = polyline.options?.dashArray || null;
-        const targetLayer = window.selectedPipelineLayer || pipelineLayer || drawnItems;
+        polyline._originalDashArray = dashArray || null;
         const idContext = getLayerIdContext(targetLayer);
         const pipelineId = formatElementId(idContext.prefix, contributorInitials, getNextIdNumber(idContext.typeKey, targetLayer));
         const defaultAttrs = getDefaultPipelineAttributes(targetLayer);
@@ -8973,10 +9932,13 @@ function finalizeDrawnPipeline(polyline) {
   polyline.options = polyline.options || {};
   polyline.options.pane = 'pipelinePane';
   const pipelineStyle = getPipelineStyleOptions();
+  const lineType = getLineStyleForLayer(targetLayer);
+  const dashArray = getDashArrayForLineType(lineType);
   polyline.setStyle({
     color: pipelineStyle.color,
     weight: pipelineStyle.weight,
-    opacity: pipelineStyle.opacity ?? 0.8
+    opacity: pipelineStyle.opacity ?? 0.8,
+    dashArray: dashArray || null
   });
   if (typeof polyline.bringToBack === 'function') {
     polyline.bringToBack();
@@ -8984,7 +9946,7 @@ function finalizeDrawnPipeline(polyline) {
   polyline._originalColor = pipelineStyle.color;
   polyline._originalWeight = pipelineStyle.weight;
   polyline._originalOpacity = pipelineStyle.opacity ?? 0.8;
-  polyline._originalDashArray = polyline.options?.dashArray || null;
+  polyline._originalDashArray = dashArray || null;
   
   setPipelineInteraction(polyline, 'info');
   currentMode = 'info';
@@ -9015,7 +9977,10 @@ function createNewLayer(type, name) {
       geometryClass: 'line',
       defaultAttributes: { ID: '', Start_Node: '', End_Node: '' },
       idPrefix,
-      typeKey: name
+      typeKey: name,
+      color: uniqueColor,
+      size: defaultWeight,
+      lineStyle: 'solid'
     };
     layerGroup._customLayerSettings = layerSettings;
     facilityTypeMap[name] = idPrefix;
@@ -9030,17 +9995,24 @@ function createNewLayer(type, name) {
   } else if (type === 'inline') {
     // In-Line Element Layer (Punktlayer mit spezieller Behandlung)
     layerGroup = L.layerGroup().addTo(map);
+    const defaultColor = '#f03';
     // Zur Legende hinzufügen
-    addToLegend(name, 'point');
+    addToLegend(name, 'point', { color: defaultColor });
     isInline = true;
+    const defaultRadius = 6;
     const idPrefix = deriveCustomLayerPrefix(name);
     layerGroup._customLayerName = name;
+    layerGroup._customLayerColor = defaultColor;
     layerGroup._customLayerSettings = {
       name,
       geometryClass: 'inline',
       defaultAttributes: { ID: '', Type: name, Node: '' },
       idPrefix,
-      typeKey: name
+      typeKey: name,
+      color: defaultColor,
+      radius: defaultRadius,
+      size: defaultRadius,
+      shape: 'circle'
     };
     facilityTypeMap[name] = idPrefix;
     const metadata = registerLayerMetadata(name, {
@@ -9054,16 +10026,23 @@ function createNewLayer(type, name) {
   } else {
     // Punktlayer (Infrastructure)
     layerGroup = L.layerGroup().addTo(map);
+    const defaultColor = '#f03';
     // Zur Legende hinzufügen
-    addToLegend(name, 'point');
+    addToLegend(name, 'point', { color: defaultColor });
+    const defaultRadius = 6;
     const idPrefix = deriveCustomLayerPrefix(name);
     layerGroup._customLayerName = name;
+    layerGroup._customLayerColor = defaultColor;
     layerGroup._customLayerSettings = {
       name,
       geometryClass: 'point',
       defaultAttributes: { ID: '', Type: name, Node: '' },
       idPrefix,
-      typeKey: name
+      typeKey: name,
+      color: defaultColor,
+      radius: defaultRadius,
+      size: defaultRadius,
+      shape: 'circle'
     };
     facilityTypeMap[name] = idPrefix;
     const metadata = registerLayerMetadata(name, {
@@ -9074,6 +10053,7 @@ function createNewLayer(type, name) {
     assignMetadataToLayer(layerGroup, metadata);
     rememberLayerInstanceForElementKey(metadata.elementKey, layerGroup);
     dynamicLayers[name] = layerGroup;
+    invalidateStyleableLayerRegistry();
   }
   
   // Layer speichern
@@ -9096,9 +10076,17 @@ function addToLegend(name, layerType, options = {}) {
   const legendContainer = document.querySelector('.legend-control');
   if (!legendContainer) return;
   const resolvedColor = options.color || (layerType === 'line' ? '#0070f3' : '#f03');
+  const resolvedLineStyle = options.lineStyle || 'solid';
   
   const legendItem = document.createElement('div');
-  legendItem.innerHTML = `<label><input type="checkbox" id="toggle-${name.toLowerCase().replace(/\s+/g, '-')}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;">${layerType === 'line' ? `<div class="legend-line" style="background:${resolvedColor};"></div>` : `<span class="legend-icon" style="background:${resolvedColor};"></span>`}</span><span style="margin-left: 6px;">${name}</span></label><br>`;
+  const swatchMarkup = layerType === 'line'
+    ? '<div class="legend-line"></div>'
+    : `<span class="legend-icon" style="background:${resolvedColor};"></span>`;
+  legendItem.innerHTML = `<label><input type="checkbox" id="toggle-${name.toLowerCase().replace(/\s+/g, '-')}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;">${swatchMarkup}</span><span style="margin-left: 6px;">${name}</span></label><br>`;
+  if (layerType === 'line') {
+    const legendLineEl = legendItem.querySelector('.legend-line');
+    styleLegendLineElement(legendLineEl, resolvedColor, resolvedLineStyle);
+  }
   
   // Vor dem Select All Button einfügen
   const selectAllBtn = legendContainer.querySelector('#activate-all-btn');
@@ -9565,19 +10553,40 @@ function openGroupsPanel() {
 
 function highlightGroup(index) {
   const group = pipelineGroups[index];
-  
+  if (!group) return;
+
+  dockCustomPopupBottomRight();
+
   // Alle Pipelines zurücksetzen
   unhighlightAllGroups();
-  
-  // Gruppe rot markieren
-  if (pipelineLayer) {
-    pipelineLayer.eachLayer(layer => {
-      const pipelineId = layer.feature.properties.ID;
-      if (group.pipelines.includes(pipelineId)) {
-        layer.setStyle({color: 'red', weight: 5});
-        layer.bringToFront();
+
+  if (!pipelineLayer || !map) return;
+
+  const targetedIds = Array.isArray(group.pipelines) ? new Set(group.pipelines) : new Set();
+  const bounds = L.latLngBounds();
+
+  pipelineLayer.eachLayer(layer => {
+    const featureId = layer?.feature?.properties?.ID;
+    if (!targetedIds.has(featureId)) return;
+
+    layer.setStyle({ color: '#ff2b2b', weight: 6 });
+    if (layer._path) {
+      layer._path.style.stroke = '#ff2b2b';
+      layer._path.style.strokeWidth = '6';
+    }
+    if (typeof layer.bringToFront === 'function') {
+      layer.bringToFront();
+    }
+    if (typeof layer.getBounds === 'function') {
+      const layerBounds = layer.getBounds();
+      if (layerBounds && layerBounds.isValid()) {
+        bounds.extend(layerBounds);
       }
-    });
+    }
+  });
+
+  if (typeof bounds.isValid === 'function' && bounds.isValid()) {
+    map.fitBounds(bounds, { padding: [80, 80] });
   }
 }
 
@@ -9585,8 +10594,1125 @@ function unhighlightAllGroups() {
   if (pipelineLayer) {
     pipelineLayer.eachLayer(layer => {
       layer.setStyle({color: '#3388ff', weight: 3});
+      if (layer._path) {
+        layer._path.style.stroke = '#3388ff';
+        layer._path.style.strokeWidth = '3';
+      }
     });
   }
+}
+
+// ==================== Infrastructure Plan Georeferencing ====================
+
+const planLayers = [];
+const loadedPlanIds = new Set();
+const legendToggleRegistry = new Map();
+const planGeorefState = {
+  imageDataUrl: null,
+  imageName: '',
+  controlPairs: [],
+  pendingImagePoint: null,
+  awaitingMapPoint: false,
+  mapClickHandler: null,
+  imageNaturalWidth: 0,
+  imageNaturalHeight: 0,
+  zoom: 1,
+  markers: new Map(),
+  pendingMarkerEl: null,
+  activePlanId: null,
+  imageReady: false,
+  viewportDragging: false,
+  viewportDragMoved: false,
+  viewportPointerActive: false,
+  viewportPointerId: null,
+  viewportDragStartX: 0,
+  viewportDragStartY: 0,
+  viewportStartScrollLeft: 0,
+  viewportStartScrollTop: 0
+};
+
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+function normalizePlanControlPairs(controlPairs = []) {
+  if (!Array.isArray(controlPairs)) return [];
+  return controlPairs
+    .map((pair, idx) => {
+      if (!pair || !pair.image || typeof pair.image.x !== 'number' || typeof pair.image.y !== 'number') {
+        return null;
+      }
+      const lat = pair.latlng?.lat;
+      const lng = pair.latlng?.lng;
+      if (typeof lat !== 'number' || typeof lng !== 'number') {
+        return null;
+      }
+      return {
+        id: pair.id || `plan-pt-${idx}`,
+        image: { x: pair.image.x, y: pair.image.y },
+        latlng: L.latLng(lat, lng)
+      };
+    })
+    .filter(Boolean);
+}
+
+function sanitizePlanFolderSegment(segment) {
+  const cleaned = sanitizeRelativePath(segment || '')
+    .replace(/^\.+\/+/, '')
+    .replace(/^Infrastructure_Plans\/+/, '')
+    .replace(/\.\./g, '')
+    .replace(/^\//, '');
+  return cleaned;
+}
+
+function initializePlanGeorefUI() {
+  if (window._planGeorefInitialized) return;
+  window._planGeorefInitialized = true;
+
+  const fileInput = document.getElementById('plan-file-input');
+  const selectMapBtn = document.getElementById('plan-select-map-point');
+  const clearPendingBtn = document.getElementById('plan-clear-pending');
+  const finishBtn = document.getElementById('plan-finish-btn');
+  const closeBtn = document.getElementById('plan-georef-close-btn');
+  const resumeBtn = document.getElementById('plan-georef-resume-btn');
+  const zoomSlider = document.getElementById('plan-zoom-slider');
+  const imageStage = document.getElementById('plan-image-stage');
+  const imageEl = document.getElementById('plan-georef-image');
+  const viewport = document.getElementById('plan-image-viewport');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', handlePlanFileSelection);
+  }
+  if (selectMapBtn) {
+    selectMapBtn.addEventListener('click', requestPlanMapPoint);
+  }
+  if (clearPendingBtn) {
+    clearPendingBtn.addEventListener('click', () => {
+      clearPendingPlanPoint();
+    });
+  }
+  if (finishBtn) {
+    finishBtn.addEventListener('click', finalizePlanGeoref);
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', cancelPlanGeorefWorkflow);
+  }
+  if (resumeBtn) {
+    resumeBtn.addEventListener('click', resumePlanOverlayFromMap);
+  }
+  if (zoomSlider) {
+    zoomSlider.addEventListener('input', handlePlanZoomChange);
+  }
+  if (imageStage) {
+    imageStage.addEventListener('click', handlePlanImageClick);
+  }
+  if (viewport) {
+    setupPlanViewportInteractions(viewport);
+  }
+}
+
+function setupPlanViewportInteractions(viewport) {
+  if (!viewport || viewport._planViewportInitialized) return;
+  viewport._planViewportInitialized = true;
+  viewport.addEventListener('pointerdown', handlePlanViewportPointerDown);
+  viewport.addEventListener('pointermove', handlePlanViewportPointerMove);
+  viewport.addEventListener('pointerup', handlePlanViewportPointerUp);
+  viewport.addEventListener('pointerleave', handlePlanViewportPointerUp);
+  viewport.addEventListener('pointercancel', handlePlanViewportPointerUp);
+  viewport.addEventListener('wheel', handlePlanViewportWheel, { passive: false });
+}
+
+function handlePlanViewportPointerDown(event) {
+  if (event.button !== 0) return;
+  const viewport = event.currentTarget;
+  planGeorefState.viewportPointerActive = true;
+  planGeorefState.viewportDragging = false;
+  planGeorefState.viewportDragMoved = false;
+  planGeorefState.viewportPointerId = event.pointerId;
+  planGeorefState.viewportDragStartX = event.clientX;
+  planGeorefState.viewportDragStartY = event.clientY;
+  planGeorefState.viewportStartScrollLeft = viewport.scrollLeft;
+  planGeorefState.viewportStartScrollTop = viewport.scrollTop;
+}
+
+function handlePlanViewportPointerMove(event) {
+  if (!planGeorefState.viewportPointerActive || planGeorefState.viewportPointerId !== event.pointerId) return;
+  const viewport = event.currentTarget;
+  const dx = event.clientX - planGeorefState.viewportDragStartX;
+  const dy = event.clientY - planGeorefState.viewportDragStartY;
+  if (!planGeorefState.viewportDragging) {
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      planGeorefState.viewportDragging = true;
+      planGeorefState.viewportDragMoved = true;
+      viewport.classList.add('plan-viewport--dragging');
+      try {
+        viewport.setPointerCapture(event.pointerId);
+      } catch (err) {
+        // ignore if capture fails
+      }
+    } else {
+      return;
+    }
+  }
+  viewport.scrollLeft = planGeorefState.viewportStartScrollLeft - dx;
+  viewport.scrollTop = planGeorefState.viewportStartScrollTop - dy;
+}
+
+function handlePlanViewportPointerUp(event) {
+  if (!planGeorefState.viewportPointerActive) return;
+  const pointerId = planGeorefState.viewportPointerId;
+  if (event && pointerId !== null && event.pointerId !== pointerId) return;
+  const viewport = event ? event.currentTarget : document.getElementById('plan-image-viewport');
+  const wasDragging = planGeorefState.viewportDragging;
+  planGeorefState.viewportPointerActive = false;
+  planGeorefState.viewportDragging = false;
+  planGeorefState.viewportPointerId = null;
+  if (viewport) {
+    viewport.classList.remove('plan-viewport--dragging');
+    if (wasDragging && pointerId !== null) {
+      try {
+        viewport.releasePointerCapture(pointerId);
+      } catch (err) {
+        // ignore if pointer already released
+      }
+    }
+  }
+  setTimeout(() => {
+    if (!planGeorefState.viewportDragging) {
+      planGeorefState.viewportDragMoved = false;
+    }
+  }, 0);
+}
+
+function handlePlanViewportWheel(event) {
+  if (!planGeorefState.imageReady) return;
+  event.preventDefault();
+  const slider = document.getElementById('plan-zoom-slider');
+  if (!slider) return;
+  const min = parseInt(slider.min, 10) || 25;
+  const max = parseInt(slider.max, 10) || 200;
+  const current = parseInt(slider.value, 10) || 100;
+  const step = event.deltaY < 0 ? 5 : -5;
+  let next = Math.min(max, Math.max(min, current + step));
+  if (next === current) return;
+  const viewport = event.currentTarget;
+  const rect = viewport.getBoundingClientRect();
+  const focalX = viewport.scrollLeft + (event.clientX - rect.left);
+  const focalY = viewport.scrollTop + (event.clientY - rect.top);
+  const oldWidth = planGeorefState.imageNaturalWidth * planGeorefState.zoom || 1;
+  const oldHeight = planGeorefState.imageNaturalHeight * planGeorefState.zoom || 1;
+  slider.value = next;
+  handlePlanZoomChange({ target: slider });
+  const newWidth = planGeorefState.imageNaturalWidth * planGeorefState.zoom || oldWidth;
+  const newHeight = planGeorefState.imageNaturalHeight * planGeorefState.zoom || oldHeight;
+  const scaleX = newWidth / oldWidth;
+  const scaleY = newHeight / oldHeight;
+  viewport.scrollLeft = Math.max(0, (focalX * scaleX) - (event.clientX - rect.left));
+  viewport.scrollTop = Math.max(0, (focalY * scaleY) - (event.clientY - rect.top));
+}
+
+function startAddInfrastructurePlan() {
+  initializePlanGeorefUI();
+  const fileInput = document.getElementById('plan-file-input');
+  if (!fileInput) {
+    showInfoPopup('File input element not available.', 'Add Infrastructure Plan');
+    return;
+  }
+  fileInput.value = '';
+  fileInput.click();
+}
+
+function handlePlanFileSelection(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!/\.(jpe?g|png)$/i.test(file.name)) {
+    showInfoPopup('Please select a JPG or PNG image.', 'Add Infrastructure Plan');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(loadEvent) {
+    planGeorefState.imageDataUrl = loadEvent.target.result;
+    planGeorefState.imageName = file.name;
+    planGeorefState.controlPairs = [];
+    planGeorefState.pendingImagePoint = null;
+    planGeorefState.awaitingMapPoint = false;
+    planGeorefState.mapClickHandler = null;
+    planGeorefState.imageReady = false;
+    planGeorefState.viewportDragMoved = false;
+    planGeorefState.viewportDragging = false;
+    planGeorefState.viewportPointerId = null;
+    clearAllPlanMarkers();
+
+    showCustomPopup(
+      '🗺️ Add Infrastructure Plan',
+      '<p style="text-align:center; margin: 15px 0;">Now start georeferencing the image by selecting common points in the picture and on the map.</p>',
+      [{ text: 'Start', type: 'primary', onClick: () => { openPlanGeorefOverlay(); } }]
+    );
+  };
+  reader.onerror = () => {
+    showInfoPopup('Could not read the selected file.', 'Add Infrastructure Plan');
+  };
+  reader.readAsDataURL(file);
+}
+
+function openPlanGeorefOverlay() {
+  const overlay = document.getElementById('plan-georef-overlay');
+  const subtitle = document.getElementById('plan-georef-subtitle');
+  const imageEl = document.getElementById('plan-georef-image');
+  const resumeBtn = document.getElementById('plan-georef-resume-btn');
+  const pointsList = document.getElementById('plan-points-list');
+  if (!overlay || !imageEl) return;
+
+  overlay.style.display = 'flex';
+  if (resumeBtn) resumeBtn.style.display = 'none';
+  if (subtitle) subtitle.textContent = planGeorefState.imageName || 'Plan image';
+  if (pointsList) {
+    pointsList.innerHTML = '<p style="color:#666; text-align:center; margin:40px 0;">No control points yet.</p>';
+  }
+
+  imageEl.onload = () => {
+    planGeorefState.imageNaturalWidth = imageEl.naturalWidth;
+    planGeorefState.imageNaturalHeight = imageEl.naturalHeight;
+    planGeorefState.imageReady = true;
+    resetPlanImageSizing();
+  };
+  imageEl.src = planGeorefState.imageDataUrl;
+}
+
+function closePlanGeorefOverlay() {
+  const overlay = document.getElementById('plan-georef-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function cancelPlanGeorefWorkflow() {
+  cancelPlanMapSelection();
+  closePlanGeorefOverlay();
+  planGeorefState.imageDataUrl = null;
+  planGeorefState.imageName = '';
+  planGeorefState.controlPairs = [];
+  planGeorefState.pendingImagePoint = null;
+  clearAllPlanMarkers();
+  planGeorefState.activePlanId = null;
+  planGeorefState.imageReady = false;
+  resetPlanPointsUI();
+}
+
+function clearAllPlanMarkers() {
+  const markerLayer = document.getElementById('plan-marker-layer');
+  if (markerLayer) {
+    markerLayer.innerHTML = '';
+  }
+  planGeorefState.markers = new Map();
+  planGeorefState.pendingMarkerEl = null;
+}
+
+function resetPlanPointsUI() {
+  const pointsList = document.getElementById('plan-points-list');
+  if (pointsList) {
+    pointsList.innerHTML = '<p style="color:#666; text-align:center; margin:40px 0;">No control points yet.</p>';
+  }
+  const selectBtn = document.getElementById('plan-select-map-point');
+  const clearBtn = document.getElementById('plan-clear-pending');
+  const finishBtn = document.getElementById('plan-finish-btn');
+  if (selectBtn) selectBtn.disabled = true;
+  if (clearBtn) clearBtn.disabled = true;
+  if (finishBtn) finishBtn.disabled = true;
+}
+
+function resetPlanImageSizing() {
+  const imageEl = document.getElementById('plan-georef-image');
+  const stage = document.getElementById('plan-image-stage');
+  const markerLayer = document.getElementById('plan-marker-layer');
+  const zoomSlider = document.getElementById('plan-zoom-slider');
+  if (!imageEl || !stage) return;
+
+  const naturalWidth = planGeorefState.imageNaturalWidth || imageEl.naturalWidth || 1;
+  const naturalHeight = planGeorefState.imageNaturalHeight || imageEl.naturalHeight || 1;
+  const viewport = document.getElementById('plan-image-viewport');
+  let initialScale = 1;
+  if (viewport) {
+    const fitScaleX = (viewport.clientWidth - 40) / naturalWidth;
+    const fitScaleY = (viewport.clientHeight - 40) / naturalHeight;
+    initialScale = Math.min(1, Math.max(0.1, Math.min(fitScaleX, fitScaleY)));
+  }
+  planGeorefState.zoom = initialScale;
+  if (zoomSlider) {
+    zoomSlider.value = Math.round(initialScale * 100);
+  }
+  const displayWidth = naturalWidth * planGeorefState.zoom;
+  const displayHeight = naturalHeight * planGeorefState.zoom;
+  imageEl.style.width = `${displayWidth}px`;
+  imageEl.style.height = `${displayHeight}px`;
+  stage.style.width = `${displayWidth}px`;
+  stage.style.height = `${displayHeight}px`;
+  if (markerLayer) {
+    markerLayer.style.width = `${displayWidth}px`;
+    markerLayer.style.height = `${displayHeight}px`;
+  }
+  if (viewport) {
+    viewport.scrollLeft = Math.max(0, (displayWidth - viewport.clientWidth) / 2);
+    viewport.scrollTop = Math.max(0, (displayHeight - viewport.clientHeight) / 2);
+  }
+  updatePlanMarkers();
+}
+
+function handlePlanZoomChange(event) {
+  const slider = event.target;
+  const scale = Math.max(0.1, parseInt(slider.value, 10) / 100);
+  planGeorefState.zoom = scale;
+  const imageEl = document.getElementById('plan-georef-image');
+  const stage = document.getElementById('plan-image-stage');
+  const markerLayer = document.getElementById('plan-marker-layer');
+  if (!imageEl || !stage || !markerLayer) return;
+  const displayWidth = planGeorefState.imageNaturalWidth * scale;
+  const displayHeight = planGeorefState.imageNaturalHeight * scale;
+  imageEl.style.width = `${displayWidth}px`;
+  imageEl.style.height = `${displayHeight}px`;
+  stage.style.width = `${displayWidth}px`;
+  stage.style.height = `${displayHeight}px`;
+  markerLayer.style.width = `${displayWidth}px`;
+  markerLayer.style.height = `${displayHeight}px`;
+  updatePlanMarkers();
+}
+
+function handlePlanImageClick(event) {
+  if (planGeorefState.awaitingMapPoint || !planGeorefState.imageReady) return;
+  if (planGeorefState.viewportDragging) return;
+  if (planGeorefState.viewportDragMoved) {
+    planGeorefState.viewportDragMoved = false;
+    return;
+  }
+  const imageEl = document.getElementById('plan-georef-image');
+  const markerLayer = document.getElementById('plan-marker-layer');
+  if (!imageEl || !markerLayer) return;
+  const rect = imageEl.getBoundingClientRect();
+  const displayWidth = rect.width;
+  const displayHeight = rect.height;
+  if (!displayWidth || !displayHeight) return;
+  const relativeX = event.clientX - rect.left;
+  const relativeY = event.clientY - rect.top;
+  if (relativeX < 0 || relativeY < 0 || relativeX > displayWidth || relativeY > displayHeight) return;
+  const normalizedX = relativeX / displayWidth;
+  const normalizedY = relativeY / displayHeight;
+
+  const imageX = normalizedX * planGeorefState.imageNaturalWidth;
+  const imageY = normalizedY * planGeorefState.imageNaturalHeight;
+  planGeorefState.pendingImagePoint = { x: imageX, y: imageY };
+  const selectBtn = document.getElementById('plan-select-map-point');
+  const clearBtn = document.getElementById('plan-clear-pending');
+  if (selectBtn) selectBtn.disabled = false;
+  if (clearBtn) clearBtn.disabled = false;
+  drawPendingPlanMarker(normalizedX, normalizedY);
+  planGeorefState.viewportDragMoved = false;
+}
+
+function drawPendingPlanMarker(normX, normY) {
+  const markerLayer = document.getElementById('plan-marker-layer');
+  if (!markerLayer) return;
+  const displayWidth = planGeorefState.imageNaturalWidth * planGeorefState.zoom;
+  const displayHeight = planGeorefState.imageNaturalHeight * planGeorefState.zoom;
+  const x = normX * displayWidth;
+  const y = normY * displayHeight;
+  if (!planGeorefState.pendingMarkerEl) {
+    const marker = document.createElement('div');
+    marker.className = 'plan-image-marker plan-image-marker--pending';
+    markerLayer.appendChild(marker);
+    planGeorefState.pendingMarkerEl = marker;
+  }
+  planGeorefState.pendingMarkerEl.style.left = `${x}px`;
+  planGeorefState.pendingMarkerEl.style.top = `${y}px`;
+  planGeorefState.pendingMarkerEl.textContent = '+';
+}
+
+function clearPendingPlanPoint() {
+  planGeorefState.pendingImagePoint = null;
+  const selectBtn = document.getElementById('plan-select-map-point');
+  const clearBtn = document.getElementById('plan-clear-pending');
+  if (selectBtn) selectBtn.disabled = true;
+  if (clearBtn) clearBtn.disabled = true;
+  if (planGeorefState.pendingMarkerEl) {
+    planGeorefState.pendingMarkerEl.remove();
+    planGeorefState.pendingMarkerEl = null;
+  }
+}
+
+function requestPlanMapPoint() {
+  if (!planGeorefState.pendingImagePoint || planGeorefState.awaitingMapPoint) return;
+  planGeorefState.awaitingMapPoint = true;
+  const overlay = document.getElementById('plan-georef-overlay');
+  const resumeBtn = document.getElementById('plan-georef-resume-btn');
+  if (overlay) overlay.style.display = 'none';
+  if (resumeBtn) resumeBtn.style.display = 'block';
+  planGeorefState.mapClickHandler = function(e) {
+    completePlanMapSelection(e.latlng);
+  };
+  if (map && planGeorefState.mapClickHandler) {
+    map.once('click', planGeorefState.mapClickHandler);
+    map.getContainer().style.cursor = 'crosshair';
+  }
+  showTransientMessage('Click the matching location on the map.');
+}
+
+function resumePlanOverlayFromMap() {
+  const resumeBtn = document.getElementById('plan-georef-resume-btn');
+  if (resumeBtn) resumeBtn.style.display = 'none';
+  const overlay = document.getElementById('plan-georef-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  if (planGeorefState.awaitingMapPoint) {
+    cancelPlanMapSelection();
+  }
+}
+
+function cancelPlanMapSelection() {
+  if (map) {
+    map.off('click', planGeorefState.mapClickHandler);
+    map.getContainer().style.cursor = '';
+  }
+  planGeorefState.awaitingMapPoint = false;
+  planGeorefState.mapClickHandler = null;
+  const resumeBtn = document.getElementById('plan-georef-resume-btn');
+  if (resumeBtn) resumeBtn.style.display = 'none';
+}
+
+function completePlanMapSelection(latlng) {
+  cancelPlanMapSelection();
+  if (!planGeorefState.pendingImagePoint) return;
+  const overlay = document.getElementById('plan-georef-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  const pairId = `plan-pt-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+  const newPair = {
+    id: pairId,
+    image: { ...planGeorefState.pendingImagePoint },
+    latlng: L.latLng(latlng)
+  };
+  planGeorefState.controlPairs.push(newPair);
+  addPlanMarkerForPair(newPair);
+  updatePlanPointsList();
+  clearPendingPlanPoint();
+  updatePlanFinishState();
+}
+
+function addPlanMarkerForPair(pair) {
+  const markerLayer = document.getElementById('plan-marker-layer');
+  if (!markerLayer) return;
+  const marker = document.createElement('div');
+  marker.className = 'plan-image-marker';
+  marker.dataset.pairId = pair.id;
+  markerLayer.appendChild(marker);
+  planGeorefState.markers.set(pair.id, marker);
+  updatePlanMarkerPosition(pair.id);
+}
+
+function updatePlanMarkers() {
+  planGeorefState.controlPairs.forEach(pair => {
+    updatePlanMarkerPosition(pair.id);
+  });
+  if (planGeorefState.pendingMarkerEl && planGeorefState.pendingImagePoint) {
+    const normX = planGeorefState.pendingImagePoint.x / planGeorefState.imageNaturalWidth;
+    const normY = planGeorefState.pendingImagePoint.y / planGeorefState.imageNaturalHeight;
+    drawPendingPlanMarker(normX, normY);
+  }
+}
+
+function updatePlanMarkerPosition(pairId) {
+  const marker = planGeorefState.markers.get(pairId);
+  const pair = planGeorefState.controlPairs.find(p => p.id === pairId);
+  if (!marker || !pair) return;
+  const displayWidth = planGeorefState.imageNaturalWidth * planGeorefState.zoom;
+  const displayHeight = planGeorefState.imageNaturalHeight * planGeorefState.zoom;
+  const x = (pair.image.x / planGeorefState.imageNaturalWidth) * displayWidth;
+  const y = (pair.image.y / planGeorefState.imageNaturalHeight) * displayHeight;
+  marker.style.left = `${x}px`;
+  marker.style.top = `${y}px`;
+  marker.textContent = planGeorefState.controlPairs.indexOf(pair) + 1;
+}
+
+function updatePlanPointsList() {
+  const list = document.getElementById('plan-points-list');
+  if (!list) return;
+  if (!planGeorefState.controlPairs.length) {
+    list.innerHTML = '<p style="color:#666; text-align:center; margin:40px 0;">No control points yet.</p>';
+    return;
+  }
+  list.innerHTML = '';
+  planGeorefState.controlPairs.forEach((pair, index) => {
+    const item = document.createElement('div');
+    item.className = 'plan-point-item';
+    item.innerHTML = `
+      <div>
+        <div style="font-weight:600;">Point ${index + 1}</div>
+        <div style="font-size:0.85rem; color:#555;">Image: (${pair.image.x.toFixed(1)}, ${pair.image.y.toFixed(1)})</div>
+        <div style="font-size:0.85rem; color:#555;">Map: (${pair.latlng.lat.toFixed(5)}, ${pair.latlng.lng.toFixed(5)})</div>
+      </div>
+      <button type="button" onclick="removePlanControlPoint('${pair.id}')">Remove</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function removePlanControlPoint(pairId) {
+  const idx = planGeorefState.controlPairs.findIndex(p => p.id === pairId);
+  if (idx === -1) return;
+  planGeorefState.controlPairs.splice(idx, 1);
+  const marker = planGeorefState.markers.get(pairId);
+  if (marker) marker.remove();
+  planGeorefState.markers.delete(pairId);
+  updatePlanPointsList();
+  updatePlanMarkers();
+  updatePlanFinishState();
+}
+
+function updatePlanFinishState() {
+  const finishBtn = document.getElementById('plan-finish-btn');
+  if (finishBtn) {
+    finishBtn.disabled = planGeorefState.controlPairs.length < 3;
+  }
+}
+
+function finalizePlanGeoref() {
+  if (planGeorefState.controlPairs.length < 3) {
+    showInfoPopup('Please add at least three control points.', 'Add Infrastructure Plan');
+    return;
+  }
+  const transform = computePlanAffineTransform(planGeorefState.controlPairs, map);
+  if (!transform) {
+    showInfoPopup('Unable to compute a stable transformation. Try selecting non-collinear points.', 'Add Infrastructure Plan');
+    return;
+  }
+  const planConfig = {
+    id: `plan-${Date.now()}`,
+    name: planGeorefState.imageName || 'Plan layer',
+    imageDataUrl: planGeorefState.imageDataUrl,
+    imageWidth: planGeorefState.imageNaturalWidth,
+    imageHeight: planGeorefState.imageNaturalHeight,
+    controlPairs: planGeorefState.controlPairs.map(pair => ({
+      id: pair.id,
+      image: { ...pair.image },
+      latlng: L.latLng(pair.latlng)
+    }))
+  };
+  const overlay = addPlanOverlayFromConfig(planConfig);
+  if (overlay) {
+    showInfoPopup(`Plan "${planConfig.name}" added to the map. Use the legend to toggle visibility.`, 'Add Infrastructure Plan');
+  }
+  cancelPlanGeorefWorkflow();
+}
+
+function computePlanAffineTransform(pairs, mapInstance = map) {
+  if (!pairs || pairs.length < 3) return null;
+  const xTargets = [];
+  const yTargets = [];
+  const A = [];
+  pairs.forEach((pair, idx) => {
+    const latlng = pair.latlng;
+    const layerPoint = mapInstance.latLngToLayerPoint(latlng);
+    xTargets[idx] = layerPoint.x;
+    yTargets[idx] = layerPoint.y;
+    A[idx] = [pair.image.x, pair.image.y, 1];
+  });
+  const coeffsX = solveAffineCoefficients(A, xTargets);
+  const coeffsY = solveAffineCoefficients(A, yTargets);
+  if (!coeffsX || !coeffsY) return null;
+  return {
+    a: coeffsX[0],
+    b: coeffsX[1],
+    c: coeffsX[2],
+    d: coeffsY[0],
+    e: coeffsY[1],
+    f: coeffsY[2]
+  };
+}
+
+function solveAffineCoefficients(A, target) {
+  if (!A.length) return null;
+  let sXX = 0, sXY = 0, sYY = 0, sX = 0, sY = 0, sXTarget = 0, sYTarget = 0, sTarget = 0;
+  const n = A.length;
+  for (let i = 0; i < n; i++) {
+    const x = A[i][0];
+    const y = A[i][1];
+    const value = target[i];
+    sXX += x * x;
+    sXY += x * y;
+    sYY += y * y;
+    sX += x;
+    sY += y;
+    sXTarget += x * value;
+    sYTarget += y * value;
+    sTarget += value;
+  }
+  const matrix = [
+    [sXX, sXY, sX],
+    [sXY, sYY, sY],
+    [sX,  sY,  n ]
+  ];
+  const vector = [sXTarget, sYTarget, sTarget];
+  return solve3x3(matrix, vector);
+}
+
+function solve3x3(matrix, vector) {
+  const m = [
+    [matrix[0][0], matrix[0][1], matrix[0][2], vector[0]],
+    [matrix[1][0], matrix[1][1], matrix[1][2], vector[1]],
+    [matrix[2][0], matrix[2][1], matrix[2][2], vector[2]]
+  ];
+  for (let i = 0; i < 3; i++) {
+    let pivotRow = i;
+    for (let r = i + 1; r < 3; r++) {
+      if (Math.abs(m[r][i]) > Math.abs(m[pivotRow][i])) {
+        pivotRow = r;
+      }
+    }
+    if (Math.abs(m[pivotRow][i]) < 1e-8) return null;
+    if (pivotRow !== i) {
+      const temp = m[i];
+      m[i] = m[pivotRow];
+      m[pivotRow] = temp;
+    }
+    const pivot = m[i][i];
+    for (let c = i; c < 4; c++) {
+      m[i][c] /= pivot;
+    }
+    for (let r = 0; r < 3; r++) {
+      if (r === i) continue;
+      const factor = m[r][i];
+      for (let c = i; c < 4; c++) {
+        m[r][c] -= factor * m[i][c];
+      }
+    }
+  }
+  return [m[0][3], m[1][3], m[2][3]];
+}
+
+function unregisterLegendToggle(elementKey) {
+  if (!elementKey || !legendToggleRegistry.has(elementKey)) return;
+  const entry = legendToggleRegistry.get(elementKey);
+  const { checkbox, handler } = entry || {};
+  if (checkbox && handler) {
+    checkbox.removeEventListener('change', handler);
+  }
+  legendToggleRegistry.delete(elementKey);
+}
+
+function registerLegendToggle({ checkbox, resolveLayers, elementKey }) {
+  if (!checkbox || typeof resolveLayers !== 'function') return null;
+  if (elementKey) {
+    unregisterLegendToggle(elementKey);
+  }
+  const key = elementKey || Symbol('legendToggle');
+  const handler = () => {
+    if (!map) return;
+    const resolved = resolveLayers();
+    const layers = Array.isArray(resolved) ? resolved : [resolved];
+    layers.forEach(layer => {
+      if (!layer) return;
+      const shouldShow = !!checkbox.checked;
+      const isVisible = map.hasLayer(layer);
+      if (shouldShow && !isVisible) {
+        layer.addTo(map);
+      } else if (!shouldShow && isVisible) {
+        map.removeLayer(layer);
+      }
+    });
+  };
+  checkbox.addEventListener('change', handler);
+  legendToggleRegistry.set(key, { checkbox, handler });
+  handler();
+  return key;
+}
+
+function addPlanLayerToLegend(planConfig, overlay) {
+  const legendContainer = document.querySelector('.legend-control');
+  if (!legendContainer) return;
+  const entry = document.createElement('div');
+  entry.className = 'legend-plan-entry';
+  const checkboxId = `toggle-${planConfig.id}`;
+  entry.innerHTML = `
+    <label>
+      <input type="checkbox" id="${checkboxId}" checked style="margin-right: 6px;">
+      <span class="legend-icon" style="background:linear-gradient(135deg, rgba(33,37,41,0.15), rgba(33,37,41,0.85)); border:1px solid rgba(0,0,0,0.35);"></span>
+      <span>${planConfig.name}</span>
+    </label>
+  `;
+  const selectAllBtn = legendContainer.querySelector('#activate-all-btn');
+  if (selectAllBtn && selectAllBtn.parentElement) {
+    legendContainer.insertBefore(entry, selectAllBtn.parentElement);
+  } else {
+    legendContainer.appendChild(entry);
+  }
+  const checkbox = entry.querySelector('input');
+  if (checkbox) {
+    registerLegendToggle({
+      checkbox,
+      resolveLayers: () => [overlay],
+      elementKey: planConfig.id
+    });
+  }
+}
+
+function showTransientMessage(message) {
+  const existing = document.getElementById('plan-transient-message');
+  if (existing) existing.remove();
+  const msg = document.createElement('div');
+  msg.id = 'plan-transient-message';
+  msg.textContent = message;
+  msg.style.position = 'fixed';
+  msg.style.top = '20px';
+  msg.style.left = '50%';
+  msg.style.transform = 'translateX(-50%)';
+  msg.style.background = 'rgba(13,110,253,0.9)';
+  msg.style.color = '#fff';
+  msg.style.padding = '10px 20px';
+  msg.style.borderRadius = '999px';
+  msg.style.zIndex = '16000';
+  document.body.appendChild(msg);
+  setTimeout(() => {
+    msg.style.opacity = '0';
+    msg.style.transition = 'opacity 0.4s ease';
+    setTimeout(() => msg.remove(), 400);
+  }, 2000);
+}
+
+const PlanImageLayer = L.Layer.extend({
+  initialize(config, options = {}) {
+    L.setOptions(this, options);
+    this._config = config;
+    this._image = new Image();
+    this._image.src = config.imageDataUrl;
+    this._imageLoaded = false;
+    this._image.onload = () => {
+      this._imageLoaded = true;
+      this._config.imageWidth = config.imageWidth || this._image.naturalWidth;
+      this._config.imageHeight = config.imageHeight || this._image.naturalHeight;
+      this._reset();
+    };
+  },
+  onAdd(mapInstance) {
+    this._map = mapInstance;
+    const paneName = this.options.pane || 'planOverlayPane';
+    const panes = this._map.getPanes();
+    const targetPane = panes[paneName] || panes.overlayPane;
+    this._pane = targetPane;
+    this._canvas = L.DomUtil.create('canvas', 'plan-overlay-canvas', targetPane);
+    this._canvas.style.pointerEvents = 'none';
+    this._ctx = this._canvas.getContext('2d');
+    this._map.on('zoom viewreset move resize', this._reset, this);
+    if (this._imageLoaded) {
+      this._reset();
+    }
+  },
+  onRemove(mapInstance) {
+    mapInstance.off('zoom viewreset move resize', this._reset, this);
+    if (this._canvas && this._canvas.parentNode) {
+      this._canvas.parentNode.removeChild(this._canvas);
+    }
+    this._canvas = null;
+    this._ctx = null;
+    this._pane = null;
+  },
+  setOpacity(opacity) {
+    this.options.opacity = opacity;
+    this._reset();
+  },
+  _reset() {
+    if (!this._map || !this._imageLoaded || !this._config.controlPairs.length || !this._canvas || !this._ctx) return;
+    const transform = computePlanAffineTransform(this._config.controlPairs, this._map);
+    if (!transform) {
+      this._ctx.clearRect(0, 0, this._canvas.width || 0, this._canvas.height || 0);
+      return;
+    }
+    const width = this._config.imageWidth;
+    const height = this._config.imageHeight;
+    const corners = [
+      applyAffine(transform, 0, 0),
+      applyAffine(transform, width, 0),
+      applyAffine(transform, 0, height),
+      applyAffine(transform, width, height)
+    ];
+    const xs = corners.map(c => c.x);
+    const ys = corners.map(c => c.y);
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const maxX = Math.max(...xs);
+    const maxY = Math.max(...ys);
+    const canvasWidth = Math.max(1, Math.ceil(maxX - minX));
+    const canvasHeight = Math.max(1, Math.ceil(maxY - minY));
+    this._canvas.width = canvasWidth;
+    this._canvas.height = canvasHeight;
+    L.DomUtil.setPosition(this._canvas, L.point(minX, minY));
+    const ctx = this._ctx;
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.save();
+    ctx.globalAlpha = this.options.opacity ?? 0.75;
+    ctx.setTransform(
+      transform.a,
+      transform.d,
+      transform.b,
+      transform.e,
+      transform.c - minX,
+      transform.f - minY
+    );
+    ctx.drawImage(this._image, 0, 0, width, height);
+    ctx.restore();
+  }
+});
+
+function applyAffine(transform, x, y) {
+  return {
+    x: transform.a * x + transform.b * y + transform.c,
+    y: transform.d * x + transform.e * y + transform.f
+  };
+}
+
+function addPlanOverlayFromConfig(planConfig, options = {}) {
+  if (!planConfig || !Array.isArray(planConfig.controlPairs) || planConfig.controlPairs.length < 3) {
+    console.warn('Cannot add plan overlay without at least three control pairs.');
+    return null;
+  }
+  const existing = planLayers.find(entry => entry.id === planConfig.id);
+  if (existing) {
+    return existing.layer;
+  }
+  const overlay = new PlanImageLayer(planConfig, {
+    opacity: options.opacity ?? 0.75,
+    pane: 'planOverlayPane'
+  });
+  overlay.addTo(map);
+  planLayers.push({ id: planConfig.id, name: planConfig.name, layer: overlay, config: planConfig });
+  addPlanLayerToLegend(planConfig, overlay);
+  loadedPlanIds.add(planConfig.id);
+  console.log(`Infrastructure plan "${planConfig.name}" loaded.`);
+  return overlay;
+}
+
+async function fetchJsonAtProjectPath(relativePath) {
+  try {
+    const sanitized = sanitizeRelativePath(relativePath);
+    if (!sanitized) return null;
+    const { response } = await fetchProjectResource(sanitized);
+    if (!response) return null;
+    return await response.json();
+  } catch (error) {
+    console.warn('Failed to fetch JSON at', relativePath, error);
+    return null;
+  }
+}
+
+async function fetchPlanImageDataUrl(relativePath) {
+  try {
+    const sanitized = sanitizeRelativePath(relativePath);
+    if (!sanitized) return null;
+    const { response } = await fetchProjectResource(sanitized);
+    if (!response) return null;
+    const blob = await response.blob();
+    return await blobToDataURL(blob);
+  } catch (error) {
+    console.warn('Failed to fetch plan image at', relativePath, error);
+    return null;
+  }
+}
+
+async function fetchPlanManifestEntries() {
+  const manifestFiles = [
+    'Infrastructure_Plans/plans_manifest.json',
+    'Infrastructure_Plans/manifest.json',
+    'Infrastructure_Plans/index.json'
+  ];
+  for (const candidate of manifestFiles) {
+    const data = await fetchJsonAtProjectPath(candidate);
+    if (!data) continue;
+    if (Array.isArray(data.plans) && data.plans.length) {
+      return data.plans;
+    }
+    if (Array.isArray(data) && data.length) {
+      return data;
+    }
+  }
+  const fallbackMetadata = await fetchJsonAtProjectPath('Infrastructure_Plans/metadata.json');
+  if (fallbackMetadata) {
+    return [{
+      folder: '',
+      metadataFile: 'metadata.json',
+      imageFile: fallbackMetadata.imageName || fallbackMetadata.imageFile || null,
+      id: fallbackMetadata.id,
+      name: fallbackMetadata.name
+    }];
+  }
+  const discovered = await discoverPlanFoldersFromListing();
+  if (discovered && discovered.length) {
+    return discovered;
+  }
+  return null;
+}
+
+async function fetchFolderListing(relativeFolder) {
+  const sanitized = sanitizeRelativePath(relativeFolder).replace(/\/+$/, '') + '/';
+  try {
+    const { response } = await fetchProjectResource(sanitized);
+    if (!response || !response.ok) return null;
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('text')) return null;
+    const text = await response.text();
+    const matches = [...text.matchAll(/href\s*=\s*"([^"#?]+)"/gi)];
+    const folders = new Set();
+    const files = new Set();
+    matches.forEach(match => {
+      const hrefRaw = match[1];
+      if (!hrefRaw) return;
+      if (hrefRaw === '../' || hrefRaw.startsWith('?')) return;
+      const clean = hrefRaw.replace(/^\.\//, '');
+      if (!clean) return;
+      if (clean.endsWith('/')) {
+        const name = clean.replace(/\/+$/, '');
+        if (!name || name === '.' || name === '..') return;
+        folders.add(name);
+      } else {
+        const fileName = clean.split(/[?#]/)[0];
+        if (fileName && fileName !== '.' && fileName !== '..') {
+          files.add(fileName);
+        }
+      }
+    });
+    return {
+      folders: Array.from(folders),
+      files: Array.from(files)
+    };
+  } catch (error) {
+    console.warn('Failed to fetch directory listing for', relativeFolder, error);
+    return null;
+  }
+}
+
+async function discoverPlanFoldersFromListing() {
+  const listing = await fetchFolderListing('Infrastructure_Plans');
+  const folders = listing?.folders;
+  if (!folders || !folders.length) return null;
+  return folders.map(name => ({
+    folder: name,
+    metadataFile: 'metadata.json',
+    imageFile: null,
+    name: name,
+    id: null
+  }));
+}
+
+async function resolvePlanImageAsset(basePath, descriptor = {}, metadata = {}) {
+  const candidates = [];
+  const pushCandidate = (value) => {
+    if (!value || typeof value !== 'string') return;
+    const normalized = value.replace(/^\.\/+/, '').replace(/^\/+/, '');
+    if (normalized) {
+      candidates.push(normalized);
+    }
+  };
+
+  pushCandidate(descriptor.imagePath);
+  pushCandidate(descriptor.imageFile);
+  pushCandidate(metadata.imageFile);
+  pushCandidate(metadata.imageName);
+
+  const tested = new Set();
+  const tryLoad = async (fileName) => {
+    if (!fileName || tested.has(fileName)) return null;
+    tested.add(fileName);
+    const imagePath = `${basePath}/${fileName}`.replace(/\\/g, '/');
+    const dataUrl = await fetchPlanImageDataUrl(imagePath);
+    if (dataUrl) {
+      return { imageDataUrl: dataUrl, resolvedFileName: fileName };
+    }
+    return null;
+  };
+
+  for (const candidate of candidates) {
+    const result = await tryLoad(candidate);
+    if (result) {
+      return result;
+    }
+  }
+
+  const listing = await fetchFolderListing(basePath);
+  const files = listing?.files || [];
+  const allowedExt = ['.png', '.jpg', '.jpeg', '.webp'];
+  for (const file of files) {
+    const lower = file.toLowerCase();
+    if (!allowedExt.some(ext => lower.endsWith(ext))) continue;
+    const result = await tryLoad(file);
+    if (result) {
+      return result;
+    }
+  }
+
+  return { imageDataUrl: null, resolvedFileName: null };
+}
+
+async function loadPlanEntryFromDescriptor(descriptor, index) {
+  if (!descriptor) return;
+  const folderSegment = sanitizePlanFolderSegment(descriptor.folder || descriptor.path || '');
+  const basePath = folderSegment ? `Infrastructure_Plans/${folderSegment}` : 'Infrastructure_Plans';
+  const metadataFile = descriptor.metadataFile || descriptor.metadataPath || descriptor.metadata || 'metadata.json';
+  const metadataPath = `${basePath}/${metadataFile}`;
+  const metadata = await fetchJsonAtProjectPath(metadataPath);
+  if (!metadata) {
+    console.warn('Skipping plan entry because metadata could not be loaded:', metadataPath);
+    return;
+  }
+  const controlPairs = normalizePlanControlPairs(metadata.controlPoints || metadata.controlPairs);
+  if (controlPairs.length < 3) {
+    console.warn('Skipping plan entry with insufficient control points:', metadataPath);
+    return;
+  }
+  const { imageDataUrl, resolvedFileName } = await resolvePlanImageAsset(basePath, descriptor, metadata);
+  if (!imageDataUrl) {
+    console.warn('Skipping plan entry because image could not be loaded:', descriptor);
+    return;
+  }
+  const planConfig = {
+    id: descriptor.id || metadata.id || `${folderSegment || 'plan'}_${index}`,
+    name: descriptor.name || metadata.name || `Plan ${index + 1}`,
+    imageDataUrl,
+    imageName: metadata.imageName || resolvedFileName,
+    imageWidth: metadata.imageWidth || metadata.width || null,
+    imageHeight: metadata.imageHeight || metadata.height || null,
+    controlPairs
+  };
+  if (loadedPlanIds.has(planConfig.id)) {
+    return;
+  }
+  addPlanOverlayFromConfig(planConfig, { opacity: descriptor.opacity });
+}
+
+let planManifestLoadPromise = null;
+async function loadPersistedInfrastructurePlans() {
+  if (planManifestLoadPromise) return planManifestLoadPromise;
+  planManifestLoadPromise = (async () => {
+    const descriptors = await fetchPlanManifestEntries();
+    if (!descriptors || !descriptors.length) {
+      console.log('No Infrastructure_Plans manifest or metadata found – skipping automatic plan loading.');
+      return;
+    }
+    for (let i = 0; i < descriptors.length; i++) {
+      try {
+        await loadPlanEntryFromDescriptor(descriptors[i], i);
+      } catch (error) {
+        console.error('Failed to load infrastructure plan entry:', descriptors[i], error);
+      }
+    }
+  })()
+    .catch(error => {
+      console.error('Failed to load persisted infrastructure plans:', error);
+    })
+    .finally(() => {
+      planManifestLoadPromise = null;
+    });
+  return planManifestLoadPromise;
 }
 
 // ==================== End of Pipeline Grouping Functions ====================
@@ -9599,6 +11725,52 @@ let supportPointMarkers = [];
 let divisionLineGroups = [];
 let divisionAwaitingLocation = false;
 let selectedDivisionParentLayer = null;
+
+function inferDivisionParentLayer(layer) {
+  if (!layer) return null;
+  const meta = getLayerMetadataFromParents(layer);
+  if (meta?.layerName && dynamicLayers[meta.layerName]) {
+    return dynamicLayers[meta.layerName];
+  }
+  if (layer._originLayerName && dynamicLayers[layer._originLayerName]) {
+    return dynamicLayers[layer._originLayerName];
+  }
+  const directParent = getLayerParentGroup(layer);
+  if (directParent && directParent !== drawnItems) {
+    return directParent;
+  }
+  if (layer._qgasMeta?.elementKey === 'pipelines' && pipelineLayer) {
+    return pipelineLayer;
+  }
+  if (drawnItems && typeof drawnItems.hasLayer === 'function' && drawnItems.hasLayer(layer)) {
+    return drawnItems;
+  }
+  return null;
+}
+
+function resolveDivisionParentLayer(layer) {
+  const cached = selectedDivisionParentLayer;
+  if (cached && cached !== drawnItems && typeof cached.addLayer === 'function') {
+    return cached;
+  }
+  const inferred = inferDivisionParentLayer(layer);
+  if (inferred) {
+    if (inferred !== cached) {
+      selectedDivisionParentLayer = inferred;
+    }
+    return inferred;
+  }
+  if (cached && typeof cached.addLayer === 'function') {
+    return cached;
+  }
+  if (layer && drawnItems && typeof drawnItems.hasLayer === 'function' && drawnItems.hasLayer(layer)) {
+    selectedDivisionParentLayer = drawnItems;
+    return drawnItems;
+  }
+  const fallback = pipelineLayer || drawnItems || null;
+  selectedDivisionParentLayer = fallback;
+  return fallback;
+}
 
 function captureDivisionBaseStyle(layer) {
   if (!layer || layer._divisionBaseStyle) return;
@@ -9878,11 +12050,20 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
       geometry: { type: 'LineString', coordinates: secondCoordinates }
     };
 
-    const parentGroup = selectedDivisionParentLayer || getLayerParentGroup(selectedPipelineLayer) || pipelineLayer;
+    const parentGroup = resolveDivisionParentLayer(selectedPipelineLayer);
     if (parentGroup && typeof parentGroup.removeLayer === 'function') {
-      parentGroup.removeLayer(selectedPipelineLayer);
-    } else if (map.hasLayer(selectedPipelineLayer)) {
+      if (!parentGroup.hasLayer || parentGroup.hasLayer(selectedPipelineLayer)) {
+        parentGroup.removeLayer(selectedPipelineLayer);
+      }
+    }
+    if (map.hasLayer(selectedPipelineLayer)) {
       map.removeLayer(selectedPipelineLayer);
+    }
+    if (drawnItems && typeof drawnItems.hasLayer === 'function' && drawnItems.hasLayer(selectedPipelineLayer)) {
+      drawnItems.removeLayer(selectedPipelineLayer);
+    }
+    if (selectedPipelineLayer?.feature) {
+      deletedPipelines.push(selectedPipelineLayer.feature);
     }
 
     restoreDivisionBaseStyle(selectedPipelineLayer);
@@ -9896,6 +12077,15 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
     } else {
       if (firstLayer) firstLayer.addTo(map);
       if (secondLayer) secondLayer.addTo(map);
+    }
+
+    if (drawnItems && typeof drawnItems.addLayer === 'function') {
+      if (firstLayer && (!drawnItems.hasLayer || !drawnItems.hasLayer(firstLayer))) {
+        drawnItems.addLayer(firstLayer);
+      }
+      if (secondLayer && (!drawnItems.hasLayer || !drawnItems.hasLayer(secondLayer))) {
+        drawnItems.addLayer(secondLayer);
+      }
     }
 
     addDivisionNodeMarker(divisionCoord, newNodeId, properties);
@@ -10058,6 +12248,7 @@ function assignPipelinesToSubnodes(subnodes, origId, highlightedEntries = []) {
     cleanupSplitNodeState(message);
     setActiveSplitSubnodeMarker(null);
     resetNodeClicks();
+    activateInfoMode();
   };
 
   const assignSelectionToSubnode = (subnodeId, selectionSet) => {
@@ -10140,11 +12331,15 @@ function showSplitOkBtn(subnodeId, options = {}) {
   const container = document.createElement('div');
   container.id = 'split-ok-container';
   container.style.position = 'absolute';
-  container.style.right = '20px';
-  container.style.bottom = '80px';
+  container.style.top = '110px';
+  container.style.left = '50%';
+  container.style.transform = 'translateX(-50%)';
+  container.style.right = 'auto';
+  container.style.bottom = 'auto';
   container.style.zIndex = 1300;
-  container.style.minWidth = '280px';
-  container.style.maxWidth = '320px';
+  container.style.minWidth = '260px';
+  container.style.maxWidth = '420px';
+  container.style.width = 'calc(100% - 40px)';
   container.style.padding = '14px 20px';
   container.style.background = 'rgba(18, 18, 18, 0.92)';
   container.style.color = '#fff';
@@ -10178,10 +12373,10 @@ function showSplitOkBtn(subnodeId, options = {}) {
   confirmBtn.style.color = '#fff';
   confirmBtn.style.fontSize = '14px';
   confirmBtn.onclick = () => {
+    removeSplitOkBtn();
     if (typeof onConfirm === 'function') {
       onConfirm();
     }
-    removeSplitOkBtn();
   };
 
   const cancelBtn = document.createElement('button');
@@ -10195,10 +12390,10 @@ function showSplitOkBtn(subnodeId, options = {}) {
   cancelBtn.style.color = '#fff';
   cancelBtn.style.fontSize = '14px';
   cancelBtn.onclick = () => {
+    removeSplitOkBtn();
     if (typeof onCancel === 'function') {
       onCancel();
     }
-    removeSplitOkBtn();
   };
 
   buttonRow.appendChild(confirmBtn);
@@ -10318,6 +12513,7 @@ function activateInfoMode() {
     
     currentMode = 'info';
     console.log('Info Mode aktiviert');
+    applyEditGeometryVisibility(false);
     
     // Toolbox-Buttons aktualisieren
     currentActiveTool = 'info';
@@ -10583,12 +12779,15 @@ function activatePipelineRouteEdit() {
       layer.on('click', function () {
         try {
           if (window.editingLayer && window.editingLayer !== layer) {
+                releasePipelineEndpointLocks(window.editingLayer);
             window.editingLayer.editing.disable();
             const btn = document.getElementById('save-edit-btn');
             if (btn) btn.remove();
           }
           window.editingLayer = layer;
           if (layer.editing) {
+            captureLayerEditSnapshot(layer);
+            refreshEditableLayerCache(layer);
             layer.editing.enable();
             restorePipelineEditStyle(layer);
             bindPipelineEditStyleHandlers(layer);
@@ -10611,12 +12810,15 @@ function activatePipelineRouteEdit() {
       layer.on('click', function () {
         try {
           if (window.editingLayer && window.editingLayer !== layer) {
+                releasePipelineEndpointLocks(window.editingLayer);
             window.editingLayer.editing.disable();
             const btn = document.getElementById('save-edit-btn');
             if (btn) btn.remove();
           }
           window.editingLayer = layer;
           if (layer.editing) {
+            captureLayerEditSnapshot(layer);
+            refreshEditableLayerCache(layer);
             layer.editing.enable();
             restorePipelineEditStyle(layer);
             bindPipelineEditStyleHandlers(layer);
@@ -10649,6 +12851,23 @@ function activatePipelineRouteEdit() {
       }
     });
     return layers;
+  }
+
+  function collectNodePositionSnapshots(nodeId) {
+    const snapshots = [];
+    getAllNodeLayers().forEach(layerGroup => {
+      if (!layerGroup) return;
+      layerGroup.eachLayer(marker => {
+        if (marker.feature && marker.feature.properties.ID === nodeId) {
+          const latlng = marker.getLatLng();
+          snapshots.push({
+            marker,
+            originalLatLng: latlng ? { lat: latlng.lat, lng: latlng.lng } : null
+          });
+        }
+      });
+    });
+    return snapshots;
   }
 
   function storeOriginalNodeClickHandlers(marker) {
@@ -10728,8 +12947,15 @@ function selectNodeForPositionEdit(nodeMarker) {
   }
   
   // Speichere Originalpositionen für Discard
-  const originalNodeLatLng = nodeMarker.getLatLng();
-  const originalPipelineCoords = {};
+  const nodePositionSnapshots = collectNodePositionSnapshots(nodeId);
+  const pipelineSnapshots = {};
+  const nodeSelectionLatLng = nodeMarker.getLatLng();
+  nodePositionEditSession = {
+    nodeId,
+    originalNodeLatLng: nodeSelectionLatLng ? { lat: nodeSelectionLatLng.lat, lng: nodeSelectionLatLng.lng } : null,
+    nodeSnapshots: nodePositionSnapshots,
+    pipelineSnapshots
+  };
   
   // Markiere den ausgewählten Node (größer und grün)
   captureOriginalMarkerStyle(nodeMarker, 'highlight');
@@ -10747,9 +12973,9 @@ function selectNodeForPositionEdit(nodeMarker) {
         if (layer.feature && layer.feature.geometry.type === "LineString") {
           const props = layer.feature.properties;
           if (props.Start_Node === nodeId || props.End_Node === nodeId) {
-            // Prüfe ob bereits hinzugefügt
-            if (!seenIds.has(props.ID)) {
-              seenIds.add(props.ID);
+            const uniqueKey = props.ID ?? L.stamp(layer);
+            if (!seenIds.has(uniqueKey)) {
+              seenIds.add(uniqueKey);
               layer.setStyle({color: '#00ff00', weight: 8});
               // Deaktiviere Pipeline-Interaktionen (macht sie "durchklickbar")
               if (layer.getElement()) {
@@ -10758,7 +12984,11 @@ function selectNodeForPositionEdit(nodeMarker) {
               connectedPipelines.push(layer);
               window.selectedNodeConnectedPipelines.push(layer);
               // Speichere Originalkoordinaten
-              originalPipelineCoords[props.ID] = JSON.parse(JSON.stringify(layer.getLatLngs()));
+              const snapshotKey = L.stamp(layer);
+              pipelineSnapshots[snapshotKey] = {
+                latlngs: cloneLatLngStructure(layer.getLatLngs()),
+                geometry: layer.feature?.geometry ? JSON.parse(JSON.stringify(layer.feature.geometry)) : null
+              };
             }
           }
         }
@@ -10769,20 +12999,23 @@ function selectNodeForPositionEdit(nodeMarker) {
   console.log('Found', connectedPipelines.length, 'connected pipelines');
   
   // Zeige Save/Discard Buttons
-  showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, originalNodeLatLng, originalPipelineCoords);
+  showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, nodePositionSnapshots, pipelineSnapshots);
   
   // Mache den Node draggable
   enableNodeDragging(nodeMarker, nodeId, connectedPipelines);
 }
 
 // Zeigt Save/Discard Buttons für Node Position Edit
-function showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, originalNodeLatLng, originalPipelineCoords) {
+function showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, nodePositionSnapshots, pipelineSnapshots) {
   // Entferne alte Buttons falls vorhanden
   document.getElementById('save-edit-btn')?.remove();
   document.getElementById('discard-edit-btn')?.remove();
   
   const toolsSection = document.getElementById('tools-section');
   if (!toolsSection) return;
+  const sessionBackup = nodePositionEditSession && nodePositionEditSession.nodeId === nodeId
+    ? nodePositionEditSession
+    : null;
   
   // Save Button
   const saveBtn = document.createElement('button');
@@ -10790,25 +13023,27 @@ function showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, originalNod
   saveBtn.textContent = '✔️ Save Changes';
   saveBtn.className = 'main-menu-btn edit-action-btn';
   saveBtn.style.display = 'block';
-  saveBtn.style.width = '140px';
-  saveBtn.style.margin = '0';
-  saveBtn.style.padding = '8px 16px';
-  saveBtn.style.boxSizing = 'border-box';
+  saveBtn.style.margin = '0 auto';
   saveBtn.style.background = '#28a745';
   saveBtn.onclick = () => {
-    // Aktualisiere Node-Geometrie permanent
-    const newLatLng = nodeMarker.getLatLng();
-    nodeMarker.feature.geometry.coordinates = [newLatLng.lng, newLatLng.lat];
-    nodeMarker.feature.properties.modified = true;
+    // Aktualisiere Node-Geometrien permanent
+    nodePositionSnapshots.forEach(entry => {
+      const latlng = entry.marker.getLatLng();
+      if (entry.marker.feature) {
+        entry.marker.feature.geometry.coordinates = [latlng.lng, latlng.lat];
+        entry.marker.feature.properties.modified = true;
+      }
+    });
     
     // Aktualisiere Pipeline-Geometrien permanent
     connectedPipelines.forEach(pipelineLayer => {
-      const props = pipelineLayer.feature.properties;
+      if (!pipelineLayer.feature || !pipelineLayer.feature.properties) return;
       pipelineLayer.feature.properties.modified = true;
       
       // Berechne neue Länge
       const lengthKm = calculatePipelineLength(pipelineLayer);
       pipelineLayer.feature.properties.Length_km = lengthKm;
+      syncLayerFeatureGeometry(pipelineLayer);
     });
     
     // Cleanup und zurück zu Info Mode
@@ -10823,6 +13058,7 @@ function showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, originalNod
       `<p style="text-align: center; margin: 15px 0;">Node ${nodeId} and ${connectedPipelines.length} pipeline(s) updated successfully.</p>`,
       [{text: 'OK', type: 'primary', keepOpen: false, onClick: () => {}}]
     );
+    nodePositionEditSession = null;
   };
   
   // Discard Button
@@ -10831,21 +13067,31 @@ function showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, originalNod
   discardBtn.textContent = '❌ Discard Changes';
   discardBtn.className = 'main-menu-btn edit-action-btn';
   discardBtn.style.display = 'block';
-  discardBtn.style.width = '140px';
-  discardBtn.style.margin = '0';
-  discardBtn.style.padding = '8px 16px';
-  discardBtn.style.boxSizing = 'border-box';
+  discardBtn.style.margin = '0 auto';
   discardBtn.style.background = '#dc3545';
   discardBtn.onclick = () => {
-    // Stelle Originalpositionen wieder her
-    nodeMarker.setLatLng(originalNodeLatLng);
-    
-    connectedPipelines.forEach(pipelineLayer => {
-      const props = pipelineLayer.feature.properties;
-      const originalCoords = originalPipelineCoords[props.ID];
-      if (originalCoords) {
-        pipelineLayer.setLatLngs(originalCoords);
+    const fallbackSnapshots = (sessionBackup?.nodeSnapshots || nodePositionSnapshots) || [];
+    const pipelineBackups = sessionBackup?.pipelineSnapshots || pipelineSnapshots || {};
+
+    fallbackSnapshots.forEach(entry => {
+      const backup = entry.originalLatLng;
+      if (!backup) return;
+      const restored = L.latLng(backup.lat, backup.lng);
+      entry.marker.setLatLng(restored);
+      if (entry.marker.feature && entry.marker.feature.geometry) {
+        entry.marker.feature.geometry.coordinates = [backup.lng, backup.lat];
       }
+    });
+
+    connectedPipelines.forEach(pipelineLayer => {
+      const snapshotKey = L.stamp(pipelineLayer);
+      const snapshot = pipelineBackups[snapshotKey];
+      if (!snapshot || !snapshot.latlngs) return;
+      pipelineLayer.setLatLngs(cloneLatLngStructure(snapshot.latlngs));
+      if (snapshot.geometry && pipelineLayer.feature) {
+        pipelineLayer.feature.geometry = JSON.parse(JSON.stringify(snapshot.geometry));
+      }
+      syncLayerFeatureGeometry(pipelineLayer);
     });
     
     // Cleanup und zurück zu Info Mode
@@ -10854,6 +13100,7 @@ function showNodeEditButtons(nodeMarker, nodeId, connectedPipelines, originalNod
     discardBtn.remove();
     document.getElementById('save-edit-btn')?.remove();
     activateInfoMode();
+    nodePositionEditSession = null;
   };
   
   toolsSection.appendChild(saveBtn);
@@ -10887,6 +13134,7 @@ function cleanupNodeEdit(nodeMarker) {
   
   restoreNodePositionInteractions();
   nodePositionEditActive = false;
+  nodePositionEditSession = null;
 }
 
 // Aktiviert Dragging für einen Node und synchronisiert verbundene Pipelines
@@ -11045,6 +13293,7 @@ function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
           
           if (updated) {
             console.log('Pipeline adjusted:', props.ID);
+            refreshEditableLayerCache(layer);
           }
         }
       });
@@ -11059,6 +13308,7 @@ function activateEditMode() {
     if (window.markerDrawer && window.markerDrawer._enabled) window.markerDrawer.disable();
     map.closePopup();
     if (editingLayer && editingLayer.editing) {
+      releasePipelineEndpointLocks(editingLayer);
       editingLayer.editing.disable();
       editingLayer = null;
     }
@@ -11071,6 +13321,7 @@ function activateEditMode() {
     
     currentMode = 'edit';
     console.log('Edit Mode aktiviert');
+    applyEditGeometryVisibility(true);
     
     // Zeige Auswahl-Dialog
     showCustomPopup(
@@ -11548,6 +13799,7 @@ function activateDeleteMode() {
 function deactivateAllModes() {
   try {
     console.log('Deaktiviere alle Modi');
+    applyEditGeometryVisibility(false);
     
     // Draw-Tools deaktivieren
     if (window.polylineDrawer && window.polylineDrawer._enabled) window.polylineDrawer.disable();
@@ -12449,6 +14701,7 @@ document.addEventListener('keydown', function(e) {
     closeColorPickerModal();
     closeStylePickerModal();
     closeSizePickerModal();
+    closeLineTypePickerModal();
   }
 });
 
@@ -12483,6 +14736,12 @@ document.getElementById('size-picker-modal').addEventListener('click', function(
   }
 });
 
+document.getElementById('linetype-picker-modal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeLineTypePickerModal();
+  }
+});
+
 // Options Modal Funktionen
 let currentLayerBeingChanged = null;
 
@@ -12511,6 +14770,11 @@ function closeStylePickerModal() {
 
 function closeSizePickerModal() {
   document.getElementById('size-picker-modal').style.display = 'none';
+  currentLayerBeingChanged = null;
+}
+
+function closeLineTypePickerModal() {
+  document.getElementById('linetype-picker-modal').style.display = 'none';
   currentLayerBeingChanged = null;
 }
 
@@ -12617,30 +14881,169 @@ function clearAllFilters() {
 // Globale Variablen für Style/Size Picker (zusätzlich zu currentLayerBeingChanged)
 let selectedShape = null;
 let selectedSize = null;
+let selectedLineType = 'solid';
+
+function ensureStyleableLayerRegistry() {
+  if (styleableLayerRegistryDirty) {
+    styleableLayerRegistry = buildStyleableLayerRegistry();
+    styleableLayerRegistryDirty = false;
+  }
+  return styleableLayerRegistry;
+}
+
+function buildStyleableLayerRegistry() {
+  const registry = new Map();
+
+  const collectLayerRefs = (entry) => {
+    const refs = [];
+    if (entry.layerName && dynamicLayers[entry.layerName]) {
+      refs.push(dynamicLayers[entry.layerName]);
+    }
+    if (entry.elementKey) {
+      const elementLayers = getLayersForElementType(entry.elementKey) || [];
+      elementLayers.forEach(layer => {
+        if (layer && !refs.includes(layer)) {
+          refs.push(layer);
+        }
+      });
+    }
+    if (entry.customLayer && !refs.includes(entry.customLayer)) {
+      refs.push(entry.customLayer);
+    }
+    if (entry.geometry === 'line' && entry.elementKey === 'pipelines' && typeof drawnItems !== 'undefined' && drawnItems) {
+      if (!refs.includes(drawnItems)) {
+        refs.push(drawnItems);
+      }
+    }
+    return refs;
+  };
+
+  if (Array.isArray(layerConfig)) {
+    layerConfig.forEach((config, index) => {
+      if (!config) return;
+      const geometry = ((config.type || '').toLowerCase() === 'line') ? 'line' : 'point';
+      const shape = geometry === 'line' ? null : (config.shape || config.markerType || 'circle');
+      if (geometry !== 'line') {
+        config.shape = shape;
+      }
+      const entryKey = config.layerName || `${(config.legendName || config.filename || 'layer')}_${index}`;
+      const entry = {
+        key: entryKey,
+        name: config.legendName || config.layerName || config.filename || `Layer ${index + 1}`,
+        geometry,
+        color: config.color || (geometry === 'line' ? '#3388ff' : '#ff7800'),
+        size: typeof config.size === 'number' ? config.size : (geometry === 'line' ? 3 : 6),
+        shape,
+        lineStyle: config.lineStyle || 'solid',
+        configRef: config,
+        elementKey: config.elementKey,
+        layerName: config.layerName,
+        layerRefs: []
+      };
+      entry.layerRefs = collectLayerRefs(entry);
+      if (entry.geometry === 'line' && entry.lineStyle && entry.lineStyle !== 'solid' && entry.layerRefs.length) {
+        entry.layerRefs.forEach(layerRef => applyLinePattern(layerRef, entry.lineStyle));
+      }
+      registry.set(entryKey, entry);
+    });
+  }
+
+  if (window.customLayers) {
+    Object.entries(window.customLayers).forEach(([name, layer]) => {
+      if (!layer) return;
+      const settings = layer._customLayerSettings || {};
+      let geometry = settings.geometryClass || (layer._customLineLayer ? 'line' : 'point');
+      if (geometry !== 'line') {
+        geometry = 'point';
+      }
+      const entryKey = layer._optionsKey || `custom-${name.replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
+      const entry = {
+        key: entryKey,
+        name,
+        geometry,
+        color: geometry === 'line'
+          ? (layer._customLineColor || settings.color || '#3388ff')
+          : (layer._customLayerColor || settings.color || '#ff7800'),
+        size: geometry === 'line'
+          ? (layer._customLineWeight || settings.size || 4)
+          : (settings.radius || settings.size || 6),
+        shape: geometry === 'line' ? null : (settings.shape || 'circle'),
+        lineStyle: settings.lineStyle || 'solid',
+        customLayer: layer,
+        elementKey: settings.typeKey,
+        layerName: settings.layerName || name,
+        layerRefs: [layer]
+      };
+      if (geometry === 'line' && entry.lineStyle && entry.lineStyle !== 'solid') {
+        applyLinePattern(layer, entry.lineStyle);
+      }
+      registry.set(entryKey, entry);
+      layer._optionsKey = entryKey;
+    });
+  }
+
+  return registry;
+}
+
+function getStyleableLayerEntries() {
+  const registry = ensureStyleableLayerRegistry();
+  return Array.from(registry.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function getStyleableLayerEntry(key) {
+  if (!key) return null;
+  const registry = ensureStyleableLayerRegistry();
+  return registry.get(key) || null;
+}
+
+function resolveStyleEntryForLayer(layerInstance) {
+  if (!layerInstance) return null;
+  const registry = ensureStyleableLayerRegistry();
+  for (const entry of registry.values()) {
+    if (Array.isArray(entry.layerRefs) && entry.layerRefs.includes(layerInstance)) {
+      return entry;
+    }
+  }
+  return null;
+}
+
+function getLineStyleForLayer(layerInstance) {
+  const entry = resolveStyleEntryForLayer(layerInstance);
+  if (entry && entry.geometry === 'line') {
+    return entry.lineStyle || 'solid';
+  }
+  if (layerInstance && layerInstance._customLayerSettings && layerInstance._customLayerSettings.lineStyle) {
+    return layerInstance._customLayerSettings.lineStyle;
+  }
+  return 'solid';
+}
 
 // OLD layerConfig object - replaced by dynamic layerConfig array at line ~1300
 
 function populateLayerList() {
   const layerList = document.getElementById('layer-list');
   layerList.innerHTML = '';
-  
-  Object.keys(layerConfig).forEach(layerKey => {
-    const layer = layerConfig[layerKey];
+
+  const entries = getStyleableLayerEntries();
+  if (!entries.length) {
+    const emptyItem = document.createElement('div');
+    emptyItem.className = 'layer-item';
+    emptyItem.textContent = 'No layers available';
+    layerList.appendChild(emptyItem);
+    return;
+  }
+
+  entries.forEach(entry => {
     const layerItem = document.createElement('div');
     layerItem.className = 'layer-item';
-    
-    // Layer Icon basierend auf Typ und Shape - einheitliche Größen für bessere Optik
+
     let iconStyle = '';
-    if (layer.type === 'line') {
-      // Pipelines: variable Breite basierend auf weight
-      iconStyle = `width: 20px; height: ${layer.weight || 3}px; border-radius: 2px; background-color: ${layer.color};`;
+    if (entry.geometry === 'line') {
+      iconStyle = `width: 20px; height: ${entry.size || 3}px; border-radius: 2px; background-color: ${entry.color};`;
     } else {
-      // Alle Point-Elemente: einheitliche Größe 16x16px für Options-Liste
       const standardSize = 16;
-      iconStyle = `width: ${standardSize}px; height: ${standardSize}px; background-color: ${layer.color}; border: 1px solid #333;`;
-      
-      // Shape-spezifische Styles für aktuelle Shape
-      switch(layer.shape) {
+      iconStyle = `width: ${standardSize}px; height: ${standardSize}px; background-color: ${entry.color}; border: 1px solid #333;`;
+      switch(entry.shape) {
         case 'circle':
           iconStyle += ' border-radius: 50%;';
           break;
@@ -12660,74 +15063,153 @@ function populateLayerList() {
           iconStyle += ' clip-path: polygon(20% 0%, 80% 0%, 80% 20%, 100% 20%, 100% 80%, 80% 80%, 80% 100%, 20% 100%, 20% 80%, 0% 80%, 0% 20%, 20% 20%);';
           break;
         default:
-          // Fallback zu circle
           iconStyle += ' border-radius: 50%;';
       }
     }
-    
+
+    const controls = [];
+    controls.push(`<button class="change-btn" onclick="openColorPicker('${entry.key}')">Color</button>`);
+    if (entry.geometry === 'line') {
+      controls.push(`<button class="change-btn" onclick="openLineTypePicker('${entry.key}')">Line Type</button>`);
+      controls.push(`<button class="change-btn" onclick="openSizePicker('${entry.key}')">Width</button>`);
+    } else {
+      controls.push(`<button class="change-btn" onclick="openStylePicker('${entry.key}')">Shape</button>`);
+      controls.push(`<button class="change-btn" onclick="openSizePicker('${entry.key}')">Size</button>`);
+    }
+
+    const readableLineStyle = (style => {
+      switch(style) {
+        case 'dotted':
+          return 'Line • dotted';
+        case 'segmented':
+          return 'Line • segmented';
+        default:
+          return 'Line • solid';
+      }
+    })(entry.lineStyle || 'solid');
+
+    const readablePointMeta = entry.shape ? `Point • ${entry.shape}` : 'Point layer';
+    const metaText = entry.geometry === 'line' ? readableLineStyle : readablePointMeta;
+
     layerItem.innerHTML = `
-      <div class="layer-info">
+      <div class="layer-info-row">
         <div class="layer-icon" style="${iconStyle} margin-right: 10px; display: inline-block;"></div>
-        <span class="layer-name">${layer.name}</span>
+        <div class="layer-info-text">
+          <span class="layer-name">${entry.name}</span>
+          <span class="layer-meta">${metaText}</span>
+        </div>
       </div>
       <div class="layer-controls">
-        <button class="change-btn" onclick="openColorPicker('${layerKey}')">Color</button>
-        ${layer.type === 'circle' ? 
-          `<button class="change-btn" onclick="openStylePicker('${layerKey}')">Shape</button>
-           <button class="change-btn" onclick="openSizePicker('${layerKey}')">Size</button>` :
-          `<button class="change-btn" onclick="openSizePicker('${layerKey}')">Width</button>`
-        }
+        ${controls.join('')}
       </div>
     `;
-    
+
     layerList.appendChild(layerItem);
   });
 }
 
 function openColorPicker(layerKey) {
   currentLayerBeingChanged = layerKey;
-  const layer = layerConfig[layerKey];
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry) return;
   
-  document.getElementById('color-picker-title').textContent = `Change ${layer.name} Color`;
-  document.getElementById('custom-color-input').value = layer.color;
-  
-  populateColorPalette();
+  document.getElementById('color-picker-title').textContent = `Change ${entry.name} Color`;
+  setCustomColorInputs(entry.color);
+  populateColorPalette(entry.color);
+  selectColor(entry.color);
   document.getElementById('color-picker-modal').style.display = 'flex';
 }
 
-function populateColorPalette() {
+function populateColorPalette(activeColor = null) {
   const palette = document.getElementById('color-palette');
+  if (!palette) return;
   palette.innerHTML = '';
-  
-  // Vordefinierte Farben
-  const predefinedColors = [
-    '#ff0000', '#ff8000', '#ffff00', '#80ff00',
-    '#00ff00', '#00ff80', '#00ffff', '#0080ff',
-    '#0000ff', '#8000ff', '#ff00ff', '#ff0080',
-    '#800000', '#804000', '#808000', '#408000',
-    '#008000', '#008040', '#008080', '#004080',
-    '#000080', '#400080', '#800080', '#800040',
-    '#000000', '#404040', '#808080', '#c0c0c0'
-  ];
-  
-  predefinedColors.forEach(color => {
-    const swatch = document.createElement('div');
-    swatch.className = 'color-swatch';
-    swatch.style.backgroundColor = color;
-    swatch.onclick = () => selectColor(color);
-    palette.appendChild(swatch);
+  const normalizedActive = normalizeColorHex(activeColor || document.getElementById('custom-color-input')?.value);
+  const sections = [];
+
+  if (recentColorSelections.length) {
+    sections.push({
+      title: 'Recently used',
+      description: 'Last applied colors',
+      colors: [...recentColorSelections]
+    });
+  }
+
+  quickColorCollections.forEach(section => sections.push(section));
+
+  sections.forEach(section => {
+    if (!section || !Array.isArray(section.colors) || !section.colors.length) {
+      return;
+    }
+    const sectionEl = document.createElement('div');
+    sectionEl.className = 'color-section';
+
+    const header = document.createElement('div');
+    header.className = 'color-section-header';
+
+    const titleEl = document.createElement('span');
+    titleEl.className = 'color-section-title';
+    titleEl.textContent = section.title || 'Colors';
+    header.appendChild(titleEl);
+
+    if (section.description) {
+      const hintEl = document.createElement('span');
+      hintEl.className = 'color-section-hint';
+      hintEl.textContent = section.description;
+      header.appendChild(hintEl);
+    }
+
+    sectionEl.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'color-swatch-grid';
+
+    section.colors.forEach(color => {
+      if (!color) return;
+      const swatch = document.createElement('button');
+      swatch.type = 'button';
+      swatch.className = 'color-swatch';
+      swatch.dataset.color = color;
+      swatch.style.background = color;
+      swatch.title = `${color} (${section.title || 'Palette'})`;
+      swatch.setAttribute('aria-label', `Use color ${color}`);
+      if (normalizeColorHex(color) === normalizedActive) {
+        swatch.classList.add('selected');
+      }
+      swatch.onclick = (event) => {
+        selectColor(color, event.currentTarget);
+      };
+      grid.appendChild(swatch);
+    });
+
+    sectionEl.appendChild(grid);
+    palette.appendChild(sectionEl);
   });
+
+  if (!palette.children.length) {
+    const emptyState = document.createElement('p');
+    emptyState.textContent = 'Add a color by entering a HEX value below.';
+    emptyState.style.fontSize = '13px';
+    emptyState.style.color = '#777';
+    palette.appendChild(emptyState);
+  }
 }
 
-function selectColor(color) {
-  // Entferne vorherige Auswahl
+function selectColor(color, sourceElement = null) {
+  const normalized = normalizeColorHex(color);
   document.querySelectorAll('.color-swatch').forEach(swatch => {
     swatch.classList.remove('selected');
   });
-  
-  // Markiere neue Auswahl
-  event.target.classList.add('selected');
-  document.getElementById('custom-color-input').value = color;
+  if (sourceElement) {
+    sourceElement.classList.add('selected');
+  } else if (normalized) {
+    const matching = Array.from(document.querySelectorAll('.color-swatch'))
+      .find(swatch => normalizeColorHex(swatch.dataset.color) === normalized);
+    if (matching) {
+      matching.classList.add('selected');
+    }
+  }
+  setCustomColorInputs(normalized || color);
 }
 
 function applyColorChange() {
@@ -12735,19 +15217,31 @@ function applyColorChange() {
   
   const newColor = document.getElementById('custom-color-input').value;
   const layerKey = currentLayerBeingChanged;
-  const layerEntry = layerConfig[layerKey];
-  const previousColor = layerEntry ? layerEntry.color : null;
-  
-  // Aktualisiere Layer-Konfiguration
-  if (layerEntry) {
-    layerEntry.color = newColor;
-    if ((layerEntry.type || '').toLowerCase() === 'line') {
-      replaceLineColorUsage(previousColor, newColor);
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry) return;
+
+  const previousColor = entry.color;
+  entry.color = newColor;
+  if (entry.configRef) {
+    entry.configRef.color = newColor;
+  }
+  if (entry.customLayer) {
+    if (entry.geometry === 'line') {
+      entry.customLayer._customLineColor = newColor;
+    } else {
+      entry.customLayer._customLayerColor = newColor;
+      if (entry.customLayer._customLayerSettings) {
+        entry.customLayer._customLayerSettings.color = newColor;
+      }
     }
   }
-  
-  // Wende neue Farbe auf den tatsächlichen Layer an
+
+  if (entry.geometry === 'line') {
+    replaceLineColorUsage(previousColor, newColor);
+  }
+
   updateLayerColor(layerKey, newColor);
+  recordRecentColor(newColor);
   
   // Aktualisiere Layer-Liste
   populateLayerList();
@@ -12760,81 +15254,176 @@ function applyColorChange() {
 
 function updateLayerColor(layerKey, newColor) {
   console.log(`Ändere ${layerKey} Farbe zu ${newColor}`);
-  
-  switch(layerKey) {
-    case 'pipelines':
-      updatePipelineColor(newColor);
-      break;
-    case 'nodes':
-      updateElementLayerColor(nodeLayer, newColor, newColor);
-      break;
-    case 'powerplants':
-      updateElementLayerColor(powerplantsLayer, newColor, newColor);
-      break;
-    case 'compressors':
-      updateElementLayerColor(compressorsLayer, newColor, newColor);
-      break;
-    case 'lng':
-      updateElementLayerColor(lngLayer, newColor, newColor);
-      break;
-    case 'storages':
-      updateElementLayerColor(storageLayer, newColor, newColor);
-      break;
-    case 'consumption':
-      updateElementLayerColor(consumptionLayer, newColor, newColor);
-      break;
-  }
-}
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry) return;
 
-function updatePipelineColor(newColor) {
-  // Update hauptsächlicher Pipeline Layer
-  if (pipelineLayer) {
-    pipelineLayer.eachLayer(layer => {
-      layer.setStyle({ color: newColor });
-    });
-  }
-  
-  // Update gezeichnete Pipelines
-  drawnItems.eachLayer(layer => {
-    if (layer.feature && layer.feature.geometry.type === "LineString") {
-      layer.setStyle({ color: newColor });
+  const applyColor = (targetLayer) => {
+    if (!targetLayer) return;
+    if (entry.geometry === 'line') {
+      applyColorToLineLayer(targetLayer, newColor);
+    } else {
+      applyColorToPointLayer(targetLayer, newColor, entry);
     }
-  });
+  };
+
+  if (Array.isArray(entry.layerRefs) && entry.layerRefs.length) {
+    entry.layerRefs.forEach(applyColor);
+  }
 }
 
-function updateElementLayerColor(elementLayer, fillColor, strokeColor) {
-  if (!elementLayer) return;
-  
-  const layerKey = getLayerKeyFromLayer(elementLayer);
-  const config = layerConfig[layerKey];
-  
-  elementLayer.eachLayer(layer => {
+function applyColorToLineLayer(targetLayer, newColor) {
+  const visit = (layer) => {
+    if (!layer) return;
+    if (layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON) {
+      if (typeof layer.eachLayer === 'function') {
+        layer.eachLayer(child => visit(child));
+      }
+      return;
+    }
+    if (layer instanceof L.Polyline) {
+      layer.setStyle({ color: newColor });
+      layer._originalColor = newColor;
+    }
+  };
+
+  if (targetLayer && typeof targetLayer.eachLayer === 'function') {
+    targetLayer.eachLayer(child => visit(child));
+  } else {
+    visit(targetLayer);
+  }
+}
+
+function applyColorToPointLayer(targetLayer, newColor, styleEntry) {
+  const radius = styleEntry?.size || 6;
+  const shape = styleEntry?.shape || 'circle';
+
+  const visit = (layer) => {
+    if (!layer) return;
+    if (layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON) {
+      if (typeof layer.eachLayer === 'function') {
+        layer.eachLayer(child => visit(child));
+      }
+      return;
+    }
     if (layer instanceof L.CircleMarker) {
-      // Standard CircleMarker - Style ändern
-      layer.setStyle({
-        fillColor: fillColor,
-        color: strokeColor
-      });
-    } else if (layer instanceof L.Marker && layer.options.icon) {
-      // Custom Shape Marker - Icon neu erstellen mit neuer Farbe
-      const currentShape = config.shape || 'circle';
-      const newIcon = createCustomIcon(currentShape, fillColor, config.radius || 6);
+      layer.setStyle({ fillColor: newColor, color: newColor });
+    } else if (layer instanceof L.Marker && layer.options && layer.options.icon) {
+      const newIcon = createCustomIcon(shape, newColor, radius);
       layer.setIcon(newIcon);
     }
-  });
+    layer._originalColor = newColor;
+  };
+
+  if (targetLayer && typeof targetLayer.eachLayer === 'function') {
+    targetLayer.eachLayer(child => visit(child));
+  } else {
+    visit(targetLayer);
+  }
+}
+
+function getDashArrayForLineType(lineType) {
+  switch ((lineType || 'solid').toLowerCase()) {
+    case 'dotted':
+      return '2 10';
+    case 'segmented':
+      return '12 8';
+    default:
+      return null;
+  }
+}
+
+function applyLinePattern(targetLayer, lineType) {
+  const dashArray = getDashArrayForLineType(lineType);
+  const visit = (layer) => {
+    if (!layer) return;
+    if (layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON) {
+      if (typeof layer.eachLayer === 'function') {
+        layer.eachLayer(child => visit(child));
+      }
+      return;
+    }
+    if (layer instanceof L.Polyline) {
+      layer.setStyle({ dashArray: dashArray || null });
+      layer._originalDashArray = dashArray || null;
+      if (layer._path) {
+        layer._path.style.strokeDasharray = dashArray ? dashArray : '';
+      }
+    }
+  };
+
+  if (targetLayer && typeof targetLayer.eachLayer === 'function' && !(targetLayer instanceof L.Polyline)) {
+    targetLayer.eachLayer(child => visit(child));
+  } else {
+    visit(targetLayer);
+  }
+}
+
+function applyWidthToLineLayer(targetLayer, newWidth) {
+  const visit = (layer) => {
+    if (!layer) return;
+    if (layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON) {
+      if (typeof layer.eachLayer === 'function') {
+        layer.eachLayer(child => visit(child));
+      }
+      return;
+    }
+    if (layer instanceof L.Polyline) {
+      const style = { weight: newWidth };
+      if (layer.options && typeof layer.options.opacity === 'number') {
+        style.opacity = layer.options.opacity;
+      }
+      layer.setStyle(style);
+      layer._originalWeight = newWidth;
+    }
+  };
+
+  if (targetLayer && typeof targetLayer.eachLayer === 'function') {
+    targetLayer.eachLayer(child => visit(child));
+  } else {
+    visit(targetLayer);
+  }
+}
+
+function applySizeToPointLayer(targetLayer, newRadius, styleEntry) {
+  const color = styleEntry?.color || '#ff7800';
+  const shape = styleEntry?.shape || 'circle';
+
+  const visit = (layer) => {
+    if (!layer) return;
+    if (layer instanceof L.LayerGroup || layer instanceof L.FeatureGroup || layer instanceof L.GeoJSON) {
+      if (typeof layer.eachLayer === 'function') {
+        layer.eachLayer(child => visit(child));
+      }
+      return;
+    }
+    if (layer instanceof L.CircleMarker) {
+      layer.setRadius(newRadius);
+      layer._originalRadius = newRadius;
+    } else if (layer instanceof L.Marker && layer.options && layer.options.icon) {
+      const newIcon = createCustomIcon(shape, color, newRadius);
+      layer.setIcon(newIcon);
+    }
+  };
+
+  if (targetLayer && typeof targetLayer.eachLayer === 'function') {
+    targetLayer.eachLayer(child => visit(child));
+  } else {
+    visit(targetLayer);
+  }
 }
 
 // Style Picker Funktionen
 function openStylePicker(layerKey) {
   currentLayerBeingChanged = layerKey;
-  const layer = layerConfig[layerKey];
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry || entry.geometry === 'line') return;
   
-  document.getElementById('style-picker-title').textContent = `Change ${layer.name} Shape`;
+  document.getElementById('style-picker-title').textContent = `Change ${entry.name} Shape`;
   
   // Aktuelle Shape markieren
   document.querySelectorAll('.shape-option').forEach(option => {
     option.classList.remove('selected');
-    if (option.dataset.shape === layer.shape) {
+    if (option.dataset.shape === entry.shape) {
       option.classList.add('selected');
     }
   });
@@ -12842,19 +15431,18 @@ function openStylePicker(layerKey) {
   document.getElementById('style-picker-modal').style.display = 'flex';
 }
 
-function selectShape(shape) {
+function selectShape(shape, sourceElement = null) {
   console.log('selectShape aufgerufen mit:', shape);
   selectedShape = shape;
   
-  // Alle Optionen deselektieren
   document.querySelectorAll('.shape-option').forEach(option => {
     option.classList.remove('selected');
   });
   
-  // Gewählte Option markieren
-  const selectedOption = document.querySelector(`[data-shape="${shape}"]`);
+  const selectedOption = sourceElement || document.querySelector(`[data-shape="${shape}"]`);
   if (selectedOption) {
     selectedOption.classList.add('selected');
+    selectedOption.focus();
     console.log('Shape-Option markiert:', shape);
   } else {
     console.log('Fehler: Shape-Option nicht gefunden:', shape);
@@ -12867,9 +15455,19 @@ function applyShapeChange() {
   console.log('selectedShape:', selectedShape);
   
   if (currentLayerBeingChanged && selectedShape) {
-    console.log('Ändere Shape von', layerConfig[currentLayerBeingChanged].name, 'zu', selectedShape);
-    layerConfig[currentLayerBeingChanged].shape = selectedShape;
-    updateLayerShape(currentLayerBeingChanged, selectedShape);
+    const entry = getStyleableLayerEntry(currentLayerBeingChanged);
+    if (entry && entry.geometry !== 'line') {
+      console.log('Ändere Shape von', entry.name, 'zu', selectedShape);
+      entry.shape = selectedShape;
+      if (entry.configRef) {
+        entry.configRef.shape = selectedShape;
+        entry.configRef.markerType = selectedShape;
+      }
+      if (entry.customLayer && entry.customLayer._customLayerSettings) {
+        entry.customLayer._customLayerSettings.shape = selectedShape;
+      }
+      updateLayerShape(currentLayerBeingChanged, selectedShape);
+    }
     populateLayerList(); // Options-Liste aktualisieren
     updateLegendSymbols(); // Legend aktualisieren
     
@@ -12886,13 +15484,14 @@ function applyShapeChange() {
 // Size Picker Funktionen
 function openSizePicker(layerKey) {
   currentLayerBeingChanged = layerKey;
-  const layer = layerConfig[layerKey];
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry) return;
   
-  const isLine = layer.type === 'line';
-  const currentValue = isLine ? (layer.weight || 3) : (layer.radius || 6);
+  const isLine = entry.geometry === 'line';
+  const currentValue = entry.size || (isLine ? 3 : 6);
   
   document.getElementById('size-picker-title').textContent = 
-    `Change ${layer.name} ${isLine ? 'Width' : 'Size'}`;
+    `Change ${entry.name} ${isLine ? 'Width' : 'Size'}`;
   
   const slider = document.getElementById('size-slider');
   const preview = document.getElementById('size-preview');
@@ -12939,193 +15538,178 @@ function openSizePicker(layerKey) {
 
 function applySizeChange() {
   if (currentLayerBeingChanged && selectedSize !== null) {
-    const layer = layerConfig[currentLayerBeingChanged];
-    
-    if (layer.type === 'line') {
-      layer.weight = selectedSize;
-    } else {
-      layer.radius = selectedSize;
+    const entry = getStyleableLayerEntry(currentLayerBeingChanged);
+    if (entry) {
+      entry.size = selectedSize;
+      if (entry.configRef) {
+        entry.configRef.size = selectedSize;
+      }
+      if (entry.customLayer) {
+        if (entry.geometry === 'line') {
+          entry.customLayer._customLineWeight = selectedSize;
+        } else if (entry.customLayer._customLayerSettings) {
+          entry.customLayer._customLayerSettings.radius = selectedSize;
+          entry.customLayer._customLayerSettings.size = selectedSize;
+        }
+      }
+      updateLayerSize(currentLayerBeingChanged, selectedSize);
     }
-    
-    updateLayerSize(currentLayerBeingChanged, selectedSize);
     populateLayerList(); // Options-Liste aktualisieren
     updateLegendSymbols(); // Legend aktualisieren
   }
   closeSizePickerModal();
 }
 
+function openLineTypePicker(layerKey) {
+  currentLayerBeingChanged = layerKey;
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry || entry.geometry !== 'line') return;
+
+  selectedLineType = entry.lineStyle || 'solid';
+  document.getElementById('linetype-picker-title').textContent = `Change ${entry.name} Line Type`;
+
+  document.querySelectorAll('#line-type-options .line-type-option').forEach(option => {
+    const type = option.dataset.linetype;
+    option.classList.toggle('selected', type === selectedLineType);
+  });
+
+  document.getElementById('linetype-picker-modal').style.display = 'flex';
+}
+
+function selectLineType(lineType, element) {
+  selectedLineType = lineType;
+  document.querySelectorAll('#line-type-options .line-type-option').forEach(option => {
+    option.classList.remove('selected');
+  });
+  if (element) {
+    element.classList.add('selected');
+  }
+}
+
+function applyLineTypeChange() {
+  if (!currentLayerBeingChanged) return;
+  updateLineType(currentLayerBeingChanged, selectedLineType || 'solid');
+  populateLayerList();
+  updateLegendSymbols();
+  closeLineTypePickerModal();
+}
+
 // Layer Shape und Size Update Funktionen
 function updateLayerShape(layerKey, newShape) {
   console.log(`updateLayerShape aufgerufen: ${layerKey} zu ${newShape}`);
-  
-  // Note: Shape changes require marker recreation
-  // For now, just update the config - full implementation would need marker recreation
-  switch(layerKey) {
-    case 'nodes':
-      console.log('Updating nodes layer');
-      recreateElementMarkersWithShape(nodeLayer, newShape);
-      break;
-    case 'powerplants':
-      console.log('Updating powerplants layer');
-      recreateElementMarkersWithShape(powerplantsLayer, newShape);
-      break;
-    case 'compressors':
-      console.log('Updating compressors layer');
-      recreateElementMarkersWithShape(compressorsLayer, newShape);
-      break;
-    case 'lng':
-      console.log('Updating lng layer');
-      recreateElementMarkersWithShape(lngLayer, newShape);
-      break;
-    case 'storages':
-      console.log('Updating storages layer');
-      recreateElementMarkersWithShape(storagesLayer, newShape);
-      break;
-    case 'consumption':
-      console.log('Updating consumption layer');
-      recreateElementMarkersWithShape(consumptionLayer, newShape);
-      break;
-    default:
-      console.log('Unbekannter layerKey:', layerKey);
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry || entry.geometry === 'line') return;
+  if (Array.isArray(entry.layerRefs)) {
+    entry.layerRefs.forEach(layer => recreateElementMarkersWithShape(layer, newShape, entry));
+  }
+}
+
+function updateLineType(layerKey, newLineType) {
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry || entry.geometry !== 'line') return;
+  entry.lineStyle = newLineType;
+  if (entry.configRef) {
+    entry.configRef.lineStyle = newLineType;
+  }
+  if (entry.customLayer && entry.customLayer._customLayerSettings) {
+    entry.customLayer._customLayerSettings.lineStyle = newLineType;
+  }
+  if (Array.isArray(entry.layerRefs)) {
+    entry.layerRefs.forEach(layer => applyLinePattern(layer, newLineType));
   }
 }
 
 function updateLayerSize(layerKey, newSize) {
   console.log(`Ändere ${layerKey} Größe zu ${newSize}`);
-  
-  switch(layerKey) {
-    case 'pipelines':
-      updatePipelineWidth(newSize);
-      break;
-    case 'nodes':
-      updateElementLayerSize(nodeLayer, newSize);
-      break;
-    case 'powerplants':
-      updateElementLayerSize(powerplantsLayer, newSize);
-      break;
-    case 'compressors':
-      updateElementLayerSize(compressorsLayer, newSize);
-      break;
-    case 'lng':
-      updateElementLayerSize(lngLayer, newSize);
-      break;
-    case 'storages':
-      updateElementLayerSize(storagesLayer, newSize);
-      break;
-    case 'consumption':
-      updateElementLayerSize(consumptionLayer, newSize);
-      break;
-  }
-}
+  const entry = getStyleableLayerEntry(layerKey);
+  if (!entry) return;
 
-function updatePipelineWidth(newWidth) {
-  if (pipelineLayer) {
-    pipelineLayer.eachLayer(layer => {
-      layer.setStyle({ weight: newWidth });
-    });
-  }
-  if (estimatedPipelinesLayer) {
-    estimatedPipelinesLayer.eachLayer(layer => {
-      layer.setStyle({ weight: newWidth });
-    });
-  }
-}
-
-function updateElementLayerSize(elementLayer, newRadius) {
-  if (!elementLayer) return;
-  
-  const layerKey = getLayerKeyFromLayer(elementLayer);
-  const config = layerConfig[layerKey];
-  
-  elementLayer.eachLayer(layer => {
-    if (layer instanceof L.CircleMarker) {
-      // Standard CircleMarker - Radius ändern
-      layer.setRadius(newRadius);
-    } else if (layer instanceof L.Marker && layer.options.icon) {
-      // Custom Shape Marker - Icon neu erstellen mit neuer Größe
-      const currentShape = config.shape || 'circle';
-      const newIcon = createCustomIcon(currentShape, config.color, newRadius);
-      layer.setIcon(newIcon);
+  const applySize = (targetLayer) => {
+    if (!targetLayer) return;
+    if (entry.geometry === 'line') {
+      applyWidthToLineLayer(targetLayer, newSize);
+    } else {
+      applySizeToPointLayer(targetLayer, newSize, entry);
     }
-  });
+  };
+
+  if (Array.isArray(entry.layerRefs) && entry.layerRefs.length) {
+    entry.layerRefs.forEach(applySize);
+  }
 }
 
-function recreateElementMarkersWithShape(elementLayer, newShape) {
+function recreateElementMarkersWithShape(elementLayer, newShape, styleEntry = null) {
   console.log('recreateElementMarkersWithShape aufgerufen:', elementLayer, newShape);
-  
+
   if (!elementLayer) {
     console.log('elementLayer ist undefined/null');
     return;
   }
-  
-  // Aktuelle Layer-Konfiguration für Farbe und Größe
-  const layerKey = getLayerKeyFromLayer(elementLayer);
-  console.log('layerKey gefunden:', layerKey);
-  
-  const config = layerConfig[layerKey];
-  console.log('config:', config);
-  
-  if (!config) {
-    console.log('config nicht gefunden für layerKey:', layerKey);
+
+  const entry = styleEntry || resolveStyleEntryForLayer(elementLayer);
+  if (!entry) {
+    console.log('Kein Style-Eintrag für Layer gefunden');
     return;
   }
-  
-  // Alle Marker sammeln und neu erstellen
+
+  const color = entry.color || '#ff7800';
+  const radius = entry.size || 6;
+  const pane = elementLayer.options?.pane || 'overlayPane';
+
   const markersToRecreate = [];
   elementLayer.eachLayer(layer => {
-    if (layer instanceof L.CircleMarker) {
-      const latLng = layer.getLatLng();
-      const feature = layer.feature;
-      markersToRecreate.push({ latLng, feature });
+    if (layer instanceof L.CircleMarker || layer instanceof L.Marker) {
+      const latLng = typeof layer.getLatLng === 'function' ? layer.getLatLng() : null;
+      if (!latLng) return;
+      markersToRecreate.push({
+        latLng,
+        feature: layer.feature,
+        options: { pane: layer.options?.pane || pane }
+      });
+      elementLayer.removeLayer(layer);
+      if (drawnItems && drawnItems.hasLayer(layer)) {
+        drawnItems.removeLayer(layer);
+      }
     }
   });
-  
-  // Alte Marker entfernen
-  elementLayer.clearLayers();
-  
-  // Neue Marker mit gewählter Shape erstellen
+
   markersToRecreate.forEach(markerData => {
     let newMarker;
-    
     if (newShape === 'circle') {
-      // Standard CircleMarker
       newMarker = L.circleMarker(markerData.latLng, {
-        radius: config.radius || 6,
-        fillColor: config.color,
+        radius,
+        fillColor: color,
         color: '#333',
         weight: 1,
         opacity: 1,
-        fillOpacity: 0.8
+        fillOpacity: 0.8,
+        pane: markerData.options.pane
       });
+      captureOriginalMarkerStyle(newMarker, 'default');
     } else {
-      // Custom SVG Icon für andere Shapes
-      const customIcon = createCustomIcon(newShape, config.color, config.radius || 6);
-      newMarker = L.marker(markerData.latLng, { icon: customIcon });
+      const customIcon = createCustomIcon(newShape, color, radius);
+      newMarker = L.marker(markerData.latLng, {
+        icon: customIcon,
+        pane: markerData.options.pane
+      });
     }
-    
-    // Feature-Daten wieder anhängen
+
     if (markerData.feature) {
       newMarker.feature = markerData.feature;
-      
-      // Event-Handler wieder hinzufügen
-      newMarker.on('click', function() {
-        showElementInfo(markerData.feature, newMarker);
-      });
     }
-    
+
     elementLayer.addLayer(newMarker);
+    if (drawnItems) {
+      drawnItems.addLayer(newMarker);
+    }
+    setPointInteraction(newMarker);
   });
 }
 
 // Hilfsfunktion um LayerKey von Layer-Objekt zu ermitteln
 function getLayerKeyFromLayer(elementLayer) {
-  if (elementLayer === nodeLayer) return 'nodes';
-  if (elementLayer === powerplantsLayer) return 'powerplants';
-  if (elementLayer === compressorsLayer) return 'compressors';
-  if (elementLayer === lngLayer) return 'lng';
-  if (elementLayer === storagesLayer) return 'storages';
-  if (elementLayer === consumptionLayer) return 'consumption';
-  return null;
+  const entry = resolveStyleEntryForLayer(elementLayer);
+  return entry ? entry.key : null;
 }
 
 // Custom SVG Icon erstellen
@@ -13209,110 +15793,108 @@ function generateLegendIcon(color, shape) {
   }
 }
 
-// Funktion zum Generieren des Legend-HTML basierend auf aktueller Layer-Konfiguration
-function generateLegendHTML() {
-  let html = '';
-  // Pipelines
-  const pipelineColor = layerConfig.pipelines ? layerConfig.pipelines.color : '#0070f3';
-  html += '<label><input type="checkbox" id="toggle-pipelines" checked><div class="legend-line" style="background:' + pipelineColor + ';"></div> Pipelines</label><br>';
-  // Nodes
-  const nodeColor = layerConfig.nodes ? layerConfig.nodes.color : '#f03';
-  const nodeShape = layerConfig.nodes ? layerConfig.nodes.shape : 'circle';
-  html += '<label><input type="checkbox" id="toggle-nodes" checked>' + generateLegendIcon(nodeColor, nodeShape) + ' Nodes</label><br>';
-  // Power Plants
-  const powerplantColor = layerConfig.powerplants ? layerConfig.powerplants.color : '#090';
-  const powerplantShape = layerConfig.powerplants ? layerConfig.powerplants.shape : 'circle';
-  html += '<label><input type="checkbox" id="toggle-powerplants" checked>' + generateLegendIcon(powerplantColor, powerplantShape) + ' Power Plants</label><br>';
-  // Compressors
-  const compressorColor = layerConfig.compressors ? layerConfig.compressors.color : '#009';
-  const compressorShape = layerConfig.compressors ? layerConfig.compressors.shape : 'circle';
-  html += '<label><input type="checkbox" id="toggle-compressors" checked>' + generateLegendIcon(compressorColor, compressorShape) + ' Compressors</label><br>';
-  // LNG Terminals
-  const lngColor = layerConfig.lng ? layerConfig.lng.color : '#099';
-  const lngShape = layerConfig.lng ? layerConfig.lng.shape : 'circle';
-  html += '<label><input type="checkbox" id="toggle-lng" checked>' + generateLegendIcon(lngColor, lngShape) + ' LNG Terminals</label><br>';
-  // Storage Sites
-  const storageColor = layerConfig.storages ? layerConfig.storages.color : '#990';
-  const storageShape = layerConfig.storages ? layerConfig.storages.shape : 'circle';
-  html += '<label><input type="checkbox" id="toggle-storages" checked>' + generateLegendIcon(storageColor, storageShape) + ' Storage Sites</label><br>';
-  // Short-Pipes
-  const shortpipeColor = layerConfig.shortpipes ? layerConfig.shortpipes.color : '#ff8800';
-  html += '<label><input type="checkbox" id="toggle-shortpipes" checked><span class="legend-line" style="background:' + shortpipeColor + '; border-radius:2px; border:1px dashed ' + shortpipeColor + ';"></span> Short-Pipes</label><br>';
-  // Consumption Points
-  const consumptionColor = layerConfig.consumption ? layerConfig.consumption.color : '#ff8800';
-  const consumptionShape = layerConfig.consumption ? layerConfig.consumption.shape : 'circle';
-  html += '<label><input type="checkbox" id="toggle-consumption" checked>' + generateLegendIcon(consumptionColor, consumptionShape) + ' Consumption</label><br>';
-  return html;
+function styleLegendLineElement(element, color, lineStyle = 'solid') {
+  if (!element) return;
+  const normalized = (lineStyle || 'solid').toLowerCase();
+  element.style.boxSizing = 'border-box';
+  element.style.borderRadius = '2px';
+  element.style.borderColor = color;
+  if (normalized === 'solid') {
+    element.style.backgroundColor = color;
+    element.style.borderWidth = '0';
+    element.style.borderStyle = 'solid';
+  } else {
+    element.style.backgroundColor = 'transparent';
+    element.style.borderWidth = '2px';
+    element.style.borderStyle = normalized === 'dotted' ? 'dotted' : 'dashed';
+  }
 }
 
-// Funktion zum Aktualisieren der Legend-Symbole mit aktuellen Layer-Konfigurationen
+// Funktion zum Generieren des Legend-HTML basierend auf aktueller Layer-Konfiguration
+function getLegendToggleIdForEntry(entry) {
+  if (!entry) return null;
+  if (entry.configRef && entry.configRef.filename) {
+    return 'toggle-' + entry.configRef.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+  if (entry.customLayer && entry.name) {
+    return 'toggle-' + entry.name.toLowerCase().replace(/\s+/g, '-');
+  }
+  return null;
+}
+
 function updateLegendSymbols() {
   const legendDiv = document.querySelector('.legend-control');
-  if (legendDiv) {
-    legendDiv.innerHTML = generateLegendHTML();
-    // Event-Handler für Checkboxen wieder hinzufügen
-    createLegendEventHandlers();
-  }
+  if (!legendDiv) return;
+  const entries = getStyleableLayerEntries();
+  entries.forEach(entry => {
+    const toggleId = getLegendToggleIdForEntry(entry);
+    if (!toggleId) return;
+    const checkbox = document.getElementById(toggleId);
+    if (!checkbox) return;
+    const label = checkbox.closest('label') || checkbox.parentElement;
+    if (!label) return;
+    if (entry.geometry === 'line') {
+      const lineEl = label.querySelector('.legend-line');
+      if (lineEl) {
+        styleLegendLineElement(lineEl, entry.color, entry.lineStyle || 'solid');
+      }
+    } else {
+      const iconEl = label.querySelector('.legend-icon');
+      if (iconEl) {
+        iconEl.outerHTML = generateLegendIcon(entry.color, entry.shape || 'circle');
+      }
+    }
+  });
 }
 
 // Funktion zum Erstellen der Event-Handler für Legend-Checkboxen
 function createLegendEventHandlers() {
-  // Dynamic legend event handlers based on layerConfig
-  const toggleCheckboxes = [];
-  const layerReferences = [];
-  
-  // Collect all toggle checkboxes and their corresponding layers
-  layerConfig.forEach(config => {
-    const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const registeredCheckboxes = [];
+
+  const registerToggle = ({ toggleId, resolveLayers, key }) => {
     const checkbox = document.getElementById(toggleId);
-    const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
-    const layer = dynamicLayers[layerName];
-    
-    if (checkbox && layer) {
-      toggleCheckboxes.push(checkbox);
-      layerReferences.push(layer);
-      
-      // Bind change event to each checkbox
-      checkbox.onchange = function() {
-        if (this.checked) {
-          if (layer && !map.hasLayer(layer)) map.addLayer(layer);
-        } else {
-          if (layer && map.hasLayer(layer)) map.removeLayer(layer);
-        }
-      };
+    if (!checkbox || typeof resolveLayers !== 'function') {
+      return;
     }
+    registerLegendToggle({
+      checkbox,
+      resolveLayers,
+      elementKey: key
+    });
+    registeredCheckboxes.push(checkbox);
+  };
+
+  if (Array.isArray(layerConfig)) {
+    layerConfig.forEach(config => {
+      if (!config || !config.filename) return;
+      const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      registerToggle({
+        toggleId,
+        resolveLayers: () => dynamicLayers[layerName],
+        key: layerName
+      });
+    });
+  }
+
+  registerToggle({
+    toggleId: 'toggle-shortpipes',
+    resolveLayers: () => shortPipeLayer,
+    key: 'shortPipeLayer'
   });
-  
-  // Activate All Button Event Handler
+
   const activateAllBtn = document.getElementById('activate-all-btn');
   if (activateAllBtn) {
     activateAllBtn.onclick = function () {
-      // Check if all layers are already active
-      const allChecked = toggleCheckboxes.every(cb => cb.checked);
-      
-      if (allChecked) {
-        // Deactivate all
-        toggleCheckboxes.forEach((cb, index) => {
-          cb.checked = false;
-          const layer = layerReferences[index];
-          if (layer && map.hasLayer(layer)) {
-            map.removeLayer(layer);
-          }
-        });
-      } else {
-        // Activate all
-        toggleCheckboxes.forEach((cb, index) => {
-          cb.checked = true;
-          const layer = layerReferences[index];
-          if (layer && !map.hasLayer(layer)) {
-            map.addLayer(layer);
-          }
-        });
-      }
+      if (!registeredCheckboxes.length) return;
+      const allChecked = registeredCheckboxes.every(cb => cb.checked);
+      registeredCheckboxes.forEach(cb => {
+        cb.checked = !allChecked;
+        cb.dispatchEvent(new Event('change'));
+      });
     };
   }
 
-  // Statistics Button Event Handler
   const statisticsBtn = document.getElementById('statistics-btn');
   if (statisticsBtn) {
     statisticsBtn.onclick = function() {
@@ -13328,6 +15910,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const customOverlay = document.getElementById('custom-popup-overlay');
   if (toolsOverlay) toolsOverlay.style.display = 'none';
   if (customOverlay) customOverlay.style.display = 'none';
+  initializePlanGeorefUI();
   
   const grayscaleToggle = document.getElementById('grayscale-toggle');
   
@@ -13340,6 +15923,37 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         tilePane.classList.remove('map-grayscale');
         console.log('Graustufen-Modus deaktiviert');
+      }
+    });
+  }
+
+  const customColorInput = document.getElementById('custom-color-input');
+  if (customColorInput) {
+    customColorInput.addEventListener('input', (event) => {
+      const value = event.target.value;
+      if (value) {
+        selectColor(value);
+      }
+    });
+  }
+
+  const customColorText = document.getElementById('custom-color-text');
+  if (customColorText) {
+    customColorText.addEventListener('input', (event) => {
+      const value = event.target.value;
+      if (isValidHexColor(value)) {
+        const normalized = normalizeColorHex(value);
+        selectColor(normalized);
+      }
+    });
+    customColorText.addEventListener('blur', (event) => {
+      const value = event.target.value;
+      if (isValidHexColor(value)) {
+        const normalized = normalizeColorHex(value);
+        selectColor(normalized);
+      } else {
+        const fallback = document.getElementById('custom-color-input')?.value || '#0070f3';
+        setCustomColorInputs(fallback);
       }
     });
   }
@@ -14399,7 +17013,7 @@ function exitReconnectMode() {
   // Click Handler zurücksetzen
   resetInfrastructureClickHandlers();
   resetNodeClickHandlers();
-  
+  activateInfoMode();
   closeCustomPopup();
 }
 
