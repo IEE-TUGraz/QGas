@@ -49,7 +49,7 @@ import gzip
 import asyncio
 import websockets
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, quote_plus
 
 class CombinedGUI:
     def __init__(self, root):
@@ -497,6 +497,10 @@ class CombinedGUI:
                             layers = ['pipelines', 'nodes', 'compressors', 'storages', 'powerplants', 'lng']
                             self.send_json_response({'layers': layers})
                             
+                        elif path == '/api/current_project':
+                            project_name = getattr(self.gui_instance, 'selected_project', 'Standard') or 'Standard'
+                            self.send_json_response({'project': project_name})
+
                         elif path == '/api/layer_stats':
                             # Gibt Layer-Statistiken zurück (ohne Geometrie für Performance)
                             layer_name = params.get('name', [''])[0]
@@ -874,15 +878,20 @@ class CombinedGUI:
             return  # User cancelled project selection
             
         try:
+            final_url = self.url
+            if self.selected_project:
+                separator = '&' if '?' in final_url else '?'
+                final_url = f"{final_url}{separator}project={quote_plus(self.selected_project)}"
+
             # Try to open in Edge
             edge_path = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
             webbrowser.register('edge', None, webbrowser.BackgroundBrowser(edge_path))
-            webbrowser.get('edge').open(self.url)
+            webbrowser.get('edge').open(final_url)
             print("Opening map in Microsoft Edge...")
         except Exception as e:
             print(f"Could not open in Edge: {e}")
             print("Opening in default browser...")
-            webbrowser.open(self.url)
+            webbrowser.open(final_url)
     
     def select_project(self):
         """Show project selection dialog if multiple projects exist."""

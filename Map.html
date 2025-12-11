@@ -81,6 +81,13 @@
       user-select: none;
     }
 
+    .legend-label {
+      display: inline-flex;
+      align-items: center;
+      width: 100%;
+      gap: 6px;
+    }
+
     .legend-plan-entry {
       margin-bottom: 4px;
     }
@@ -1648,6 +1655,9 @@
     <button class="tool-tile" data-mode="group-pipelines" onclick="selectTool('group-pipelines')">
       📦<br>Group Pipelines
     </button>
+    <button class="tool-tile" data-mode="switch-sublayer" onclick="selectTool('switch-sublayer')">
+      🧩<br>Switch Sublayer
+    </button>
     <button class="tool-tile" data-mode="add-plan" onclick="selectTool('add-plan')">
       🗺️<br>Add Infrastructure Plans
     </button>
@@ -1742,7 +1752,7 @@
   let contributors = [];
   
   // Project variable
-  let currentProject = 'SciGrid_IGGIELGNC_1'; // Default project
+  let currentProject = 'Standard'; // Default project
   
   // Layer configuration from Excel
   let layerConfig = [];
@@ -1750,6 +1760,7 @@
   const layerMetadataRegistry = {};
   const elementKeyMetadataIndex = {};
   const elementTypeLayerMap = {};
+  const deletedLayerRegistry = {};
   let styleableLayerRegistry = new Map();
   let styleableLayerRegistryDirty = true;
   const editModeHiddenPointLayers = new Set();
@@ -1780,6 +1791,67 @@
   ];
   const recentColorSelections = [];
   const MAX_RECENT_COLORS = 6;
+  const PROJECT_STORAGE_KEY = 'qgasSelectedProject';
+  const DEFAULT_PROJECT = 'Standard';
+
+  function sanitizeProjectName(name) {
+    if (!name || typeof name !== 'string') return '';
+    return name.trim().replace(/[^a-zA-Z0-9_\-]/g, '');
+  }
+
+  function persistProjectSelection(projectName) {
+    const sanitized = sanitizeProjectName(projectName);
+    if (!sanitized) return;
+    try {
+      localStorage.setItem(PROJECT_STORAGE_KEY, sanitized);
+    } catch (error) {
+      console.warn('Could not persist project selection', error);
+    }
+  }
+
+  function getStoredProjectSelection() {
+    try {
+      return sanitizeProjectName(localStorage.getItem(PROJECT_STORAGE_KEY));
+    } catch (error) {
+      console.warn('Could not read stored project selection', error);
+      return '';
+    }
+  }
+
+  function getProjectFromQuery() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return sanitizeProjectName(params.get('project'));
+    } catch (error) {
+      console.warn('Could not parse project query parameter', error);
+      return '';
+    }
+  }
+
+  async function fetchProjectFromServer() {
+    try {
+      const response = await fetch(`/api/current_project?v=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) return '';
+      const payload = await response.json();
+      return sanitizeProjectName(payload?.project);
+    } catch (error) {
+      console.warn('Project API not available, falling back to stored selection', error);
+      return '';
+    }
+  }
+
+  async function determineProjectContext() {
+    const viaQuery = getProjectFromQuery();
+    if (viaQuery) return viaQuery;
+
+    const viaApi = await fetchProjectFromServer();
+    if (viaApi) return viaApi;
+
+    const viaStorage = getStoredProjectSelection();
+    if (viaStorage) return viaStorage;
+
+    return sanitizeProjectName(currentProject) || DEFAULT_PROJECT;
+  }
 
   function normalizeColorHex(color) {
     if (!color) return '';
@@ -1991,6 +2063,7 @@
   let originalShortPipeLayer = null;
   let shortPipeSelectionActive = false;
   let selectedShortPipes = [];
+  let sublayerOperationContext = null;
   
   // Pipeline Grouping Variablen
   let pipelineGroups = []; // Array von {name, pipelines: [], startPoint, endPoint, totalLength}
@@ -2038,6 +2111,135 @@
     if (!relativePath) return '';
     const cacheParam = cacheBust ? `?v=${Date.now()}` : '';
     return `Input/${relativePath}${cacheParam}`;
+  }
+
+  function normalizeFilenameReference(fileName) {
+    const sanitized = sanitizeRelativePath(fileName || '');
+    return sanitized.toLowerCase();
+  }
+
+  function applySublayerRelationships(configList) {
+    if (!Array.isArray(configList)) return configList;
+    const lookup = new Map();
+    configList.forEach(config => {
+      const normalized = normalizeFilenameReference(config?.filename || '');
+      config.normalizedFilename = normalized;
+      config.parentFilename = sanitizeRelativePath(config?.parentFilename || '');
+      config.parentConfig = null;
+      config.childSublayers = [];
+      config.isSublayer = false;
+      if (normalized) {
+        lookup.set(normalized, config);
+      }
+    });
+
+    configList.forEach(config => {
+      const parentKey = normalizeFilenameReference(config.parentFilename);
+      if (parentKey && lookup.has(parentKey)) {
+        const parentConfig = lookup.get(parentKey);
+        config.parentConfig = parentConfig;
+        config.isSublayer = true;
+        parentConfig.childSublayers = parentConfig.childSublayers || [];
+        parentConfig.childSublayers.push(config);
+      }
+    });
+
+    return configList;
+  }
+
+  function rebuildLayerRelationships() {
+    if (!Array.isArray(layerConfig)) return;
+    applySublayerRelationships(layerConfig);
+  }
+
+  function shouldSkipLayerConfig(config) {
+    if (!config) return false;
+    const descriptor = `${config.legendName || ''} ${config.filename || ''}`.toLowerCase();
+    if (!descriptor.trim()) return false;
+    return descriptor.includes('estimated pipeline');
+  }
+
+  function getOrderedLegendConfigs() {
+    if (!Array.isArray(layerConfig)) return [];
+    const ordered = [];
+    const visited = new Set();
+    const pushWithChildren = (config) => {
+      if (!config || visited.has(config)) return;
+      ordered.push(config);
+      visited.add(config);
+      if (Array.isArray(config.childSublayers) && config.childSublayers.length) {
+        config.childSublayers.forEach(child => pushWithChildren(child));
+      }
+    };
+    layerConfig.forEach(config => {
+      if (config && !config.isSublayer) {
+        pushWithChildren(config);
+      }
+    });
+    layerConfig.forEach(config => pushWithChildren(config));
+    return ordered;
+  }
+
+  function getLayerNameFromConfig(config) {
+    if (!config || !config.filename) return '';
+    return config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+  }
+
+  function resolveDefaultPaneForConfig(config) {
+    const lowerFilename = (config?.filename || '').toLowerCase();
+    if (lowerFilename.includes('pipeline') || lowerFilename.startsWith('pl_')) {
+      return 'pipelinePane';
+    }
+    if (lowerFilename.includes('node') || lowerFilename.startsWith('n_')) {
+      return 'nodePane';
+    }
+    return null;
+  }
+
+  function sanitizeSublayerLegendName(name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) return 'Sublayer';
+    return trimmed.replace(/\s+/g, ' ').substring(0, 60);
+  }
+
+  function generateUniqueSublayerFilename(parentConfig, sublayerName) {
+    const parentFile = sanitizeRelativePath(parentConfig?.filename || '');
+    const lastSlash = parentFile.lastIndexOf('/');
+    const folder = lastSlash !== -1 ? parentFile.slice(0, lastSlash + 1) : '';
+    const baseName = lastSlash !== -1 ? parentFile.slice(lastSlash + 1) : parentFile;
+    const baseWithoutExt = baseName.replace(/\.geojson$/i, '') || 'Layer';
+    const slug = (sublayerName || 'Sublayer').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'sublayer';
+    const existingKeys = new Set((layerConfig || []).map(cfg => normalizeFilenameReference(cfg?.filename)));
+    let candidate = `${folder}${baseWithoutExt}_${slug}.geojson`;
+    let counter = 1;
+    while (existingKeys.has(normalizeFilenameReference(candidate))) {
+      candidate = `${folder}${baseWithoutExt}_${slug}_${counter}.geojson`;
+      counter++;
+    }
+    return candidate;
+  }
+
+  function insertConfigAfterParent(parentConfig, newConfig) {
+    if (!Array.isArray(layerConfig)) {
+      layerConfig = [];
+    }
+    if (!parentConfig) {
+      layerConfig.push(newConfig);
+      rebuildLayerRelationships();
+      return;
+    }
+    const parentIndex = layerConfig.indexOf(parentConfig);
+    if (parentIndex === -1) {
+      layerConfig.push(newConfig);
+      rebuildLayerRelationships();
+      return;
+    }
+    let insertIndex = parentIndex + 1;
+    while (insertIndex < layerConfig.length && normalizeFilenameReference(layerConfig[insertIndex].parentFilename) === normalizeFilenameReference(parentConfig.filename)) {
+      insertIndex++;
+    }
+    layerConfig.splice(insertIndex, 0, newConfig);
+    rebuildLayerRelationships();
   }
 
   function inferElementKeyFromConfig(config = {}, layerName = '') {
@@ -2107,7 +2309,10 @@
       filename: config.filename || '',
       legendName: config.legendName || layerName,
       markerType: config.markerType || null,
-      size: config.size || null
+      size: config.size || null,
+      parentFilename: config.parentFilename || '',
+      parentLegendName: config.parentConfig?.legendName || null,
+      isSublayer: !!config.parentFilename
     };
     layerMetadataRegistry[layerName] = metadata;
     if (!elementKeyMetadataIndex[elementKey]) {
@@ -2131,6 +2336,41 @@
       elementTypeLayerMap[elementKey] = new Set();
     }
     elementTypeLayerMap[elementKey].add(layerInstance);
+  }
+
+  function removeLayerReferenceForElementKey(elementKey, layerInstance) {
+    if (!elementKey || !layerInstance) return;
+    const registry = elementTypeLayerMap[elementKey];
+    if (registry && registry.has(layerInstance)) {
+      registry.delete(layerInstance);
+      if (registry.size === 0) {
+        delete elementTypeLayerMap[elementKey];
+      }
+    }
+  }
+
+  function swapElementLayerReference(elementKey, previousLayer, newLayer) {
+    if (elementKey && previousLayer) {
+      removeLayerReferenceForElementKey(elementKey, previousLayer);
+    }
+    if (elementKey && newLayer) {
+      rememberLayerInstanceForElementKey(elementKey, newLayer);
+    }
+  }
+
+  function replaceDynamicLayerReference(previousLayer, newLayer) {
+    if (!previousLayer || !dynamicLayers) return;
+    Object.keys(dynamicLayers).forEach(key => {
+      if (dynamicLayers[key] === previousLayer) {
+        dynamicLayers[key] = newLayer || null;
+      }
+    });
+  }
+
+  function synchronizeLayerReferences(elementKey, previousLayer, newLayer) {
+    if (!previousLayer && !newLayer) return;
+    replaceDynamicLayerReference(previousLayer, newLayer);
+    swapElementLayerReference(elementKey, previousLayer, newLayer);
   }
 
   function getMetadataForElementKey(elementKey) {
@@ -2239,6 +2479,29 @@
     }
   }
 
+  function getOriginalLayerReference(elementType) {
+    switch (elementType) {
+      case 'pipelines':
+        return originalPipelineLayer;
+      case 'nodes':
+        return originalNodeLayer;
+      case 'powerplants':
+        return originalPowerplantsLayer;
+      case 'compressors':
+        return originalCompressorsLayer;
+      case 'lng':
+        return originalLngLayer;
+      case 'storages':
+        return originalStorageLayer;
+      case 'consumption':
+        return originalConsumptionLayer;
+      case 'shortPipes':
+        return originalShortPipeLayer;
+      default:
+        return null;
+    }
+  }
+
   function getLayersForElementType(elementType) {
     if (!elementType) return [];
     const result = [];
@@ -2254,7 +2517,167 @@
     if (legacyLayer && !result.includes(legacyLayer)) {
       result.push(legacyLayer);
     }
+    const originalLayer = getOriginalLayerReference(elementType);
+    if (originalLayer && !result.includes(originalLayer)) {
+      result.push(originalLayer);
+    }
     return result;
+  }
+
+  function buildFeatureIdentity(feature) {
+    if (!feature) return '';
+    const props = feature.properties || {};
+    const candidateKeys = ['Global_ID', 'GlobalID', 'global_id', 'Unique_ID', 'unique_id', 'PIPELINE_ID', 'Pipeline_ID', 'PIPELINEID', 'ID', 'Id', 'id', 'Name'];
+    for (const key of candidateKeys) {
+      const value = props[key];
+      if (value !== undefined && value !== null && String(value).trim() !== '') {
+        return `${key}:${String(value).trim()}`;
+      }
+    }
+    if (feature.id !== undefined && feature.id !== null) {
+      return `feature-id:${feature.id}`;
+    }
+    return safeGeometrySignature(feature.geometry);
+  }
+
+  function safeGeometrySignature(geometry) {
+    if (!geometry || !geometry.type) return '';
+    try {
+      const clone = { type: geometry.type, coordinates: null };
+      if (Array.isArray(geometry.coordinates)) {
+        if (geometry.type === 'LineString') {
+          clone.coordinates = geometry.coordinates.slice(0, 5);
+        } else if (geometry.type === 'MultiLineString' || geometry.type === 'MultiPolygon') {
+          clone.coordinates = geometry.coordinates.map(segment => Array.isArray(segment) ? segment.slice(0, 5) : segment).slice(0, 5);
+        } else if (geometry.type === 'Polygon') {
+          clone.coordinates = geometry.coordinates.map(ring => Array.isArray(ring) ? ring.slice(0, 5) : ring).slice(0, 2);
+        } else {
+          clone.coordinates = geometry.coordinates;
+        }
+      } else {
+        clone.coordinates = geometry.coordinates || null;
+      }
+      return `geom:${JSON.stringify(clone)}`;
+    } catch (error) {
+      console.warn('Failed to build geometry signature', error);
+      return '';
+    }
+  }
+
+  function removeFeatureFromLayerGroupByIdentity(layerGroup, feature, directLayerInstance) {
+    if (!layerGroup || !feature) return;
+    const hasLayerMethod = typeof layerGroup.hasLayer === 'function';
+    if (directLayerInstance && hasLayerMethod && layerGroup.hasLayer(directLayerInstance)) {
+      layerGroup.removeLayer(directLayerInstance);
+    }
+    if (typeof layerGroup.eachLayer !== 'function') return;
+    const identity = buildFeatureIdentity(feature);
+    if (!identity) return;
+    const removalQueue = [];
+    layerGroup.eachLayer(candidate => {
+      if (candidate === directLayerInstance) return;
+      if (!candidate?.feature) return;
+      const candidateIdentity = buildFeatureIdentity(candidate.feature);
+      if (candidateIdentity && candidateIdentity === identity) {
+        removalQueue.push(candidate);
+      }
+    });
+    removalQueue.forEach(candidate => {
+      if (hasLayerMethod && layerGroup.hasLayer(candidate)) {
+        layerGroup.removeLayer(candidate);
+      } else if (typeof layerGroup.removeLayer === 'function') {
+        layerGroup.removeLayer(candidate);
+      }
+    });
+  }
+
+  function removeFeatureFromElementLayers(feature, elementType, directLayerInstance = null) {
+    const targetLayers = getLayersForElementType(elementType);
+    targetLayers.forEach(layerGroup => {
+      removeFeatureFromLayerGroupByIdentity(layerGroup, feature, directLayerInstance);
+    });
+  }
+
+  const deletedElementIdentityRegistry = new Map();
+
+  function recordDeletedFeatureIdentity(feature, elementType) {
+    if (!feature) return;
+    const identity = buildFeatureIdentity(feature);
+    if (!identity) return;
+    let resolvedType = elementType;
+    if (!resolvedType) {
+      const props = feature.properties || {};
+      resolvedType = props.__elementKey || null;
+    }
+    if (!resolvedType) return;
+    if (!deletedElementIdentityRegistry.has(resolvedType)) {
+      deletedElementIdentityRegistry.set(resolvedType, new Set());
+    }
+    deletedElementIdentityRegistry.get(resolvedType).add(identity);
+  }
+
+  function resolveElementKeyFromLayerInstance(layerInstance) {
+    if (!layerInstance) return null;
+    if (layerInstance._qgasMeta?.elementKey) {
+      return layerInstance._qgasMeta.elementKey;
+    }
+    if (typeof layerInstance.getLayers === 'function') {
+      let resolved = null;
+      layerInstance.eachLayer(child => {
+        if (resolved) return;
+        if (child?._qgasMeta?.elementKey) {
+          resolved = child._qgasMeta.elementKey;
+          return;
+        }
+        if (child?.feature?.properties?.__elementKey) {
+          resolved = child.feature.properties.__elementKey;
+        }
+      });
+      return resolved;
+    }
+    return null;
+  }
+
+  function applyDeletedIdentitiesToLayer(layerGroup) {
+    if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
+    const elementKey = resolveElementKeyFromLayerInstance(layerGroup);
+    if (!elementKey) return;
+    const registry = deletedElementIdentityRegistry.get(elementKey);
+    if (!registry || registry.size === 0) return;
+    const removalQueue = [];
+    layerGroup.eachLayer(child => {
+      if (!child?.feature) return;
+      const identity = buildFeatureIdentity(child.feature);
+      if (identity && registry.has(identity)) {
+        removalQueue.push(child);
+      }
+    });
+    removalQueue.forEach(child => {
+      if (typeof layerGroup.removeLayer === 'function') {
+        layerGroup.removeLayer(child);
+      }
+    });
+  }
+
+  function getDeletedLayerGroup(elementType) {
+    if (!elementType) return null;
+    if (!deletedLayerRegistry[elementType]) {
+      deletedLayerRegistry[elementType] = L.layerGroup();
+    }
+    return deletedLayerRegistry[elementType];
+  }
+
+  function stashLayerInDeletedGroup(layerInstance, elementType) {
+    if (!layerInstance || !elementType) return;
+    const hiddenGroup = getDeletedLayerGroup(elementType);
+    if (!hiddenGroup) return;
+    if (typeof hiddenGroup.hasLayer === 'function' && hiddenGroup.hasLayer(layerInstance)) {
+      return;
+    }
+    hiddenGroup.addLayer(layerInstance);
+    if (map && map.hasLayer(layerInstance)) {
+      map.removeLayer(layerInstance);
+    }
   }
 
   async function fetchProjectResource(fileName, options = {}) {
@@ -2347,6 +2770,7 @@
           assignMetadataToLayer(layer, metadata);
           rememberLayerInstanceForElementKey(metadata.elementKey, layer);
           registerLegacyLayerReference(metadata.elementKey, layer);
+          applyDeletedIdentitiesToLayer(layer);
           if (metadata.elementKey === 'nodes' && typeof updateSplitNodeOffsets === 'function') {
             updateSplitNodeOffsets();
           }
@@ -2380,6 +2804,9 @@
       });
   }
 
+  const DEFAULT_LINE_COLOR_SEQUENCE = ['#0070f3', '#ff6b6b', '#20c997', '#a55eea', '#ffb400', '#00b8d9', '#ff5f1f'];
+  const DEFAULT_POINT_COLOR_SEQUENCE = ['#ff6b6b', '#2ec4b6', '#f4c430', '#6c63ff', '#1bc47d', '#ff6ec7', '#3d5afe', '#ff924a'];
+
   // Load layer configuration from Excel
   async function loadLayerConfiguration() {
     try {
@@ -2402,16 +2829,21 @@
       const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
       
       const config = [];
-      const defaultColors = ['#3388ff', '#ff7800', '#8B4513', '#FF6347', '#00CED1', '#9370DB', '#ff8800', '#800080', '#ff0000', '#00ff00', '#ffff00', '#ff00ff'];
-      let colorIndex = 0;
+      const colorAssignmentState = { lineIndex: 0, pointIndex: 0 };
+
+      const firstDataRowIndex = data.findIndex(row => Array.isArray(row) && row.some(cell => typeof cell === 'string' && cell.toLowerCase().includes('.geojson')));
+      const startIndex = firstDataRowIndex >= 0 ? firstDataRowIndex : 0;
+
+      if (startIndex > 0) {
+        console.log(`Detected first data row at index ${startIndex}.`);
+      }
       
-      // Start from row 3 (index 2)
-      for (let i = 2; i < data.length; i++) {
+      for (let i = startIndex; i < data.length; i++) {
         const row = data[i];
         if (!row || row.length === 0) continue; // Skip empty rows
         
         // Debug: Log first few rows to understand structure
-        if (i <= 4) {
+        if (i <= startIndex + 2) {
           console.log(`Row ${i}:`, row);
         }
         
@@ -2439,10 +2871,13 @@
         
         // Now map the rest - Excel structure: [filename, legendName, color, markerType, size, layerType]
         // Row indices: [0, 1, 2, 3, 4, 5]
-        const color = row[2] || defaultColors[colorIndex++ % defaultColors.length];
-        const markerType = row[3] || 'circle';
-        const size = parseInt(row[4]) || (row[5] === 'Line' ? 3 : 6);  // Line=3, Point=6
-        const layerType = row[5] || 'Point';
+        const rawLayerType = typeof row[5] === 'string' ? row[5].trim() : '';
+        const layerType = rawLayerType || 'Point';
+        const color = resolveLayerColor(row[2], layerType, colorAssignmentState);
+        const markerType = row[3] || (layerType === 'Line' ? 'line' : 'circle');
+        const parsedSize = parseInt(row[4], 10);
+        const size = Number.isFinite(parsedSize) ? parsedSize : (layerType === 'Line' ? 3 : 6);
+        const parentFilename = sanitizeRelativePath(row[6] || '');
         
         config.push({
           filename: filename,
@@ -2451,7 +2886,8 @@
           markerType: markerType,
           size: size,
           type: layerType,
-          enabled: true
+          enabled: true,
+          parentFilename: parentFilename
         });
       }
       
@@ -2461,26 +2897,62 @@
       // Log which files are configured
       config.forEach(c => console.log(`  - ${c.filename}: ${c.legendName} (${c.type}, ${c.color})`));
       
-      return config;
+      return applySublayerRelationships(config);
       
     } catch (error) {
       console.error('Error loading configuration:', error);
       return getDefaultLayerConfiguration();
     }
   }
+
+  function resolveLayerColor(rawColor, layerType, colorState = { lineIndex: 0, pointIndex: 0 }) {
+    const normalizedInput = normalizeHexColorValue(rawColor);
+    if (normalizedInput) {
+      return normalizedInput;
+    }
+
+    const isLineLayer = (layerType || '').toLowerCase() === 'line';
+    const palette = isLineLayer ? DEFAULT_LINE_COLOR_SEQUENCE : DEFAULT_POINT_COLOR_SEQUENCE;
+    const indexKey = isLineLayer ? 'lineIndex' : 'pointIndex';
+    const paletteIndex = colorState[indexKey] % palette.length;
+    const resolvedColor = palette[paletteIndex];
+    colorState[indexKey] = (colorState[indexKey] + 1) % palette.length;
+    return resolvedColor;
+  }
+
+  function normalizeHexColorValue(value) {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const threeHexMatch = trimmed.match(/^#?([0-9a-fA-F]{3})$/);
+    if (threeHexMatch) {
+      const hex = threeHexMatch[1].toUpperCase();
+      const expanded = hex.split('').map(ch => ch + ch).join('');
+      return `#${expanded}`;
+    }
+
+    const sixHexMatch = trimmed.match(/^#?([0-9a-fA-F]{6})$/);
+    if (sixHexMatch) {
+      return `#${sixHexMatch[1].toUpperCase()}`;
+    }
+
+    return trimmed;
+  }
   
   function getDefaultLayerConfiguration() {
     console.log('Using default layer configuration');
     const fallbackBase = currentProject ? `${currentProject}/` : 'Standard/';
-    return [
-      { filename: `${fallbackBase}PL_Pipelines.geojson`, legendName: 'Pipelines', color: '#3388ff', markerType: 'line', size: 3, type: 'Line', enabled: true },
-      { filename: `${fallbackBase}N_Nodes.geojson`, legendName: 'Nodes', color: '#ff7800', markerType: 'circle', size: 6, type: 'Point', enabled: true },
-      { filename: `${fallbackBase}P_Powerplants.geojson`, legendName: 'Power Plants', color: '#8B4513', markerType: 'circle', size: 8, type: 'Point', enabled: true },
-      { filename: `${fallbackBase}C_Compressors.geojson`, legendName: 'Compressors', color: '#FF6347', markerType: 'circle', size: 7, type: 'In-Line', enabled: true },
-      { filename: `${fallbackBase}L_LNG.geojson`, legendName: 'LNG Terminals', color: '#00CED1', markerType: 'circle', size: 9, type: 'Point', enabled: true },
-      { filename: `${fallbackBase}S_Storages.geojson`, legendName: 'Storage Sites', color: '#9370DB', markerType: 'circle', size: 8, type: 'Point', enabled: true },
-      { filename: `${fallbackBase}NUTS3_Centroids.geojson`, legendName: 'Consumption', color: '#ff8800', markerType: 'circle', size: 4, type: 'Point', enabled: true }
+    const defaults = [
+      { filename: `${fallbackBase}PL_Pipelines.geojson`, legendName: 'Pipelines', color: DEFAULT_LINE_COLOR_SEQUENCE[0], markerType: 'line', size: 3, type: 'Line', enabled: true, parentFilename: '' },
+      { filename: `${fallbackBase}N_Nodes.geojson`, legendName: 'Nodes', color: DEFAULT_POINT_COLOR_SEQUENCE[0], markerType: 'circle', size: 6, type: 'Point', enabled: true, parentFilename: '' },
+      { filename: `${fallbackBase}P_Powerplants.geojson`, legendName: 'Power Plants', color: DEFAULT_POINT_COLOR_SEQUENCE[1], markerType: 'circle', size: 8, type: 'Point', enabled: true, parentFilename: '' },
+      { filename: `${fallbackBase}C_Compressors.geojson`, legendName: 'Compressors', color: DEFAULT_POINT_COLOR_SEQUENCE[2], markerType: 'circle', size: 7, type: 'In-Line', enabled: true, parentFilename: '' },
+      { filename: `${fallbackBase}L_LNG.geojson`, legendName: 'LNG Terminals', color: DEFAULT_POINT_COLOR_SEQUENCE[3], markerType: 'circle', size: 9, type: 'Point', enabled: true, parentFilename: '' },
+      { filename: `${fallbackBase}S_Storages.geojson`, legendName: 'Storage Sites', color: DEFAULT_POINT_COLOR_SEQUENCE[4], markerType: 'circle', size: 8, type: 'Point', enabled: true, parentFilename: '' },
+      { filename: `${fallbackBase}NUTS3_Centroids.geojson`, legendName: 'Consumption', color: DEFAULT_POINT_COLOR_SEQUENCE[5], markerType: 'circle', size: 4, type: 'Point', enabled: true, parentFilename: '' }
     ];
+    return applySublayerRelationships(defaults);
   }
 
   function loadContributors() {
@@ -3291,6 +3763,23 @@
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
 
+  function removeLayerCompletely(layer) {
+    if (!layer) return;
+    if (layer._clickLayer && map && map.hasLayer(layer._clickLayer)) {
+      map.removeLayer(layer._clickLayer);
+    }
+    if (layer._clickLayer && drawnItems && drawnItems.hasLayer && drawnItems.hasLayer(layer._clickLayer)) {
+      drawnItems.removeLayer(layer._clickLayer);
+    }
+    if (drawnItems && typeof drawnItems.removeLayer === 'function') {
+      if (drawnItems.hasLayer && drawnItems.hasLayer(layer)) {
+        drawnItems.removeLayer(layer);
+      } else {
+        drawnItems.removeLayer(layer);
+      }
+    }
+  }
+
   const drawControl = new L.Control.Draw({
     draw: false,  // Zeichentools erstmal aus
     edit: {
@@ -3925,7 +4414,11 @@
           }
           if (item.feature) {
             deletedPipelines.push(item.feature);
+            recordDeletedFeatureIdentity(item.feature, 'pipelines');
+            removeFeatureFromElementLayers(item.feature, 'pipelines', item.layer);
           }
+          stashLayerInDeletedGroup(item.layer, 'pipelines');
+          removeLayerCompletely(item.layer);
           if (item.startNodeId || item.endNodeId) {
             checkAndDeleteOrphanedNodes([item.startNodeId, item.endNodeId]);
           }
@@ -3940,7 +4433,11 @@
           }
           if (item.feature) {
             deletedNodes.push(item.feature);
+            recordDeletedFeatureIdentity(item.feature, 'nodes');
+            removeFeatureFromElementLayers(item.feature, 'nodes', item.layer);
           }
+          stashLayerInDeletedGroup(item.layer, 'nodes');
+          removeLayerCompletely(item.layer);
           delete item.layer?._markedForDeletion;
         });
 
@@ -3952,7 +4449,11 @@
           }
           if (item.feature) {
             deletedPowerplants.push(item.feature);
+            recordDeletedFeatureIdentity(item.feature, 'powerplants');
+            removeFeatureFromElementLayers(item.feature, 'powerplants', item.layer);
           }
+          stashLayerInDeletedGroup(item.layer, 'powerplants');
+          removeLayerCompletely(item.layer);
           delete item.layer?._markedForDeletion;
         });
 
@@ -3964,7 +4465,11 @@
           }
           if (item.feature) {
             deletedCompressors.push(item.feature);
+            recordDeletedFeatureIdentity(item.feature, 'compressors');
+            removeFeatureFromElementLayers(item.feature, 'compressors', item.layer);
           }
+          stashLayerInDeletedGroup(item.layer, 'compressors');
+          removeLayerCompletely(item.layer);
           delete item.layer?._markedForDeletion;
         });
 
@@ -3976,7 +4481,11 @@
           }
           if (item.feature) {
             deletedLNGs.push(item.feature);
+            recordDeletedFeatureIdentity(item.feature, 'lng');
+            removeFeatureFromElementLayers(item.feature, 'lng', item.layer);
           }
+          stashLayerInDeletedGroup(item.layer, 'lng');
+          removeLayerCompletely(item.layer);
           delete item.layer?._markedForDeletion;
         });
 
@@ -3988,7 +4497,11 @@
           }
           if (item.feature) {
             deletedStorages.push(item.feature);
+            recordDeletedFeatureIdentity(item.feature, 'storages');
+            removeFeatureFromElementLayers(item.feature, 'storages', item.layer);
           }
+          stashLayerInDeletedGroup(item.layer, 'storages');
+          removeLayerCompletely(item.layer);
           delete item.layer?._markedForDeletion;
         });
 
@@ -4160,6 +4673,7 @@
     console.log('=== Starting dynamic layer loading ===');
     console.log('Current project:', currentProject);
     layerConfig = await loadLayerConfiguration();
+    layerConfig = Array.isArray(layerConfig) ? layerConfig.filter(cfg => !shouldSkipLayerConfig(cfg)) : [];
     console.log('Configuration loaded, will load', layerConfig.length, 'layers');
     invalidateStyleableLayerRegistry();
     
@@ -4248,9 +4762,80 @@
       loadPersistedInfrastructurePlans();
     }, 2000);
   }
+
+  function ensureLayerInstanceForConfig(config) {
+    if (!config) return null;
+    const layerName = getLayerNameFromConfig(config);
+    if (!layerName) return null;
+    config.layerName = layerName;
+    if (dynamicLayers[layerName]) {
+      return dynamicLayers[layerName];
+    }
+
+    const geometryType = (config.type || '').toLowerCase();
+    const targetPane = resolveDefaultPaneForConfig(config);
+    const metadata = registerLayerMetadata(layerName, config);
+
+    const geojsonOptions = {
+      pane: targetPane || undefined,
+      onEachFeature: (feature, layer) => {
+        assignMetadataToLayer(layer, metadata);
+        handleFeature(feature, layer);
+      }
+    };
+
+    if (geometryType === 'line') {
+      geojsonOptions.style = {
+        color: config.color || '#3388ff',
+        weight: config.size || 3,
+        opacity: 0.8,
+        lineCap: 'round',
+        lineJoin: 'round'
+      };
+    } else {
+      geojsonOptions.pointToLayer = (feature, latlng) => {
+        const marker = L.circleMarker(latlng, {
+          pane: targetPane || 'overlayPane',
+          radius: config.size || 6,
+          fillColor: config.color || '#ff7800',
+          color: '#000',
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.85
+        });
+        marker.feature = feature;
+        captureOriginalMarkerStyle(marker, 'default');
+        return marker;
+      };
+    }
+
+    const layer = L.geoJSON({ type: 'FeatureCollection', features: [] }, geojsonOptions).addTo(map);
+    assignMetadataToLayer(layer, metadata);
+    rememberLayerInstanceForElementKey(metadata.elementKey, layer);
+    dynamicLayers[layerName] = layer;
+    invalidateStyleableLayerRegistry();
+    return layer;
+  }
   
-  // Start loading layers
-  loadAllLayersFromConfig();
+  async function initializeProjectAndLayers() {
+    try {
+      const resolvedProject = await determineProjectContext();
+      if (resolvedProject) {
+        currentProject = resolvedProject;
+        persistProjectSelection(resolvedProject);
+      } else {
+        currentProject = DEFAULT_PROJECT;
+      }
+      console.log('Resolved project context:', currentProject);
+    } catch (error) {
+      console.warn('Falling back to default project due to detection error:', error);
+      currentProject = DEFAULT_PROJECT;
+    }
+    await loadAllLayersFromConfig();
+  }
+
+  // Start loading layers after project context is resolved
+  initializeProjectAndLayers();
   
   /* OLD LOADING CODE - REPLACED BY DYNAMIC LOADING
   loadLayer('PL_Pipelines.geojson', 'pipelineLayer', {
@@ -5039,7 +5624,7 @@ async function exportCompleteDataset() {
   try {
     const workbook = XLSX.utils.book_new();
     const wsData = [
-      ['Filename', 'Legend Name', 'Color', 'Marker Type', 'Size', 'Layer Type'],
+      ['Filename', 'Legend Name', 'Color', 'Marker Type', 'Size', 'Layer Type', 'Parent Filename'],
       []  // Empty row
     ];
     
@@ -5051,7 +5636,8 @@ async function exportCompleteDataset() {
         config.color,
         config.markerType,
         config.size,
-        config.type
+        config.type,
+        config.parentFilename || ''
       ]);
     });
     
@@ -9000,6 +9586,7 @@ function updateActiveToolDisplay(mode) {
     'short-pipe': '📏 Short Pipe',
     'delete': '🗑️ Delete',
     'group-pipelines': '📦 Group Pipelines',
+    'switch-sublayer': '🧩 Switch to Sublayer',
     'add-plan': '🗺️ Add Infrastructure Plans',
     'divide-pipeline': '✂️ Divide Pipeline',
     'integrate-dataset': '🔗 Integrate Dataset',
@@ -9214,6 +9801,12 @@ function selectTool(mode) {
     case 'group-pipelines':
       if (!checkContributorName()) return;
       startPipelineGrouping();
+      break;
+    case 'switch-sublayer':
+      if (!checkContributorName()) return;
+      deactivateAllModes();
+      currentMode = 'switch-sublayer';
+      startSublayerSwitchFlow();
       break;
     case 'add-plan':
       if (!checkContributorName()) return;
@@ -10602,6 +11195,643 @@ function unhighlightAllGroups() {
   }
 }
 
+// ==================== Sublayer Switch Tool ====================
+
+function startSublayerSwitchFlow() {
+  const parentOptions = getEligibleSublayerParents();
+  if (!parentOptions.length) {
+    showInfoPopup('No eligible parent layers are currently loaded. Please ensure at least one base layer is available before switching to a sublayer.', '🧩 Switch to Sublayer');
+    currentMode = 'info';
+    activateInfoMode();
+    return;
+  }
+
+  const select = document.createElement('select');
+  select.id = 'sublayer-parent-select';
+  select.style.width = '100%';
+  select.style.padding = '10px';
+  select.style.border = '1px solid #ccc';
+  select.style.borderRadius = '4px';
+  select.style.marginTop = '10px';
+  select.style.fontSize = '14px';
+
+  parentOptions.forEach((config, index) => {
+    const option = document.createElement('option');
+    option.value = config.filename;
+    option.textContent = `${config.legendName} (${config.type || 'Layer'})`;
+    if (index === 0) option.selected = true;
+    select.appendChild(option);
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(select);
+
+  showCustomPopup(
+    '🧩 Switch to Sublayer - Step 1',
+    '<p style="text-align: center; margin: 15px 0;">Choose the parent layer that currently contains the elements you want to move.</p>',
+    [
+      {
+        text: 'Next',
+        type: 'primary',
+        keepOpen: true,
+        onClick: () => {
+          const selectedFilename = select.value;
+          if (!selectedFilename) {
+            showInfoPopup('Please select a parent layer.', '🧩 Switch to Sublayer');
+            return;
+          }
+          const parentConfig = parentOptions.find(cfg => cfg.filename === selectedFilename);
+          if (!parentConfig) {
+            showInfoPopup('The selected parent layer is no longer available.', '🧩 Switch to Sublayer');
+            return;
+          }
+          closeCustomPopup();
+          promptSublayerTargetSelection(parentConfig);
+        }
+      },
+      {
+        text: 'Cancel',
+        type: 'secondary',
+        onClick: () => {
+          currentMode = 'info';
+          activateInfoMode();
+        }
+      }
+    ],
+    wrapper
+  );
+}
+
+function getEligibleSublayerParents() {
+  if (!Array.isArray(layerConfig)) return [];
+  return layerConfig.filter(config => config && config.enabled !== false && !config.isSublayer);
+}
+
+function promptSublayerTargetSelection(parentConfig) {
+  const existingSublayers = Array.isArray(parentConfig.childSublayers) ? parentConfig.childSublayers : [];
+  const targetSelect = document.createElement('select');
+  targetSelect.id = 'sublayer-target-select';
+  targetSelect.style.width = '100%';
+  targetSelect.style.padding = '10px';
+  targetSelect.style.border = '1px solid #ccc';
+  targetSelect.style.borderRadius = '4px';
+  targetSelect.style.marginTop = '10px';
+  targetSelect.style.fontSize = '14px';
+
+  existingSublayers.forEach((child, index) => {
+    const option = document.createElement('option');
+    option.value = child.filename;
+    option.textContent = `${child.legendName} (existing)`;
+    if (index === 0) option.selected = true;
+    targetSelect.appendChild(option);
+  });
+
+  const createOption = document.createElement('option');
+  createOption.value = '__create__';
+  createOption.textContent = '➕ Create new sublayer';
+  if (!existingSublayers.length) {
+    createOption.selected = true;
+  }
+  targetSelect.appendChild(createOption);
+
+  const nameInput = document.createElement('input');
+  nameInput.id = 'new-sublayer-name';
+  nameInput.type = 'text';
+  nameInput.placeholder = 'e.g., Planned Expansions';
+  nameInput.style.width = '100%';
+  nameInput.style.padding = '10px';
+  nameInput.style.border = '1px solid #ccc';
+  nameInput.style.borderRadius = '4px';
+  nameInput.style.marginTop = '10px';
+  nameInput.style.fontSize = '14px';
+  nameInput.style.maxWidth = '280px';
+  nameInput.style.marginLeft = 'auto';
+  nameInput.style.marginRight = 'auto';
+  nameInput.style.textAlign = 'center';
+  nameInput.style.display = existingSublayers.length ? 'none' : 'block';
+
+  targetSelect.addEventListener('change', () => {
+    nameInput.style.display = targetSelect.value === '__create__' ? 'block' : 'none';
+    if (targetSelect.value === '__create__') {
+      nameInput.focus();
+    }
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(targetSelect);
+  wrapper.appendChild(nameInput);
+
+  showCustomPopup(
+    '🧩 Switch to Sublayer - Step 2',
+    `<p style="text-align: center; margin: 15px 0;">Parent Layer: <strong>${parentConfig.legendName}</strong><br>Select an existing sublayer or create a new one.</p>`,
+    [
+      {
+        text: 'Back',
+        type: 'secondary',
+        onClick: () => {
+          closeCustomPopup();
+          startSublayerSwitchFlow();
+        }
+      },
+      {
+        text: 'Next',
+        type: 'primary',
+        keepOpen: true,
+        onClick: () => {
+          const selectedValue = targetSelect.value;
+          let targetConfig = null;
+          if (selectedValue === '__create__') {
+            const desiredName = sanitizeSublayerLegendName(nameInput.value);
+            if (!desiredName || desiredName.length < 3) {
+              showInfoPopup('Please provide a sublayer name with at least 3 characters.', '🧩 Switch to Sublayer');
+              nameInput.focus();
+              return;
+            }
+            targetConfig = createRuntimeSublayerConfig(parentConfig, desiredName);
+          } else {
+            targetConfig = existingSublayers.find(cfg => cfg.filename === selectedValue);
+          }
+
+          if (!targetConfig) {
+            showInfoPopup('Unable to determine the target sublayer. Please try again.', '🧩 Switch to Sublayer');
+            return;
+          }
+
+          closeCustomPopup();
+          prepareSublayerSelection(parentConfig, targetConfig);
+        }
+      }
+    ],
+    wrapper
+  );
+}
+
+function createRuntimeSublayerConfig(parentConfig, legendName) {
+  const safeLegendName = sanitizeSublayerLegendName(legendName);
+  const filename = generateUniqueSublayerFilename(parentConfig, safeLegendName);
+  const newConfig = {
+    filename,
+    legendName: safeLegendName,
+    color: parentConfig.color,
+    markerType: parentConfig.markerType,
+    size: parentConfig.size,
+    type: parentConfig.type,
+    enabled: true,
+    parentFilename: parentConfig.filename
+  };
+  insertConfigAfterParent(parentConfig, newConfig);
+  updateLegendControl();
+  invalidateStyleableLayerRegistry();
+  ensureLayerInstanceForConfig(newConfig);
+  return newConfig;
+}
+
+function prepareSublayerSelection(parentConfig, targetConfig) {
+  if (!parentConfig || !targetConfig) {
+    showInfoPopup('Missing target information for sublayer selection.', '🧩 Switch to Sublayer');
+    return;
+  }
+
+  if ((parentConfig.type || '').toLowerCase() !== (targetConfig.type || '').toLowerCase()) {
+    showInfoPopup('The selected sublayer has a different geometry type than its parent. Please choose a matching sublayer.', '🧩 Switch to Sublayer');
+    return;
+  }
+
+  reapplyActiveCountryFilterState();
+
+  const parentLayer = dynamicLayers[parentConfig.layerName] || getLegacyLayerReference(parentConfig.elementKey);
+  const targetLayer = dynamicLayers[targetConfig.layerName] || getLegacyLayerReference(targetConfig.elementKey);
+
+  if (!parentLayer) {
+    showInfoPopup('The parent layer is not available on the map.', '🧩 Switch to Sublayer');
+    return;
+  }
+
+  let featureCount = 0;
+  parentLayer.eachLayer(() => { featureCount++; });
+  if (featureCount === 0) {
+    showInfoPopup('The selected parent layer does not contain any elements to move.', '🧩 Switch to Sublayer');
+    currentMode = 'info';
+    activateInfoMode();
+    return;
+  }
+
+  const context = {
+    parentConfig,
+    targetConfig,
+    parentLayer,
+    targetLayer,
+    selectedLayers: new Set(),
+    hiddenLayers: [],
+    boundHandlers: new Map(),
+    parentLayerWasVisible: parentLayer ? map.hasLayer(parentLayer) : false,
+    displayLayer: resolveDisplayLayerForParent(parentConfig, parentLayer),
+    displayLayerWasVisible: false,
+    usingFilteredDisplayLayer: false,
+    parentLayerAddedForSelection: false,
+    filterMaskedLayers: []
+  };
+  context.displayLayerWasVisible = context.displayLayer ? map.hasLayer(context.displayLayer) : false;
+  context.usingFilteredDisplayLayer = !!(context.displayLayer && context.displayLayer !== context.parentLayer && context.displayLayerWasVisible);
+  sublayerOperationContext = context;
+
+  showCustomPopup(
+    '🧩 Switch to Sublayer - Step 3',
+    '<p style="text-align: center; margin: 15px 0;">Click "Start Selection" to isolate the parent layer and choose the elements you want to move.</p>',
+    [
+      {
+        text: 'Start Selection',
+        type: 'primary',
+        keepOpen: true,
+        onClick: () => {
+          closeCustomPopup();
+          beginSublayerSelection(context);
+        }
+      },
+      {
+        text: 'Cancel',
+        type: 'secondary',
+        onClick: () => {
+          sublayerOperationContext = null;
+          currentMode = 'info';
+          activateInfoMode();
+        }
+      }
+    ]
+  );
+}
+
+function resolveDisplayLayerForParent(parentConfig, fallbackLayer) {
+  if (!parentConfig) return fallbackLayer;
+  const metadata = layerMetadataRegistry[parentConfig.layerName];
+  const elementKey = parentConfig.elementKey || metadata?.elementKey;
+  if (!elementKey) return fallbackLayer;
+  const legacyLayer = getLegacyLayerReference(elementKey);
+  if (legacyLayer && map.hasLayer(legacyLayer)) {
+    return legacyLayer;
+  }
+  const candidateLayers = getLayersForElementType(elementKey);
+  if (Array.isArray(candidateLayers)) {
+    for (const candidate of candidateLayers) {
+      if (candidate && map.hasLayer(candidate)) {
+        return candidate;
+      }
+    }
+  }
+  return fallbackLayer;
+}
+
+function beginSublayerSelection(context) {
+  if (!context) return;
+  ensureParentLayerVisibleForSelection(context);
+  isolateParentLayerVisibility(context);
+  applyActiveCountryFilterMask(context);
+  attachSublayerSelectionHandlers(context);
+  openSublayerSelectionHud(context);
+}
+
+function isolateParentLayerVisibility(context) {
+  const hidden = [];
+  Object.values(dynamicLayers || {}).forEach(layer => {
+    if (!layer || layer === context.parentLayer || layer === context.displayLayer) return;
+    if (map.hasLayer(layer)) {
+      map.removeLayer(layer);
+      hidden.push(layer);
+    }
+  });
+
+  const legacyLayers = [pipelineLayer, estimatedPipelinesLayer, nodeLayer, powerplantsLayer, compressorsLayer, lngLayer, storageLayer, consumptionLayer];
+  legacyLayers.forEach(layer => {
+    if (!layer || layer === context.parentLayer || layer === context.displayLayer) return;
+    if (map.hasLayer(layer)) {
+      map.removeLayer(layer);
+      hidden.push(layer);
+    }
+  });
+
+  context.hiddenLayers = hidden;
+}
+
+function ensureParentLayerVisibleForSelection(context) {
+  if (!context || !map) return;
+  if (context.usingFilteredDisplayLayer) {
+    if (context.displayLayer && !map.hasLayer(context.displayLayer)) {
+      map.addLayer(context.displayLayer);
+    }
+    return;
+  }
+  if (context.parentLayer && !context.parentLayerWasVisible) {
+    map.addLayer(context.parentLayer);
+    context.parentLayerAddedForSelection = true;
+  }
+}
+
+function applyActiveCountryFilterMask(context) {
+  if (!context || !context.parentLayer) {
+    context.filterMaskedLayers = [];
+    return;
+  }
+  if (context.usingFilteredDisplayLayer) {
+    context.filterMaskedLayers = [];
+    return;
+  }
+  const hasActiveFilter = (selectedCountries instanceof Set) && selectedCountries.size > 0;
+  if (!hasActiveFilter) {
+    context.filterMaskedLayers = [];
+    return;
+  }
+
+  const geometryType = (context.parentConfig?.type || '').toLowerCase();
+  const matcher = geometryType === 'line' ? shouldShowPipeline : shouldShowElement;
+  const maskedLayers = [];
+
+  context.parentLayer.eachLayer(layer => {
+    if (!layer || !layer.feature) return;
+    if (matcher(layer.feature, selectedCountries)) {
+      return;
+    }
+    const detachedEntry = detachLayerForSublayerFilter(layer, context.parentLayer);
+    if (detachedEntry) {
+      maskedLayers.push(detachedEntry);
+    }
+  });
+
+  context.filterMaskedLayers = maskedLayers;
+}
+
+function detachLayerForSublayerFilter(layer, parentLayer) {
+  if (!layer || !parentLayer || typeof parentLayer.removeLayer !== 'function') {
+    return null;
+  }
+  const entry = {
+    layer,
+    clickLayer: layer._clickLayer || null,
+    clickLayerWasVisible: !!(layer._clickLayer && map && map.hasLayer(layer._clickLayer))
+  };
+  parentLayer.removeLayer(layer);
+  if (entry.clickLayer && entry.clickLayerWasVisible) {
+    map.removeLayer(entry.clickLayer);
+  }
+  return entry;
+}
+
+function openSublayerSelectionHud(context) {
+  const hudContent = `
+    <p style="margin-bottom: 10px;">
+      Parent Layer: <strong>${context.parentConfig.legendName}</strong><br>
+      Target Sublayer: <strong>${context.targetConfig.legendName}</strong>
+    </p>
+    <p id="sublayer-selection-counter" style="font-weight: bold;">Selected: 0 elements</p>
+    <p style="font-size: 13px; color: #555;">Click features on the map to toggle selection.<br>Only the parent layer is visible.</p>
+  `;
+
+  showCustomPopup(
+    '🧩 Switch to Sublayer',
+    hudContent,
+    [
+      {
+        text: 'Confirm Move',
+        type: 'primary',
+        keepOpen: true,
+        onClick: finalizeSublayerTransfer
+      },
+      {
+        text: 'Cancel',
+        type: 'secondary',
+        onClick: () => cancelSublayerSelection('Transfer cancelled.')
+      }
+    ]
+  );
+  dockCustomPopupBottomRight();
+  updateSublayerSelectionCounter(context);
+}
+
+function attachSublayerSelectionHandlers(context) {
+  if (!context) return;
+  const selectionLayer = context.displayLayer || context.parentLayer;
+  if (!selectionLayer) return;
+  context.boundHandlers = new Map();
+  selectionLayer.eachLayer(layer => {
+    if (!layer) return;
+    layer.off('click');
+    const handler = (e) => {
+      L.DomEvent.stopPropagation(e);
+      toggleSublayerSelection(layer, context);
+    };
+    layer.on('click', handler);
+    context.boundHandlers.set(layer, handler);
+  });
+}
+
+function toggleSublayerSelection(layer, context) {
+  if (!context) return;
+  const alreadySelected = context.selectedLayers.has(layer);
+  if (alreadySelected) {
+    context.selectedLayers.delete(layer);
+    resetSublayerHighlight(layer);
+  } else {
+    context.selectedLayers.add(layer);
+    highlightLayerForSublayer(layer);
+  }
+  updateSublayerSelectionCounter(context);
+}
+
+function highlightLayerForSublayer(layer) {
+  if (!layer) return;
+  if (!layer._originalSublayerStyle) {
+    layer._originalSublayerStyle = {
+      color: layer.options?.color,
+      weight: layer.options?.weight,
+      opacity: layer.options?.opacity,
+      fillColor: layer.options?.fillColor,
+      fillOpacity: layer.options?.fillOpacity,
+      radius: typeof layer.options?.radius === 'number' ? layer.options.radius : null
+    };
+  }
+
+  if (layer.setStyle) {
+    layer.setStyle({
+      color: '#ffd166',
+      fillColor: '#ffd166',
+      weight: (layer._originalSublayerStyle.weight || 3) + 1.5,
+      opacity: 1,
+      fillOpacity: 1
+    });
+  }
+  if (typeof layer.setRadius === 'function' && layer._originalSublayerStyle.radius) {
+    layer.setRadius(layer._originalSublayerStyle.radius * 1.3);
+  }
+  if (layer._path) {
+    layer._path.style.filter = 'drop-shadow(0 0 8px rgba(0,0,0,0.35))';
+  }
+}
+
+function resetSublayerHighlight(layer) {
+  if (!layer || !layer._originalSublayerStyle) return;
+  const style = layer._originalSublayerStyle;
+  if (layer.setStyle) {
+    layer.setStyle({
+      color: style.color,
+      fillColor: style.fillColor,
+      weight: style.weight,
+      opacity: style.opacity,
+      fillOpacity: style.fillOpacity
+    });
+  }
+  if (typeof layer.setRadius === 'function' && style.radius) {
+    layer.setRadius(style.radius);
+  }
+  if (layer._path) {
+    layer._path.style.filter = '';
+  }
+}
+
+function updateSublayerSelectionCounter(context) {
+  const counter = document.getElementById('sublayer-selection-counter');
+  if (!counter || !context) return;
+  const count = context.selectedLayers.size;
+  counter.textContent = `Selected: ${count} element${count === 1 ? '' : 's'}`;
+}
+
+function cancelSublayerSelection(message) {
+  cleanupSublayerOperation(message || 'Selection aborted.');
+}
+
+function cleanupSublayerOperation(message) {
+  if (!sublayerOperationContext) {
+    if (message) {
+      showInfoPopup(message, '🧩 Switch to Sublayer');
+    }
+    return;
+  }
+
+  const context = sublayerOperationContext;
+  if (context.boundHandlers) {
+    context.boundHandlers.forEach((handler, layer) => {
+      if (layer) {
+        layer.off('click', handler);
+      }
+    });
+  }
+
+  context.selectedLayers.forEach(layer => resetSublayerHighlight(layer));
+  context.selectedLayers.clear();
+
+  if (Array.isArray(context.hiddenLayers)) {
+    context.hiddenLayers.forEach(layer => {
+      if (layer && !map.hasLayer(layer)) {
+        map.addLayer(layer);
+      }
+    });
+  }
+
+  if (Array.isArray(context.filterMaskedLayers) && context.parentLayer) {
+    context.filterMaskedLayers.forEach(entry => {
+      if (!entry || !entry.layer) return;
+      if (typeof context.parentLayer.addLayer === 'function') {
+        context.parentLayer.addLayer(entry.layer);
+      }
+      if (entry.clickLayer && entry.clickLayerWasVisible && map && map.hasLayer(context.parentLayer)) {
+        map.addLayer(entry.clickLayer);
+      }
+    });
+    context.filterMaskedLayers = [];
+  }
+
+  if (context.parentLayer && context.parentLayerAddedForSelection && map.hasLayer(context.parentLayer)) {
+    map.removeLayer(context.parentLayer);
+  }
+
+  reapplyActiveCountryFilterState();
+
+  sublayerOperationContext = null;
+  closeCustomPopup();
+  currentMode = 'info';
+  activateInfoMode();
+  if (message) {
+    showInfoPopup(message, '🧩 Switch to Sublayer');
+  }
+}
+
+function finalizeSublayerTransfer() {
+  const context = sublayerOperationContext;
+  if (!context) return;
+  if (!context.selectedLayers.size) {
+    showInfoPopup('Select at least one element before confirming the transfer.', '🧩 Switch to Sublayer');
+    return;
+  }
+  if (!context.targetLayer) {
+    showInfoPopup('The target sublayer is not available. Please restart the tool.', '🧩 Switch to Sublayer');
+    return;
+  }
+
+  const targetMetadata = layerMetadataRegistry[context.targetConfig.layerName];
+  let movedCount = 0;
+  context.selectedLayers.forEach(layer => {
+    const moved = moveLayerToSublayer(layer, context, targetMetadata);
+    if (moved) {
+      movedCount++;
+    }
+  });
+
+  const summary = `${movedCount} element${movedCount === 1 ? '' : 's'} moved to ${context.targetConfig.legendName}.`;
+  cleanupSublayerOperation(summary);
+}
+
+function moveLayerToSublayer(layer, context, targetMetadata) {
+  if (!layer || !context || !context.parentLayer || !context.targetLayer) {
+    return false;
+  }
+
+  resetSublayerHighlight(layer);
+  delete layer._originalSublayerStyle;
+  context.parentLayer.removeLayer(layer);
+  context.targetLayer.addLayer(layer);
+
+  if (targetMetadata) {
+    assignMetadataToLayer(layer, targetMetadata);
+  }
+
+  const feature = layer.feature || (layer.feature = { type: 'Feature', properties: {}, geometry: layer.toGeoJSON?.().geometry || null });
+  if (feature.properties) {
+    feature.properties.Layer_Name = context.targetConfig.legendName;
+    feature.properties.SubLayer = context.targetConfig.legendName;
+    feature.properties.modified = true;
+    feature.properties.__elementKey = targetMetadata?.elementKey || feature.properties.__elementKey;
+  }
+
+  applyTargetLayerStyling(layer, context.targetConfig);
+  return true;
+}
+
+function applyTargetLayerStyling(layer, config) {
+  if (!layer || !config) return;
+  const isLine = (config.type || '').toLowerCase() === 'line';
+  if (isLine && layer.setStyle) {
+    layer.setStyle({
+      color: config.color || '#3388ff',
+      weight: config.size || 3,
+      opacity: 0.85
+    });
+    layer._originalColor = config.color;
+    layer._originalWeight = config.size;
+    layer._originalOpacity = 0.85;
+    layer._originalDashArray = null;
+  } else if (layer.setStyle) {
+    layer.setStyle({
+      color: '#000',
+      weight: 1,
+      opacity: 1,
+      fillColor: config.color || '#ff7800',
+      fillOpacity: 0.85
+    });
+    if (typeof layer.setRadius === 'function' && config.size) {
+      layer.setRadius(config.size);
+    }
+    captureOriginalMarkerStyle(layer, 'default');
+  }
+}
+
 // ==================== Infrastructure Plan Georeferencing ====================
 
 const planLayers = [];
@@ -11317,6 +12547,7 @@ function registerLegendToggle({ checkbox, resolveLayers, elementKey }) {
       const shouldShow = !!checkbox.checked;
       const isVisible = map.hasLayer(layer);
       if (shouldShow && !isVisible) {
+        applyDeletedIdentitiesToLayer(layer);
         layer.addTo(map);
       } else if (!shouldShow && isVisible) {
         map.removeLayer(layer);
@@ -12650,33 +13881,37 @@ function activateInfoMode() {
   }
 }
 
-// Placeholder function for legend control updates
-function updateLegendControl() {
-  const legendControl = document.querySelector('.legend-control');
-  if (!legendControl) return;
-  
-  let legendContent = '';
-  
-  // Generate legend dynamically from layerConfig
-  layerConfig.forEach(config => {
-    const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
-    const layer = dynamicLayers[layerName];
+  // Placeholder function for legend control updates
+  function updateLegendControl() {
+    const legendControl = document.querySelector('.legend-control');
+    if (!legendControl) return;
     
-    // Show legend entry even if layer not yet loaded (will be filled when loaded)
-    const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    let legendContent = '';
+    const legendEntries = getOrderedLegendConfigs();
     
-    if (config.type === 'Line') {
-      // Line layer
-      legendContent += `<label><input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line" style="background:${config.color};"></div></span><span style="margin-left: 6px;">${config.legendName}</span></label><br>`;
-    } else {
-      // Point or In-Line layer
-      legendContent += `<label><input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:${config.color};"></span></span><span style="margin-left: 6px;">${config.legendName}</span></label><br>`;
-    }
-  });
+    // Generate legend dynamically from ordered configuration
+    legendEntries.forEach(config => {
+      const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      const layer = dynamicLayers[layerName];
+      
+      // Show legend entry even if layer not yet loaded (will be filled when loaded)
+      const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const labelClass = 'legend-label';
+      const labelOpen = `<label class="${labelClass}">`;
+      const labelClose = '</label><br>';
+      
+      if (config.type === 'Line') {
+        // Line layer
+        legendContent += `${labelOpen}<input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line" style="background:${config.color};"></div></span><span style="margin-left: 6px;">${config.legendName}</span>${labelClose}`;
+      } else {
+        // Point or In-Line layer
+        legendContent += `${labelOpen}<input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:${config.color};"></span></span><span style="margin-left: 6px;">${config.legendName}</span>${labelClose}`;
+      }
+    });
   
   // Add shortPipeLayer if exists (dynamically created layer)
   if (shortPipeLayer) {
-    legendContent += '<label><input type="checkbox" id="toggle-shortpipes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><span class="legend-line" style="background:#ff8800; border-radius:2px; border:1px dashed #ff8800;"></span></span><span style="margin-left: 6px;">Short-Pipes</span></label><br>';
+    legendContent += '<label class="legend-label"><input type="checkbox" id="toggle-shortpipes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><span class="legend-line" style="background:#ff8800; border-radius:2px; border:1px dashed #ff8800;"></span></span><span style="margin-left: 6px;">Short-Pipes</span></label><br>';
   }
   
   // Add Select All button
@@ -14798,83 +16033,8 @@ function closeCountryFilterModal() {
 }
 
 function clearAllFilters() {
-  // Restore all original layers if they exist
-  if (originalPipelineLayer) {
-    if (pipelineLayer && map.hasLayer(pipelineLayer)) {
-      map.removeLayer(pipelineLayer);
-    }
-    map.addLayer(originalPipelineLayer);
-    pipelineLayer = originalPipelineLayer;
-  }
-  
-  if (originalEstimatedPipelinesLayer) {
-    if (estimatedPipelinesLayer && map.hasLayer(estimatedPipelinesLayer)) {
-      map.removeLayer(estimatedPipelinesLayer);
-    }
-    map.addLayer(originalEstimatedPipelinesLayer);
-    estimatedPipelinesLayer = originalEstimatedPipelinesLayer;
-  }
-  
-  if (originalNodeLayer) {
-    if (nodeLayer && map.hasLayer(nodeLayer)) {
-      map.removeLayer(nodeLayer);
-    }
-    map.addLayer(originalNodeLayer);
-    nodeLayer = originalNodeLayer;
-  }
-  
-  if (originalPowerplantsLayer) {
-    if (powerplantsLayer && map.hasLayer(powerplantsLayer)) {
-      map.removeLayer(powerplantsLayer);
-    }
-    map.addLayer(originalPowerplantsLayer);
-    powerplantsLayer = originalPowerplantsLayer;
-  }
-  
-  if (originalCompressorsLayer) {
-    if (compressorsLayer && map.hasLayer(compressorsLayer)) {
-      map.removeLayer(compressorsLayer);
-    }
-    map.addLayer(originalCompressorsLayer);
-    compressorsLayer = originalCompressorsLayer;
-  }
-  
-  if (originalLngLayer) {
-    if (lngLayer && map.hasLayer(lngLayer)) {
-      map.removeLayer(lngLayer);
-    }
-    map.addLayer(originalLngLayer);
-    lngLayer = originalLngLayer;
-  }
-  
-  if (originalStorageLayer) {
-    if (storageLayer && map.hasLayer(storageLayer)) {
-      map.removeLayer(storageLayer);
-    }
-    map.addLayer(originalStorageLayer);
-    storageLayer = originalStorageLayer;
-  }
-  
-  if (originalConsumptionLayer) {
-    if (consumptionLayer && map.hasLayer(consumptionLayer)) {
-      map.removeLayer(consumptionLayer);
-    }
-    map.addLayer(originalConsumptionLayer);
-    consumptionLayer = originalConsumptionLayer;
-  }
-  
-  if (originalShortPipeLayer) {
-    if (shortPipeLayer && map.hasLayer(shortPipeLayer)) {
-      map.removeLayer(shortPipeLayer);
-    }
-    map.addLayer(originalShortPipeLayer);
-    shortPipeLayer = originalShortPipeLayer;
-  }
-  
-  // Clear selected countries
+  restoreAllOriginalLayers();
   selectedCountries.clear();
-  
-  // Close filter modal
   closeFilterModal();
 }
 
@@ -14899,7 +16059,7 @@ function buildStyleableLayerRegistry() {
     if (entry.layerName && dynamicLayers[entry.layerName]) {
       refs.push(dynamicLayers[entry.layerName]);
     }
-    if (entry.elementKey) {
+    if (!refs.length && entry.elementKey) {
       const elementLayers = getLayersForElementType(entry.elementKey) || [];
       elementLayers.forEach(layer => {
         if (layer && !refs.includes(layer)) {
@@ -14938,7 +16098,9 @@ function buildStyleableLayerRegistry() {
         configRef: config,
         elementKey: config.elementKey,
         layerName: config.layerName,
-        layerRefs: []
+        layerRefs: [],
+        isSublayer: !!config.isSublayer,
+        parentLegendName: config.parentConfig?.legendName || null
       };
       entry.layerRefs = collectLayerRefs(entry);
       if (entry.geometry === 'line' && entry.lineStyle && entry.lineStyle !== 'solid' && entry.layerRefs.length) {
@@ -16137,6 +17299,16 @@ function applyCountryFilter() {
 }
 
 function restoreAllOriginalLayers() {
+  const prevPipelineLayer = pipelineLayer;
+  const prevEstimatedLayer = estimatedPipelinesLayer;
+  const prevNodeLayer = nodeLayer;
+  const prevPowerplantsLayer = powerplantsLayer;
+  const prevCompressorsLayer = compressorsLayer;
+  const prevLngLayer = lngLayer;
+  const prevStorageLayer = storageLayer;
+  const prevConsumptionLayer = consumptionLayer;
+  const prevShortPipeLayer = shortPipeLayer;
+
   // Remove current layers from map
   removeAllCurrentLayers();
   
@@ -16144,34 +17316,61 @@ function restoreAllOriginalLayers() {
   if (originalPipelineLayer && !map.hasLayer(originalPipelineLayer)) {
     map.addLayer(originalPipelineLayer);
     pipelineLayer = originalPipelineLayer;
+    applyDeletedIdentitiesToLayer(pipelineLayer);
   }
   if (originalEstimatedPipelinesLayer && !map.hasLayer(originalEstimatedPipelinesLayer)) {
     map.addLayer(originalEstimatedPipelinesLayer);
     estimatedPipelinesLayer = originalEstimatedPipelinesLayer;
+    applyDeletedIdentitiesToLayer(estimatedPipelinesLayer);
   }
   if (originalNodeLayer && !map.hasLayer(originalNodeLayer)) {
     map.addLayer(originalNodeLayer);
     nodeLayer = originalNodeLayer;
+    applyDeletedIdentitiesToLayer(nodeLayer);
   }
   if (originalPowerplantsLayer && !map.hasLayer(originalPowerplantsLayer)) {
     map.addLayer(originalPowerplantsLayer);
     powerplantsLayer = originalPowerplantsLayer;
+    applyDeletedIdentitiesToLayer(powerplantsLayer);
   }
   if (originalCompressorsLayer && !map.hasLayer(originalCompressorsLayer)) {
     map.addLayer(originalCompressorsLayer);
     compressorsLayer = originalCompressorsLayer;
+    applyDeletedIdentitiesToLayer(compressorsLayer);
   }
   if (originalLngLayer && !map.hasLayer(originalLngLayer)) {
     map.addLayer(originalLngLayer);
     lngLayer = originalLngLayer;
+    applyDeletedIdentitiesToLayer(lngLayer);
   }
   if (originalStorageLayer && !map.hasLayer(originalStorageLayer)) {
     map.addLayer(originalStorageLayer);
     storageLayer = originalStorageLayer;
+    applyDeletedIdentitiesToLayer(storageLayer);
   }
   if (originalConsumptionLayer && !map.hasLayer(originalConsumptionLayer)) {
     map.addLayer(originalConsumptionLayer);
     consumptionLayer = originalConsumptionLayer;
+    applyDeletedIdentitiesToLayer(consumptionLayer);
+  }
+  if (originalShortPipeLayer && !map.hasLayer(originalShortPipeLayer)) {
+    map.addLayer(originalShortPipeLayer);
+    shortPipeLayer = originalShortPipeLayer;
+    applyDeletedIdentitiesToLayer(shortPipeLayer);
+  }
+
+  synchronizeLayerReferences('pipelines', prevPipelineLayer, pipelineLayer);
+  synchronizeLayerReferences('pipelines', prevEstimatedLayer, estimatedPipelinesLayer);
+  synchronizeLayerReferences('nodes', prevNodeLayer, nodeLayer);
+  synchronizeLayerReferences('powerplants', prevPowerplantsLayer, powerplantsLayer);
+  synchronizeLayerReferences('compressors', prevCompressorsLayer, compressorsLayer);
+  synchronizeLayerReferences('lng', prevLngLayer, lngLayer);
+  synchronizeLayerReferences('storages', prevStorageLayer, storageLayer);
+  synchronizeLayerReferences('consumption', prevConsumptionLayer, consumptionLayer);
+  synchronizeLayerReferences('shortPipes', prevShortPipeLayer, shortPipeLayer);
+
+  if (window.selectedPipelineLayer === prevPipelineLayer) {
+    window.selectedPipelineLayer = pipelineLayer;
   }
 }
 
@@ -16228,25 +17427,41 @@ function removeAllCurrentLayers() {
 function filterAllElementsByCountries(selectedCountryCodes) {
   console.log('filterAllElementsByCountries called with:', Array.from(selectedCountryCodes));
 
+  const prevPipelineLayer = pipelineLayer;
+  const prevEstimatedLayer = estimatedPipelinesLayer;
+  const prevNodeLayer = nodeLayer;
+  const prevPowerplantsLayer = powerplantsLayer;
+  const prevCompressorsLayer = compressorsLayer;
+  const prevLngLayer = lngLayer;
+  const prevStorageLayer = storageLayer;
+  const prevConsumptionLayer = consumptionLayer;
+
   // Remove current layers from map
   removeAllCurrentLayers();
 
   // Create filtered layers from original data
-  const filteredPipelineLayer = L.layerGroup();
-  const filteredEstimatedLayer = L.layerGroup();
-  const filteredNodeLayer = L.layerGroup();
-  const filteredPowerplantsLayer = L.layerGroup();
-  const filteredCompressorsLayer = L.layerGroup();
-  const filteredLngLayer = L.layerGroup();
-  const filteredStorageLayer = L.layerGroup();
-  const filteredConsumptionLayer = L.layerGroup();
+  const filteredPipelineLayer = originalPipelineLayer ? L.layerGroup() : null;
+  const filteredEstimatedLayer = originalEstimatedPipelinesLayer ? L.layerGroup() : null;
+  const filteredNodeLayer = originalNodeLayer ? L.layerGroup() : null;
+  const filteredPowerplantsLayer = originalPowerplantsLayer ? L.layerGroup() : null;
+  const filteredCompressorsLayer = originalCompressorsLayer ? L.layerGroup() : null;
+  const filteredLngLayer = originalLngLayer ? L.layerGroup() : null;
+  const filteredStorageLayer = originalStorageLayer ? L.layerGroup() : null;
+  const filteredConsumptionLayer = originalConsumptionLayer ? L.layerGroup() : null;
+  const addFilteredLayerToMap = (layerGroup, label) => {
+    if (!layerGroup) return;
+    if (!map.hasLayer(layerGroup)) {
+      map.addLayer(layerGroup);
+    }
+    console.log(`Added ${label} layer with ${layerGroup.getLayers().length} features`);
+  };
 
   // Filter pipelines
   if (originalPipelineLayer) {
     let pipelineCount = 0;
     originalPipelineLayer.eachLayer(layer => {
       if (layer.feature && shouldShowPipeline(layer.feature, selectedCountryCodes)) {
-        filteredPipelineLayer.addLayer(layer);
+        filteredPipelineLayer?.addLayer(layer);
         pipelineCount++;
       }
     });
@@ -16254,7 +17469,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter estimated pipelines
-  if (originalEstimatedPipelinesLayer) {
+  if (originalEstimatedPipelinesLayer && filteredEstimatedLayer) {
     let estimatedCount = 0;
     originalEstimatedPipelinesLayer.eachLayer(layer => {
       if (layer.feature && shouldShowPipeline(layer.feature, selectedCountryCodes)) {
@@ -16266,7 +17481,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter nodes
-  if (originalNodeLayer) {
+  if (originalNodeLayer && filteredNodeLayer) {
     let nodeCount = 0;
     originalNodeLayer.eachLayer(layer => {
       if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
@@ -16278,7 +17493,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter powerplants
-  if (originalPowerplantsLayer) {
+  if (originalPowerplantsLayer && filteredPowerplantsLayer) {
     let powerplantCount = 0;
     originalPowerplantsLayer.eachLayer(layer => {
       if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
@@ -16290,7 +17505,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter compressors
-  if (originalCompressorsLayer) {
+  if (originalCompressorsLayer && filteredCompressorsLayer) {
     let compressorCount = 0;
     originalCompressorsLayer.eachLayer(layer => {
       if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
@@ -16302,7 +17517,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter LNG terminals
-  if (originalLngLayer) {
+  if (originalLngLayer && filteredLngLayer) {
     let lngCount = 0;
     originalLngLayer.eachLayer(layer => {
       if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
@@ -16314,7 +17529,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter storage sites
-  if (originalStorageLayer) {
+  if (originalStorageLayer && filteredStorageLayer) {
     let storageCount = 0;
     originalStorageLayer.eachLayer(layer => {
       if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
@@ -16326,7 +17541,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter consumption points
-  if (originalConsumptionLayer) {
+  if (originalConsumptionLayer && filteredConsumptionLayer) {
     let consumptionCount = 0;
     originalConsumptionLayer.eachLayer(layer => {
       if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
@@ -16338,7 +17553,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter short pipes
-  if (originalShortPipeLayer) {
+  if (originalShortPipeLayer && filteredPipelineLayer) {
     let shortPipeCount = 0;
     originalShortPipeLayer.eachLayer(layer => {
       if (layer.feature && shouldShowPipeline(layer.feature, selectedCountryCodes)) {
@@ -16349,39 +17564,24 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered short pipes:', shortPipeCount);
   }
 
-  // Add filtered layers to map
-  if (filteredPipelineLayer.getLayers().length > 0) {
-    map.addLayer(filteredPipelineLayer);
-    console.log('Added pipeline layer with', filteredPipelineLayer.getLayers().length, 'features');
-  }
-  if (filteredEstimatedLayer.getLayers().length > 0) {
-    map.addLayer(filteredEstimatedLayer);
-    console.log('Added estimated pipeline layer with', filteredEstimatedLayer.getLayers().length, 'features');
-  }
-  if (filteredNodeLayer.getLayers().length > 0) {
-    map.addLayer(filteredNodeLayer);
-    console.log('Added node layer with', filteredNodeLayer.getLayers().length, 'features');
-  }
-  if (filteredPowerplantsLayer.getLayers().length > 0) {
-    map.addLayer(filteredPowerplantsLayer);
-    console.log('Added powerplant layer with', filteredPowerplantsLayer.getLayers().length, 'features');
-  }
-  if (filteredCompressorsLayer.getLayers().length > 0) {
-    map.addLayer(filteredCompressorsLayer);
-    console.log('Added compressor layer with', filteredCompressorsLayer.getLayers().length, 'features');
-  }
-  if (filteredLngLayer.getLayers().length > 0) {
-    map.addLayer(filteredLngLayer);
-    console.log('Added LNG layer with', filteredLngLayer.getLayers().length, 'features');
-  }
-  if (filteredStorageLayer.getLayers().length > 0) {
-    map.addLayer(filteredStorageLayer);
-    console.log('Added storage layer with', filteredStorageLayer.getLayers().length, 'features');
-  }
-  if (filteredConsumptionLayer.getLayers().length > 0) {
-    map.addLayer(filteredConsumptionLayer);
-    console.log('Added consumption layer with', filteredConsumptionLayer.getLayers().length, 'features');
-  }
+  // Add filtered layers to map (even if empty, so editing targets exist)
+  applyDeletedIdentitiesToLayer(filteredPipelineLayer);
+  applyDeletedIdentitiesToLayer(filteredEstimatedLayer);
+  applyDeletedIdentitiesToLayer(filteredNodeLayer);
+  applyDeletedIdentitiesToLayer(filteredPowerplantsLayer);
+  applyDeletedIdentitiesToLayer(filteredCompressorsLayer);
+  applyDeletedIdentitiesToLayer(filteredLngLayer);
+  applyDeletedIdentitiesToLayer(filteredStorageLayer);
+  applyDeletedIdentitiesToLayer(filteredConsumptionLayer);
+
+  addFilteredLayerToMap(filteredPipelineLayer, 'pipeline');
+  addFilteredLayerToMap(filteredEstimatedLayer, 'estimated pipeline');
+  addFilteredLayerToMap(filteredNodeLayer, 'node');
+  addFilteredLayerToMap(filteredPowerplantsLayer, 'powerplant');
+  addFilteredLayerToMap(filteredCompressorsLayer, 'compressor');
+  addFilteredLayerToMap(filteredLngLayer, 'lng');
+  addFilteredLayerToMap(filteredStorageLayer, 'storage');
+  addFilteredLayerToMap(filteredConsumptionLayer, 'consumption');
 
   // Update current layer references (but keep originals intact)
   pipelineLayer = filteredPipelineLayer;
@@ -16392,6 +17592,55 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   lngLayer = filteredLngLayer;
   storageLayer = filteredStorageLayer;
   consumptionLayer = filteredConsumptionLayer;
+
+  synchronizeLayerReferences('pipelines', prevPipelineLayer, pipelineLayer);
+  synchronizeLayerReferences('pipelines', prevEstimatedLayer, estimatedPipelinesLayer);
+  synchronizeLayerReferences('nodes', prevNodeLayer, nodeLayer);
+  synchronizeLayerReferences('powerplants', prevPowerplantsLayer, powerplantsLayer);
+  synchronizeLayerReferences('compressors', prevCompressorsLayer, compressorsLayer);
+  synchronizeLayerReferences('lng', prevLngLayer, lngLayer);
+  synchronizeLayerReferences('storages', prevStorageLayer, storageLayer);
+  synchronizeLayerReferences('consumption', prevConsumptionLayer, consumptionLayer);
+
+  if (window.selectedPipelineLayer === prevPipelineLayer) {
+    window.selectedPipelineLayer = pipelineLayer;
+  }
+
+  enforceFilteredLayerPresence();
+}
+
+function reapplyActiveCountryFilterState() {
+  const hasActiveFilter = (selectedCountries instanceof Set) && selectedCountries.size > 0;
+  if (!hasActiveFilter) {
+    return;
+  }
+  filterAllElementsByCountries(selectedCountries);
+}
+
+function enforceFilteredLayerPresence() {
+  if (!map || !(selectedCountries instanceof Set) || selectedCountries.size === 0) {
+    return;
+  }
+
+  const ensurePair = (originalLayer, filteredLayer) => {
+    if (!filteredLayer || filteredLayer === originalLayer) return;
+    if (originalLayer && map.hasLayer(originalLayer)) {
+      map.removeLayer(originalLayer);
+    }
+    if (!map.hasLayer(filteredLayer) && typeof filteredLayer.getLayers === 'function' && filteredLayer.getLayers().length > 0) {
+      map.addLayer(filteredLayer);
+    }
+  };
+
+  ensurePair(originalPipelineLayer, pipelineLayer);
+  ensurePair(originalEstimatedPipelinesLayer, estimatedPipelinesLayer);
+  ensurePair(originalNodeLayer, nodeLayer);
+  ensurePair(originalPowerplantsLayer, powerplantsLayer);
+  ensurePair(originalCompressorsLayer, compressorsLayer);
+  ensurePair(originalLngLayer, lngLayer);
+  ensurePair(originalStorageLayer, storageLayer);
+  ensurePair(originalConsumptionLayer, consumptionLayer);
+  ensurePair(originalShortPipeLayer, shortPipeLayer);
 }
 
 // Country name to country code mapping
@@ -16401,6 +17650,11 @@ const countryNameToCode = {
   'Italy': 'IT',
   'Spain': 'ES',
   'United Kingdom': 'GB',
+  'Great Britain': 'GB',
+  'England': 'GB',
+  'Scotland': 'GB',
+  'Wales': 'GB',
+  'Northern Ireland': 'GB',
   'Netherlands': 'NL',
   'Belgium': 'BE',
   'Austria': 'AT',
@@ -16431,59 +17685,172 @@ const countryNameToCode = {
   // Add more mappings as needed
 };
 
+const countryNameLookup = {};
+Object.entries(countryNameToCode).forEach(([name, code]) => {
+  if (typeof name === 'string' && code) {
+    countryNameLookup[name.trim().toLowerCase()] = code;
+  }
+});
+
+const countryCodeAliases = {
+  UK: 'GB',
+  EL: 'GR'
+};
+
+const iso3ToIso2 = {
+  AUT: 'AT',
+  BEL: 'BE',
+  BGR: 'BG',
+  HRV: 'HR',
+  CYP: 'CY',
+  CZE: 'CZ',
+  DNK: 'DK',
+  EST: 'EE',
+  FIN: 'FI',
+  FRA: 'FR',
+  DEU: 'DE',
+  GRC: 'GR',
+  HUN: 'HU',
+  IRL: 'IE',
+  ITA: 'IT',
+  LVA: 'LV',
+  LTU: 'LT',
+  LUX: 'LU',
+  MLT: 'MT',
+  NLD: 'NL',
+  POL: 'PL',
+  PRT: 'PT',
+  ROU: 'RO',
+  SVK: 'SK',
+  SVN: 'SI',
+  ESP: 'ES',
+  SWE: 'SE',
+  GBR: 'GB'
+};
+
+const elementCountryKeys = [
+  'Country_Code',
+  'CountryCode',
+  'Country',
+  'Country_of_Location',
+  'Country Location',
+  'CountryName',
+  'Country_Name'
+];
+
+const pipelineStartCountryKeys = ['Country_Start', 'country_start', 'Start_Country'];
+const pipelineEndCountryKeys = ['Country_End', 'country_end', 'End_Country'];
+
+function normalizeCountryCodeToken(rawCode) {
+  if (rawCode == null) return null;
+  const lettersOnly = String(rawCode).trim().replace(/[^a-zA-Z]/g, '');
+  if (!lettersOnly) return null;
+  const upper = lettersOnly.toUpperCase();
+  if (upper.length === 2) {
+    return countryCodeAliases[upper] || upper;
+  }
+  if (upper.length === 3 && iso3ToIso2[upper]) {
+    return iso3ToIso2[upper];
+  }
+  return null;
+}
+
+function extractCountryCodesFromValue(value) {
+  if (value == null) return [];
+  if (Array.isArray(value)) {
+    return value.flatMap(extractCountryCodesFromValue).filter(Boolean);
+  }
+
+  const raw = String(value).trim();
+  if (!raw) return [];
+
+  const candidates = new Set([raw]);
+  raw.split(/[,;\/|]/).forEach(part => {
+    if (part && part.trim()) {
+      candidates.add(part.trim());
+    }
+  });
+  const parenMatches = raw.match(/\(([^)]+)\)/g);
+  if (parenMatches) {
+    parenMatches.forEach(segment => {
+      const inside = segment.replace(/[()]/g, '').trim();
+      if (inside) {
+        candidates.add(inside);
+      }
+    });
+  }
+
+  const codes = new Set();
+  candidates.forEach(token => {
+    if (!token) return;
+    const lower = token.toLowerCase();
+    if (countryNameLookup[lower]) {
+      codes.add(countryNameLookup[lower]);
+    }
+
+    const normalizedCode = normalizeCountryCodeToken(token);
+    if (normalizedCode) {
+      codes.add(normalizedCode);
+    }
+
+    token.split(/\s+/).forEach(part => {
+      if (!part) return;
+      const partLower = part.toLowerCase();
+      if (countryNameLookup[partLower]) {
+        codes.add(countryNameLookup[partLower]);
+      }
+      const partCode = normalizeCountryCodeToken(part);
+      if (partCode) {
+        codes.add(partCode);
+      }
+    });
+  });
+
+  return Array.from(codes);
+}
+
+function doesFeatureMatchCountryFilter(properties, selectedCountryCodes, candidateKeys) {
+  if (!properties) return false;
+  if (!(selectedCountryCodes instanceof Set) || selectedCountryCodes.size === 0) {
+    return true;
+  }
+
+  for (const key of candidateKeys) {
+    const value = properties[key];
+    if (!value) continue;
+    const codes = extractCountryCodesFromValue(value);
+    if (codes.some(code => selectedCountryCodes.has(code))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function shouldShowElement(feature, selectedCountryCodes) {
-  if (!feature.properties) {
+  if (!feature?.properties) {
     console.log('shouldShowElement: No properties', feature);
     return false;
   }
 
-  // Try different property names for country information
-  let countryCode = feature.properties.Country_Code;
-  let countryName = feature.properties.Country;
-
-  console.log('shouldShowElement: Country_Code =', countryCode, 'Country =', countryName, 'selectedCountries =', Array.from(selectedCountryCodes));
-
-  // If we have a country code, use it directly
-  if (countryCode) {
-    const result = selectedCountryCodes.has(countryCode);
-    console.log('shouldShowElement: Using Country_Code, Result =', result);
-    return result;
+  const result = doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, elementCountryKeys);
+  if (!result) {
+    console.log('shouldShowElement: Filtered out due to missing match', feature.properties?.ID || feature);
   }
-
-  // If we have a country name, map it to code
-  if (countryName) {
-    const mappedCode = countryNameToCode[countryName];
-    console.log('shouldShowElement: Mapped', countryName, 'to', mappedCode);
-    if (mappedCode) {
-      const result = selectedCountryCodes.has(mappedCode);
-      console.log('shouldShowElement: Using mapped code, Result =', result);
-      return result;
-    }
-  }
-
-  console.log('shouldShowElement: No valid country information found');
-  return false;
+  return result;
 }
 
 function shouldShowPipeline(feature, selectedCountryCodes) {
-  if (!feature.properties) {
+  if (!feature?.properties) {
     console.log('shouldShowPipeline: No properties', feature);
     return false;
   }
 
-  // Pipelines have Country_Start and Country_End properties
-  const countryStart = feature.properties.Country_Start;
-  const countryEnd = feature.properties.Country_End;
-
-  console.log('shouldShowPipeline: Country_Start =', countryStart, 'Country_End =', countryEnd, 'selectedCountries =', Array.from(selectedCountryCodes));
-
-  // Check if either start or end country is in the selected countries
-  const startInSelection = countryStart && selectedCountryCodes.has(countryStart);
-  const endInSelection = countryEnd && selectedCountryCodes.has(countryEnd);
-
-  const result = startInSelection || endInSelection;
-  console.log('shouldShowPipeline: Start in selection =', startInSelection, 'End in selection =', endInSelection, 'Result =', result);
-
+  const startMatches = doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, pipelineStartCountryKeys);
+  const endMatches = doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, pipelineEndCountryKeys);
+  const result = startMatches || endMatches;
+  if (!result) {
+    console.log('shouldShowPipeline: Filtered out due to start/end mismatch', feature.properties?.ID || feature);
+  }
   return result;
 }
 
