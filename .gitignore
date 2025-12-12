@@ -2,5 +2,10 @@ __pycache__/
 *.py[cod]
 
 .idea/
-Input/
-Plans/
+
+Input/*
+!Input/.gitkeep
+
+Plans/*
+!Plans/.gitkeep
+
