@@ -173,7 +173,7 @@ class CombinedGUI:
         
         try:
             # Load and display logo
-            logo_path = os.path.join(self.app_dir, "QGas_Logo.jpg")
+            logo_path = os.path.join(self.app_dir, "Images", "QGas_Logo.jpg")
             if os.path.exists(logo_path):
                 from PIL import Image, ImageTk
                 logo_image = Image.open(logo_path)

@@ -1600,9 +1600,9 @@
 
 <div id="top-logo">
   <div class="logo-row">
-    <img src="QGas_Logo.jpg" alt="QGas Logo" class="main-logo-small">
-    <img src="TU_Graz.png" alt="TU Graz Logo" class="side-logo-small">
-    <img src="Logo_IEE.png" alt="IEE Logo" class="side-logo-small">
+    <img src="Images/QGas_Logo.jpg" alt="QGas Logo" class="main-logo-small">
+    <img src="Images/TU_Graz.png" alt="TU Graz Logo" class="side-logo-small">
+    <img src="Images/Logo_IEE.png" alt="IEE Logo" class="side-logo-small">
   </div>
   <button id="cite-btn" onclick="openCiteModal()" style="display: block; margin: 6px auto; padding: 6px 12px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Cite This Project</button>
   <button id="data-licensing-btn" onclick="openDataLicensingModal()" style="display: block; margin: 4px auto; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px;">Data and Licensing</button>
@@ -3733,7 +3733,7 @@
   
   function preloadAllAssets() {
     return new Promise((resolve) => {
-      const logos = ['TU_Graz.png', 'QGas_Logo.jpg', 'Logo_IEE.png', 'Loading_Screen.png'];
+      const logos = ['Images/TU_Graz.png', 'Images/QGas_Logo.jpg', 'Images/Logo_IEE.png', 'Images/Loading_Screen.png'];
       let loadedCount = 0;
       
       logos.forEach(logoSrc => {
@@ -3761,15 +3761,15 @@
     document.body.style.visibility = 'visible';
     
     // Logos in Loading Screen und Top-Logo setzen
-    const logoSources = ['QGas_Logo.jpg', 'Logo_IEE.png', 'TU_Graz.png']; // Neue Reihenfolge: QGas - IEE - TU Graz
-    const topLogoSources = ['QGas_Logo.jpg', 'TU_Graz.png', 'Logo_IEE.png']; // Andere Reihenfolge für Top-Logo
+    const logoSources = ['Images/QGas_Logo.jpg', 'Images/Logo_IEE.png', 'Images/TU_Graz.png']; // Neue Reihenfolge: QGas - IEE - TU Graz
+    const topLogoSources = ['Images/QGas_Logo.jpg', 'Images/TU_Graz.png', 'Images/Logo_IEE.png']; // Andere Reihenfolge für Top-Logo
     const loadingLogos = document.querySelectorAll('.logo-container img');
     const topLogos = document.querySelectorAll('#top-logo .logo-row img');
     
     // Hintergrundbild setzen
     const loadingBackground = document.getElementById('loading-background');
     if (loadingBackground) {
-      loadingBackground.src = 'Loading_Screen.png';
+      loadingBackground.src = 'Images/Loading_Screen.png';
     }
     
     logoSources.forEach((src, index) => {
