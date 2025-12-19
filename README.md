@@ -1,15 +1,9 @@
 <div align="center">
 
-<!-- Main QGas Logo -->
-<img src="Images/QGas_Logo.jpg" alt="QGas Logo" width="250"/>
-
-</div>
-
-<div align="center">
-
-<!-- Logos von TU Graz und IEE -->
-<img src="Images/TU_Graz.png" alt="TU Graz Logo" width="150" style="margin-right: 20px;"/>
-<img src="Images/Logo_IEE.png" alt="IEE Logo" width="150"/>
+<!-- Logos nebeneinander -->
+<img src="Images/QGas_Logo.jpg" alt="QGas Logo" width="200" style="margin-right: 20px;"/>
+<img src="Images/TU_Graz.png" alt="TU Graz Logo" width="200" style="margin-right: 20px; background-color: white; padding: 10px;"/>
+<img src="Images/Logo_IEE.png" alt="IEE Logo" width="200" style="background-color: white; padding: 10px;"/>
 
 </div>
 
@@ -54,10 +48,6 @@ The manual provides detailed guidance on all aspects of QGas, including the crea
 
 QGas is released under the **MIT License**, allowing free use, modification, and distribution of the software with proper attribution.
 
----
-
-# Acknowledgements
-
 To facilitate testing and to demonstrate the data structure used by QGas, a sample dataset has been included in the repository.  
 The **IGGIELGNC-1 dataset from SciGRID_gas** has been converted into the QGas data format and is provided in the `Input` folder of this repository.  
 
@@ -73,6 +63,13 @@ For more information about the original dataset, see the [Zenodo record](https:/
   url    = {https://doi.org/10.5281/zenodo.5509988}
 }
 ```
+
+---
+
+# Acknowledgements
+
+We would like to express our gratitude to all contributors and developers who participated in the development of QGas.  
+Special acknowledgment is extended to the team maintaining the Conda Activation Scripts repository.
 
 ---
 
