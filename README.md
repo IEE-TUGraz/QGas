@@ -1,13 +1,8 @@
 <div align="center">
 
-<img src="Images/QGas_Logo.png"
-     alt="QGas Logo"
-     height="120"
-     style="margin-right: 30px;" />
-
-<img src="Images/Logo_IEE.png"
-     alt="IEE Logo"
-     height="120" />
+<img src="Images/QGas_Logo.png" alt="QGas Logo" height="120" />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="Images/Logo_IEE.png" alt="IEE Logo" height="120" />
 
 </div>
 
