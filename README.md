@@ -1,7 +1,7 @@
 <div align="center">
 
 <img src="Images/QGas_Logo.png" alt="QGas Logo" height="120" />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="display: inline-block; width: 10%;"></span>
 <img src="Images/Logo_IEE.png" alt="IEE Logo" height="120" />
 
 </div>
