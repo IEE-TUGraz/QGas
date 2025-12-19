@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Logos nebeneinander -->
-<img src="Images/QGas_Logo.jpg" alt="QGas Logo" width="200" style="margin-right: 20px;"/>
+<img src="Images/QGas_Logo.png" alt="QGas Logo" width="200" style="margin-right: 20px;"/>
 <img src="Images/Logo_IEE.png" alt="IEE Logo" width="200" style="background-color: white; padding: 10px;"/>
 
 </div>
