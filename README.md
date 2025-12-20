@@ -77,8 +77,8 @@ Currently, you can reference the GitHub repository:
 
 ```bibtex
 @misc{QGAS,
-   author = {Marco Quantschnig and Thomas Klatzer and Yannick Werner},
-   title = {{QGas – Interactive Gas Infrastructure Toolkit}},
+   author = {Marco Quantschnig and Yannick Werner and Thomas Klatzer},
+   title = {{QGas -- Interactive Gas Infrastructure Toolkit}},
    howpublished = {\url{https://github.com/IEE-TUGraz/QGas}},
    year = {2025},
    note = {Developed at the Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Austria}
