@@ -978,6 +978,22 @@
   margin-top: auto;
 }
 
+#plan-finish-btn.plan-finish-btn--inactive {
+  background: #9aa0a6;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.plan-finish-hint {
+  font-size: 0.85rem;
+  margin-top: 6px;
+  color: #c0392b;
+}
+
+.plan-finish-hint.plan-finish-hint--ready {
+  color: #2e7d32;
+}
+
 .plan-points-list {
   flex: 1;
   background: #fafafa;
@@ -1710,7 +1726,7 @@
     </div>
     <div class="plan-georef-sidebar">
       <div class="plan-instructions" id="plan-instructions-text">
-        Click a recognizable feature in the plan, then match it on the map.
+        Click a recognizable feature in the plan, then match it on the map. Add <strong>at least three</strong> control points before finishing so the image can be georeferenced.
       </div>
       <div class="plan-zoom-control">
         <label for="plan-zoom-slider">Zoom</label>
@@ -1723,7 +1739,8 @@
       <div class="plan-points-list" id="plan-points-list">
         <p style="color:#666; text-align:center; margin:40px 0;">No control points yet.</p>
       </div>
-      <button id="plan-finish-btn" disabled>Add plan to map</button>
+      <button id="plan-finish-btn" class="plan-finish-btn--inactive">Add plan to map</button>
+      <div id="plan-finish-hint" class="plan-finish-hint">Select at least three control points before finishing.</div>
     </div>
   </div>
 </div>
@@ -12182,7 +12199,8 @@ function handlePlanFileSelection(event) {
 
     showCustomPopup(
       '🗺️ Add Infrastructure Plan',
-      '<p style="text-align:center; margin: 15px 0;">Now start georeferencing the image by selecting common points in the picture and on the map.</p>',
+      '<p style="text-align:center; margin: 15px 0;">Now start georeferencing the image by selecting common points in the picture and on the map.</p>' +
+      '<p style="text-align:center; margin: 0 0 10px 0; font-size: 0.9rem; color: #c0392b;">Select at least three matching control points before adding the plan.</p>',
       [{ text: 'Start', type: 'primary', onClick: () => { openPlanGeorefOverlay(); } }]
     );
   };
@@ -12206,6 +12224,7 @@ function openPlanGeorefOverlay() {
   if (pointsList) {
     pointsList.innerHTML = '<p style="color:#666; text-align:center; margin:40px 0;">No control points yet.</p>';
   }
+  updatePlanFinishState();
 
   imageEl.onload = () => {
     planGeorefState.imageNaturalWidth = imageEl.naturalWidth;
@@ -12250,10 +12269,9 @@ function resetPlanPointsUI() {
   }
   const selectBtn = document.getElementById('plan-select-map-point');
   const clearBtn = document.getElementById('plan-clear-pending');
-  const finishBtn = document.getElementById('plan-finish-btn');
   if (selectBtn) selectBtn.disabled = true;
   if (clearBtn) clearBtn.disabled = true;
-  if (finishBtn) finishBtn.disabled = true;
+  updatePlanFinishState();
 }
 
 function resetPlanImageSizing() {
@@ -12501,14 +12519,31 @@ function removePlanControlPoint(pairId) {
 
 function updatePlanFinishState() {
   const finishBtn = document.getElementById('plan-finish-btn');
+  const finishHint = document.getElementById('plan-finish-hint');
+  const totalPoints = Array.isArray(planGeorefState.controlPairs) ? planGeorefState.controlPairs.length : 0;
+  const remaining = Math.max(0, 3 - totalPoints);
+  const requirementMet = remaining === 0;
+
   if (finishBtn) {
-    finishBtn.disabled = planGeorefState.controlPairs.length < 3;
+    finishBtn.classList.toggle('plan-finish-btn--inactive', !requirementMet);
+    finishBtn.setAttribute('aria-disabled', (!requirementMet).toString());
+    finishBtn.dataset.pointsReady = requirementMet ? 'true' : 'false';
+  }
+
+  if (finishHint) {
+    if (requirementMet) {
+      finishHint.textContent = 'Ready to add the plan to the map.';
+      finishHint.classList.add('plan-finish-hint--ready');
+    } else {
+      const plural = remaining === 1 ? '' : 's';
+      finishHint.textContent = `Select ${remaining} more control point${plural} before finishing.`;
+      finishHint.classList.remove('plan-finish-hint--ready');
+    }
   }
 }
 
 function finalizePlanGeoref() {
   if (planGeorefState.controlPairs.length < 3) {
-    showInfoPopup('Please add at least three control points.', 'Add Infrastructure Plan');
     return;
   }
   const transform = computePlanAffineTransform(planGeorefState.controlPairs, map);
