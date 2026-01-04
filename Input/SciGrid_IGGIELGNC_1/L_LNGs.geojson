@@ -1,21 +1,21 @@
 {
   "type": "FeatureCollection",
+  "name": "L_LNGs",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
   "features": [
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          25.994099,
-          40.939928
-        ]
-      },
       "properties": {
         "ID": "INET_LG_1",
-        "Node": "INET_N_31",
         "name": "Alexandroupolis",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_31",
+        "NUTS3_ID": "EL511",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -25,30 +25,27 @@
         "max_vessel_size_M_m3": 108.12250187165749,
         "max_workingGas_M_m3": 99.250216,
         "median_cap_store2pipe_M_m3_per_d": 15.589128881373854,
-        "nuts_id_1": "GR",
-        "nuts_id_2": "GR",
-        "nuts_id_3": "GR",
-        "start_year": 2023,
+        "start_year": 2023.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          25.994099,
+          40.939928
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          2.174,
-          41.398
-        ]
-      },
       "properties": {
         "ID": "INET_LG_2",
-        "Node": "INET_N_142",
         "name": "Barcelona",
-        "tags": {},
+        "Node": "INET_N_142",
+        "NUTS3_ID": "ES511",
         "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
-        "entsog_id": 309,
+        "entsog_id": 309.0,
         "exact": 3,
         "from_TSO": "Enagas",
         "is_H_gas": 1,
@@ -56,30 +53,27 @@
         "max_vessel_size_M_m3": 155.344,
         "max_workingGas_M_m3": 489.28688,
         "median_cap_store2pipe_M_m3_per_d": 47.7620497321617,
-        "nuts_id_1": "ES5",
-        "nuts_id_2": "ES51",
-        "nuts_id_3": "ES511",
-        "start_year": 1969,
+        "start_year": 1969.0,
         "to_TSO": "Enagas"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.174,
+          41.398
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -3.1080400000000004,
-          43.34045
-        ]
-      },
       "properties": {
         "ID": "INET_LG_3",
-        "Node": "N_340_M_LMGN",
         "name": "Bilbao",
-        "tags": {},
+        "Node": "N_340_M_LMGN",
+        "NUTS3_ID": "ES213",
         "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
-        "entsog_id": 314,
+        "entsog_id": 314.0,
         "exact": 3,
         "from_TSO": "BBG",
         "is_H_gas": 1,
@@ -87,30 +81,27 @@
         "max_vessel_size_M_m3": 157.68,
         "max_workingGas_M_m3": 262.11672,
         "median_cap_store2pipe_M_m3_per_d": 19.592205701514846,
-        "nuts_id_1": "ES2",
-        "nuts_id_2": "ES21",
-        "nuts_id_3": "ES213",
-        "start_year": 2003,
+        "start_year": 2003.0,
         "to_TSO": "Enagas"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.10804,
+          43.34045
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.97196,
-          37.62167
-        ]
-      },
       "properties": {
         "ID": "INET_LG_5",
-        "Node": "SEQ_1093_p",
         "name": "Cartagena",
-        "tags": {},
+        "Node": "SEQ_1093_p",
+        "NUTS3_ID": "ES620",
         "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
-        "entsog_id": 311,
+        "entsog_id": 311.0,
         "exact": 3,
         "from_TSO": "Enagas",
         "is_H_gas": 1,
@@ -118,30 +109,27 @@
         "max_vessel_size_M_m3": 155.344,
         "max_workingGas_M_m3": 341.92032,
         "median_cap_store2pipe_M_m3_per_d": 33.06129727269546,
-        "nuts_id_1": "ES6",
-        "nuts_id_2": "ES62",
-        "nuts_id_3": "ES620",
-        "start_year": 1989,
+        "start_year": 1989.0,
         "to_TSO": "Enagas"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.97196,
+          37.62167
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          12.080219999999999,
-          45.133742
-        ]
-      },
       "properties": {
         "ID": "INET_LG_6",
-        "Node": "INET_N_299",
         "name": "Cavarzere",
-        "tags": {},
+        "Node": "INET_N_299",
+        "NUTS3_ID": "ITH35",
         "GCV_mean_kWh_per_m3": 11.602,
         "end_year": null,
-        "entsog_id": 307,
+        "entsog_id": 307.0,
         "exact": 3,
         "from_TSO": "GNL Adriatico",
         "is_H_gas": 1,
@@ -149,28 +137,25 @@
         "max_vessel_size_M_m3": 88.768,
         "max_workingGas_M_m3": 146.0,
         "median_cap_store2pipe_M_m3_per_d": 19.66917383169956,
-        "nuts_id_1": "ITH",
-        "nuts_id_2": "ITH3",
-        "nuts_id_3": "ITH35",
-        "start_year": 2009,
+        "start_year": 2009.0,
         "to_TSO": "multiple_TSOs"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.08022,
+          45.133742
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          14.556524,
-          35.828835999999995
-        ]
-      },
       "properties": {
         "ID": "INET_LG_7",
-        "Node": "INET_N_380",
         "name": "Delimara",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_380",
+        "NUTS3_ID": "MT001",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -180,30 +165,27 @@
         "max_vessel_size_M_m3": 77.27890365254069,
         "max_workingGas_M_m3": 73.0,
         "median_cap_store2pipe_M_m3_per_d": 3.0143702777234176,
-        "nuts_id_1": "MT0",
-        "nuts_id_2": "MT00",
-        "nuts_id_3": "MT001",
-        "start_year": 2017,
+        "start_year": 2017.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.556524,
+          35.828836
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -5.03,
-          51.71
-        ]
-      },
       "properties": {
         "ID": "INET_LG_8",
-        "Node": "INET_N_1070",
         "name": "Dragon",
-        "tags": {},
+        "Node": "INET_N_1070",
+        "NUTS3_ID": "UKL14",
         "GCV_mean_kWh_per_m3": 11.0,
         "end_year": null,
-        "entsog_id": 303,
+        "entsog_id": 303.0,
         "exact": 2,
         "from_TSO": "multiple_TSOs",
         "is_H_gas": 1,
@@ -211,30 +193,27 @@
         "max_vessel_size_M_m3": 126.728,
         "max_workingGas_M_m3": 186.88,
         "median_cap_store2pipe_M_m3_per_d": 70.79890257803908,
-        "nuts_id_1": "UKL",
-        "nuts_id_2": "UKL1",
-        "nuts_id_3": "UKL14",
-        "start_year": 2009,
+        "start_year": 2009.0,
         "to_TSO": "National Grid Gas"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.03,
+          51.71
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          2.19056,
-          51.03479
-        ]
-      },
       "properties": {
         "ID": "INET_LG_9",
-        "Node": "N_3_NS_LMGN",
         "name": "Dunkerque",
-        "tags": {},
+        "Node": "N_3_NS_LMGN",
+        "NUTS3_ID": null,
         "GCV_mean_kWh_per_m3": 11.75,
         "end_year": null,
-        "entsog_id": 320,
+        "entsog_id": 320.0,
         "exact": 3,
         "from_TSO": "Dunkerque LNG",
         "is_H_gas": 1,
@@ -242,28 +221,25 @@
         "max_vessel_size_M_m3": 155.928,
         "max_workingGas_M_m3": 350.4,
         "median_cap_store2pipe_M_m3_per_d": 45.72980926649042,
-        "nuts_id_1": "FRE",
-        "nuts_id_2": "FRE1",
-        "nuts_id_3": "FRE11",
-        "start_year": 2016,
+        "start_year": 2016.0,
         "to_TSO": "GRTgaz"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.19056,
+          51.03479
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -5.664,
-          43.534
-        ]
-      },
       "properties": {
         "ID": "INET_LG_10",
-        "Node": "INET_N_462",
         "name": "El Musel",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_462",
+        "NUTS3_ID": "ES120",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -273,30 +249,27 @@
         "max_vessel_size_M_m3": 155.344,
         "max_workingGas_M_m3": 175.2,
         "median_cap_store2pipe_M_m3_per_d": 18.644257412681927,
-        "nuts_id_1": "ES1",
-        "nuts_id_2": "ES12",
-        "nuts_id_3": "ES120",
-        "start_year": 2012,
+        "start_year": 2012.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.664,
+          43.534
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.898630000000001,
-          43.42239
-        ]
-      },
       "properties": {
         "ID": "INET_LG_11",
-        "Node": "INET_N_545",
         "name": "Fos Cavaou",
-        "tags": {},
+        "Node": "INET_N_545",
+        "NUTS3_ID": "FRL04",
         "GCV_mean_kWh_per_m3": 12.05,
         "end_year": null,
-        "entsog_id": 305,
+        "entsog_id": 305.0,
         "exact": 3,
         "from_TSO": "Fosmax LNG",
         "is_H_gas": 1,
@@ -304,30 +277,27 @@
         "max_vessel_size_M_m3": 155.928,
         "max_workingGas_M_m3": 192.72,
         "median_cap_store2pipe_M_m3_per_d": 23.383961721879867,
-        "nuts_id_1": "FRL",
-        "nuts_id_2": "FRL0",
-        "nuts_id_3": "FRL04",
-        "start_year": 2020,
+        "start_year": 2020.0,
         "to_TSO": "GRTgaz"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.89863,
+          43.42239
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.8516699999999995,
-          43.45399999999999
-        ]
-      },
       "properties": {
         "ID": "INET_LG_12",
-        "Node": "INET_N_547",
         "name": "Fos Tonkin",
-        "tags": {},
+        "Node": "INET_N_547",
+        "NUTS3_ID": "FRL04",
         "GCV_mean_kWh_per_m3": 12.05,
         "end_year": null,
-        "entsog_id": 305,
+        "entsog_id": 305.0,
         "exact": 3,
         "from_TSO": "Elengy",
         "is_H_gas": 1,
@@ -335,30 +305,27 @@
         "max_vessel_size_M_m3": 43.8,
         "max_workingGas_M_m3": 87.6,
         "median_cap_store2pipe_M_m3_per_d": 8.436877084756507,
-        "nuts_id_1": "FRL",
-        "nuts_id_2": "FRL0",
-        "nuts_id_3": "FRL04",
-        "start_year": 1972,
+        "start_year": 1972.0,
         "to_TSO": "GRTgaz"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.85167,
+          43.454
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.064029,
-          51.973836999999996
-        ]
-      },
       "properties": {
         "ID": "INET_LG_13",
-        "Node": "INET_N_570",
         "name": "Gate Rotterdam",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_570",
+        "NUTS3_ID": "NL33C",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
-        "entsog_id": 316,
+        "entsog_id": 316.0,
         "exact": 3,
         "from_TSO": "Gate Terminal ",
         "is_H_gas": 1,
@@ -366,28 +333,25 @@
         "max_vessel_size_M_m3": 155.344,
         "max_workingGas_M_m3": 315.36,
         "median_cap_store2pipe_M_m3_per_d": 40.556833535690814,
-        "nuts_id_1": "NL3",
-        "nuts_id_2": "NL33",
-        "nuts_id_3": "NL33C",
-        "start_year": 2018,
+        "start_year": 2018.0,
         "to_TSO": "Gasunie TS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.064029,
+          51.973837
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          11.97456,
-          57.70887
-        ]
-      },
       "properties": {
         "ID": "INET_LG_14",
-        "Node": "INET_N_606",
         "name": "Gothenburg",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_606",
+        "NUTS3_ID": "SE232",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -397,92 +361,83 @@
         "max_vessel_size_M_m3": -172.15087932237742,
         "max_workingGas_M_m3": 19.230536,
         "median_cap_store2pipe_M_m3_per_d": 23.933810332721663,
-        "nuts_id_1": "SE2",
-        "nuts_id_2": "SE23",
-        "nuts_id_3": "SE232",
-        "start_year": 2018,
+        "start_year": 2018.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          11.97456,
+          57.70887
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "INET_LG_15",
+        "name": "Huelva",
+        "Node": "INET_N_698",
+        "NUTS3_ID": "ES615",
+        "GCV_mean_kWh_per_m3": 11.65,
+        "end_year": null,
+        "entsog_id": 312.0,
+        "exact": 3,
+        "from_TSO": "Enagas",
+        "is_H_gas": 1,
+        "max_cap_store2pipe_M_m3_per_d": 33.06129727269546,
+        "max_vessel_size_M_m3": 101.2656,
+        "max_workingGas_M_m3": 360.84776,
+        "median_cap_store2pipe_M_m3_per_d": 33.06129727269546,
+        "start_year": 1988.0,
+        "to_TSO": "Enagas"
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           -6.9508,
           37.2583
         ]
-      },
-      "properties": {
-        "ID": "INET_LG_15",
-        "Node": "INET_N_698",
-        "name": "Huelva",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.65,
-        "end_year": null,
-        "entsog_id": 312,
-        "exact": 3,
-        "from_TSO": "Enagas",
-        "is_H_gas": 1,
-        "max_cap_store2pipe_M_m3_per_d": 33.06129727269546,
-        "max_vessel_size_M_m3": 101.26559999999999,
-        "max_workingGas_M_m3": 360.84776000000005,
-        "median_cap_store2pipe_M_m3_per_d": 33.06129727269546,
-        "nuts_id_1": "ES6",
-        "nuts_id_2": "ES61",
-        "nuts_id_3": "ES615",
-        "start_year": 1988,
-        "to_TSO": "Enagas"
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "INET_LG_16",
+        "name": "Isle Of Grain",
+        "Node": "INET_N_745",
+        "NUTS3_ID": "UKJ41",
+        "GCV_mean_kWh_per_m3": 11.0,
+        "end_year": null,
+        "entsog_id": 302.0,
+        "exact": 3,
+        "from_TSO": "Grain LNG",
+        "is_H_gas": 1,
+        "max_cap_store2pipe_M_m3_per_d": 56.65640086113858,
+        "max_vessel_size_M_m3": 154.76,
+        "max_workingGas_M_m3": 599.4176,
+        "median_cap_store2pipe_M_m3_per_d": 56.65640086113858,
+        "start_year": 2020.0,
+        "to_TSO": "National Grid Gas"
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           0.711,
           51.45
         ]
-      },
-      "properties": {
-        "ID": "INET_LG_16",
-        "Node": "INET_N_745",
-        "name": "Isle Of Grain",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.0,
-        "end_year": null,
-        "entsog_id": 302,
-        "exact": 3,
-        "from_TSO": "Grain LNG",
-        "is_H_gas": 1,
-        "max_cap_store2pipe_M_m3_per_d": 56.65640086113858,
-        "max_vessel_size_M_m3": 154.76,
-        "max_workingGas_M_m3": 599.4176000000001,
-        "median_cap_store2pipe_M_m3_per_d": 56.65640086113858,
-        "nuts_id_1": "UKJ",
-        "nuts_id_2": "UKJ4",
-        "nuts_id_3": "UKJ41",
-        "start_year": 2020,
-        "to_TSO": "National Grid Gas"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          21.101954,
-          55.7253
-        ]
-      },
       "properties": {
         "ID": "INET_LG_17",
-        "Node": "INET_N_848",
         "name": "Klaipeda",
-        "tags": {},
+        "Node": "INET_N_848",
+        "NUTS3_ID": "LT023",
         "GCV_mean_kWh_per_m3": 11.7115,
         "end_year": null,
-        "entsog_id": 319,
+        "entsog_id": 319.0,
         "exact": 3,
         "from_TSO": "AB Klaipedos Nafta",
         "is_H_gas": 1,
@@ -490,61 +445,55 @@
         "max_vessel_size_M_m3": 93.44,
         "max_workingGas_M_m3": 97.56888,
         "median_cap_store2pipe_M_m3_per_d": 11.040960105703247,
-        "nuts_id_1": "LT0",
-        "nuts_id_2": "LT02",
-        "nuts_id_3": "LT023",
-        "start_year": 2014,
+        "start_year": 2014.0,
         "to_TSO": "Amber Grid"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          21.101954,
+          55.7253
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "INET_LG_19",
+        "name": "Montoir De Bretagne",
+        "Node": "INET_N_1100",
+        "NUTS3_ID": "FRG01",
+        "GCV_mean_kWh_per_m3": 11.93,
+        "end_year": null,
+        "entsog_id": 304.0,
+        "exact": 3,
+        "from_TSO": "Elengy",
+        "is_H_gas": 1,
+        "max_cap_store2pipe_M_m3_per_d": 30.369238474014033,
+        "max_vessel_size_M_m3": 155.928,
+        "max_workingGas_M_m3": 210.24,
+        "median_cap_store2pipe_M_m3_per_d": 29.647837096589598,
+        "start_year": 1980.0,
+        "to_TSO": "GRTgaz"
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           -2.14,
           47.32
         ]
-      },
-      "properties": {
-        "ID": "INET_LG_19",
-        "Node": "INET_N_1100",
-        "name": "Montoir De Bretagne",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.93,
-        "end_year": null,
-        "entsog_id": 304,
-        "exact": 3,
-        "from_TSO": "Elengy",
-        "is_H_gas": 1,
-        "max_cap_store2pipe_M_m3_per_d": 30.369238474014033,
-        "max_vessel_size_M_m3": 155.928,
-        "max_workingGas_M_m3": 210.23999999999998,
-        "median_cap_store2pipe_M_m3_per_d": 29.647837096589598,
-        "nuts_id_1": "FRG",
-        "nuts_id_2": "FRG0",
-        "nuts_id_3": "FRG01",
-        "start_year": 1980,
-        "to_TSO": "GRTgaz"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -8.253,
-          43.4578
-        ]
-      },
       "properties": {
         "ID": "INET_LG_20",
-        "Node": "INET_N_1113",
         "name": "Mugardos",
-        "tags": {},
+        "Node": "INET_N_1113",
+        "NUTS3_ID": "ES111",
         "GCV_mean_kWh_per_m3": 11.63,
         "end_year": null,
-        "entsog_id": 313,
+        "entsog_id": 313.0,
         "exact": 3,
         "from_TSO": "Reganosa",
         "is_H_gas": 1,
@@ -552,28 +501,25 @@
         "max_vessel_size_M_m3": 155.344,
         "max_workingGas_M_m3": 175.2,
         "median_cap_store2pipe_M_m3_per_d": 10.13480959503597,
-        "nuts_id_1": "ES1",
-        "nuts_id_2": "ES11",
-        "nuts_id_3": "ES111",
-        "start_year": 2007,
+        "start_year": 2007.0,
         "to_TSO": "Reganosa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -8.253,
+          43.4578
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          25.04241,
-          59.406659999999995
-        ]
-      },
       "properties": {
         "ID": "INET_LG_21",
-        "Node": "N_757_M_LMGN",
         "name": "Tallinn",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "N_757_M_LMGN",
+        "NUTS3_ID": "EE001",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -583,59 +529,53 @@
         "max_vessel_size_M_m3": -2629.4323022321946,
         "max_workingGas_M_m3": 2.323152,
         "median_cap_store2pipe_M_m3_per_d": 9.578134445771123,
-        "nuts_id_1": "EE0",
-        "nuts_id_2": "EE00",
-        "nuts_id_3": "EE001",
-        "start_year": 2019,
+        "start_year": 2019.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          25.04241,
+          59.40666
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -1.127558,
-          54.57551899999999
-        ]
-      },
       "properties": {
         "ID": "INET_LG_22",
-        "Node": "INET_N_1617",
         "name": "Teesside",
-        "tags": {},
+        "Node": "INET_N_1617",
+        "NUTS3_ID": "UKC12",
         "GCV_mean_kWh_per_m3": 11.0,
         "end_year": null,
-        "entsog_id": 301,
+        "entsog_id": 301.0,
         "exact": 3,
         "from_TSO": "multiple_TSOs",
         "is_H_gas": 1,
         "max_cap_store2pipe_M_m3_per_d": 11.718181819178081,
-        "max_vessel_size_M_m3": 155.05200000000005,
-        "max_workingGas_M_m3": 175.1999999999999,
+        "max_vessel_size_M_m3": 155.052,
+        "max_workingGas_M_m3": 175.2,
         "median_cap_store2pipe_M_m3_per_d": 11.724713467353904,
-        "nuts_id_1": "UKC",
-        "nuts_id_2": "UKC1",
-        "nuts_id_3": "UKC12",
         "start_year": null,
         "to_TSO": "National Grid Gas"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.127558,
+          54.575519
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          24.074939999999998,
-          59.38445
-        ]
-      },
       "properties": {
         "ID": "INET_LG_24",
-        "Node": "INET_N_1226",
         "name": "Paldiski",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_1226",
+        "NUTS3_ID": "EE001",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -645,30 +585,27 @@
         "max_vessel_size_M_m3": 104.04429419400462,
         "max_workingGas_M_m3": 93.442336,
         "median_cap_store2pipe_M_m3_per_d": 7.516707044181764,
-        "nuts_id_1": "EE0",
-        "nuts_id_2": "EE00",
-        "nuts_id_3": "EE001",
-        "start_year": 2025,
+        "start_year": 2025.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.07494,
+          59.38445
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          9.830632000000001,
-          44.073876
-        ]
-      },
       "properties": {
         "ID": "INET_LG_25",
-        "Node": "INET_N_1232",
         "name": "Panigaglia",
-        "tags": {},
+        "Node": "INET_N_1232",
+        "NUTS3_ID": "ITC34",
         "GCV_mean_kWh_per_m3": 11.944,
         "end_year": null,
-        "entsog_id": 306,
+        "entsog_id": 306.0,
         "exact": 3,
         "from_TSO": "GNL Italia",
         "is_H_gas": 1,
@@ -676,28 +613,25 @@
         "max_vessel_size_M_m3": 40.88,
         "max_workingGas_M_m3": 46.72,
         "median_cap_store2pipe_M_m3_per_d": 10.513105439295124,
-        "nuts_id_1": "ITC",
-        "nuts_id_2": "ITC3",
-        "nuts_id_3": "ITC34",
-        "start_year": 1971,
+        "start_year": 1971.0,
         "to_TSO": "Snam Rete Gas"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.830632,
+          44.073876
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          21.39881,
-          61.638169999999995
-        ]
-      },
       "properties": {
         "ID": "INET_LG_26",
-        "Node": "INET_N_1288",
         "name": "Pori",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_1288",
+        "NUTS3_ID": "FI196",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -707,30 +641,27 @@
         "max_vessel_size_M_m3": -224.65286716621233,
         "max_workingGas_M_m3": 16.649256,
         "median_cap_store2pipe_M_m3_per_d": 23.933810332721663,
-        "nuts_id_1": "FI1",
-        "nuts_id_2": "FI19",
-        "nuts_id_3": "FI196",
         "start_year": null,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          21.39881,
+          61.63817
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          23.4023,
-          37.96
-        ]
-      },
       "properties": {
         "ID": "INET_LG_27",
-        "Node": "INET_N_1352",
         "name": "Revithoussa",
-        "tags": {},
+        "Node": "INET_N_1352",
+        "NUTS3_ID": "EL307",
         "GCV_mean_kWh_per_m3": 11.994,
         "end_year": null,
-        "entsog_id": 308,
+        "entsog_id": 308.0,
         "exact": 3,
         "from_TSO": "DESFA",
         "is_H_gas": 1,
@@ -738,28 +669,25 @@
         "max_vessel_size_M_m3": 151.84,
         "max_workingGas_M_m3": 131.4,
         "median_cap_store2pipe_M_m3_per_d": 18.079022324478228,
-        "nuts_id_1": "EL3",
-        "nuts_id_2": "EL30",
-        "nuts_id_3": "EL307",
-        "start_year": 2000,
+        "start_year": 2000.0,
         "to_TSO": "DESFA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.4023,
+          37.96
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          24.1788,
-          56.9904
-        ]
-      },
       "properties": {
         "ID": "INET_LG_28",
-        "Node": "INET_N_1357",
         "name": "Riga",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_1357",
+        "NUTS3_ID": "LV006",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -769,90 +697,81 @@
         "max_vessel_size_M_m3": 104.15180130378569,
         "max_workingGas_M_m3": 104.47055574307382,
         "median_cap_store2pipe_M_m3_per_d": 13.564034318303944,
-        "nuts_id_1": "LV0",
-        "nuts_id_2": "LV00",
-        "nuts_id_3": "LV006",
-        "start_year": 2019,
+        "start_year": 2019.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.1788,
+          56.9904
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "INET_LG_29",
+        "name": "Sagunto",
+        "Node": "INET_N_1410",
+        "NUTS3_ID": "ES523",
+        "GCV_mean_kWh_per_m3": 11.63,
+        "end_year": null,
+        "entsog_id": 310.0,
+        "exact": 3,
+        "from_TSO": "Saggas",
+        "is_H_gas": 1,
+        "max_cap_store2pipe_M_m3_per_d": 24.48365894356346,
+        "max_vessel_size_M_m3": 155.928,
+        "max_workingGas_M_m3": 349.48896,
+        "median_cap_store2pipe_M_m3_per_d": 24.48365894356346,
+        "start_year": 2006.0,
+        "to_TSO": "Enagas"
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           -0.2344,
           39.6426
         ]
-      },
-      "properties": {
-        "ID": "INET_LG_29",
-        "Node": "INET_N_1410",
-        "name": "Sagunto",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.63,
-        "end_year": null,
-        "entsog_id": 310,
-        "exact": 3,
-        "from_TSO": "Saggas",
-        "is_H_gas": 1,
-        "max_cap_store2pipe_M_m3_per_d": 24.48365894356346,
-        "max_vessel_size_M_m3": 155.928,
-        "max_workingGas_M_m3": 349.48895999999996,
-        "median_cap_store2pipe_M_m3_per_d": 24.48365894356346,
-        "nuts_id_1": "ES5",
-        "nuts_id_2": "ES52",
-        "nuts_id_3": "ES523",
-        "start_year": 2006,
-        "to_TSO": "Enagas"
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "INET_LG_30",
+        "name": "Sines",
+        "Node": "N_80_M_LMGN",
+        "NUTS3_ID": "PT181",
+        "GCV_mean_kWh_per_m3": 11.9,
+        "end_year": null,
+        "entsog_id": 315.0,
+        "exact": 3,
+        "from_TSO": "REN Atlantico",
+        "is_H_gas": 1,
+        "max_cap_store2pipe_M_m3_per_d": 17.59515554693745,
+        "max_vessel_size_M_m3": 126.144,
+        "max_workingGas_M_m3": 227.76,
+        "median_cap_store2pipe_M_m3_per_d": 16.9617299472477,
+        "start_year": 2003.0,
+        "to_TSO": "REN Gasodutos"
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           -8.79009,
           37.94417
         ]
-      },
-      "properties": {
-        "ID": "INET_LG_30",
-        "Node": "N_80_M_LMGN",
-        "name": "Sines",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.9,
-        "end_year": null,
-        "entsog_id": 315,
-        "exact": 3,
-        "from_TSO": "REN Atlantico",
-        "is_H_gas": 1,
-        "max_cap_store2pipe_M_m3_per_d": 17.59515554693745,
-        "max_vessel_size_M_m3": 126.14399999999999,
-        "max_workingGas_M_m3": 227.76000000000002,
-        "median_cap_store2pipe_M_m3_per_d": 16.9617299472477,
-        "nuts_id_1": "PT1",
-        "nuts_id_2": "PT18",
-        "nuts_id_3": "PT181",
-        "start_year": 2003,
-        "to_TSO": "REN Gasodutos"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -5.078012,
-          51.713781
-        ]
-      },
       "properties": {
         "ID": "INET_LG_31",
-        "Node": "INET_N_1528",
         "name": "South Hook",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "INET_N_1528",
+        "NUTS3_ID": "UKL14",
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -860,63 +779,57 @@
         "is_H_gas": 1,
         "max_cap_store2pipe_M_m3_per_d": 57.1842555275467,
         "max_vessel_size_M_m3": 146.0,
-        "max_workingGas_M_m3": 438.98112000000003,
+        "max_workingGas_M_m3": 438.98112,
         "median_cap_store2pipe_M_m3_per_d": 57.1842555275467,
-        "nuts_id_1": "UKL",
-        "nuts_id_2": "UKL1",
-        "nuts_id_3": "UKL14",
-        "start_year": 2009,
+        "start_year": 2009.0,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.078012,
+          51.713781
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          14.294722,
-          53.909167000000004
-        ]
-      },
       "properties": {
         "ID": "INET_LG_32",
-        "Node": "INET_N_1587",
         "name": "Swinoujscie",
-        "tags": {},
+        "Node": "INET_N_1587",
+        "NUTS3_ID": "PL428",
         "GCV_mean_kWh_per_m3": 11.55,
         "end_year": null,
-        "entsog_id": 321,
+        "entsog_id": 321.0,
         "exact": 3,
         "from_TSO": "Polskie LNG",
         "is_H_gas": 1,
         "max_cap_store2pipe_M_m3_per_d": 13.679653679452056,
-        "max_vessel_size_M_m3": 126.14399999999999,
+        "max_vessel_size_M_m3": 126.144,
         "max_workingGas_M_m3": 280.32,
         "median_cap_store2pipe_M_m3_per_d": 15.652407115715972,
-        "nuts_id_1": "PL4",
-        "nuts_id_2": "PL42",
-        "nuts_id_3": "PL428",
-        "start_year": 2020,
+        "start_year": 2020.0,
         "to_TSO": "GAZ-SYSTEM"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.294722,
+          53.909167
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          10.311025,
-          43.547519
-        ]
-      },
       "properties": {
         "ID": "INET_LG_33",
-        "Node": "INET_N_967",
         "name": "Toscana",
-        "tags": {},
+        "Node": "INET_N_967",
+        "NUTS3_ID": "ITI16",
         "GCV_mean_kWh_per_m3": 11.6885,
         "end_year": null,
-        "entsog_id": 317,
+        "entsog_id": 317.0,
         "exact": 2,
         "from_TSO": "OLT",
         "is_H_gas": 1,
@@ -924,30 +837,27 @@
         "max_vessel_size_M_m3": 85.18769447780069,
         "max_workingGas_M_m3": 80.10144,
         "median_cap_store2pipe_M_m3_per_d": 14.647966992825424,
-        "nuts_id_1": "ITI",
-        "nuts_id_2": "ITI1",
-        "nuts_id_3": "ITI16",
-        "start_year": 2013,
+        "start_year": 2013.0,
         "to_TSO": "Snam Rete Gas"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.311025,
+          43.547519
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          3.20788,
-          51.32098
-        ]
-      },
       "properties": {
         "ID": "INET_LG_34",
-        "Node": "SEQ_1106_p",
         "name": "Zeebrugge",
-        "tags": {},
+        "Node": "SEQ_1106_p",
+        "NUTS3_ID": "BE251",
         "GCV_mean_kWh_per_m3": 11.63,
         "end_year": null,
-        "entsog_id": 300,
+        "entsog_id": 300.0,
         "exact": 3,
         "from_TSO": "Fluxys LNG",
         "is_H_gas": 1,
@@ -955,28 +865,25 @@
         "max_vessel_size_M_m3": 155.344,
         "max_workingGas_M_m3": 329.084,
         "median_cap_store2pipe_M_m3_per_d": 39.10523320306847,
-        "nuts_id_1": "BE2",
-        "nuts_id_2": "BE25",
-        "nuts_id_3": "BE251",
-        "start_year": 2019,
+        "start_year": 2019.0,
         "to_TSO": "Fluxys Belgium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.20788,
+          51.32098
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          12.34293,
-          45.04144
-        ]
-      },
       "properties": {
         "ID": "GIE_LG_16",
-        "Node": "SEQ_3504_p",
         "name": "Porto Levante LNG Terminal",
-        "tags": {},
-        "GCV_mean_kWh_per_m3": 11.650000000000004,
+        "Node": "SEQ_3504_p",
+        "NUTS3_ID": null,
+        "GCV_mean_kWh_per_m3": 11.65,
         "end_year": null,
         "entsog_id": null,
         "exact": 3,
@@ -986,11 +893,15 @@
         "max_vessel_size_M_m3": 129.1323127543191,
         "max_workingGas_M_m3": 146.0,
         "median_cap_store2pipe_M_m3_per_d": 20.102465212376032,
-        "nuts_id_1": "ITH",
-        "nuts_id_2": "ITH3",
-        "nuts_id_3": "ITH37",
         "start_year": null,
         "to_TSO": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.34293,
+          45.04144
+        ]
       }
     }
   ]

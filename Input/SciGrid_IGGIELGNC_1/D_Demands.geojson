@@ -1,24 +1,23 @@
 {
   "type": "FeatureCollection",
+  "name": "D_Demands",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
   "features": [
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.840439,
-          50.344435
-        ]
-      },
       "properties": {
         "ID": "BE3",
-        "Node": "NutsCons_0",
         "name": "RÃÂÃÂGION WALLONNE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_0",
+        "NUTS3_ID": "BE351",
         "max_demand_M_m3_per_d": 23.793,
-        "max_demand_commercial_M_m3_per_d": 5.468999999999999,
-        "max_demand_household_M_m3_per_d": 15.610999999999999,
+        "max_demand_commercial_M_m3_per_d": 5.469,
+        "max_demand_household_M_m3_per_d": 15.611,
         "max_demand_industrial_M_m3_per_d": 3.591,
         "mean_demand_M_m3_per_d": 9.305366922234386,
         "mean_demand_commercial_M_m3_per_d": 1.5978715772179637,
@@ -26,32 +25,28 @@
         "mean_demand_industrial_M_m3_per_d": 3.189999452354804,
         "median_demand_M_m3_per_d": 8.831,
         "median_demand_commercial_M_m3_per_d": 1.422,
-        "median_demand_household_M_m3_per_d": 4.1930000000000005,
-        "median_demand_industrial_M_m3_per_d": 3.3680000000000003,
+        "median_demand_household_M_m3_per_d": 4.193,
+        "median_demand_industrial_M_m3_per_d": 3.368,
         "min_demand_M_m3_per_d": 3.417,
         "min_demand_commercial_M_m3_per_d": 0.391,
         "min_demand_household_M_m3_per_d": 0.475,
-        "min_demand_industrial_M_m3_per_d": 2.54,
-        "nuts_id_1": "BE3",
-        "nuts_id_2": "BE35",
-        "nuts_id_3": "BE351"
+        "min_demand_industrial_M_m3_per_d": 2.54
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.840439,
+          50.344435
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          8.473547,
-          46.610661
-        ]
-      },
       "properties": {
         "ID": "CH0",
-        "Node": "NutsCons_1",
         "name": "SCHWEIZ/SUISSE/SVIZZERA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_1",
+        "NUTS3_ID": "CH062",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -67,65 +62,57 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "CH0",
-        "nuts_id_2": "CH06",
-        "nuts_id_3": "CH062"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.473547,
+          46.610661
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "DE1",
+        "name": "BADEN-WÃÂÃÂRTTEMBERG",
+        "Node": "INET_N_1504",
+        "NUTS3_ID": "DE112",
+        "max_demand_M_m3_per_d": 48.601,
+        "max_demand_commercial_M_m3_per_d": 13.878,
+        "max_demand_household_M_m3_per_d": 23.512,
+        "max_demand_industrial_M_m3_per_d": 11.888,
+        "mean_demand_M_m3_per_d": 20.768226725082098,
+        "mean_demand_commercial_M_m3_per_d": 3.5319887732749424,
+        "mean_demand_household_M_m3_per_d": 7.050036144578301,
+        "mean_demand_industrial_M_m3_per_d": 10.186201807228715,
+        "median_demand_M_m3_per_d": 19.556,
+        "median_demand_commercial_M_m3_per_d": 3.01,
+        "median_demand_household_M_m3_per_d": 6.457,
+        "median_demand_industrial_M_m3_per_d": 10.673,
+        "min_demand_M_m3_per_d": 10.478,
+        "min_demand_commercial_M_m3_per_d": 0.872,
+        "min_demand_household_M_m3_per_d": 1.478,
+        "min_demand_industrial_M_m3_per_d": 7.917
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           8.9992,
           48.6972
         ]
-      },
-      "properties": {
-        "ID": "DE1",
-        "Node": "INET_N_1504",
-        "name": "BADEN-WÃÂÃÂRTTEMBERG",
-        "tags": {},
-        "exact": 3,
-        "max_demand_M_m3_per_d": 48.601,
-        "max_demand_commercial_M_m3_per_d": 13.878,
-        "max_demand_household_M_m3_per_d": 23.511999999999997,
-        "max_demand_industrial_M_m3_per_d": 11.888,
-        "mean_demand_M_m3_per_d": 20.768226725082098,
-        "mean_demand_commercial_M_m3_per_d": 3.5319887732749424,
-        "mean_demand_household_M_m3_per_d": 7.050036144578301,
-        "mean_demand_industrial_M_m3_per_d": 10.186201807228715,
-        "median_demand_M_m3_per_d": 19.555999999999997,
-        "median_demand_commercial_M_m3_per_d": 3.01,
-        "median_demand_household_M_m3_per_d": 6.457000000000001,
-        "median_demand_industrial_M_m3_per_d": 10.673,
-        "min_demand_M_m3_per_d": 10.478000000000002,
-        "min_demand_commercial_M_m3_per_d": 0.872,
-        "min_demand_household_M_m3_per_d": 1.4780000000000002,
-        "min_demand_industrial_M_m3_per_d": 7.917000000000001,
-        "nuts_id_1": "DE1",
-        "nuts_id_2": "DE11",
-        "nuts_id_3": "DE112"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          7.843219,
-          51.493633
-        ]
-      },
       "properties": {
         "ID": "DEA",
-        "Node": "NutsCons_4",
         "name": "NORDRHEIN-WESTFALEN",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 61.690999999999995,
-        "max_demand_commercial_M_m3_per_d": 22.965999999999998,
+        "Node": "NutsCons_4",
+        "NUTS3_ID": "DEA5B",
+        "max_demand_M_m3_per_d": 61.691,
+        "max_demand_commercial_M_m3_per_d": 22.966,
         "max_demand_household_M_m3_per_d": 26.612,
         "max_demand_industrial_M_m3_per_d": 13.145,
         "mean_demand_M_m3_per_d": 26.383549288061463,
@@ -137,31 +124,27 @@
         "median_demand_household_M_m3_per_d": 8.283,
         "median_demand_industrial_M_m3_per_d": 12.237,
         "min_demand_M_m3_per_d": 13.5,
-        "min_demand_commercial_M_m3_per_d": 1.4669999999999999,
+        "min_demand_commercial_M_m3_per_d": 1.467,
         "min_demand_household_M_m3_per_d": 2.434,
-        "min_demand_industrial_M_m3_per_d": 9.18,
-        "nuts_id_1": "DEA",
-        "nuts_id_2": "DEA5",
-        "nuts_id_3": "DEA5B"
+        "min_demand_industrial_M_m3_per_d": 9.18
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.843219,
+          51.493633
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          25.466554000000002,
-          43.032664000000004
-        ]
-      },
       "properties": {
         "ID": "BG3",
-        "Node": "NutsCons_5",
         "name": "ÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ ÃÂÃÂ ÃÂÃÂ®ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂªÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 2.5540000000000003,
-        "max_demand_commercial_M_m3_per_d": 0.47700000000000004,
+        "Node": "NutsCons_5",
+        "NUTS3_ID": "BG322",
+        "max_demand_M_m3_per_d": 2.554,
+        "max_demand_commercial_M_m3_per_d": 0.477,
         "max_demand_household_M_m3_per_d": 0.629,
         "max_demand_industrial_M_m3_per_d": 1.578,
         "mean_demand_M_m3_per_d": 1.5248255750273814,
@@ -170,32 +153,28 @@
         "mean_demand_industrial_M_m3_per_d": 1.2965772179627446,
         "median_demand_M_m3_per_d": 1.509,
         "median_demand_commercial_M_m3_per_d": 0.063,
-        "median_demand_household_M_m3_per_d": 0.07200000000000001,
+        "median_demand_household_M_m3_per_d": 0.072,
         "median_demand_industrial_M_m3_per_d": 1.272,
         "min_demand_M_m3_per_d": 0.927,
         "min_demand_commercial_M_m3_per_d": 0.03,
         "min_demand_household_M_m3_per_d": 0.012,
-        "min_demand_industrial_M_m3_per_d": 0.883,
-        "nuts_id_1": "BG3",
-        "nuts_id_2": "BG32",
-        "nuts_id_3": "BG322"
+        "min_demand_industrial_M_m3_per_d": 0.883
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          25.466554,
+          43.032664
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          9.041056,
-          50.462676
-        ]
-      },
       "properties": {
         "ID": "DE7",
-        "Node": "NutsCons_6",
         "name": "HESSEN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_6",
+        "NUTS3_ID": "DE71E",
         "max_demand_M_m3_per_d": 29.635,
         "max_demand_commercial_M_m3_per_d": 8.406,
         "max_demand_household_M_m3_per_d": 17.145,
@@ -211,30 +190,26 @@
         "min_demand_M_m3_per_d": 4.537,
         "min_demand_commercial_M_m3_per_d": 0.564,
         "min_demand_household_M_m3_per_d": 0.841,
-        "min_demand_industrial_M_m3_per_d": 3.0639999999999996,
-        "nuts_id_1": "DE7",
-        "nuts_id_2": "DE71",
-        "nuts_id_3": "DE71E"
+        "min_demand_industrial_M_m3_per_d": 3.064
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.041056,
+          50.462676
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          23.487485,
-          40.493802
-        ]
-      },
       "properties": {
         "ID": "EL5",
-        "Node": "NutsCons_7",
         "name": "ÃÂÃÂÃÂÃÂÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 2.6710000000000003,
+        "Node": "NutsCons_7",
+        "NUTS3_ID": "EL527",
+        "max_demand_M_m3_per_d": 2.671,
         "max_demand_commercial_M_m3_per_d": 0.514,
-        "max_demand_household_M_m3_per_d": 1.9140000000000001,
+        "max_demand_household_M_m3_per_d": 1.914,
         "max_demand_industrial_M_m3_per_d": 0.607,
         "mean_demand_M_m3_per_d": 0.8816549835706543,
         "mean_demand_commercial_M_m3_per_d": 0.10778587075574936,
@@ -243,31 +218,27 @@
         "median_demand_M_m3_per_d": 0.684,
         "median_demand_commercial_M_m3_per_d": 0.05,
         "median_demand_household_M_m3_per_d": 0.205,
-        "median_demand_industrial_M_m3_per_d": 0.42100000000000004,
+        "median_demand_industrial_M_m3_per_d": 0.421,
         "min_demand_M_m3_per_d": 0.306,
-        "min_demand_commercial_M_m3_per_d": 0.026000000000000002,
+        "min_demand_commercial_M_m3_per_d": 0.026,
         "min_demand_household_M_m3_per_d": 0.004,
-        "min_demand_industrial_M_m3_per_d": 0.26,
-        "nuts_id_1": "GR",
-        "nuts_id_2": "GR",
-        "nuts_id_3": "GR"
+        "min_demand_industrial_M_m3_per_d": 0.26
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.487485,
+          40.493802
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          22.785420000000002,
-          38.457599
-        ]
-      },
       "properties": {
         "ID": "EL6",
-        "Node": "NutsCons_8",
         "name": "ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃ¢ÂÂ¬ÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_8",
+        "NUTS3_ID": "EL641",
         "max_demand_M_m3_per_d": 3.278,
         "max_demand_commercial_M_m3_per_d": 0.484,
         "max_demand_household_M_m3_per_d": 2.545,
@@ -279,34 +250,30 @@
         "median_demand_M_m3_per_d": 0.661,
         "median_demand_commercial_M_m3_per_d": 0.032,
         "median_demand_household_M_m3_per_d": 0.166,
-        "median_demand_industrial_M_m3_per_d": 0.45899999999999996,
-        "min_demand_M_m3_per_d": 0.30799999999999994,
-        "min_demand_commercial_M_m3_per_d": 0.022000000000000002,
+        "median_demand_industrial_M_m3_per_d": 0.459,
+        "min_demand_M_m3_per_d": 0.308,
+        "min_demand_commercial_M_m3_per_d": 0.022,
         "min_demand_household_M_m3_per_d": 0.004,
-        "min_demand_industrial_M_m3_per_d": 0.266,
-        "nuts_id_1": "GR",
-        "nuts_id_2": "GR",
-        "nuts_id_3": "GR"
+        "min_demand_industrial_M_m3_per_d": 0.266
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.78542,
+          38.457599
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          13.224641,
-          52.513276
-        ]
-      },
       "properties": {
         "ID": "DE4",
-        "Node": "INET_N_172",
         "name": "BRANDENBURG",
-        "tags": {},
-        "exact": 3,
+        "Node": "INET_N_172",
+        "NUTS3_ID": "DE300",
         "max_demand_M_m3_per_d": 11.389,
         "max_demand_commercial_M_m3_per_d": 3.339,
-        "max_demand_household_M_m3_per_d": 6.6979999999999995,
+        "max_demand_household_M_m3_per_d": 6.698,
         "max_demand_industrial_M_m3_per_d": 1.892,
         "mean_demand_M_m3_per_d": 4.3390725629791955,
         "mean_demand_commercial_M_m3_per_d": 0.8868885542168546,
@@ -314,32 +281,28 @@
         "mean_demand_industrial_M_m3_per_d": 1.6005802300110064,
         "median_demand_M_m3_per_d": 4.041,
         "median_demand_commercial_M_m3_per_d": 0.755,
-        "median_demand_household_M_m3_per_d": 1.7009999999999998,
+        "median_demand_household_M_m3_per_d": 1.701,
         "median_demand_industrial_M_m3_per_d": 1.661,
-        "min_demand_M_m3_per_d": 1.8619999999999999,
-        "min_demand_commercial_M_m3_per_d": 0.22399999999999998,
-        "min_demand_household_M_m3_per_d": 0.33899999999999997,
-        "min_demand_industrial_M_m3_per_d": 1.204,
-        "nuts_id_1": "DE4",
-        "nuts_id_2": "DE40",
-        "nuts_id_3": "DE300"
+        "min_demand_M_m3_per_d": 1.862,
+        "min_demand_commercial_M_m3_per_d": 0.224,
+        "min_demand_household_M_m3_per_d": 0.339,
+        "min_demand_industrial_M_m3_per_d": 1.204
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.224641,
+          52.513276
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          23.63862,
-          58.569497999999996
-        ]
-      },
       "properties": {
         "ID": "EE0",
-        "Node": "NutsCons_10",
         "name": "EESTI",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_10",
+        "NUTS3_ID": "EE004",
         "max_demand_M_m3_per_d": 1.597,
         "max_demand_commercial_M_m3_per_d": 0.74,
         "max_demand_household_M_m3_per_d": 0.512,
@@ -351,67 +314,59 @@
         "median_demand_M_m3_per_d": 0.643,
         "median_demand_commercial_M_m3_per_d": 0.139,
         "median_demand_household_M_m3_per_d": 0.159,
-        "median_demand_industrial_M_m3_per_d": 0.32299999999999995,
-        "min_demand_M_m3_per_d": 0.33299999999999996,
-        "min_demand_commercial_M_m3_per_d": 0.026000000000000002,
+        "median_demand_industrial_M_m3_per_d": 0.323,
+        "min_demand_M_m3_per_d": 0.333,
+        "min_demand_commercial_M_m3_per_d": 0.026,
         "min_demand_household_M_m3_per_d": 0.04,
-        "min_demand_industrial_M_m3_per_d": 0.23199999999999998,
-        "nuts_id_1": "EE0",
-        "nuts_id_2": "EE00",
-        "nuts_id_3": "EE004"
+        "min_demand_industrial_M_m3_per_d": 0.232
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.63862,
+          58.569498
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "DEB",
+        "name": "RHEINLAND-PFALZ",
+        "Node": "NutsCons_11",
+        "NUTS3_ID": "DEB1D",
+        "max_demand_M_m3_per_d": 25.481,
+        "max_demand_commercial_M_m3_per_d": 5.043,
+        "max_demand_household_M_m3_per_d": 17.253,
+        "max_demand_industrial_M_m3_per_d": 3.393,
+        "mean_demand_M_m3_per_d": 9.351202081051474,
+        "mean_demand_commercial_M_m3_per_d": 1.3837864184008863,
+        "mean_demand_household_M_m3_per_d": 4.988415936473133,
+        "mean_demand_industrial_M_m3_per_d": 2.9789997261774865,
+        "median_demand_M_m3_per_d": 8.809,
+        "median_demand_commercial_M_m3_per_d": 1.199,
+        "median_demand_household_M_m3_per_d": 4.564,
+        "median_demand_industrial_M_m3_per_d": 3.145,
+        "min_demand_M_m3_per_d": 3.331,
+        "min_demand_commercial_M_m3_per_d": 0.345,
+        "min_demand_household_M_m3_per_d": 0.553,
+        "min_demand_industrial_M_m3_per_d": 2.36
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           7.532027,
           49.973605
         ]
-      },
-      "properties": {
-        "ID": "DEB",
-        "Node": "NutsCons_11",
-        "name": "RHEINLAND-PFALZ",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 25.480999999999998,
-        "max_demand_commercial_M_m3_per_d": 5.043,
-        "max_demand_household_M_m3_per_d": 17.253,
-        "max_demand_industrial_M_m3_per_d": 3.3930000000000002,
-        "mean_demand_M_m3_per_d": 9.351202081051474,
-        "mean_demand_commercial_M_m3_per_d": 1.3837864184008863,
-        "mean_demand_household_M_m3_per_d": 4.988415936473133,
-        "mean_demand_industrial_M_m3_per_d": 2.9789997261774865,
-        "median_demand_M_m3_per_d": 8.809000000000001,
-        "median_demand_commercial_M_m3_per_d": 1.199,
-        "median_demand_household_M_m3_per_d": 4.564,
-        "median_demand_industrial_M_m3_per_d": 3.145,
-        "min_demand_M_m3_per_d": 3.3310000000000004,
-        "min_demand_commercial_M_m3_per_d": 0.345,
-        "min_demand_household_M_m3_per_d": 0.5529999999999999,
-        "min_demand_industrial_M_m3_per_d": 2.36,
-        "nuts_id_1": "DEB",
-        "nuts_id_2": "DEB1",
-        "nuts_id_3": "DEB1D"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.457146,
-          50.823145000000004
-        ]
-      },
       "properties": {
         "ID": "BE2",
-        "Node": "NutsCons_12",
         "name": "VLAAMS GEWEST",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_12",
+        "NUTS3_ID": "BE100",
         "max_demand_M_m3_per_d": 34.752,
         "max_demand_commercial_M_m3_per_d": 11.817,
         "max_demand_household_M_m3_per_d": 16.39,
@@ -421,33 +376,29 @@
         "mean_demand_household_M_m3_per_d": 4.6569843921139285,
         "mean_demand_industrial_M_m3_per_d": 7.6697406900329,
         "median_demand_M_m3_per_d": 14.634,
-        "median_demand_commercial_M_m3_per_d": 2.7089999999999996,
+        "median_demand_commercial_M_m3_per_d": 2.709,
         "median_demand_household_M_m3_per_d": 4.265,
         "median_demand_industrial_M_m3_per_d": 8.06,
         "min_demand_M_m3_per_d": 7.649,
-        "min_demand_commercial_M_m3_per_d": 0.7859999999999999,
+        "min_demand_commercial_M_m3_per_d": 0.786,
         "min_demand_household_M_m3_per_d": 0.853,
-        "min_demand_industrial_M_m3_per_d": 5.994,
-        "nuts_id_1": "BE2",
-        "nuts_id_2": "BE10",
-        "nuts_id_3": "BE100"
+        "min_demand_industrial_M_m3_per_d": 5.994
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.457146,
+          50.823145
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          9.699618,
-          54.438941
-        ]
-      },
       "properties": {
         "ID": "DEF",
-        "Node": "NutsCons_13",
         "name": "SCHLESWIG-HOLSTEIN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_13",
+        "NUTS3_ID": "DEF0B",
         "max_demand_M_m3_per_d": 11.099,
         "max_demand_commercial_M_m3_per_d": 3.76,
         "max_demand_household_M_m3_per_d": 5.606,
@@ -457,33 +408,29 @@
         "mean_demand_household_M_m3_per_d": 1.8196423877327506,
         "mean_demand_industrial_M_m3_per_d": 1.639538061336276,
         "median_demand_M_m3_per_d": 4.308,
-        "median_demand_commercial_M_m3_per_d": 0.9470000000000001,
+        "median_demand_commercial_M_m3_per_d": 0.947,
         "median_demand_household_M_m3_per_d": 1.751,
         "median_demand_industrial_M_m3_per_d": 1.733,
-        "min_demand_M_m3_per_d": 1.9740000000000002,
+        "min_demand_M_m3_per_d": 1.974,
         "min_demand_commercial_M_m3_per_d": 0.257,
         "min_demand_household_M_m3_per_d": 0.391,
-        "min_demand_industrial_M_m3_per_d": 1.294,
-        "nuts_id_1": "DEF",
-        "nuts_id_2": "DEF0",
-        "nuts_id_3": "DEF0B"
+        "min_demand_industrial_M_m3_per_d": 1.294
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.699618,
+          54.438941
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          6.950724,
-          49.435463
-        ]
-      },
       "properties": {
         "ID": "DEC",
-        "Node": "NutsCons_14",
         "name": "SAARLAND",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_14",
+        "NUTS3_ID": "DEC04",
         "max_demand_M_m3_per_d": 6.757,
         "max_demand_commercial_M_m3_per_d": 1.182,
         "max_demand_household_M_m3_per_d": 4.837,
@@ -493,105 +440,93 @@
         "mean_demand_household_M_m3_per_d": 1.3650607886089945,
         "mean_demand_industrial_M_m3_per_d": 0.6716522453450191,
         "median_demand_M_m3_per_d": 2.168,
-        "median_demand_commercial_M_m3_per_d": 0.27399999999999997,
-        "median_demand_household_M_m3_per_d": 1.2229999999999999,
+        "median_demand_commercial_M_m3_per_d": 0.274,
+        "median_demand_household_M_m3_per_d": 1.223,
         "median_demand_industrial_M_m3_per_d": 0.691,
         "min_demand_M_m3_per_d": 0.752,
         "min_demand_commercial_M_m3_per_d": 0.08,
-        "min_demand_household_M_m3_per_d": 0.13699999999999998,
-        "min_demand_industrial_M_m3_per_d": 0.522,
-        "nuts_id_1": "DEC",
-        "nuts_id_2": "DEC0",
-        "nuts_id_3": "DEC04"
+        "min_demand_household_M_m3_per_d": 0.137,
+        "min_demand_industrial_M_m3_per_d": 0.522
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.950724,
+          49.435463
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "DEE",
+        "name": "SACHSEN-ANHALT",
+        "Node": "NutsCons_15",
+        "NUTS3_ID": "DEE05",
+        "max_demand_M_m3_per_d": 10.988,
+        "max_demand_commercial_M_m3_per_d": 2.676,
+        "max_demand_household_M_m3_per_d": 6.783,
+        "max_demand_industrial_M_m3_per_d": 1.899,
+        "mean_demand_M_m3_per_d": 4.153299014238764,
+        "mean_demand_commercial_M_m3_per_d": 0.7146714129244214,
+        "mean_demand_household_M_m3_per_d": 1.8427612267250983,
+        "mean_demand_industrial_M_m3_per_d": 1.5958663745892907,
+        "median_demand_M_m3_per_d": 3.905,
+        "median_demand_commercial_M_m3_per_d": 0.619,
+        "median_demand_household_M_m3_per_d": 1.695,
+        "median_demand_industrial_M_m3_per_d": 1.654,
+        "min_demand_M_m3_per_d": 1.768,
+        "min_demand_commercial_M_m3_per_d": 0.189,
+        "min_demand_household_M_m3_per_d": 0.309,
+        "min_demand_industrial_M_m3_per_d": 1.187
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           11.897107,
           51.85219
         ]
-      },
-      "properties": {
-        "ID": "DEE",
-        "Node": "NutsCons_15",
-        "name": "SACHSEN-ANHALT",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 10.988,
-        "max_demand_commercial_M_m3_per_d": 2.676,
-        "max_demand_household_M_m3_per_d": 6.7829999999999995,
-        "max_demand_industrial_M_m3_per_d": 1.899,
-        "mean_demand_M_m3_per_d": 4.153299014238764,
-        "mean_demand_commercial_M_m3_per_d": 0.7146714129244214,
-        "mean_demand_household_M_m3_per_d": 1.8427612267250983,
-        "mean_demand_industrial_M_m3_per_d": 1.5958663745892907,
-        "median_demand_M_m3_per_d": 3.9050000000000002,
-        "median_demand_commercial_M_m3_per_d": 0.619,
-        "median_demand_household_M_m3_per_d": 1.695,
-        "median_demand_industrial_M_m3_per_d": 1.6540000000000001,
-        "min_demand_M_m3_per_d": 1.7680000000000002,
-        "min_demand_commercial_M_m3_per_d": 0.18899999999999997,
-        "min_demand_household_M_m3_per_d": 0.309,
-        "min_demand_industrial_M_m3_per_d": 1.187,
-        "nuts_id_1": "DEE",
-        "nuts_id_2": "DEE0",
-        "nuts_id_3": "DEE05"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          23.433356,
-          37.71725
-        ]
-      },
       "properties": {
         "ID": "EL3",
-        "Node": "NutsCons_17",
         "name": "ATTIKÃÂÃÂ",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_17",
+        "NUTS3_ID": null,
         "max_demand_M_m3_per_d": 2.284,
-        "max_demand_commercial_M_m3_per_d": 1.4169999999999998,
+        "max_demand_commercial_M_m3_per_d": 1.417,
         "max_demand_household_M_m3_per_d": 0.644,
-        "max_demand_industrial_M_m3_per_d": 0.42700000000000005,
+        "max_demand_industrial_M_m3_per_d": 0.427,
         "mean_demand_M_m3_per_d": 0.5689704271631959,
         "mean_demand_commercial_M_m3_per_d": 0.18870947426068047,
         "mean_demand_household_M_m3_per_d": 0.09194687842278336,
         "mean_demand_industrial_M_m3_per_d": 0.28831407447972396,
-        "median_demand_M_m3_per_d": 0.40900000000000003,
+        "median_demand_M_m3_per_d": 0.409,
         "median_demand_commercial_M_m3_per_d": 0.061,
         "median_demand_household_M_m3_per_d": 0.023,
         "median_demand_industrial_M_m3_per_d": 0.29,
         "min_demand_M_m3_per_d": 0.249,
         "min_demand_commercial_M_m3_per_d": 0.048,
         "min_demand_household_M_m3_per_d": 0.006,
-        "min_demand_industrial_M_m3_per_d": 0.17300000000000001,
-        "nuts_id_1": "EL3",
-        "nuts_id_2": "EL30",
-        "nuts_id_3": "EL307"
+        "min_demand_industrial_M_m3_per_d": 0.173
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.433356,
+          37.71725
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          11.035028,
-          50.939778999999994
-        ]
-      },
       "properties": {
         "ID": "DEG",
-        "Node": "NutsCons_19",
         "name": "THÃÂÃÂRINGEN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_19",
+        "NUTS3_ID": "DEG01",
         "max_demand_M_m3_per_d": 10.503,
         "max_demand_commercial_M_m3_per_d": 2.364,
         "max_demand_household_M_m3_per_d": 6.312,
@@ -600,35 +535,31 @@
         "mean_demand_commercial_M_m3_per_d": 0.6804036144578267,
         "mean_demand_household_M_m3_per_d": 1.8456243154436147,
         "mean_demand_industrial_M_m3_per_d": 1.8368420043811418,
-        "median_demand_M_m3_per_d": 4.1899999999999995,
+        "median_demand_M_m3_per_d": 4.19,
         "median_demand_commercial_M_m3_per_d": 0.606,
-        "median_demand_household_M_m3_per_d": 1.7469999999999999,
+        "median_demand_household_M_m3_per_d": 1.747,
         "median_demand_industrial_M_m3_per_d": 1.892,
-        "min_demand_M_m3_per_d": 1.9330000000000003,
-        "min_demand_commercial_M_m3_per_d": 0.17800000000000002,
+        "min_demand_M_m3_per_d": 1.933,
+        "min_demand_commercial_M_m3_per_d": 0.178,
         "min_demand_household_M_m3_per_d": 0.298,
-        "min_demand_industrial_M_m3_per_d": 1.402,
-        "nuts_id_1": "DEG",
-        "nuts_id_2": "DEG0",
-        "nuts_id_3": "DEG01"
+        "min_demand_industrial_M_m3_per_d": 1.402
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          11.035028,
+          50.939779
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          10.45989,
-          55.599526000000004
-        ]
-      },
       "properties": {
         "ID": "DK0",
-        "Node": "NutsCons_20",
         "name": "DANMARK",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 8.661999999999999,
+        "Node": "NutsCons_20",
+        "NUTS3_ID": null,
+        "max_demand_M_m3_per_d": 8.662,
         "max_demand_commercial_M_m3_per_d": 1.676,
         "max_demand_household_M_m3_per_d": 4.758,
         "max_demand_industrial_M_m3_per_d": 2.325,
@@ -638,32 +569,28 @@
         "mean_demand_industrial_M_m3_per_d": 2.066057776560822,
         "median_demand_M_m3_per_d": 4.39,
         "median_demand_commercial_M_m3_per_d": 0.539,
-        "median_demand_household_M_m3_per_d": 1.7990000000000002,
-        "median_demand_industrial_M_m3_per_d": 2.1959999999999997,
-        "min_demand_M_m3_per_d": 2.2809999999999997,
+        "median_demand_household_M_m3_per_d": 1.799,
+        "median_demand_industrial_M_m3_per_d": 2.196,
+        "min_demand_M_m3_per_d": 2.281,
         "min_demand_commercial_M_m3_per_d": 0.133,
         "min_demand_household_M_m3_per_d": 0.491,
-        "min_demand_industrial_M_m3_per_d": 1.632,
-        "nuts_id_1": "DK0",
-        "nuts_id_2": "DK03",
-        "nuts_id_3": "DK031"
+        "min_demand_industrial_M_m3_per_d": 1.632
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.45989,
+          55.599526
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          10.437899,
-          49.173559999999995
-        ]
-      },
       "properties": {
         "ID": "DE2",
-        "Node": "NutsCons_21",
         "name": "BAYERN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_21",
+        "NUTS3_ID": "DE256",
         "max_demand_M_m3_per_d": 70.267,
         "max_demand_commercial_M_m3_per_d": 16.477,
         "max_demand_household_M_m3_per_d": 41.475,
@@ -672,35 +599,31 @@
         "mean_demand_commercial_M_m3_per_d": 4.397544633077768,
         "mean_demand_household_M_m3_per_d": 12.071300109529044,
         "mean_demand_industrial_M_m3_per_d": 11.211640197152304,
-        "median_demand_M_m3_per_d": 26.218000000000004,
-        "median_demand_commercial_M_m3_per_d": 3.8169999999999997,
+        "median_demand_M_m3_per_d": 26.218,
+        "median_demand_commercial_M_m3_per_d": 3.817,
         "median_demand_household_M_m3_per_d": 11.005,
-        "median_demand_industrial_M_m3_per_d": 11.799000000000001,
+        "median_demand_industrial_M_m3_per_d": 11.799,
         "min_demand_M_m3_per_d": 11.972,
-        "min_demand_commercial_M_m3_per_d": 1.0859999999999999,
+        "min_demand_commercial_M_m3_per_d": 1.086,
         "min_demand_household_M_m3_per_d": 1.751,
-        "min_demand_industrial_M_m3_per_d": 8.902000000000001,
-        "nuts_id_1": "DE2",
-        "nuts_id_2": "DE25",
-        "nuts_id_3": "DE256"
+        "min_demand_industrial_M_m3_per_d": 8.902
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.437899,
+          49.17356
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          13.451479,
-          52.459472
-        ]
-      },
       "properties": {
         "ID": "DE3",
-        "Node": "NutsCons_22",
         "name": "BERLIN",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 11.890999999999998,
+        "Node": "NutsCons_22",
+        "NUTS3_ID": "DE300",
+        "max_demand_M_m3_per_d": 11.891,
         "max_demand_commercial_M_m3_per_d": 5.563,
         "max_demand_household_M_m3_per_d": 5.347,
         "max_demand_industrial_M_m3_per_d": 1.403,
@@ -708,34 +631,30 @@
         "mean_demand_commercial_M_m3_per_d": 1.4063696604600024,
         "mean_demand_household_M_m3_per_d": 1.6515106790799954,
         "mean_demand_industrial_M_m3_per_d": 1.2208017524643686,
-        "median_demand_M_m3_per_d": 3.8920000000000003,
+        "median_demand_M_m3_per_d": 3.892,
         "median_demand_commercial_M_m3_per_d": 1.168,
-        "median_demand_household_M_m3_per_d": 1.5290000000000001,
+        "median_demand_household_M_m3_per_d": 1.529,
         "median_demand_industrial_M_m3_per_d": 1.273,
-        "min_demand_M_m3_per_d": 1.8359999999999999,
+        "min_demand_M_m3_per_d": 1.836,
         "min_demand_commercial_M_m3_per_d": 0.332,
         "min_demand_household_M_m3_per_d": 0.478,
-        "min_demand_industrial_M_m3_per_d": 0.941,
-        "nuts_id_1": "DE4",
-        "nuts_id_2": "DE40",
-        "nuts_id_3": "DE300"
+        "min_demand_industrial_M_m3_per_d": 0.941
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.451479,
+          52.459472
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          13.158909,
-          54.097933999999995
-        ]
-      },
       "properties": {
         "ID": "DE8",
-        "Node": "NutsCons_23",
         "name": "MECKLENBURG-VORPOMMERN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_23",
+        "NUTS3_ID": "DE80L",
         "max_demand_M_m3_per_d": 9.41,
         "max_demand_commercial_M_m3_per_d": 1.949,
         "max_demand_household_M_m3_per_d": 6.568,
@@ -746,34 +665,30 @@
         "mean_demand_industrial_M_m3_per_d": 1.0020575027381826,
         "median_demand_M_m3_per_d": 3.198,
         "median_demand_commercial_M_m3_per_d": 0.488,
-        "median_demand_household_M_m3_per_d": 1.7069999999999999,
+        "median_demand_household_M_m3_per_d": 1.707,
         "median_demand_industrial_M_m3_per_d": 1.022,
-        "min_demand_M_m3_per_d": 1.1600000000000001,
+        "min_demand_M_m3_per_d": 1.16,
         "min_demand_commercial_M_m3_per_d": 0.138,
         "min_demand_household_M_m3_per_d": 0.221,
-        "min_demand_industrial_M_m3_per_d": 0.735,
-        "nuts_id_1": "DE8",
-        "nuts_id_2": "DE80",
-        "nuts_id_3": "DE80L"
+        "min_demand_industrial_M_m3_per_d": 0.735
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.158909,
+          54.097934
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          15.374158,
-          49.987355
-        ]
-      },
       "properties": {
         "ID": "CZ0",
-        "Node": "NutsCons_24",
         "name": "ÃÂÃÂESKÃÂÃÂ REPUBLIKA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_24",
+        "NUTS3_ID": "CZ020",
         "max_demand_M_m3_per_d": 33.365,
-        "max_demand_commercial_M_m3_per_d": 10.812000000000001,
+        "max_demand_commercial_M_m3_per_d": 10.812,
         "max_demand_household_M_m3_per_d": 15.939,
         "max_demand_industrial_M_m3_per_d": 7.189,
         "mean_demand_M_m3_per_d": 15.442694140197021,
@@ -782,36 +697,32 @@
         "mean_demand_industrial_M_m3_per_d": 6.147838718510268,
         "median_demand_M_m3_per_d": 14.689,
         "median_demand_commercial_M_m3_per_d": 3.076,
-        "median_demand_household_M_m3_per_d": 5.492000000000001,
-        "median_demand_industrial_M_m3_per_d": 6.542000000000001,
-        "min_demand_M_m3_per_d": 7.6450000000000005,
-        "min_demand_commercial_M_m3_per_d": 0.9329999999999999,
+        "median_demand_household_M_m3_per_d": 5.492,
+        "median_demand_industrial_M_m3_per_d": 6.542,
+        "min_demand_M_m3_per_d": 7.645,
+        "min_demand_commercial_M_m3_per_d": 0.933,
         "min_demand_household_M_m3_per_d": 1.982,
-        "min_demand_industrial_M_m3_per_d": 4.695,
-        "nuts_id_1": "CZ0",
-        "nuts_id_2": "CZ02",
-        "nuts_id_3": "CZ020"
+        "min_demand_industrial_M_m3_per_d": 4.695
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.374158,
+          49.987355
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          8.654899,
-          53.180246
-        ]
-      },
       "properties": {
         "ID": "DE5",
-        "Node": "NutsCons_25",
         "name": "BREMEN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_25",
+        "NUTS3_ID": "DE501",
         "max_demand_M_m3_per_d": 5.884,
         "max_demand_commercial_M_m3_per_d": 0.92,
         "max_demand_household_M_m3_per_d": 4.607,
-        "max_demand_industrial_M_m3_per_d": 0.39299999999999996,
+        "max_demand_industrial_M_m3_per_d": 0.393,
         "mean_demand_M_m3_per_d": 1.8228778751369152,
         "mean_demand_commercial_M_m3_per_d": 0.2407732749178535,
         "mean_demand_household_M_m3_per_d": 1.2615347754655168,
@@ -819,33 +730,29 @@
         "median_demand_M_m3_per_d": 1.721,
         "median_demand_commercial_M_m3_per_d": 0.214,
         "median_demand_household_M_m3_per_d": 1.19,
-        "median_demand_industrial_M_m3_per_d": 0.32299999999999995,
+        "median_demand_industrial_M_m3_per_d": 0.323,
         "min_demand_M_m3_per_d": 0.41,
         "min_demand_commercial_M_m3_per_d": 0.06,
         "min_demand_household_M_m3_per_d": 0.092,
-        "min_demand_industrial_M_m3_per_d": 0.237,
-        "nuts_id_1": "DE5",
-        "nuts_id_2": "DE50",
-        "nuts_id_3": "DE501"
+        "min_demand_industrial_M_m3_per_d": 0.237
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.654899,
+          53.180246
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          9.997188000000001,
-          53.601645
-        ]
-      },
       "properties": {
         "ID": "DE6",
-        "Node": "NutsCons_26",
         "name": "HAMBURG",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_26",
+        "NUTS3_ID": "DE600",
         "max_demand_M_m3_per_d": 8.756,
-        "max_demand_commercial_M_m3_per_d": 3.0389999999999997,
+        "max_demand_commercial_M_m3_per_d": 3.039,
         "max_demand_household_M_m3_per_d": 4.888,
         "max_demand_industrial_M_m3_per_d": 0.884,
         "mean_demand_M_m3_per_d": 2.8681056955093194,
@@ -854,32 +761,28 @@
         "mean_demand_industrial_M_m3_per_d": 0.7383255750273934,
         "median_demand_M_m3_per_d": 2.694,
         "median_demand_commercial_M_m3_per_d": 0.655,
-        "median_demand_household_M_m3_per_d": 1.2990000000000002,
+        "median_demand_household_M_m3_per_d": 1.299,
         "median_demand_industrial_M_m3_per_d": 0.752,
-        "min_demand_M_m3_per_d": 1.0219999999999998,
-        "min_demand_commercial_M_m3_per_d": 0.18100000000000002,
+        "min_demand_M_m3_per_d": 1.022,
+        "min_demand_commercial_M_m3_per_d": 0.181,
         "min_demand_household_M_m3_per_d": 0.244,
-        "min_demand_industrial_M_m3_per_d": 0.564,
-        "nuts_id_1": "DE6",
-        "nuts_id_2": "DE60",
-        "nuts_id_3": "DE600"
+        "min_demand_industrial_M_m3_per_d": 0.564
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.997188,
+          53.601645
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          24.528912,
-          42.118865
-        ]
-      },
       "properties": {
         "ID": "BG4",
-        "Node": "NutsCons_27",
         "name": "ÃÂÃÂ®ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂ ÃÂÃÂ®ÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂªÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_27",
+        "NUTS3_ID": "BG421",
         "max_demand_M_m3_per_d": 2.223,
         "max_demand_commercial_M_m3_per_d": 0.573,
         "max_demand_household_M_m3_per_d": 0.294,
@@ -888,34 +791,30 @@
         "mean_demand_commercial_M_m3_per_d": 0.14519852135816053,
         "mean_demand_household_M_m3_per_d": 0.06465251916757994,
         "mean_demand_industrial_M_m3_per_d": 1.2042932639649833,
-        "median_demand_M_m3_per_d": 1.4109999999999998,
+        "median_demand_M_m3_per_d": 1.411,
         "median_demand_commercial_M_m3_per_d": 0.107,
-        "median_demand_household_M_m3_per_d": 0.052000000000000005,
+        "median_demand_household_M_m3_per_d": 0.052,
         "median_demand_industrial_M_m3_per_d": 1.198,
         "min_demand_M_m3_per_d": 0.886,
         "min_demand_commercial_M_m3_per_d": 0.038,
-        "min_demand_household_M_m3_per_d": 0.011000000000000001,
-        "min_demand_industrial_M_m3_per_d": 0.835,
-        "nuts_id_1": "BG4",
-        "nuts_id_2": "BG42",
-        "nuts_id_3": "BG421"
+        "min_demand_household_M_m3_per_d": 0.011,
+        "min_demand_industrial_M_m3_per_d": 0.835
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.528912,
+          42.118865
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          8.937016999999999,
-          52.754996999999996
-        ]
-      },
       "properties": {
         "ID": "DE9",
-        "Node": "NutsCons_28",
         "name": "NIEDERSACHSEN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_28",
+        "NUTS3_ID": "DE922",
         "max_demand_M_m3_per_d": 40.087,
         "max_demand_commercial_M_m3_per_d": 10.042,
         "max_demand_household_M_m3_per_d": 23.78,
@@ -931,27 +830,23 @@
         "min_demand_M_m3_per_d": 6.311,
         "min_demand_commercial_M_m3_per_d": 0.664,
         "min_demand_household_M_m3_per_d": 1.08,
-        "min_demand_industrial_M_m3_per_d": 4.479,
-        "nuts_id_1": "DE9",
-        "nuts_id_2": "DE92",
-        "nuts_id_3": "DE922"
+        "min_demand_industrial_M_m3_per_d": 4.479
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.937017,
+          52.754997
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          20.016547,
-          41.078377
-        ]
-      },
       "properties": {
         "ID": "AL0",
-        "Node": "NutsCons_29",
         "name": "SHQIPÃÂÃÂRIA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_29",
+        "NUTS3_ID": "AL021",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -967,27 +862,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "AL0",
-        "nuts_id_2": "AL02",
-        "nuts_id_3": "AL021"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          20.016547,
+          41.078377
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          16.098523999999998,
-          47.960951
-        ]
-      },
       "properties": {
         "ID": "AT1",
-        "Node": "NutsCons_30",
         "name": "OSTÃÂÃÂSTERREICH",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_30",
+        "NUTS3_ID": "AT122",
         "max_demand_M_m3_per_d": 9.392,
         "max_demand_commercial_M_m3_per_d": 1.796,
         "max_demand_household_M_m3_per_d": 4.881,
@@ -997,35 +888,31 @@
         "mean_demand_household_M_m3_per_d": 1.4105703723986862,
         "mean_demand_industrial_M_m3_per_d": 2.5407918948522483,
         "median_demand_M_m3_per_d": 4.179,
-        "median_demand_commercial_M_m3_per_d": 0.41100000000000003,
+        "median_demand_commercial_M_m3_per_d": 0.411,
         "median_demand_household_M_m3_per_d": 1.228,
-        "median_demand_industrial_M_m3_per_d": 2.7110000000000003,
+        "median_demand_industrial_M_m3_per_d": 2.711,
         "min_demand_M_m3_per_d": 2.378,
         "min_demand_commercial_M_m3_per_d": 0.135,
         "min_demand_household_M_m3_per_d": 0.222,
-        "min_demand_industrial_M_m3_per_d": 1.986,
-        "nuts_id_1": "AT1",
-        "nuts_id_2": "AT12",
-        "nuts_id_3": "AT122"
+        "min_demand_industrial_M_m3_per_d": 1.986
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          16.098524,
+          47.960951
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -3.754782,
-          40.760746000000005
-        ]
-      },
       "properties": {
         "ID": "ES4",
-        "Node": "NutsCons_31",
         "name": "CENTRO (ES)",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_31",
+        "NUTS3_ID": "ES300",
         "max_demand_M_m3_per_d": 10.754,
-        "max_demand_commercial_M_m3_per_d": 3.4130000000000003,
+        "max_demand_commercial_M_m3_per_d": 3.413,
         "max_demand_household_M_m3_per_d": 5.124,
         "max_demand_industrial_M_m3_per_d": 4.263,
         "mean_demand_M_m3_per_d": 5.718009036144536,
@@ -1038,28 +925,24 @@
         "median_demand_industrial_M_m3_per_d": 3.53,
         "min_demand_M_m3_per_d": 3.331,
         "min_demand_commercial_M_m3_per_d": 0.1,
-        "min_demand_household_M_m3_per_d": 0.5329999999999999,
-        "min_demand_industrial_M_m3_per_d": 2.362,
-        "nuts_id_1": "ES4",
-        "nuts_id_2": "ES30",
-        "nuts_id_3": "ES300"
+        "min_demand_household_M_m3_per_d": 0.533,
+        "min_demand_industrial_M_m3_per_d": 2.362
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.754782,
+          40.760746
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          22.366881,
-          60.490466000000005
-        ]
-      },
       "properties": {
         "ID": "FI1",
-        "Node": "NutsCons_33",
         "name": "MANNER-SUOMI",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_33",
+        "NUTS3_ID": "FI1C1",
         "max_demand_M_m3_per_d": 2.528,
         "max_demand_commercial_M_m3_per_d": 0.317,
         "max_demand_household_M_m3_per_d": 0.226,
@@ -1070,32 +953,28 @@
         "mean_demand_industrial_M_m3_per_d": 1.8050733844469147,
         "median_demand_M_m3_per_d": 1.984,
         "median_demand_commercial_M_m3_per_d": 0.09,
-        "median_demand_household_M_m3_per_d": 0.052000000000000005,
+        "median_demand_household_M_m3_per_d": 0.052,
         "median_demand_industrial_M_m3_per_d": 1.795,
         "min_demand_M_m3_per_d": 1.342,
-        "min_demand_commercial_M_m3_per_d": 0.022000000000000002,
+        "min_demand_commercial_M_m3_per_d": 0.022,
         "min_demand_household_M_m3_per_d": 0.016,
-        "min_demand_industrial_M_m3_per_d": 1.3,
-        "nuts_id_1": "FI1",
-        "nuts_id_2": "FI1C",
-        "nuts_id_3": "FI1C1"
+        "min_demand_industrial_M_m3_per_d": 1.3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.366881,
+          60.490466
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          14.376157000000001,
-          35.941119
-        ]
-      },
       "properties": {
         "ID": "MT0",
-        "Node": "NutsCons_34",
         "name": "MALTA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_34",
+        "NUTS3_ID": "MT001",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -1111,27 +990,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "MT0",
-        "nuts_id_2": "MT00",
-        "nuts_id_3": "MT001"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.376157,
+          35.941119
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          5.522957,
-          51.439346
-        ]
-      },
       "properties": {
         "ID": "NL4",
-        "Node": "NutsCons_35",
         "name": "ZUID-NEDERLAND",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_35",
+        "NUTS3_ID": "NL414",
         "max_demand_M_m3_per_d": 24.822,
         "max_demand_commercial_M_m3_per_d": 7.933,
         "max_demand_household_M_m3_per_d": 13.782,
@@ -1140,34 +1015,30 @@
         "mean_demand_commercial_M_m3_per_d": 1.984199342825838,
         "mean_demand_household_M_m3_per_d": 3.9029444140197693,
         "mean_demand_industrial_M_m3_per_d": 3.9518622672509034,
-        "median_demand_M_m3_per_d": 9.123000000000001,
+        "median_demand_M_m3_per_d": 9.123,
         "median_demand_commercial_M_m3_per_d": 1.665,
         "median_demand_household_M_m3_per_d": 3.563,
         "median_demand_industrial_M_m3_per_d": 4.172,
         "min_demand_M_m3_per_d": 4.618,
         "min_demand_commercial_M_m3_per_d": 0.502,
         "min_demand_household_M_m3_per_d": 0.998,
-        "min_demand_industrial_M_m3_per_d": 3.1010000000000004,
-        "nuts_id_1": "NL4",
-        "nuts_id_2": "NL41",
-        "nuts_id_3": "NL414"
+        "min_demand_industrial_M_m3_per_d": 3.101
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.522957,
+          51.439346
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          2.523201,
-          48.760488
-        ]
-      },
       "properties": {
         "ID": "FR1",
-        "Node": "NutsCons_37",
         "name": "ILE-DE-FRANCE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_37",
+        "NUTS3_ID": "FR107",
         "max_demand_M_m3_per_d": 25.379,
         "max_demand_commercial_M_m3_per_d": 14.673,
         "max_demand_household_M_m3_per_d": 6.084,
@@ -1178,34 +1049,30 @@
         "mean_demand_industrial_M_m3_per_d": 3.9809852135814667,
         "median_demand_M_m3_per_d": 9.178,
         "median_demand_commercial_M_m3_per_d": 3.29,
-        "median_demand_household_M_m3_per_d": 1.9969999999999999,
-        "median_demand_industrial_M_m3_per_d": 3.9160000000000004,
+        "median_demand_household_M_m3_per_d": 1.997,
+        "median_demand_industrial_M_m3_per_d": 3.916,
         "min_demand_M_m3_per_d": 5.031,
         "min_demand_commercial_M_m3_per_d": 1.021,
-        "min_demand_household_M_m3_per_d": 0.9570000000000001,
-        "min_demand_industrial_M_m3_per_d": 2.8819999999999997,
-        "nuts_id_1": "FR1",
-        "nuts_id_2": "FR10",
-        "nuts_id_3": "FR107"
+        "min_demand_household_M_m3_per_d": 0.957,
+        "min_demand_industrial_M_m3_per_d": 2.882
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.523201,
+          48.760488
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.707415,
-          47.535914
-        ]
-      },
       "properties": {
         "ID": "FRC",
-        "Node": "NutsCons_38",
         "name": "BOURGOGNE-FRANCHE-COMTÃÂÃÂ",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_38",
+        "NUTS3_ID": "FRC11",
         "max_demand_M_m3_per_d": 17.634,
-        "max_demand_commercial_M_m3_per_d": 2.6010000000000004,
+        "max_demand_commercial_M_m3_per_d": 2.601,
         "max_demand_household_M_m3_per_d": 12.93,
         "max_demand_industrial_M_m3_per_d": 2.251,
         "mean_demand_M_m3_per_d": 5.702395125958355,
@@ -1215,31 +1082,27 @@
         "median_demand_M_m3_per_d": 5.069,
         "median_demand_commercial_M_m3_per_d": 0.55,
         "median_demand_household_M_m3_per_d": 2.573,
-        "median_demand_industrial_M_m3_per_d": 1.9780000000000002,
-        "min_demand_M_m3_per_d": 1.9090000000000003,
-        "min_demand_commercial_M_m3_per_d": 0.17600000000000002,
+        "median_demand_industrial_M_m3_per_d": 1.978,
+        "min_demand_M_m3_per_d": 1.909,
+        "min_demand_commercial_M_m3_per_d": 0.176,
         "min_demand_household_M_m3_per_d": 0.225,
-        "min_demand_industrial_M_m3_per_d": 1.4880000000000002,
-        "nuts_id_1": "FRC",
-        "nuts_id_2": "FRC1",
-        "nuts_id_3": "FRC11"
+        "min_demand_industrial_M_m3_per_d": 1.488
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.707415,
+          47.535914
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          2.98909,
-          49.68486
-        ]
-      },
       "properties": {
         "ID": "FRE",
-        "Node": "SEQ_721_p",
         "name": "NORD-PAS DE CALAIS-PICARDIE",
-        "tags": {},
-        "exact": 4,
+        "Node": "SEQ_721_p",
+        "NUTS3_ID": "FRE22",
         "max_demand_M_m3_per_d": 19.87,
         "max_demand_commercial_M_m3_per_d": 5.274,
         "max_demand_household_M_m3_per_d": 11.318,
@@ -1255,31 +1118,27 @@
         "min_demand_M_m3_per_d": 3.096,
         "min_demand_commercial_M_m3_per_d": 0.39,
         "min_demand_household_M_m3_per_d": 0.465,
-        "min_demand_industrial_M_m3_per_d": 2.195,
-        "nuts_id_1": "FRE",
-        "nuts_id_2": "FRE2",
-        "nuts_id_3": "FRE22"
+        "min_demand_industrial_M_m3_per_d": 2.195
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.98909,
+          49.68486
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.779393,
-          47.457671999999995
-        ]
-      },
       "properties": {
         "ID": "FRG",
-        "Node": "NutsCons_40",
         "name": "PAYS DE LA LOIRE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_40",
+        "NUTS3_ID": "FRG02",
         "max_demand_M_m3_per_d": 12.802,
         "max_demand_commercial_M_m3_per_d": 3.77,
         "max_demand_household_M_m3_per_d": 6.352,
-        "max_demand_industrial_M_m3_per_d": 2.8489999999999998,
+        "max_demand_industrial_M_m3_per_d": 2.849,
         "mean_demand_M_m3_per_d": 5.086636089813827,
         "mean_demand_commercial_M_m3_per_d": 0.9760829682365642,
         "mean_demand_household_M_m3_per_d": 1.6277469879517887,
@@ -1288,31 +1147,27 @@
         "median_demand_commercial_M_m3_per_d": 0.767,
         "median_demand_household_M_m3_per_d": 1.453,
         "median_demand_industrial_M_m3_per_d": 2.593,
-        "min_demand_M_m3_per_d": 2.5170000000000003,
+        "min_demand_M_m3_per_d": 2.517,
         "min_demand_commercial_M_m3_per_d": 0.237,
         "min_demand_household_M_m3_per_d": 0.304,
-        "min_demand_industrial_M_m3_per_d": 1.933,
-        "nuts_id_1": "FRG",
-        "nuts_id_2": "FRG0",
-        "nuts_id_3": "FRG02"
+        "min_demand_industrial_M_m3_per_d": 1.933
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.779393,
+          47.457672
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          1.563741,
-          47.640848999999996
-        ]
-      },
       "properties": {
         "ID": "FRB",
-        "Node": "NutsCons_41",
         "name": "CENTRE - VAL DE LOIRE",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 11.289000000000001,
+        "Node": "NutsCons_41",
+        "NUTS3_ID": "FRB05",
+        "max_demand_M_m3_per_d": 11.289,
         "max_demand_commercial_M_m3_per_d": 2.589,
         "max_demand_household_M_m3_per_d": 6.945,
         "max_demand_industrial_M_m3_per_d": 1.784,
@@ -1320,38 +1175,34 @@
         "mean_demand_commercial_M_m3_per_d": 0.6770564074479675,
         "mean_demand_household_M_m3_per_d": 1.6130868017524704,
         "mean_demand_industrial_M_m3_per_d": 1.4926122672507873,
-        "median_demand_M_m3_per_d": 3.3390000000000004,
+        "median_demand_M_m3_per_d": 3.339,
         "median_demand_commercial_M_m3_per_d": 0.521,
-        "median_demand_household_M_m3_per_d": 1.3880000000000001,
-        "median_demand_industrial_M_m3_per_d": 1.4969999999999999,
-        "min_demand_M_m3_per_d": 1.5140000000000002,
+        "median_demand_household_M_m3_per_d": 1.388,
+        "median_demand_industrial_M_m3_per_d": 1.497,
+        "min_demand_M_m3_per_d": 1.514,
         "min_demand_commercial_M_m3_per_d": 0.175,
         "min_demand_household_M_m3_per_d": 0.207,
-        "min_demand_industrial_M_m3_per_d": 1.09,
-        "nuts_id_1": "FRB",
-        "nuts_id_2": "FRB0",
-        "nuts_id_3": "FRB05"
+        "min_demand_industrial_M_m3_per_d": 1.09
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.563741,
+          47.640849
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          0.157973,
-          49.057697999999995
-        ]
-      },
       "properties": {
         "ID": "FRD",
-        "Node": "NutsCons_42",
         "name": "NORMANDIE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_42",
+        "NUTS3_ID": "FRD11",
         "max_demand_M_m3_per_d": 16.144,
         "max_demand_commercial_M_m3_per_d": 2.822,
         "max_demand_household_M_m3_per_d": 11.159,
-        "max_demand_industrial_M_m3_per_d": 2.5580000000000003,
+        "max_demand_industrial_M_m3_per_d": 2.558,
         "mean_demand_M_m3_per_d": 6.014842552026314,
         "mean_demand_commercial_M_m3_per_d": 0.825975355969326,
         "mean_demand_household_M_m3_per_d": 3.0322688937568634,
@@ -1363,27 +1214,23 @@
         "min_demand_M_m3_per_d": 2.169,
         "min_demand_commercial_M_m3_per_d": 0.214,
         "min_demand_household_M_m3_per_d": 0.265,
-        "min_demand_industrial_M_m3_per_d": 1.659,
-        "nuts_id_1": "FRD",
-        "nuts_id_2": "FRD1",
-        "nuts_id_3": "FRD11"
+        "min_demand_industrial_M_m3_per_d": 1.659
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.157973,
+          49.057698
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          5.307704,
-          48.561991
-        ]
-      },
       "properties": {
         "ID": "FRF",
-        "Node": "NutsCons_44",
         "name": "ALSACE-CHAMPAGNE-ARDENNE-LORRAINE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_44",
+        "NUTS3_ID": "FRF32",
         "max_demand_M_m3_per_d": 27.044,
         "max_demand_commercial_M_m3_per_d": 5.117,
         "max_demand_household_M_m3_per_d": 18.023,
@@ -1392,37 +1239,33 @@
         "mean_demand_commercial_M_m3_per_d": 1.4611089813800902,
         "mean_demand_household_M_m3_per_d": 4.453400328587099,
         "mean_demand_industrial_M_m3_per_d": 3.50578943044898,
-        "median_demand_M_m3_per_d": 8.591000000000001,
+        "median_demand_M_m3_per_d": 8.591,
         "median_demand_commercial_M_m3_per_d": 1.202,
         "median_demand_household_M_m3_per_d": 3.904,
         "median_demand_industrial_M_m3_per_d": 3.568,
         "min_demand_M_m3_per_d": 3.533,
         "min_demand_commercial_M_m3_per_d": 0.377,
         "min_demand_household_M_m3_per_d": 0.441,
-        "min_demand_industrial_M_m3_per_d": 2.673,
-        "nuts_id_1": "FRF",
-        "nuts_id_2": "FRF3",
-        "nuts_id_3": "FRF32"
+        "min_demand_industrial_M_m3_per_d": 2.673
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.307704,
+          48.561991
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -7.591838,
-          42.985968
-        ]
-      },
       "properties": {
         "ID": "ES1",
-        "Node": "NutsCons_45",
         "name": "NOROESTE",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 8.267999999999999,
+        "Node": "NutsCons_45",
+        "NUTS3_ID": "ES112",
+        "max_demand_M_m3_per_d": 8.268,
         "max_demand_commercial_M_m3_per_d": 2.532,
-        "max_demand_household_M_m3_per_d": 4.7010000000000005,
+        "max_demand_household_M_m3_per_d": 4.701,
         "max_demand_industrial_M_m3_per_d": 3.313,
         "mean_demand_M_m3_per_d": 4.564084884994537,
         "mean_demand_commercial_M_m3_per_d": 0.5839769989047084,
@@ -1430,32 +1273,28 @@
         "mean_demand_industrial_M_m3_per_d": 2.572535323110605,
         "median_demand_M_m3_per_d": 4.366,
         "median_demand_commercial_M_m3_per_d": 0.414,
-        "median_demand_household_M_m3_per_d": 1.3159999999999998,
-        "median_demand_industrial_M_m3_per_d": 2.5639999999999996,
+        "median_demand_household_M_m3_per_d": 1.316,
+        "median_demand_industrial_M_m3_per_d": 2.564,
         "min_demand_M_m3_per_d": 2.496,
-        "min_demand_commercial_M_m3_per_d": 0.08199999999999999,
+        "min_demand_commercial_M_m3_per_d": 0.082,
         "min_demand_household_M_m3_per_d": 0.418,
-        "min_demand_industrial_M_m3_per_d": 1.72,
-        "nuts_id_1": "ES1",
-        "nuts_id_2": "ES11",
-        "nuts_id_3": "ES112"
+        "min_demand_industrial_M_m3_per_d": 1.72
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -7.591838,
+          42.985968
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -3.6843150000000002,
-          40.331238
-        ]
-      },
       "properties": {
         "ID": "ES3",
-        "Node": "NutsCons_46",
         "name": "COMUNIDAD DE MADRID",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_46",
+        "NUTS3_ID": "ES300",
         "max_demand_M_m3_per_d": 9.402,
         "max_demand_commercial_M_m3_per_d": 5.609,
         "max_demand_household_M_m3_per_d": 2.2,
@@ -1469,101 +1308,89 @@
         "median_demand_household_M_m3_per_d": 0.971,
         "median_demand_industrial_M_m3_per_d": 2.235,
         "min_demand_M_m3_per_d": 2.752,
-        "min_demand_commercial_M_m3_per_d": 0.16699999999999998,
+        "min_demand_commercial_M_m3_per_d": 0.167,
         "min_demand_household_M_m3_per_d": 0.638,
-        "min_demand_industrial_M_m3_per_d": 1.4280000000000002,
-        "nuts_id_1": "ES4",
-        "nuts_id_2": "ES30",
-        "nuts_id_3": "ES300"
+        "min_demand_industrial_M_m3_per_d": 1.428
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.684315,
+          40.331238
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -4.2211,
-          37.73709
-        ]
-      },
       "properties": {
         "ID": "ES6",
-        "Node": "SEQ_7244_p",
         "name": "SUR",
-        "tags": {},
-        "exact": 4,
+        "Node": "SEQ_7244_p",
+        "NUTS3_ID": "ES616",
         "max_demand_M_m3_per_d": 17.063,
-        "max_demand_commercial_M_m3_per_d": 8.738999999999999,
+        "max_demand_commercial_M_m3_per_d": 8.739,
         "max_demand_household_M_m3_per_d": 4.987,
         "max_demand_industrial_M_m3_per_d": 5.56,
         "mean_demand_M_m3_per_d": 7.4715627053668205,
         "mean_demand_commercial_M_m3_per_d": 1.268409090909104,
         "mean_demand_household_M_m3_per_d": 1.6823748630886766,
         "mean_demand_industrial_M_m3_per_d": 4.520778751369045,
-        "median_demand_M_m3_per_d": 6.765000000000001,
-        "median_demand_commercial_M_m3_per_d": 0.5429999999999999,
-        "median_demand_household_M_m3_per_d": 1.4069999999999998,
+        "median_demand_M_m3_per_d": 6.765,
+        "median_demand_commercial_M_m3_per_d": 0.543,
+        "median_demand_household_M_m3_per_d": 1.407,
         "median_demand_industrial_M_m3_per_d": 4.641,
         "min_demand_M_m3_per_d": 4.678,
-        "min_demand_commercial_M_m3_per_d": 0.17300000000000001,
-        "min_demand_household_M_m3_per_d": 0.9620000000000001,
-        "min_demand_industrial_M_m3_per_d": 3.096,
-        "nuts_id_1": "ES6",
-        "nuts_id_2": "ES61",
-        "nuts_id_3": "ES616"
+        "min_demand_commercial_M_m3_per_d": 0.173,
+        "min_demand_household_M_m3_per_d": 0.962,
+        "min_demand_industrial_M_m3_per_d": 3.096
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -4.2211,
+          37.73709
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          1.118314,
-          40.010181
-        ]
-      },
       "properties": {
         "ID": "ES5",
-        "Node": "NutsCons_48",
         "name": "ESTE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_48",
+        "NUTS3_ID": null,
         "max_demand_M_m3_per_d": 23.782,
-        "max_demand_commercial_M_m3_per_d": 11.097999999999999,
+        "max_demand_commercial_M_m3_per_d": 11.098,
         "max_demand_household_M_m3_per_d": 5.944,
         "max_demand_industrial_M_m3_per_d": 9.588,
         "mean_demand_M_m3_per_d": 12.25025903614462,
         "mean_demand_commercial_M_m3_per_d": 2.0304939759036196,
         "mean_demand_household_M_m3_per_d": 2.3712760131435373,
         "mean_demand_industrial_M_m3_per_d": 7.848489047097065,
-        "median_demand_M_m3_per_d": 11.267999999999999,
-        "median_demand_commercial_M_m3_per_d": 0.9690000000000001,
+        "median_demand_M_m3_per_d": 11.268,
+        "median_demand_commercial_M_m3_per_d": 0.969,
         "median_demand_household_M_m3_per_d": 2.102,
         "median_demand_industrial_M_m3_per_d": 8.135,
-        "min_demand_M_m3_per_d": 7.853999999999999,
+        "min_demand_M_m3_per_d": 7.854,
         "min_demand_commercial_M_m3_per_d": 0.273,
         "min_demand_household_M_m3_per_d": 1.325,
-        "min_demand_industrial_M_m3_per_d": 5.265,
-        "nuts_id_1": "ES5",
-        "nuts_id_2": "XX",
-        "nuts_id_3": "XX"
+        "min_demand_industrial_M_m3_per_d": 5.265
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.118314,
+          40.010181
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -3.1804650000000003,
-          48.20515
-        ]
-      },
       "properties": {
         "ID": "FRH",
-        "Node": "NutsCons_51",
         "name": "BRETAGNE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_51",
+        "NUTS3_ID": "FRH01",
         "max_demand_M_m3_per_d": 10.938,
         "max_demand_commercial_M_m3_per_d": 3.266,
         "max_demand_household_M_m3_per_d": 5.822,
@@ -1574,36 +1401,32 @@
         "mean_demand_industrial_M_m3_per_d": 1.9994118291347969,
         "median_demand_M_m3_per_d": 4.356,
         "median_demand_commercial_M_m3_per_d": 0.762,
-        "median_demand_household_M_m3_per_d": 1.6159999999999999,
+        "median_demand_household_M_m3_per_d": 1.616,
         "median_demand_industrial_M_m3_per_d": 2.085,
-        "min_demand_M_m3_per_d": 2.0860000000000003,
+        "min_demand_M_m3_per_d": 2.086,
         "min_demand_commercial_M_m3_per_d": 0.215,
         "min_demand_household_M_m3_per_d": 0.266,
-        "min_demand_industrial_M_m3_per_d": 1.568,
-        "nuts_id_1": "FRH",
-        "nuts_id_2": "FRH0",
-        "nuts_id_3": "FRH01"
+        "min_demand_industrial_M_m3_per_d": 1.568
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.180465,
+          48.20515
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          12.734772999999999,
-          47.496887
-        ]
-      },
       "properties": {
         "ID": "AT3",
-        "Node": "NutsCons_52",
         "name": "WESTÃÂÃÂSTERREICH",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_52",
+        "NUTS3_ID": "AT322",
         "max_demand_M_m3_per_d": 9.967,
         "max_demand_commercial_M_m3_per_d": 1.121,
         "max_demand_household_M_m3_per_d": 5.155,
-        "max_demand_industrial_M_m3_per_d": 3.8569999999999998,
+        "max_demand_industrial_M_m3_per_d": 3.857,
         "mean_demand_M_m3_per_d": 5.566536692223457,
         "mean_demand_commercial_M_m3_per_d": 0.38629299014239227,
         "mean_demand_household_M_m3_per_d": 1.7788537787513647,
@@ -1611,31 +1434,27 @@
         "median_demand_M_m3_per_d": 5.497,
         "median_demand_commercial_M_m3_per_d": 0.371,
         "median_demand_household_M_m3_per_d": 1.713,
-        "median_demand_industrial_M_m3_per_d": 3.5610000000000004,
-        "min_demand_M_m3_per_d": 3.0020000000000002,
-        "min_demand_commercial_M_m3_per_d": 0.10300000000000001,
+        "median_demand_industrial_M_m3_per_d": 3.561,
+        "min_demand_M_m3_per_d": 3.002,
+        "min_demand_commercial_M_m3_per_d": 0.103,
         "min_demand_household_M_m3_per_d": 0.183,
-        "min_demand_industrial_M_m3_per_d": 2.67,
-        "nuts_id_1": "AT3",
-        "nuts_id_2": "AT32",
-        "nuts_id_3": "AT322"
+        "min_demand_industrial_M_m3_per_d": 2.67
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.734773,
+          47.496887
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.363716,
-          50.838295
-        ]
-      },
       "properties": {
         "ID": "BE1",
-        "Node": "NutsCons_53",
         "name": "RÃÂÃÂGION DE BRUXELLES-CAPITALE/BRUSSELS HOOFDSTEDELIJK GEWEST",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_53",
+        "NUTS3_ID": "BE100",
         "max_demand_M_m3_per_d": 5.547,
         "max_demand_commercial_M_m3_per_d": 2.077,
         "max_demand_household_M_m3_per_d": 3.002,
@@ -1644,34 +1463,30 @@
         "mean_demand_commercial_M_m3_per_d": 0.5723849945235502,
         "mean_demand_household_M_m3_per_d": 0.859240416210306,
         "mean_demand_industrial_M_m3_per_d": 0.6099707009857649,
-        "median_demand_M_m3_per_d": 1.8810000000000002,
+        "median_demand_M_m3_per_d": 1.881,
         "median_demand_commercial_M_m3_per_d": 0.488,
         "median_demand_household_M_m3_per_d": 0.785,
         "median_demand_industrial_M_m3_per_d": 0.62,
         "min_demand_M_m3_per_d": 0.776,
         "min_demand_commercial_M_m3_per_d": 0.14,
         "min_demand_household_M_m3_per_d": 0.157,
-        "min_demand_industrial_M_m3_per_d": 0.457,
-        "nuts_id_1": "BE2",
-        "nuts_id_2": "BE10",
-        "nuts_id_3": "BE100"
+        "min_demand_industrial_M_m3_per_d": 0.457
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.363716,
+          50.838295
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          5.781587,
-          44.039773
-        ]
-      },
       "properties": {
         "ID": "FRL",
-        "Node": "NutsCons_54",
         "name": "PROVENCE-ALPES-CÃÂÃÂTE DÃÂ¢ÃÂÃÂAZUR",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_54",
+        "NUTS3_ID": "FRL01",
         "max_demand_M_m3_per_d": 12.458,
         "max_demand_commercial_M_m3_per_d": 4.859,
         "max_demand_household_M_m3_per_d": 5.428,
@@ -1686,30 +1501,26 @@
         "median_demand_industrial_M_m3_per_d": 1.989,
         "min_demand_M_m3_per_d": 2.215,
         "min_demand_commercial_M_m3_per_d": 0.364,
-        "min_demand_household_M_m3_per_d": 0.40299999999999997,
-        "min_demand_industrial_M_m3_per_d": 1.403,
-        "nuts_id_1": "FRL",
-        "nuts_id_2": "FRL0",
-        "nuts_id_3": "FRL01"
+        "min_demand_household_M_m3_per_d": 0.403,
+        "min_demand_industrial_M_m3_per_d": 1.403
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.781587,
+          44.039773
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          12.218509,
-          45.403262
-        ]
-      },
       "properties": {
         "ID": "ITH",
-        "Node": "NutsCons_55",
         "name": "NORD-EST",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 59.086999999999996,
-        "max_demand_commercial_M_m3_per_d": 14.732000000000001,
+        "Node": "NutsCons_55",
+        "NUTS3_ID": null,
+        "max_demand_M_m3_per_d": 59.087,
+        "max_demand_commercial_M_m3_per_d": 14.732,
         "max_demand_household_M_m3_per_d": 37.235,
         "max_demand_industrial_M_m3_per_d": 8.549,
         "mean_demand_M_m3_per_d": 23.033498904709813,
@@ -1721,29 +1532,25 @@
         "median_demand_household_M_m3_per_d": 10.19,
         "median_demand_industrial_M_m3_per_d": 7.249,
         "min_demand_M_m3_per_d": 8.703,
-        "min_demand_commercial_M_m3_per_d": 1.0659999999999998,
+        "min_demand_commercial_M_m3_per_d": 1.066,
         "min_demand_household_M_m3_per_d": 2.181,
-        "min_demand_industrial_M_m3_per_d": 5.325,
-        "nuts_id_1": "ITH",
-        "nuts_id_2": "ITH3",
-        "nuts_id_3": "ITH35"
+        "min_demand_industrial_M_m3_per_d": 5.325
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.218509,
+          45.403262
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.193998,
-          45.492613
-        ]
-      },
       "properties": {
         "ID": "FRI",
-        "Node": "NutsCons_56",
         "name": "AQUITAINE-LIMOUSIN-POITOU-CHARENTES",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_56",
+        "NUTS3_ID": "FRI31",
         "max_demand_M_m3_per_d": 32.979,
         "max_demand_commercial_M_m3_per_d": 6.57,
         "max_demand_household_M_m3_per_d": 22.717,
@@ -1753,105 +1560,93 @@
         "mean_demand_household_M_m3_per_d": 4.773125958379,
         "mean_demand_industrial_M_m3_per_d": 3.3293945783132495,
         "median_demand_M_m3_per_d": 8.104,
-        "median_demand_commercial_M_m3_per_d": 1.0490000000000002,
+        "median_demand_commercial_M_m3_per_d": 1.049,
         "median_demand_household_M_m3_per_d": 3.734,
         "median_demand_industrial_M_m3_per_d": 3.513,
-        "min_demand_M_m3_per_d": 3.5519999999999996,
+        "min_demand_M_m3_per_d": 3.552,
         "min_demand_commercial_M_m3_per_d": 0.396,
-        "min_demand_household_M_m3_per_d": 0.48700000000000004,
-        "min_demand_industrial_M_m3_per_d": 2.6039999999999996,
-        "nuts_id_1": "FRI",
-        "nuts_id_2": "FRI3",
-        "nuts_id_3": "FRI31"
+        "min_demand_household_M_m3_per_d": 0.487,
+        "min_demand_industrial_M_m3_per_d": 2.604
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.193998,
+          45.492613
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "ITC",
+        "name": "NORD-OVEST",
+        "Node": "NutsCons_57",
+        "NUTS3_ID": "ITC48",
+        "max_demand_M_m3_per_d": 61.115,
+        "max_demand_commercial_M_m3_per_d": 20.402,
+        "max_demand_household_M_m3_per_d": 31.249,
+        "max_demand_industrial_M_m3_per_d": 10.611,
+        "mean_demand_M_m3_per_d": 25.15064622124875,
+        "mean_demand_commercial_M_m3_per_d": 6.0673543263964556,
+        "mean_demand_household_M_m3_per_d": 10.493214950711966,
+        "mean_demand_industrial_M_m3_per_d": 8.590076944139923,
+        "median_demand_M_m3_per_d": 22.641,
+        "median_demand_commercial_M_m3_per_d": 4.807,
+        "median_demand_household_M_m3_per_d": 9.315,
+        "median_demand_industrial_M_m3_per_d": 8.95,
+        "min_demand_M_m3_per_d": 11.434,
+        "min_demand_commercial_M_m3_per_d": 1.496,
+        "min_demand_household_M_m3_per_d": 3.055,
+        "min_demand_industrial_M_m3_per_d": 6.675
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           9.274534,
           45.127762
         ]
-      },
-      "properties": {
-        "ID": "ITC",
-        "Node": "NutsCons_57",
-        "name": "NORD-OVEST",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 61.115,
-        "max_demand_commercial_M_m3_per_d": 20.402,
-        "max_demand_household_M_m3_per_d": 31.249000000000002,
-        "max_demand_industrial_M_m3_per_d": 10.610999999999999,
-        "mean_demand_M_m3_per_d": 25.15064622124875,
-        "mean_demand_commercial_M_m3_per_d": 6.0673543263964556,
-        "mean_demand_household_M_m3_per_d": 10.493214950711966,
-        "mean_demand_industrial_M_m3_per_d": 8.590076944139923,
-        "median_demand_M_m3_per_d": 22.641,
-        "median_demand_commercial_M_m3_per_d": 4.8069999999999995,
-        "median_demand_household_M_m3_per_d": 9.315,
-        "median_demand_industrial_M_m3_per_d": 8.95,
-        "min_demand_M_m3_per_d": 11.434000000000001,
-        "min_demand_commercial_M_m3_per_d": 1.496,
-        "min_demand_household_M_m3_per_d": 3.055,
-        "min_demand_industrial_M_m3_per_d": 6.675,
-        "nuts_id_1": "ITC",
-        "nuts_id_2": "ITC4",
-        "nuts_id_3": "ITC48"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          24.214971,
-          55.18676800000001
-        ]
-      },
       "properties": {
         "ID": "LT0",
-        "Node": "NutsCons_58",
         "name": "LIETUVA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_58",
+        "NUTS3_ID": "LT022",
         "max_demand_M_m3_per_d": 3.199,
-        "max_demand_commercial_M_m3_per_d": 0.6679999999999999,
+        "max_demand_commercial_M_m3_per_d": 0.668,
         "max_demand_household_M_m3_per_d": 1.406,
         "max_demand_industrial_M_m3_per_d": 1.169,
         "mean_demand_M_m3_per_d": 1.6136927710843258,
         "mean_demand_commercial_M_m3_per_d": 0.19471823658269344,
         "mean_demand_household_M_m3_per_d": 0.47815306681270714,
         "mean_demand_industrial_M_m3_per_d": 0.9408214676889602,
-        "median_demand_M_m3_per_d": 1.5669999999999997,
-        "median_demand_commercial_M_m3_per_d": 0.17800000000000002,
-        "median_demand_household_M_m3_per_d": 0.46799999999999997,
-        "median_demand_industrial_M_m3_per_d": 0.9470000000000001,
-        "min_demand_M_m3_per_d": 0.9169999999999999,
+        "median_demand_M_m3_per_d": 1.567,
+        "median_demand_commercial_M_m3_per_d": 0.178,
+        "median_demand_household_M_m3_per_d": 0.468,
+        "median_demand_industrial_M_m3_per_d": 0.947,
+        "min_demand_M_m3_per_d": 0.917,
         "min_demand_commercial_M_m3_per_d": 0.047,
         "min_demand_household_M_m3_per_d": 0.16,
-        "min_demand_industrial_M_m3_per_d": 0.7,
-        "nuts_id_1": "LT0",
-        "nuts_id_2": "LT02",
-        "nuts_id_3": "LT022"
+        "min_demand_industrial_M_m3_per_d": 0.7
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.214971,
+          55.186768
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          6.1008059999999995,
-          49.76608
-        ]
-      },
       "properties": {
         "ID": "LU0",
-        "Node": "NutsCons_59",
         "name": "LUXEMBOURG",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_59",
+        "NUTS3_ID": "LU000",
         "max_demand_M_m3_per_d": 4.281,
         "max_demand_commercial_M_m3_per_d": 1.149,
         "max_demand_household_M_m3_per_d": 2.425,
@@ -1864,30 +1659,26 @@
         "median_demand_commercial_M_m3_per_d": 0.282,
         "median_demand_household_M_m3_per_d": 0.62,
         "median_demand_industrial_M_m3_per_d": 0.885,
-        "min_demand_M_m3_per_d": 0.8200000000000001,
+        "min_demand_M_m3_per_d": 0.82,
         "min_demand_commercial_M_m3_per_d": 0.071,
         "min_demand_household_M_m3_per_d": 0.061,
-        "min_demand_industrial_M_m3_per_d": 0.6559999999999999,
-        "nuts_id_1": "LU0",
-        "nuts_id_2": "LU00",
-        "nuts_id_3": "LU000"
+        "min_demand_industrial_M_m3_per_d": 0.656
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.100806,
+          49.76608
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          9.541638,
-          47.148053000000004
-        ]
-      },
       "properties": {
         "ID": "LI0",
-        "Node": "NutsCons_60",
         "name": "LIECHTENSTEIN",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_60",
+        "NUTS3_ID": "LI000",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -1903,28 +1694,24 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "LI0",
-        "nuts_id_2": "LI00",
-        "nuts_id_3": "LI000"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.541638,
+          47.148053
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.545523,
-          45.415789000000004
-        ]
-      },
       "properties": {
         "ID": "FRK",
-        "Node": "NutsCons_61",
         "name": "AUVERGNE-RHÃÂÃÂNE-ALPES",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 24.281000000000002,
+        "Node": "NutsCons_61",
+        "NUTS3_ID": "FRK25",
+        "max_demand_M_m3_per_d": 24.281,
         "max_demand_commercial_M_m3_per_d": 7.709,
         "max_demand_household_M_m3_per_d": 12.0,
         "max_demand_industrial_M_m3_per_d": 5.791,
@@ -1933,33 +1720,29 @@
         "mean_demand_household_M_m3_per_d": 3.364970153340636,
         "mean_demand_industrial_M_m3_per_d": 4.8916475903613,
         "median_demand_M_m3_per_d": 9.821,
-        "median_demand_commercial_M_m3_per_d": 1.8659999999999999,
+        "median_demand_commercial_M_m3_per_d": 1.866,
         "median_demand_household_M_m3_per_d": 3.093,
         "median_demand_industrial_M_m3_per_d": 5.08,
         "min_demand_M_m3_per_d": 5.061,
         "min_demand_commercial_M_m3_per_d": 0.525,
         "min_demand_household_M_m3_per_d": 0.639,
-        "min_demand_industrial_M_m3_per_d": 3.7089999999999996,
-        "nuts_id_1": "FRK",
-        "nuts_id_2": "FRK2",
-        "nuts_id_3": "FRK25"
+        "min_demand_industrial_M_m3_per_d": 3.709
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.545523,
+          45.415789
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          15.662823999999999,
-          44.193286
-        ]
-      },
       "properties": {
         "ID": "HR0",
-        "Node": "NutsCons_63",
         "name": "HRVATSKA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_63",
+        "NUTS3_ID": "HR033",
         "max_demand_M_m3_per_d": 8.83,
         "max_demand_commercial_M_m3_per_d": 2.411,
         "max_demand_household_M_m3_per_d": 5.51,
@@ -1970,105 +1753,93 @@
         "mean_demand_industrial_M_m3_per_d": 1.187071467688936,
         "median_demand_M_m3_per_d": 2.582,
         "median_demand_commercial_M_m3_per_d": 0.285,
-        "median_demand_household_M_m3_per_d": 1.0979999999999999,
+        "median_demand_household_M_m3_per_d": 1.098,
         "median_demand_industrial_M_m3_per_d": 1.158,
-        "min_demand_M_m3_per_d": 1.3530000000000002,
+        "min_demand_M_m3_per_d": 1.353,
         "min_demand_commercial_M_m3_per_d": 0.114,
         "min_demand_household_M_m3_per_d": 0.344,
-        "min_demand_industrial_M_m3_per_d": 0.8390000000000001,
-        "nuts_id_1": "HR0",
-        "nuts_id_2": "HR03",
-        "nuts_id_3": "HR033"
+        "min_demand_industrial_M_m3_per_d": 0.839
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.662824,
+          44.193286
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          19.324806,
-          47.496478
-        ]
-      },
       "properties": {
         "ID": "HU1",
-        "Node": "NutsCons_64",
         "name": "KÃÂÃÂZÃÂÃÂP-MAGYARORSZÃÂÃÂG",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_64",
+        "NUTS3_ID": "HU120",
         "max_demand_M_m3_per_d": 14.477,
-        "max_demand_commercial_M_m3_per_d": 6.132999999999999,
+        "max_demand_commercial_M_m3_per_d": 6.133,
         "max_demand_household_M_m3_per_d": 7.852,
         "max_demand_industrial_M_m3_per_d": 0.97,
         "mean_demand_M_m3_per_d": 4.289843921139151,
         "mean_demand_commercial_M_m3_per_d": 1.5383973165388827,
         "mean_demand_household_M_m3_per_d": 2.012393756845543,
         "mean_demand_industrial_M_m3_per_d": 0.7390528477546406,
-        "median_demand_M_m3_per_d": 3.2439999999999998,
+        "median_demand_M_m3_per_d": 3.244,
         "median_demand_commercial_M_m3_per_d": 0.977,
         "median_demand_household_M_m3_per_d": 1.501,
         "median_demand_industrial_M_m3_per_d": 0.73,
         "min_demand_M_m3_per_d": 1.251,
         "min_demand_commercial_M_m3_per_d": 0.364,
-        "min_demand_household_M_m3_per_d": 0.28800000000000003,
-        "min_demand_industrial_M_m3_per_d": 0.41200000000000003,
-        "nuts_id_1": "HU1",
-        "nuts_id_2": "HU12",
-        "nuts_id_3": "HU120"
+        "min_demand_household_M_m3_per_d": 0.288,
+        "min_demand_industrial_M_m3_per_d": 0.412
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          19.324806,
+          47.496478
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "ITI",
+        "name": "CENTRO (IT)",
+        "Node": "NutsCons_65",
+        "NUTS3_ID": "ITI19",
+        "max_demand_M_m3_per_d": 68.523,
+        "max_demand_commercial_M_m3_per_d": 23.378,
+        "max_demand_household_M_m3_per_d": 40.22,
+        "max_demand_industrial_M_m3_per_d": 6.177,
+        "mean_demand_M_m3_per_d": 19.38901916757946,
+        "mean_demand_commercial_M_m3_per_d": 4.8283420043812475,
+        "mean_demand_household_M_m3_per_d": 9.837864457831248,
+        "mean_demand_industrial_M_m3_per_d": 4.722812705366972,
+        "median_demand_M_m3_per_d": 14.211,
+        "median_demand_commercial_M_m3_per_d": 2.38,
+        "median_demand_household_M_m3_per_d": 7.045,
+        "median_demand_industrial_M_m3_per_d": 4.826,
+        "min_demand_M_m3_per_d": 7.233,
+        "min_demand_commercial_M_m3_per_d": 1.205,
+        "min_demand_household_M_m3_per_d": 2.222,
+        "min_demand_industrial_M_m3_per_d": 3.586
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           11.698004,
           42.803087
         ]
-      },
-      "properties": {
-        "ID": "ITI",
-        "Node": "NutsCons_65",
-        "name": "CENTRO (IT)",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 68.523,
-        "max_demand_commercial_M_m3_per_d": 23.378,
-        "max_demand_household_M_m3_per_d": 40.22,
-        "max_demand_industrial_M_m3_per_d": 6.1770000000000005,
-        "mean_demand_M_m3_per_d": 19.38901916757946,
-        "mean_demand_commercial_M_m3_per_d": 4.8283420043812475,
-        "mean_demand_household_M_m3_per_d": 9.837864457831248,
-        "mean_demand_industrial_M_m3_per_d": 4.722812705366972,
-        "median_demand_M_m3_per_d": 14.210999999999999,
-        "median_demand_commercial_M_m3_per_d": 2.38,
-        "median_demand_household_M_m3_per_d": 7.045,
-        "median_demand_industrial_M_m3_per_d": 4.8260000000000005,
-        "min_demand_M_m3_per_d": 7.2330000000000005,
-        "min_demand_commercial_M_m3_per_d": 1.205,
-        "min_demand_household_M_m3_per_d": 2.222,
-        "min_demand_industrial_M_m3_per_d": 3.5860000000000003,
-        "nuts_id_1": "ITI",
-        "nuts_id_2": "ITI1",
-        "nuts_id_3": "ITI19"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          1.844094,
-          44.022548
-        ]
-      },
       "properties": {
         "ID": "FRJ",
-        "Node": "NutsCons_66",
         "name": "LANGUEDOC-ROUSSILLON-MIDI-PYRÃÂÃÂNÃÂÃÂES",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 21.872999999999998,
+        "Node": "NutsCons_66",
+        "NUTS3_ID": "FRJ27",
+        "max_demand_M_m3_per_d": 21.873,
         "max_demand_commercial_M_m3_per_d": 5.885,
         "max_demand_household_M_m3_per_d": 13.144,
         "max_demand_industrial_M_m3_per_d": 3.207,
@@ -2083,31 +1854,27 @@
         "min_demand_M_m3_per_d": 3.151,
         "min_demand_commercial_M_m3_per_d": 0.395,
         "min_demand_household_M_m3_per_d": 0.483,
-        "min_demand_industrial_M_m3_per_d": 2.097,
-        "nuts_id_1": "FRJ",
-        "nuts_id_2": "FRJ2",
-        "nuts_id_3": "FRJ27"
+        "min_demand_industrial_M_m3_per_d": 2.097
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.844094,
+          44.022548
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          17.369854,
-          46.853925
-        ]
-      },
       "properties": {
         "ID": "HU2",
-        "Node": "NutsCons_68",
         "name": "DUNÃÂÃÂNTÃÂÃÂL",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_68",
+        "NUTS3_ID": "HU213",
         "max_demand_M_m3_per_d": 18.342,
         "max_demand_commercial_M_m3_per_d": 4.417,
-        "max_demand_household_M_m3_per_d": 12.732999999999999,
-        "max_demand_industrial_M_m3_per_d": 1.7530000000000001,
+        "max_demand_household_M_m3_per_d": 12.733,
+        "max_demand_industrial_M_m3_per_d": 1.753,
         "mean_demand_M_m3_per_d": 5.532147042716347,
         "mean_demand_commercial_M_m3_per_d": 1.0732390470974889,
         "mean_demand_household_M_m3_per_d": 3.0941467688938102,
@@ -2116,33 +1883,29 @@
         "median_demand_commercial_M_m3_per_d": 0.693,
         "median_demand_household_M_m3_per_d": 2.283,
         "median_demand_industrial_M_m3_per_d": 1.319,
-        "min_demand_M_m3_per_d": 1.4540000000000002,
-        "min_demand_commercial_M_m3_per_d": 0.23800000000000002,
+        "min_demand_M_m3_per_d": 1.454,
+        "min_demand_commercial_M_m3_per_d": 0.238,
         "min_demand_household_M_m3_per_d": 0.28,
-        "min_demand_industrial_M_m3_per_d": 0.765,
-        "nuts_id_1": "HU2",
-        "nuts_id_2": "HU21",
-        "nuts_id_3": "HU213"
+        "min_demand_industrial_M_m3_per_d": 0.765
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.369854,
+          46.853925
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          15.656023000000001,
-          40.657317
-        ]
-      },
       "properties": {
         "ID": "ITF",
-        "Node": "NutsCons_69",
         "name": "SUD",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_69",
+        "NUTS3_ID": "ITF51",
         "max_demand_M_m3_per_d": 84.176,
         "max_demand_commercial_M_m3_per_d": 18.892,
-        "max_demand_household_M_m3_per_d": 62.818999999999996,
+        "max_demand_household_M_m3_per_d": 62.819,
         "max_demand_industrial_M_m3_per_d": 5.835,
         "mean_demand_M_m3_per_d": 22.40717606790772,
         "mean_demand_commercial_M_m3_per_d": 3.9261111719605237,
@@ -2150,36 +1913,32 @@
         "mean_demand_industrial_M_m3_per_d": 4.616854874041656,
         "median_demand_M_m3_per_d": 15.006,
         "median_demand_commercial_M_m3_per_d": 1.53,
-        "median_demand_household_M_m3_per_d": 8.972999999999999,
+        "median_demand_household_M_m3_per_d": 8.973,
         "median_demand_industrial_M_m3_per_d": 4.746,
         "min_demand_M_m3_per_d": 7.084,
         "min_demand_commercial_M_m3_per_d": 0.955,
         "min_demand_household_M_m3_per_d": 2.529,
-        "min_demand_industrial_M_m3_per_d": 3.44,
-        "nuts_id_1": "ITF",
-        "nuts_id_2": "ITF5",
-        "nuts_id_3": "ITF51"
+        "min_demand_industrial_M_m3_per_d": 3.44
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.656023,
+          40.657317
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          20.107646,
-          47.621881
-        ]
-      },
       "properties": {
         "ID": "HU3",
-        "Node": "NutsCons_70",
         "name": "ALFÃÂÃÂLD ÃÂÃÂS ÃÂÃÂSZAK",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_70",
+        "NUTS3_ID": "HU312",
         "max_demand_M_m3_per_d": 20.095,
-        "max_demand_commercial_M_m3_per_d": 5.6129999999999995,
-        "max_demand_household_M_m3_per_d": 13.155999999999999,
-        "max_demand_industrial_M_m3_per_d": 1.9609999999999999,
+        "max_demand_commercial_M_m3_per_d": 5.613,
+        "max_demand_household_M_m3_per_d": 13.156,
+        "max_demand_industrial_M_m3_per_d": 1.961,
         "mean_demand_M_m3_per_d": 6.104093099671438,
         "mean_demand_commercial_M_m3_per_d": 1.3829693318729805,
         "mean_demand_household_M_m3_per_d": 3.213167579408524,
@@ -2191,31 +1950,27 @@
         "min_demand_M_m3_per_d": 1.728,
         "min_demand_commercial_M_m3_per_d": 0.314,
         "min_demand_household_M_m3_per_d": 0.374,
-        "min_demand_industrial_M_m3_per_d": 0.835,
-        "nuts_id_1": "HU3",
-        "nuts_id_2": "HU31",
-        "nuts_id_3": "HU312"
+        "min_demand_industrial_M_m3_per_d": 0.835
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          20.107646,
+          47.621881
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -9.432388000000001,
-          53.400645
-        ]
-      },
       "properties": {
         "ID": "IE0",
-        "Node": "NutsCons_71",
         "name": "IRELAND",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 10.517999999999999,
-        "max_demand_commercial_M_m3_per_d": 3.2089999999999996,
+        "Node": "NutsCons_71",
+        "NUTS3_ID": "IE042",
+        "max_demand_M_m3_per_d": 10.518,
+        "max_demand_commercial_M_m3_per_d": 3.209,
         "max_demand_household_M_m3_per_d": 4.276,
-        "max_demand_industrial_M_m3_per_d": 3.0989999999999998,
+        "max_demand_industrial_M_m3_per_d": 3.099,
         "mean_demand_M_m3_per_d": 5.059450438116088,
         "mean_demand_commercial_M_m3_per_d": 1.0998740416210355,
         "mean_demand_household_M_m3_per_d": 1.6899041621029531,
@@ -2224,68 +1979,60 @@
         "median_demand_commercial_M_m3_per_d": 1.055,
         "median_demand_household_M_m3_per_d": 1.661,
         "median_demand_industrial_M_m3_per_d": 2.147,
-        "min_demand_M_m3_per_d": 2.0789999999999997,
+        "min_demand_M_m3_per_d": 2.079,
         "min_demand_commercial_M_m3_per_d": 0.292,
         "min_demand_household_M_m3_per_d": 0.461,
-        "min_demand_industrial_M_m3_per_d": 1.3259999999999998,
-        "nuts_id_1": "IE0",
-        "nuts_id_2": "IE04",
-        "nuts_id_3": "IE042"
+        "min_demand_industrial_M_m3_per_d": 1.326
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -9.432388,
+          53.400645
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          14.512436,
-          47.022382
-        ]
-      },
       "properties": {
         "ID": "AT2",
-        "Node": "NutsCons_73",
         "name": "SÃÂÃÂDÃÂÃÂSTERREICH",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_73",
+        "NUTS3_ID": "AT226",
         "max_demand_M_m3_per_d": 5.559,
         "max_demand_commercial_M_m3_per_d": 0.614,
         "max_demand_household_M_m3_per_d": 2.971,
-        "max_demand_industrial_M_m3_per_d": 2.0669999999999997,
+        "max_demand_industrial_M_m3_per_d": 2.067,
         "mean_demand_M_m3_per_d": 3.018855147864189,
         "mean_demand_commercial_M_m3_per_d": 0.20863444687842328,
         "mean_demand_household_M_m3_per_d": 0.9685309419496166,
         "mean_demand_industrial_M_m3_per_d": 1.8416897590361456,
         "median_demand_M_m3_per_d": 2.96,
         "median_demand_commercial_M_m3_per_d": 0.192,
-        "median_demand_household_M_m3_per_d": 0.9079999999999999,
+        "median_demand_household_M_m3_per_d": 0.908,
         "median_demand_industrial_M_m3_per_d": 1.963,
         "min_demand_M_m3_per_d": 1.659,
         "min_demand_commercial_M_m3_per_d": 0.055,
-        "min_demand_household_M_m3_per_d": 0.10300000000000001,
-        "min_demand_industrial_M_m3_per_d": 1.474,
-        "nuts_id_1": "AT2",
-        "nuts_id_2": "AT22",
-        "nuts_id_3": "AT226"
+        "min_demand_household_M_m3_per_d": 0.103,
+        "min_demand_industrial_M_m3_per_d": 1.474
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.512436,
+          47.022382
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          16.824609,
-          52.484129
-        ]
-      },
       "properties": {
         "ID": "PL4",
-        "Node": "NutsCons_74",
         "name": "MAKROREGION PÃÂÃÂÃÂÃÂNOCNO-ZACHODNI",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_74",
+        "NUTS3_ID": "PL418",
         "max_demand_M_m3_per_d": 9.224,
-        "max_demand_commercial_M_m3_per_d": 2.9530000000000003,
+        "max_demand_commercial_M_m3_per_d": 2.953,
         "max_demand_household_M_m3_per_d": 4.622,
         "max_demand_industrial_M_m3_per_d": 2.254,
         "mean_demand_M_m3_per_d": 3.71860021905806,
@@ -2294,36 +2041,32 @@
         "mean_demand_industrial_M_m3_per_d": 1.6674389375684486,
         "median_demand_M_m3_per_d": 3.345,
         "median_demand_commercial_M_m3_per_d": 0.654,
-        "median_demand_household_M_m3_per_d": 0.9179999999999999,
+        "median_demand_household_M_m3_per_d": 0.918,
         "median_demand_industrial_M_m3_per_d": 1.591,
         "min_demand_M_m3_per_d": 1.745,
         "min_demand_commercial_M_m3_per_d": 0.185,
-        "min_demand_household_M_m3_per_d": 0.29100000000000004,
-        "min_demand_industrial_M_m3_per_d": 1.181,
-        "nuts_id_1": "PL4",
-        "nuts_id_2": "PL41",
-        "nuts_id_3": "PL418"
+        "min_demand_household_M_m3_per_d": 0.291,
+        "min_demand_industrial_M_m3_per_d": 1.181
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          16.824609,
+          52.484129
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          22.5333,
-          51.726765
-        ]
-      },
       "properties": {
         "ID": "PL8",
-        "Node": "NutsCons_75",
         "name": "MAKROREGION WSCHODNI",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_75",
+        "NUTS3_ID": "PL811",
         "max_demand_M_m3_per_d": 8.878,
         "max_demand_commercial_M_m3_per_d": 2.625,
         "max_demand_household_M_m3_per_d": 5.56,
-        "max_demand_industrial_M_m3_per_d": 1.8719999999999999,
+        "max_demand_industrial_M_m3_per_d": 1.872,
         "mean_demand_M_m3_per_d": 3.519821741511486,
         "mean_demand_commercial_M_m3_per_d": 0.6532957283680171,
         "mean_demand_household_M_m3_per_d": 1.2773135268346079,
@@ -2333,33 +2076,29 @@
         "median_demand_household_M_m3_per_d": 0.887,
         "median_demand_industrial_M_m3_per_d": 1.652,
         "min_demand_M_m3_per_d": 1.791,
-        "min_demand_commercial_M_m3_per_d": 0.14300000000000002,
+        "min_demand_commercial_M_m3_per_d": 0.143,
         "min_demand_household_M_m3_per_d": 0.272,
-        "min_demand_industrial_M_m3_per_d": 1.236,
-        "nuts_id_1": "PL8",
-        "nuts_id_2": "PL81",
-        "nuts_id_3": "PL811"
+        "min_demand_industrial_M_m3_per_d": 1.236
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.5333,
+          51.726765
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          27.593113,
-          46.279722
-        ]
-      },
       "properties": {
         "ID": "RO2",
-        "Node": "NutsCons_76",
         "name": "MACROREGIUNEA DOI",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 10.251000000000001,
-        "max_demand_commercial_M_m3_per_d": 2.5810000000000004,
+        "Node": "NutsCons_76",
+        "NUTS3_ID": "RO216",
+        "max_demand_M_m3_per_d": 10.251,
+        "max_demand_commercial_M_m3_per_d": 2.581,
         "max_demand_household_M_m3_per_d": 5.461,
-        "max_demand_industrial_M_m3_per_d": 3.1889999999999996,
+        "max_demand_industrial_M_m3_per_d": 3.189,
         "mean_demand_M_m3_per_d": 4.858232475355995,
         "mean_demand_commercial_M_m3_per_d": 0.576368291347207,
         "mean_demand_household_M_m3_per_d": 1.823006297918959,
@@ -2367,31 +2106,27 @@
         "median_demand_M_m3_per_d": 4.426,
         "median_demand_commercial_M_m3_per_d": 0.408,
         "median_demand_household_M_m3_per_d": 1.535,
-        "median_demand_industrial_M_m3_per_d": 2.4859999999999998,
+        "median_demand_industrial_M_m3_per_d": 2.486,
         "min_demand_M_m3_per_d": 2.799,
         "min_demand_commercial_M_m3_per_d": 0.155,
         "min_demand_household_M_m3_per_d": 0.738,
-        "min_demand_industrial_M_m3_per_d": 1.818,
-        "nuts_id_1": "RO2",
-        "nuts_id_2": "RO21",
-        "nuts_id_3": "RO216"
+        "min_demand_industrial_M_m3_per_d": 1.818
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.593113,
+          46.279722
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          21.363536,
-          52.287997
-        ]
-      },
       "properties": {
         "ID": "PL9",
-        "Node": "NutsCons_77",
         "name": "MAKROREGION WOJEWÃÂÃÂDZTWO MAZOWIECKIE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_77",
+        "NUTS3_ID": "PL912",
         "max_demand_M_m3_per_d": 7.772,
         "max_demand_commercial_M_m3_per_d": 3.636,
         "max_demand_household_M_m3_per_d": 3.458,
@@ -2405,29 +2140,25 @@
         "median_demand_household_M_m3_per_d": 0.75,
         "median_demand_industrial_M_m3_per_d": 1.265,
         "min_demand_M_m3_per_d": 1.486,
-        "min_demand_commercial_M_m3_per_d": 0.20600000000000002,
+        "min_demand_commercial_M_m3_per_d": 0.206,
         "min_demand_household_M_m3_per_d": 0.287,
-        "min_demand_industrial_M_m3_per_d": 0.897,
-        "nuts_id_1": "PL9",
-        "nuts_id_2": "PL92",
-        "nuts_id_3": "PL912"
+        "min_demand_industrial_M_m3_per_d": 0.897
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          21.363536,
+          52.287997
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          20.850428,
-          43.840655
-        ]
-      },
       "properties": {
         "ID": "RS2",
-        "Node": "NutsCons_78",
         "name": "ÃÂÃÂ¡ÃÂÃÂÃÂÃÂ±ÃÂÃÅžÃÂÃÂÃÂÃÂ° - ÃÂÃÂÃÂÃÂÃÂÃÂ³ ",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_78",
+        "NUTS3_ID": "RS217",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -2443,30 +2174,26 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "RS2",
-        "nuts_id_2": "RS21",
-        "nuts_id_3": "RS217"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          20.850428,
+          43.840655
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          12.751261,
-          57.789475
-        ]
-      },
       "properties": {
         "ID": "SE2",
-        "Node": "NutsCons_80",
         "name": "SÃÂÃÂDRA SVERIGE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_80",
+        "NUTS3_ID": "SE232",
         "max_demand_M_m3_per_d": 2.303,
         "max_demand_commercial_M_m3_per_d": 0.423,
-        "max_demand_household_M_m3_per_d": 0.10099999999999999,
+        "max_demand_household_M_m3_per_d": 0.101,
         "max_demand_industrial_M_m3_per_d": 0.636,
         "mean_demand_M_m3_per_d": 1.359889101861989,
         "mean_demand_commercial_M_m3_per_d": 0.11841128148959507,
@@ -2474,35 +2201,31 @@
         "mean_demand_industrial_M_m3_per_d": 0.4731714129244275,
         "median_demand_M_m3_per_d": 1.34,
         "median_demand_commercial_M_m3_per_d": 0.109,
-        "median_demand_household_M_m3_per_d": 0.037000000000000005,
-        "median_demand_industrial_M_m3_per_d": 0.48200000000000004,
+        "median_demand_household_M_m3_per_d": 0.037,
+        "median_demand_industrial_M_m3_per_d": 0.482,
         "min_demand_M_m3_per_d": 0.711,
         "min_demand_commercial_M_m3_per_d": 0.019,
-        "min_demand_household_M_m3_per_d": 0.009000000000000001,
-        "min_demand_industrial_M_m3_per_d": 0.31,
-        "nuts_id_1": "SE2",
-        "nuts_id_2": "SE23",
-        "nuts_id_3": "SE232"
+        "min_demand_household_M_m3_per_d": 0.009,
+        "min_demand_industrial_M_m3_per_d": 0.31
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.751261,
+          57.789475
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          20.257362,
-          51.115303000000004
-        ]
-      },
       "properties": {
         "ID": "PL7",
-        "Node": "NutsCons_82",
         "name": "MAKROREGION CENTRALNY",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_82",
+        "NUTS3_ID": "PL721",
         "max_demand_M_m3_per_d": 5.952,
         "max_demand_commercial_M_m3_per_d": 2.093,
-        "max_demand_household_M_m3_per_d": 3.3169999999999997,
+        "max_demand_household_M_m3_per_d": 3.317,
         "max_demand_industrial_M_m3_per_d": 1.396,
         "mean_demand_M_m3_per_d": 2.590438116100761,
         "mean_demand_commercial_M_m3_per_d": 0.5234608433734983,
@@ -2511,31 +2234,27 @@
         "median_demand_M_m3_per_d": 2.385,
         "median_demand_commercial_M_m3_per_d": 0.425,
         "median_demand_household_M_m3_per_d": 0.607,
-        "median_demand_industrial_M_m3_per_d": 1.2890000000000001,
+        "median_demand_industrial_M_m3_per_d": 1.289,
         "min_demand_M_m3_per_d": 1.392,
-        "min_demand_commercial_M_m3_per_d": 0.10400000000000001,
-        "min_demand_household_M_m3_per_d": 0.21899999999999997,
-        "min_demand_industrial_M_m3_per_d": 0.91,
-        "nuts_id_1": "PL7",
-        "nuts_id_2": "PL72",
-        "nuts_id_3": "PL721"
+        "min_demand_commercial_M_m3_per_d": 0.104,
+        "min_demand_household_M_m3_per_d": 0.219,
+        "min_demand_industrial_M_m3_per_d": 0.91
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          20.257362,
+          51.115303
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          22.904217000000003,
-          45.211746999999995
-        ]
-      },
       "properties": {
         "ID": "RO4",
-        "Node": "NutsCons_83",
         "name": "MACROREGIUNEA PATRU",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_83",
+        "NUTS3_ID": "RO412",
         "max_demand_M_m3_per_d": 8.209,
         "max_demand_commercial_M_m3_per_d": 1.501,
         "max_demand_household_M_m3_per_d": 5.16,
@@ -2544,70 +2263,62 @@
         "mean_demand_commercial_M_m3_per_d": 0.3755618838992221,
         "mean_demand_household_M_m3_per_d": 1.5457861445783039,
         "mean_demand_industrial_M_m3_per_d": 1.5644255202628972,
-        "median_demand_M_m3_per_d": 3.1049999999999995,
+        "median_demand_M_m3_per_d": 3.105,
         "median_demand_commercial_M_m3_per_d": 0.265,
         "median_demand_household_M_m3_per_d": 1.261,
-        "median_demand_industrial_M_m3_per_d": 1.5090000000000001,
-        "min_demand_M_m3_per_d": 1.6719999999999997,
+        "median_demand_industrial_M_m3_per_d": 1.509,
+        "min_demand_M_m3_per_d": 1.672,
         "min_demand_commercial_M_m3_per_d": 0.099,
         "min_demand_household_M_m3_per_d": 0.486,
-        "min_demand_industrial_M_m3_per_d": 1.023,
-        "nuts_id_1": "RO4",
-        "nuts_id_2": "RO41",
-        "nuts_id_3": "RO412"
+        "min_demand_industrial_M_m3_per_d": 1.023
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.904217,
+          45.211747
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "PL2",
+        "name": "MAKROREGION POÃÂÃÂUDNIOWY",
+        "Node": "NutsCons_84",
+        "NUTS3_ID": "PL214",
+        "max_demand_M_m3_per_d": 8.694,
+        "max_demand_commercial_M_m3_per_d": 4.153,
+        "max_demand_household_M_m3_per_d": 3.714,
+        "max_demand_industrial_M_m3_per_d": 2.538,
+        "mean_demand_M_m3_per_d": 4.281944687842248,
+        "mean_demand_commercial_M_m3_per_d": 1.027345564074486,
+        "mean_demand_household_M_m3_per_d": 1.2103644578313346,
+        "mean_demand_industrial_M_m3_per_d": 2.044234665936481,
+        "median_demand_M_m3_per_d": 4.012,
+        "median_demand_commercial_M_m3_per_d": 0.852,
+        "median_demand_household_M_m3_per_d": 1.039,
+        "median_demand_industrial_M_m3_per_d": 2.086,
+        "min_demand_M_m3_per_d": 2.232,
+        "min_demand_commercial_M_m3_per_d": 0.232,
+        "min_demand_household_M_m3_per_d": 0.407,
+        "min_demand_industrial_M_m3_per_d": 1.48
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           19.840922,
           50.183607
         ]
-      },
-      "properties": {
-        "ID": "PL2",
-        "Node": "NutsCons_84",
-        "name": "MAKROREGION POÃÂÃÂUDNIOWY",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 8.693999999999999,
-        "max_demand_commercial_M_m3_per_d": 4.1530000000000005,
-        "max_demand_household_M_m3_per_d": 3.714,
-        "max_demand_industrial_M_m3_per_d": 2.5380000000000003,
-        "mean_demand_M_m3_per_d": 4.281944687842248,
-        "mean_demand_commercial_M_m3_per_d": 1.027345564074486,
-        "mean_demand_household_M_m3_per_d": 1.2103644578313346,
-        "mean_demand_industrial_M_m3_per_d": 2.044234665936481,
-        "median_demand_M_m3_per_d": 4.0120000000000005,
-        "median_demand_commercial_M_m3_per_d": 0.852,
-        "median_demand_household_M_m3_per_d": 1.0390000000000001,
-        "median_demand_industrial_M_m3_per_d": 2.086,
-        "min_demand_M_m3_per_d": 2.232,
-        "min_demand_commercial_M_m3_per_d": 0.23199999999999998,
-        "min_demand_household_M_m3_per_d": 0.40700000000000003,
-        "min_demand_industrial_M_m3_per_d": 1.48,
-        "nuts_id_1": "PL2",
-        "nuts_id_2": "PL21",
-        "nuts_id_3": "PL214"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          20.109719000000002,
-          45.109907
-        ]
-      },
       "properties": {
         "ID": "RS1",
-        "Node": "NutsCons_85",
         "name": "ÃÂÃÂ¡ÃÂÃÂÃÂÃÂ±ÃÂÃÅžÃÂÃÂÃÂÃÂ° - ÃÂÃÂÃÂÃÂµÃÂÃÂ²ÃÂÃÂµÃÂÃÂ ",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_85",
+        "NUTS3_ID": "RS127",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -2623,28 +2334,24 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "RS1",
-        "nuts_id_2": "RS12",
-        "nuts_id_3": "RS127"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          20.109719,
+          45.109907
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          0.7015680000000001,
-          51.934837
-        ]
-      },
       "properties": {
         "ID": "UKH",
-        "Node": "NutsCons_86",
         "name": "EAST OF ENGLAND",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 24.822000000000003,
+        "Node": "NutsCons_86",
+        "NUTS3_ID": "UKH34",
+        "max_demand_M_m3_per_d": 24.822,
         "max_demand_commercial_M_m3_per_d": 5.834,
         "max_demand_household_M_m3_per_d": 16.94,
         "max_demand_industrial_M_m3_per_d": 2.742,
@@ -2656,66 +2363,58 @@
         "median_demand_commercial_M_m3_per_d": 1.65,
         "median_demand_household_M_m3_per_d": 5.575,
         "median_demand_industrial_M_m3_per_d": 2.468,
-        "min_demand_M_m3_per_d": 3.8549999999999995,
+        "min_demand_M_m3_per_d": 3.855,
         "min_demand_commercial_M_m3_per_d": 0.478,
         "min_demand_household_M_m3_per_d": 1.561,
-        "min_demand_industrial_M_m3_per_d": 1.765,
-        "nuts_id_1": "UKH",
-        "nuts_id_2": "UKH3",
-        "nuts_id_3": "UKH34"
+        "min_demand_industrial_M_m3_per_d": 1.765
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.701568,
+          51.934837
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.11774000000000001,
-          51.489032
-        ]
-      },
       "properties": {
         "ID": "UKI",
-        "Node": "NutsCons_87",
         "name": "LONDON",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_87",
+        "NUTS3_ID": "UKI45",
         "max_demand_M_m3_per_d": 36.039,
         "max_demand_commercial_M_m3_per_d": 9.943,
-        "max_demand_household_M_m3_per_d": 25.881999999999998,
+        "max_demand_household_M_m3_per_d": 25.882,
         "max_demand_industrial_M_m3_per_d": 2.156,
         "mean_demand_M_m3_per_d": 13.711864457831371,
         "mean_demand_commercial_M_m3_per_d": 2.9497384994523723,
         "mean_demand_household_M_m3_per_d": 8.850181270536734,
         "mean_demand_industrial_M_m3_per_d": 1.911944687842289,
-        "median_demand_M_m3_per_d": 12.907000000000002,
+        "median_demand_M_m3_per_d": 12.907,
         "median_demand_commercial_M_m3_per_d": 2.616,
         "median_demand_household_M_m3_per_d": 8.335,
         "median_demand_industrial_M_m3_per_d": 2.024,
-        "min_demand_M_m3_per_d": 4.5809999999999995,
+        "min_demand_M_m3_per_d": 4.581,
         "min_demand_commercial_M_m3_per_d": 0.725,
         "min_demand_household_M_m3_per_d": 2.24,
-        "min_demand_industrial_M_m3_per_d": 1.4880000000000002,
-        "nuts_id_1": "UKI",
-        "nuts_id_2": "UKI4",
-        "nuts_id_3": "UKI45"
+        "min_demand_industrial_M_m3_per_d": 1.488
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.11774,
+          51.489032
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -1.631089,
-          54.965431
-        ]
-      },
       "properties": {
         "ID": "UKC",
-        "Node": "NutsCons_88",
         "name": "NORTH EAST (ENGLAND)",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_88",
+        "NUTS3_ID": "UKC22",
         "max_demand_M_m3_per_d": 12.231,
         "max_demand_commercial_M_m3_per_d": 1.858,
         "max_demand_household_M_m3_per_d": 9.213,
@@ -2725,36 +2424,32 @@
         "mean_demand_household_M_m3_per_d": 3.346763143483026,
         "mean_demand_industrial_M_m3_per_d": 1.0002171412924499,
         "median_demand_M_m3_per_d": 4.946,
-        "median_demand_commercial_M_m3_per_d": 0.6920000000000001,
+        "median_demand_commercial_M_m3_per_d": 0.692,
         "median_demand_household_M_m3_per_d": 3.263,
         "median_demand_industrial_M_m3_per_d": 1.043,
         "min_demand_M_m3_per_d": 1.662,
         "min_demand_commercial_M_m3_per_d": 0.184,
-        "min_demand_household_M_m3_per_d": 0.6729999999999999,
-        "min_demand_industrial_M_m3_per_d": 0.77,
-        "nuts_id_1": "UKC",
-        "nuts_id_2": "UKC2",
-        "nuts_id_3": "UKC22"
+        "min_demand_household_M_m3_per_d": 0.673,
+        "min_demand_industrial_M_m3_per_d": 0.77
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.631089,
+          54.965431
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.794588,
-          51.327917
-        ]
-      },
       "properties": {
         "ID": "UKJ",
-        "Node": "NutsCons_89",
         "name": "SOUTH EAST (ENGLAND)",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_89",
+        "NUTS3_ID": "UKJ37",
         "max_demand_M_m3_per_d": 32.96,
         "max_demand_commercial_M_m3_per_d": 9.035,
-        "max_demand_household_M_m3_per_d": 21.363000000000003,
+        "max_demand_household_M_m3_per_d": 21.363,
         "max_demand_industrial_M_m3_per_d": 3.611,
         "mean_demand_M_m3_per_d": 13.802811062431555,
         "mean_demand_commercial_M_m3_per_d": 2.81084145673608,
@@ -2765,32 +2460,28 @@
         "median_demand_household_M_m3_per_d": 7.495,
         "median_demand_industrial_M_m3_per_d": 3.375,
         "min_demand_M_m3_per_d": 5.587,
-        "min_demand_commercial_M_m3_per_d": 0.7290000000000001,
+        "min_demand_commercial_M_m3_per_d": 0.729,
         "min_demand_household_M_m3_per_d": 2.299,
-        "min_demand_industrial_M_m3_per_d": 2.412,
-        "nuts_id_1": "UKJ",
-        "nuts_id_2": "UKJ3",
-        "nuts_id_3": "UKJ37"
+        "min_demand_industrial_M_m3_per_d": 2.412
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.794588,
+          51.327917
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -2.856456,
-          53.992188
-        ]
-      },
       "properties": {
         "ID": "UKD",
-        "Node": "NutsCons_90",
         "name": "NORTH WEST (ENGLAND)",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_90",
+        "NUTS3_ID": "UKD44",
         "max_demand_M_m3_per_d": 35.298,
         "max_demand_commercial_M_m3_per_d": 5.925,
-        "max_demand_household_M_m3_per_d": 26.273000000000003,
+        "max_demand_household_M_m3_per_d": 26.273,
         "max_demand_industrial_M_m3_per_d": 3.1,
         "mean_demand_M_m3_per_d": 13.306386089813754,
         "mean_demand_commercial_M_m3_per_d": 2.05969468784228,
@@ -2799,32 +2490,28 @@
         "median_demand_M_m3_per_d": 13.057,
         "median_demand_commercial_M_m3_per_d": 1.979,
         "median_demand_household_M_m3_per_d": 8.443,
-        "median_demand_industrial_M_m3_per_d": 2.7710000000000004,
+        "median_demand_industrial_M_m3_per_d": 2.771,
         "min_demand_M_m3_per_d": 4.555,
         "min_demand_commercial_M_m3_per_d": 0.527,
-        "min_demand_household_M_m3_per_d": 1.8430000000000002,
-        "min_demand_industrial_M_m3_per_d": 2.025,
-        "nuts_id_1": "UKD",
-        "nuts_id_2": "UKD4",
-        "nuts_id_3": "UKD44"
+        "min_demand_household_M_m3_per_d": 1.843,
+        "min_demand_industrial_M_m3_per_d": 2.025
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.856456,
+          53.992188
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -6.226799,
-          54.46917
-        ]
-      },
       "properties": {
         "ID": "UKN",
-        "Node": "NutsCons_91",
         "name": "NORTHERN IRELAND",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 13.790000000000001,
+        "Node": "NutsCons_91",
+        "NUTS3_ID": "UKN0E",
+        "max_demand_M_m3_per_d": 13.79,
         "max_demand_commercial_M_m3_per_d": 1.416,
         "max_demand_household_M_m3_per_d": 11.465,
         "max_demand_industrial_M_m3_per_d": 0.909,
@@ -2834,68 +2521,60 @@
         "mean_demand_industrial_M_m3_per_d": 0.7439518072289305,
         "median_demand_M_m3_per_d": 4.484,
         "median_demand_commercial_M_m3_per_d": 0.449,
-        "median_demand_household_M_m3_per_d": 3.2960000000000003,
+        "median_demand_household_M_m3_per_d": 3.296,
         "median_demand_industrial_M_m3_per_d": 0.757,
         "min_demand_M_m3_per_d": 1.147,
         "min_demand_commercial_M_m3_per_d": 0.122,
         "min_demand_household_M_m3_per_d": 0.474,
-        "min_demand_industrial_M_m3_per_d": 0.551,
-        "nuts_id_1": "UKN",
-        "nuts_id_2": "UKN0",
-        "nuts_id_3": "UKN14"
+        "min_demand_industrial_M_m3_per_d": 0.551
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -6.226799,
+          54.46917
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "SK0",
+        "name": "SLOVENSKO",
+        "Node": "NutsCons_92",
+        "NUTS3_ID": "SK032",
+        "max_demand_M_m3_per_d": 19.735,
+        "max_demand_commercial_M_m3_per_d": 6.725,
+        "max_demand_household_M_m3_per_d": 11.782,
+        "max_demand_industrial_M_m3_per_d": 3.018,
+        "mean_demand_M_m3_per_d": 7.534733023001115,
+        "mean_demand_commercial_M_m3_per_d": 1.689783953997819,
+        "mean_demand_household_M_m3_per_d": 3.2931098028477725,
+        "mean_demand_industrial_M_m3_per_d": 2.5518392661554388,
+        "median_demand_M_m3_per_d": 6.857,
+        "median_demand_commercial_M_m3_per_d": 1.327,
+        "median_demand_household_M_m3_per_d": 2.894,
+        "median_demand_industrial_M_m3_per_d": 2.669,
+        "min_demand_M_m3_per_d": 3.015,
+        "min_demand_commercial_M_m3_per_d": 0.309,
+        "min_demand_household_M_m3_per_d": 0.617,
+        "min_demand_industrial_M_m3_per_d": 1.943
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           19.714714,
           48.620865
         ]
-      },
-      "properties": {
-        "ID": "SK0",
-        "Node": "NutsCons_92",
-        "name": "SLOVENSKO",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 19.735,
-        "max_demand_commercial_M_m3_per_d": 6.725,
-        "max_demand_household_M_m3_per_d": 11.782,
-        "max_demand_industrial_M_m3_per_d": 3.0180000000000002,
-        "mean_demand_M_m3_per_d": 7.534733023001115,
-        "mean_demand_commercial_M_m3_per_d": 1.689783953997819,
-        "mean_demand_household_M_m3_per_d": 3.2931098028477725,
-        "mean_demand_industrial_M_m3_per_d": 2.5518392661554388,
-        "median_demand_M_m3_per_d": 6.856999999999999,
-        "median_demand_commercial_M_m3_per_d": 1.327,
-        "median_demand_household_M_m3_per_d": 2.8939999999999997,
-        "median_demand_industrial_M_m3_per_d": 2.6689999999999996,
-        "min_demand_M_m3_per_d": 3.015,
-        "min_demand_commercial_M_m3_per_d": 0.309,
-        "min_demand_household_M_m3_per_d": 0.617,
-        "min_demand_industrial_M_m3_per_d": 1.943,
-        "nuts_id_1": "SK0",
-        "nuts_id_2": "SK03",
-        "nuts_id_3": "SK032"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -7.959013000000001,
-          39.399414
-        ]
-      },
       "properties": {
         "ID": "PT1",
-        "Node": "NutsCons_93",
         "name": "CONTINENTE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_93",
+        "NUTS3_ID": "PT16I",
         "max_demand_M_m3_per_d": 8.425,
         "max_demand_commercial_M_m3_per_d": 3.627,
         "max_demand_household_M_m3_per_d": 0.988,
@@ -2908,30 +2587,26 @@
         "median_demand_commercial_M_m3_per_d": 0.248,
         "median_demand_household_M_m3_per_d": 0.767,
         "median_demand_industrial_M_m3_per_d": 3.511,
-        "min_demand_M_m3_per_d": 3.5410000000000004,
+        "min_demand_M_m3_per_d": 3.541,
         "min_demand_commercial_M_m3_per_d": 0.17,
         "min_demand_household_M_m3_per_d": 0.708,
-        "min_demand_industrial_M_m3_per_d": 2.593,
-        "nuts_id_1": "PT1",
-        "nuts_id_2": "PT16",
-        "nuts_id_3": "PT16I"
+        "min_demand_industrial_M_m3_per_d": 2.593
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -7.959013,
+          39.399414
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -1.03677,
-          53.714332999999996
-        ]
-      },
       "properties": {
         "ID": "UKE",
-        "Node": "NutsCons_96",
         "name": "YORKSHIRE AND THE HUMBER",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_96",
+        "NUTS3_ID": "UKE22",
         "max_demand_M_m3_per_d": 27.455,
         "max_demand_commercial_M_m3_per_d": 4.203,
         "max_demand_household_M_m3_per_d": 20.82,
@@ -2942,35 +2617,31 @@
         "mean_demand_industrial_M_m3_per_d": 2.127346933187306,
         "median_demand_M_m3_per_d": 10.301,
         "median_demand_commercial_M_m3_per_d": 1.435,
-        "median_demand_household_M_m3_per_d": 6.7170000000000005,
+        "median_demand_household_M_m3_per_d": 6.717,
         "median_demand_industrial_M_m3_per_d": 2.259,
-        "min_demand_M_m3_per_d": 3.5140000000000002,
+        "min_demand_M_m3_per_d": 3.514,
         "min_demand_commercial_M_m3_per_d": 0.387,
-        "min_demand_household_M_m3_per_d": 1.3840000000000001,
-        "min_demand_industrial_M_m3_per_d": 1.632,
-        "nuts_id_1": "UKE",
-        "nuts_id_2": "UKE2",
-        "nuts_id_3": "UKE22"
+        "min_demand_household_M_m3_per_d": 1.384,
+        "min_demand_industrial_M_m3_per_d": 1.632
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.03677,
+          53.714333
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          16.86107,
-          50.93527
-        ]
-      },
       "properties": {
         "ID": "PL5",
-        "Node": "SEQ_11204_p",
         "name": "MAKROREGION POÃÂÃÂUDNIOWO-ZACHODNI",
-        "tags": {},
-        "exact": 4,
+        "Node": "SEQ_11204_p",
+        "NUTS3_ID": "PL518",
         "max_demand_M_m3_per_d": 5.614,
         "max_demand_commercial_M_m3_per_d": 1.808,
-        "max_demand_household_M_m3_per_d": 3.0389999999999997,
+        "max_demand_household_M_m3_per_d": 3.039,
         "max_demand_industrial_M_m3_per_d": 1.244,
         "mean_demand_M_m3_per_d": 2.302586801752474,
         "mean_demand_commercial_M_m3_per_d": 0.49359036144577895,
@@ -2981,29 +2652,25 @@
         "median_demand_household_M_m3_per_d": 0.595,
         "median_demand_industrial_M_m3_per_d": 0.946,
         "min_demand_M_m3_per_d": 1.085,
-        "min_demand_commercial_M_m3_per_d": 0.11800000000000001,
-        "min_demand_household_M_m3_per_d": 0.20199999999999999,
-        "min_demand_industrial_M_m3_per_d": 0.713,
-        "nuts_id_1": "PL5",
-        "nuts_id_2": "PL51",
-        "nuts_id_3": "PL518"
+        "min_demand_commercial_M_m3_per_d": 0.118,
+        "min_demand_household_M_m3_per_d": 0.202,
+        "min_demand_industrial_M_m3_per_d": 0.713
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          16.86107,
+          50.93527
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -3.54377,
-          50.68551
-        ]
-      },
       "properties": {
         "ID": "UKK",
-        "Node": "SEQ_6255_p",
         "name": "SOUTH WEST (ENGLAND)",
-        "tags": {},
-        "exact": 4,
+        "Node": "SEQ_6255_p",
+        "NUTS3_ID": "UKK43",
         "max_demand_M_m3_per_d": 29.241,
         "max_demand_commercial_M_m3_per_d": 5.31,
         "max_demand_household_M_m3_per_d": 22.642,
@@ -3018,29 +2685,25 @@
         "median_demand_industrial_M_m3_per_d": 2.265,
         "min_demand_M_m3_per_d": 3.587,
         "min_demand_commercial_M_m3_per_d": 0.419,
-        "min_demand_household_M_m3_per_d": 1.4140000000000001,
-        "min_demand_industrial_M_m3_per_d": 1.681,
-        "nuts_id_1": "UKK",
-        "nuts_id_2": "UKK4",
-        "nuts_id_3": "UKK43"
+        "min_demand_household_M_m3_per_d": 1.414,
+        "min_demand_industrial_M_m3_per_d": 1.681
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.54377,
+          50.68551
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          25.775879999999997,
-          44.463159999999995
-        ]
-      },
       "properties": {
         "ID": "RO3",
-        "Node": "NutsCons_99",
         "name": "MACROREGIUNEA TREI",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 10.629000000000001,
+        "Node": "NutsCons_99",
+        "NUTS3_ID": "RO314",
+        "max_demand_M_m3_per_d": 10.629,
         "max_demand_commercial_M_m3_per_d": 3.915,
         "max_demand_household_M_m3_per_d": 5.468,
         "max_demand_industrial_M_m3_per_d": 2.053,
@@ -3054,28 +2717,24 @@
         "median_demand_industrial_M_m3_per_d": 1.499,
         "min_demand_M_m3_per_d": 2.058,
         "min_demand_commercial_M_m3_per_d": 0.233,
-        "min_demand_household_M_m3_per_d": 0.6709999999999999,
-        "min_demand_industrial_M_m3_per_d": 1.052,
-        "nuts_id_1": "RO3",
-        "nuts_id_2": "RO31",
-        "nuts_id_3": "RO314"
+        "min_demand_household_M_m3_per_d": 0.671,
+        "min_demand_industrial_M_m3_per_d": 1.052
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          25.77588,
+          44.46316
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -1.012317,
-          52.954778000000005
-        ]
-      },
       "properties": {
         "ID": "UKF",
-        "Node": "NutsCons_100",
         "name": "EAST MIDLANDS (ENGLAND)",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_100",
+        "NUTS3_ID": "UKF16",
         "max_demand_M_m3_per_d": 23.009,
         "max_demand_commercial_M_m3_per_d": 3.949,
         "max_demand_household_M_m3_per_d": 16.799,
@@ -3089,68 +2748,60 @@
         "median_demand_household_M_m3_per_d": 5.185,
         "median_demand_industrial_M_m3_per_d": 2.255,
         "min_demand_M_m3_per_d": 3.285,
-        "min_demand_commercial_M_m3_per_d": 0.33899999999999997,
+        "min_demand_commercial_M_m3_per_d": 0.339,
         "min_demand_household_M_m3_per_d": 1.206,
-        "min_demand_industrial_M_m3_per_d": 1.685,
-        "nuts_id_1": "UKF",
-        "nuts_id_2": "UKF1",
-        "nuts_id_3": "UKF16"
+        "min_demand_industrial_M_m3_per_d": 1.685
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.012317,
+          52.954778
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          24.064087,
-          46.659055
-        ]
-      },
       "properties": {
         "ID": "RO1",
-        "Node": "NutsCons_101",
         "name": "MACROREGIUNEA UNU",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 8.838999999999999,
+        "Node": "NutsCons_101",
+        "NUTS3_ID": "RO113",
+        "max_demand_M_m3_per_d": 8.839,
         "max_demand_commercial_M_m3_per_d": 2.074,
-        "max_demand_household_M_m3_per_d": 5.1979999999999995,
+        "max_demand_household_M_m3_per_d": 5.198,
         "max_demand_industrial_M_m3_per_d": 2.174,
         "mean_demand_M_m3_per_d": 3.991559693318751,
         "mean_demand_commercial_M_m3_per_d": 0.5818874589266118,
         "mean_demand_household_M_m3_per_d": 1.697974260679047,
         "mean_demand_industrial_M_m3_per_d": 1.711697973713005,
         "median_demand_M_m3_per_d": 3.732,
-        "median_demand_commercial_M_m3_per_d": 0.47200000000000003,
+        "median_demand_commercial_M_m3_per_d": 0.472,
         "median_demand_household_M_m3_per_d": 1.507,
         "median_demand_industrial_M_m3_per_d": 1.7,
-        "min_demand_M_m3_per_d": 2.1049999999999995,
+        "min_demand_M_m3_per_d": 2.105,
         "min_demand_commercial_M_m3_per_d": 0.157,
         "min_demand_household_M_m3_per_d": 0.619,
-        "min_demand_industrial_M_m3_per_d": 1.2409999999999999,
-        "nuts_id_1": "RO1",
-        "nuts_id_2": "RO11",
-        "nuts_id_3": "RO113"
+        "min_demand_industrial_M_m3_per_d": 1.241
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.064087,
+          46.659055
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          15.272761,
-          46.207409999999996
-        ]
-      },
       "properties": {
         "ID": "SI0",
-        "Node": "NutsCons_102",
         "name": "SLOVENIJA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_102",
+        "NUTS3_ID": "SI034",
         "max_demand_M_m3_per_d": 2.955,
-        "max_demand_commercial_M_m3_per_d": 0.5429999999999999,
-        "max_demand_household_M_m3_per_d": 1.1159999999999999,
+        "max_demand_commercial_M_m3_per_d": 0.543,
+        "max_demand_household_M_m3_per_d": 1.116,
         "max_demand_industrial_M_m3_per_d": 1.564,
         "mean_demand_M_m3_per_d": 1.718612541073389,
         "mean_demand_commercial_M_m3_per_d": 0.10920618838992324,
@@ -3159,34 +2810,30 @@
         "median_demand_M_m3_per_d": 1.663,
         "median_demand_commercial_M_m3_per_d": 0.069,
         "median_demand_household_M_m3_per_d": 0.272,
-        "median_demand_industrial_M_m3_per_d": 1.3019999999999998,
+        "median_demand_industrial_M_m3_per_d": 1.302,
         "min_demand_M_m3_per_d": 1.081,
-        "min_demand_commercial_M_m3_per_d": 0.011000000000000001,
+        "min_demand_commercial_M_m3_per_d": 0.011,
         "min_demand_household_M_m3_per_d": 0.078,
-        "min_demand_industrial_M_m3_per_d": 0.965,
-        "nuts_id_1": "SI0",
-        "nuts_id_2": "SI03",
-        "nuts_id_3": "SI034"
+        "min_demand_industrial_M_m3_per_d": 0.965
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.272761,
+          46.20741
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          19.117481,
-          53.480027
-        ]
-      },
       "properties": {
         "ID": "PL6",
-        "Node": "NutsCons_103",
         "name": "MAKROREGION PÃÂÃÂÃÂÃÂNOCNY",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_103",
+        "NUTS3_ID": "PL616",
         "max_demand_M_m3_per_d": 8.426,
         "max_demand_commercial_M_m3_per_d": 2.718,
-        "max_demand_household_M_m3_per_d": 4.2780000000000005,
+        "max_demand_household_M_m3_per_d": 4.278,
         "max_demand_industrial_M_m3_per_d": 1.919,
         "mean_demand_M_m3_per_d": 3.4256021358159816,
         "mean_demand_commercial_M_m3_per_d": 0.730095016429357,
@@ -3194,33 +2841,29 @@
         "mean_demand_industrial_M_m3_per_d": 1.4621092552026254,
         "median_demand_M_m3_per_d": 3.089,
         "median_demand_commercial_M_m3_per_d": 0.654,
-        "median_demand_household_M_m3_per_d": 0.9059999999999999,
+        "median_demand_household_M_m3_per_d": 0.906,
         "median_demand_industrial_M_m3_per_d": 1.454,
         "min_demand_M_m3_per_d": 1.534,
         "min_demand_commercial_M_m3_per_d": 0.171,
         "min_demand_household_M_m3_per_d": 0.282,
-        "min_demand_industrial_M_m3_per_d": 1.014,
-        "nuts_id_1": "PL6",
-        "nuts_id_2": "PL61",
-        "nuts_id_3": "PL616"
+        "min_demand_industrial_M_m3_per_d": 1.014
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          19.117481,
+          53.480027
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -2.364897,
-          52.49215600000001
-        ]
-      },
       "properties": {
         "ID": "UKG",
-        "Node": "NutsCons_104",
         "name": "WEST MIDLANDS (ENGLAND)",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 23.532000000000004,
+        "Node": "NutsCons_104",
+        "NUTS3_ID": "UKG22",
+        "max_demand_M_m3_per_d": 23.532,
         "max_demand_commercial_M_m3_per_d": 4.772,
         "max_demand_household_M_m3_per_d": 16.549,
         "max_demand_industrial_M_m3_per_d": 2.78,
@@ -3234,100 +2877,88 @@
         "median_demand_industrial_M_m3_per_d": 2.545,
         "min_demand_M_m3_per_d": 3.807,
         "min_demand_commercial_M_m3_per_d": 0.4,
-        "min_demand_household_M_m3_per_d": 1.4769999999999999,
-        "min_demand_industrial_M_m3_per_d": 1.847,
-        "nuts_id_1": "UKG",
-        "nuts_id_2": "UKG2",
-        "nuts_id_3": "UKG22"
+        "min_demand_household_M_m3_per_d": 1.477,
+        "min_demand_industrial_M_m3_per_d": 1.847
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.364897,
+          52.492156
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          25.297189000000003,
-          56.692842000000006
-        ]
-      },
       "properties": {
         "ID": "LV0",
-        "Node": "NutsCons_105",
         "name": "LATVIJA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_105",
+        "NUTS3_ID": "LV009",
         "max_demand_M_m3_per_d": 2.589,
         "max_demand_commercial_M_m3_per_d": 0.975,
-        "max_demand_household_M_m3_per_d": 0.8270000000000001,
+        "max_demand_household_M_m3_per_d": 0.827,
         "max_demand_industrial_M_m3_per_d": 0.787,
         "mean_demand_M_m3_per_d": 1.050426889375688,
         "mean_demand_commercial_M_m3_per_d": 0.2966837349397634,
         "mean_demand_household_M_m3_per_d": 0.33119194961664933,
         "mean_demand_industrial_M_m3_per_d": 0.42255120481927855,
         "median_demand_M_m3_per_d": 1.03,
-        "median_demand_commercial_M_m3_per_d": 0.27699999999999997,
+        "median_demand_commercial_M_m3_per_d": 0.277,
         "median_demand_household_M_m3_per_d": 0.325,
         "median_demand_industrial_M_m3_per_d": 0.39,
         "min_demand_M_m3_per_d": 0.498,
-        "min_demand_commercial_M_m3_per_d": 0.07200000000000001,
+        "min_demand_commercial_M_m3_per_d": 0.072,
         "min_demand_household_M_m3_per_d": 0.141,
-        "min_demand_industrial_M_m3_per_d": 0.24,
-        "nuts_id_1": "LV0",
-        "nuts_id_2": "LV00",
-        "nuts_id_3": "LV009"
+        "min_demand_industrial_M_m3_per_d": 0.24
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          25.297189,
+          56.692842
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "UKL",
+        "name": "WALES",
+        "Node": "NutsCons_107",
+        "NUTS3_ID": "UKL14",
+        "max_demand_M_m3_per_d": 14.43,
+        "max_demand_commercial_M_m3_per_d": 2.504,
+        "max_demand_household_M_m3_per_d": 10.927,
+        "max_demand_industrial_M_m3_per_d": 1.417,
+        "mean_demand_M_m3_per_d": 5.679074205914552,
+        "mean_demand_commercial_M_m3_per_d": 0.850173329682372,
+        "mean_demand_household_M_m3_per_d": 3.595348576122665,
+        "mean_demand_industrial_M_m3_per_d": 1.2335523001095667,
+        "median_demand_M_m3_per_d": 5.564,
+        "median_demand_commercial_M_m3_per_d": 0.823,
+        "median_demand_household_M_m3_per_d": 3.497,
+        "median_demand_industrial_M_m3_per_d": 1.292,
+        "min_demand_M_m3_per_d": 2.003,
+        "min_demand_commercial_M_m3_per_d": 0.217,
+        "min_demand_household_M_m3_per_d": 0.795,
+        "min_demand_industrial_M_m3_per_d": 0.957
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           -4.14647,
           52.259784
         ]
-      },
-      "properties": {
-        "ID": "UKL",
-        "Node": "NutsCons_107",
-        "name": "WALES",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 14.43,
-        "max_demand_commercial_M_m3_per_d": 2.504,
-        "max_demand_household_M_m3_per_d": 10.927,
-        "max_demand_industrial_M_m3_per_d": 1.4169999999999998,
-        "mean_demand_M_m3_per_d": 5.679074205914552,
-        "mean_demand_commercial_M_m3_per_d": 0.850173329682372,
-        "mean_demand_household_M_m3_per_d": 3.595348576122665,
-        "mean_demand_industrial_M_m3_per_d": 1.2335523001095667,
-        "median_demand_M_m3_per_d": 5.563999999999999,
-        "median_demand_commercial_M_m3_per_d": 0.823,
-        "median_demand_household_M_m3_per_d": 3.497,
-        "median_demand_industrial_M_m3_per_d": 1.2919999999999998,
-        "min_demand_M_m3_per_d": 2.003,
-        "min_demand_commercial_M_m3_per_d": 0.217,
-        "min_demand_household_M_m3_per_d": 0.795,
-        "min_demand_industrial_M_m3_per_d": 0.9570000000000001,
-        "nuts_id_1": "UKL",
-        "nuts_id_2": "UKL1",
-        "nuts_id_3": "UKL14"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          21.848651,
-          41.595853000000005
-        ]
-      },
       "properties": {
         "ID": "MK0",
-        "Node": "NutsCons_109",
         "name": "Severna Makedonija",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_109",
+        "NUTS3_ID": "MK001",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3343,27 +2974,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "MK0",
-        "nuts_id_2": "MK00",
-        "nuts_id_3": "MK001"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          21.848651,
+          41.595853
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          6.1656699999999995,
-          53.35246
-        ]
-      },
       "properties": {
         "ID": "NL1",
-        "Node": "N_1608_S_LMGN",
         "name": "NOORD-NEDERLAND",
-        "tags": {},
-        "exact": 3,
+        "Node": "N_1608_S_LMGN",
+        "NUTS3_ID": "NL124",
         "max_demand_M_m3_per_d": 25.38,
         "max_demand_commercial_M_m3_per_d": 3.47,
         "max_demand_household_M_m3_per_d": 20.57,
@@ -3374,33 +3001,29 @@
         "mean_demand_industrial_M_m3_per_d": 1.6971960569550537,
         "median_demand_M_m3_per_d": 7.693,
         "median_demand_commercial_M_m3_per_d": 0.83,
-        "median_demand_household_M_m3_per_d": 5.1370000000000005,
+        "median_demand_household_M_m3_per_d": 5.137,
         "median_demand_industrial_M_m3_per_d": 1.786,
-        "min_demand_M_m3_per_d": 2.0149999999999997,
+        "min_demand_M_m3_per_d": 2.015,
         "min_demand_commercial_M_m3_per_d": 0.233,
-        "min_demand_household_M_m3_per_d": 0.47100000000000003,
-        "min_demand_industrial_M_m3_per_d": 1.297,
-        "nuts_id_1": "NL1",
-        "nuts_id_2": "NL12",
-        "nuts_id_3": "NL124"
+        "min_demand_household_M_m3_per_d": 0.471,
+        "min_demand_industrial_M_m3_per_d": 1.297
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.16567,
+          53.35246
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          5.7451419999999995,
-          51.968498
-        ]
-      },
       "properties": {
         "ID": "NL2",
-        "Node": "NutsCons_111",
         "name": "OOST-NEDERLAND",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 29.732999999999997,
+        "Node": "NutsCons_111",
+        "NUTS3_ID": "NL226",
+        "max_demand_M_m3_per_d": 29.733,
         "max_demand_commercial_M_m3_per_d": 7.816,
         "max_demand_household_M_m3_per_d": 19.174,
         "max_demand_industrial_M_m3_per_d": 3.944,
@@ -3415,30 +3038,26 @@
         "min_demand_M_m3_per_d": 4.089,
         "min_demand_commercial_M_m3_per_d": 0.515,
         "min_demand_household_M_m3_per_d": 0.99,
-        "min_demand_industrial_M_m3_per_d": 2.57,
-        "nuts_id_1": "NL2",
-        "nuts_id_2": "NL22",
-        "nuts_id_3": "NL226"
+        "min_demand_industrial_M_m3_per_d": 2.57
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.745142,
+          51.968498
+        ]
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.215952,
-          51.696853000000004
-        ]
-      },
       "properties": {
         "ID": "NL3",
-        "Node": "NutsCons_112",
         "name": "WEST-NEDERLAND",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": 51.32000000000001,
+        "Node": "NutsCons_112",
+        "NUTS3_ID": "NL33C",
+        "max_demand_M_m3_per_d": 51.32,
         "max_demand_commercial_M_m3_per_d": 19.559,
-        "max_demand_household_M_m3_per_d": 27.168000000000003,
+        "max_demand_household_M_m3_per_d": 27.168,
         "max_demand_industrial_M_m3_per_d": 6.414,
         "mean_demand_M_m3_per_d": 18.493829956188456,
         "mean_demand_commercial_M_m3_per_d": 4.893257940854428,
@@ -3447,31 +3066,59 @@
         "median_demand_M_m3_per_d": 17.532,
         "median_demand_commercial_M_m3_per_d": 4.327,
         "median_demand_household_M_m3_per_d": 7.52,
-        "median_demand_industrial_M_m3_per_d": 6.042000000000001,
+        "median_demand_industrial_M_m3_per_d": 6.042,
         "min_demand_M_m3_per_d": 7.901,
         "min_demand_commercial_M_m3_per_d": 1.244,
         "min_demand_household_M_m3_per_d": 2.244,
-        "min_demand_industrial_M_m3_per_d": 4.41,
-        "nuts_id_1": "NL3",
-        "nuts_id_2": "NL33",
-        "nuts_id_3": "NL33C"
+        "min_demand_industrial_M_m3_per_d": 4.41
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.215952,
+          51.696853
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "TR1",
+        "name": "ISTANBUL",
+        "Node": "NutsCons_113",
+        "NUTS3_ID": "TR100",
+        "max_demand_M_m3_per_d": null,
+        "max_demand_commercial_M_m3_per_d": null,
+        "max_demand_household_M_m3_per_d": null,
+        "max_demand_industrial_M_m3_per_d": null,
+        "mean_demand_M_m3_per_d": null,
+        "mean_demand_commercial_M_m3_per_d": null,
+        "mean_demand_household_M_m3_per_d": null,
+        "mean_demand_industrial_M_m3_per_d": null,
+        "median_demand_M_m3_per_d": null,
+        "median_demand_commercial_M_m3_per_d": null,
+        "median_demand_household_M_m3_per_d": null,
+        "median_demand_industrial_M_m3_per_d": null,
+        "min_demand_M_m3_per_d": null,
+        "min_demand_commercial_M_m3_per_d": null,
+        "min_demand_household_M_m3_per_d": null,
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           29.053592,
           41.045459
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TR1",
-        "Node": "NutsCons_113",
-        "name": "ISTANBUL",
-        "tags": {},
-        "exact": 4,
+        "ID": "TR2",
+        "name": "BATI MARMARA",
+        "Node": "NutsCons_114",
+        "NUTS3_ID": null,
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3487,27 +3134,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR1",
-        "nuts_id_2": "TR10",
-        "nuts_id_3": "TR100"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           26.950981,
           40.4604
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TR2",
-        "Node": "NutsCons_114",
-        "name": "BATI MARMARA",
-        "tags": {},
-        "exact": 4,
+        "ID": "TRC",
+        "name": "GÃÂÃÂNEYDOGU ANADOLU",
+        "Node": "NutsCons_115",
+        "NUTS3_ID": "TRC22",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3523,27 +3166,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR2",
-        "nuts_id_2": "TR22",
-        "nuts_id_3": "TR222"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           40.008246,
           37.883601
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TRC",
-        "Node": "NutsCons_115",
-        "name": "GÃÂÃÂNEYDOGU ANADOLU",
-        "tags": {},
-        "exact": 4,
+        "ID": "TR7",
+        "name": "ORTA ANADOLU",
+        "Node": "NutsCons_116",
+        "NUTS3_ID": "TR723",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3559,27 +3198,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TRC",
-        "nuts_id_2": "TRC2",
-        "nuts_id_3": "TRC22"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          35.946847999999996,
+          35.946848,
           39.641023
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TR7",
-        "Node": "NutsCons_116",
-        "name": "ORTA ANADOLU",
-        "tags": {},
-        "exact": 4,
+        "ID": "TR6",
+        "name": "AKDENIZ",
+        "Node": "NutsCons_117",
+        "NUTS3_ID": "TR622",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3595,27 +3230,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR7",
-        "nuts_id_2": "TR72",
-        "nuts_id_3": "TR723"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           33.477808,
           36.722549
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TR6",
-        "Node": "NutsCons_117",
-        "name": "AKDENIZ",
-        "tags": {},
-        "exact": 4,
+        "ID": "TR8",
+        "name": "BATI KARADENIZ",
+        "Node": "NutsCons_118",
+        "NUTS3_ID": "TR823",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3631,63 +3262,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR6",
-        "nuts_id_2": "TR62",
-        "nuts_id_3": "TR622"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           34.809781,
-          41.258146999999994
+          41.258147
         ]
-      },
-      "properties": {
-        "ID": "TR8",
-        "Node": "NutsCons_118",
-        "name": "BATI KARADENIZ",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": null,
-        "max_demand_commercial_M_m3_per_d": null,
-        "max_demand_household_M_m3_per_d": null,
-        "max_demand_industrial_M_m3_per_d": null,
-        "mean_demand_M_m3_per_d": null,
-        "mean_demand_commercial_M_m3_per_d": null,
-        "mean_demand_household_M_m3_per_d": null,
-        "mean_demand_industrial_M_m3_per_d": null,
-        "median_demand_M_m3_per_d": null,
-        "median_demand_commercial_M_m3_per_d": null,
-        "median_demand_household_M_m3_per_d": null,
-        "median_demand_industrial_M_m3_per_d": null,
-        "min_demand_M_m3_per_d": null,
-        "min_demand_commercial_M_m3_per_d": null,
-        "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR8",
-        "nuts_id_2": "TR82",
-        "nuts_id_3": "TR823"
       }
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          29.933522999999997,
-          40.384161999999996
-        ]
-      },
       "properties": {
         "ID": "TR4",
-        "Node": "NutsCons_119",
         "name": "DOGU MARMARA",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_119",
+        "NUTS3_ID": "TR413",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3703,27 +3294,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR4",
-        "nuts_id_2": "TR41",
-        "nuts_id_3": "TR413"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          27.641178000000004,
-          37.381471999999995
+          29.933523,
+          40.384162
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
         "ID": "TR3",
-        "Node": "NutsCons_120",
         "name": "EGE",
-        "tags": {},
-        "exact": 4,
+        "Node": "NutsCons_120",
+        "NUTS3_ID": "TR323",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3739,27 +3326,55 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR3",
-        "nuts_id_2": "TR32",
-        "nuts_id_3": "TR323"
+        "min_demand_industrial_M_m3_per_d": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.641178,
+          37.381472
+        ]
       }
     },
     {
       "type": "Feature",
+      "properties": {
+        "ID": "TRA",
+        "name": "KUZEYDOGU ANADOLU",
+        "Node": "SEQ_1563_p",
+        "NUTS3_ID": "TRA11",
+        "max_demand_M_m3_per_d": null,
+        "max_demand_commercial_M_m3_per_d": null,
+        "max_demand_household_M_m3_per_d": null,
+        "max_demand_industrial_M_m3_per_d": null,
+        "mean_demand_M_m3_per_d": null,
+        "mean_demand_commercial_M_m3_per_d": null,
+        "mean_demand_household_M_m3_per_d": null,
+        "mean_demand_industrial_M_m3_per_d": null,
+        "median_demand_M_m3_per_d": null,
+        "median_demand_commercial_M_m3_per_d": null,
+        "median_demand_household_M_m3_per_d": null,
+        "median_demand_industrial_M_m3_per_d": null,
+        "min_demand_M_m3_per_d": null,
+        "min_demand_commercial_M_m3_per_d": null,
+        "min_demand_household_M_m3_per_d": null,
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           41.1767,
-          39.897090000000006
+          39.89709
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TRA",
-        "Node": "SEQ_1563_p",
-        "name": "KUZEYDOGU ANADOLU",
-        "tags": {},
-        "exact": 4,
+        "ID": "TR9",
+        "name": "DOGU KARADENIZ",
+        "Node": "N_4_M_LMGN",
+        "NUTS3_ID": "TR901",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3775,27 +3390,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TRA",
-        "nuts_id_2": "TRA1",
-        "nuts_id_3": "TRA11"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           39.72784,
           40.95418
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TR9",
-        "Node": "N_4_M_LMGN",
-        "name": "DOGU KARADENIZ",
-        "tags": {},
-        "exact": 3,
+        "ID": "TR5",
+        "name": "BATI ANADOLU",
+        "Node": "NutsCons_123",
+        "NUTS3_ID": "TR510",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3811,27 +3422,23 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR9",
-        "nuts_id_2": "TR90",
-        "nuts_id_3": "TR901"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          32.476240999999995,
+          32.476241,
           39.037616
         ]
-      },
+      }
+    },
+    {
+      "type": "Feature",
       "properties": {
-        "ID": "TR5",
-        "Node": "NutsCons_123",
-        "name": "BATI ANADOLU",
-        "tags": {},
-        "exact": 4,
+        "ID": "TRB",
+        "name": "ORTADOGU ANADOLU",
+        "Node": "NutsCons_124",
+        "NUTS3_ID": "TRB13",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3847,46 +3454,14 @@
         "min_demand_M_m3_per_d": null,
         "min_demand_commercial_M_m3_per_d": null,
         "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TR5",
-        "nuts_id_2": "TR51",
-        "nuts_id_3": "TR510"
-      }
-    },
-    {
-      "type": "Feature",
+        "min_demand_industrial_M_m3_per_d": null
+      },
       "geometry": {
         "type": "Point",
         "coordinates": [
           40.678456,
           38.704781
         ]
-      },
-      "properties": {
-        "ID": "TRB",
-        "Node": "NutsCons_124",
-        "name": "ORTADOGU ANADOLU",
-        "tags": {},
-        "exact": 4,
-        "max_demand_M_m3_per_d": null,
-        "max_demand_commercial_M_m3_per_d": null,
-        "max_demand_household_M_m3_per_d": null,
-        "max_demand_industrial_M_m3_per_d": null,
-        "mean_demand_M_m3_per_d": null,
-        "mean_demand_commercial_M_m3_per_d": null,
-        "mean_demand_household_M_m3_per_d": null,
-        "mean_demand_industrial_M_m3_per_d": null,
-        "median_demand_M_m3_per_d": null,
-        "median_demand_commercial_M_m3_per_d": null,
-        "median_demand_household_M_m3_per_d": null,
-        "median_demand_industrial_M_m3_per_d": null,
-        "min_demand_M_m3_per_d": null,
-        "min_demand_commercial_M_m3_per_d": null,
-        "min_demand_household_M_m3_per_d": null,
-        "min_demand_industrial_M_m3_per_d": null,
-        "nuts_id_1": "TRB",
-        "nuts_id_2": "TRB1",
-        "nuts_id_3": "TRB13"
       }
     }
   ]

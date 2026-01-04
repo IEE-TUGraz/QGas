@@ -5,6 +5,7 @@ __pycache__/
 
 Input/*
 !Input/.gitkeep
+!Input/SciGrid_IGGIELGNC_1
 
 Plans/*
 !Plans/.gitkeep

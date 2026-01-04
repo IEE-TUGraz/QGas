@@ -2061,6 +2061,11 @@
   let originalStorageLayer = null;
   let originalConsumptionLayer = null;
   let originalShortPipeLayer = null;
+  let originalBorderpointsLayer = null;
+  let originalDemandsLayer = null;
+  let originalProductionsLayer = null;
+  let originalHydrogenPipeLayer = null;
+  let originalElectrolyzersLayer = null;
   let shortPipeSelectionActive = false;
   let selectedShortPipes = [];
   let sublayerOperationContext = null;
@@ -2499,18 +2504,23 @@
         break;
       case 'borderpoints':
         borderpointsLayer = layerInstance;
+        originalBorderpointsLayer = layerInstance;
         break;
       case 'demands':
         demandsLayer = layerInstance;
+        originalDemandsLayer = layerInstance;
         break;
       case 'productions':
         productionsLayer = layerInstance;
+        originalProductionsLayer = layerInstance;
         break;
       case 'hydrogenPipes':
         hydrogenPipeLayer = layerInstance;
+        originalHydrogenPipeLayer = layerInstance;
         break;
       case 'electrolyzers':
         electrolyzersLayer = layerInstance;
+        originalElectrolyzersLayer = layerInstance;
         break;
     }
   }
@@ -2533,6 +2543,16 @@
         return originalConsumptionLayer;
       case 'shortPipes':
         return originalShortPipeLayer;
+      case 'borderpoints':
+        return originalBorderpointsLayer;
+      case 'demands':
+        return originalDemandsLayer;
+      case 'productions':
+        return originalProductionsLayer;
+      case 'hydrogenPipes':
+        return originalHydrogenPipeLayer;
+      case 'electrolyzers':
+        return originalElectrolyzersLayer;
       default:
         return null;
     }
@@ -17631,6 +17651,21 @@ function applyCountryFilter() {
   if (!originalShortPipeLayer && shortPipeLayer) {
     originalShortPipeLayer = shortPipeLayer;
   }
+  if (!originalBorderpointsLayer && borderpointsLayer) {
+    originalBorderpointsLayer = borderpointsLayer;
+  }
+  if (!originalDemandsLayer && demandsLayer) {
+    originalDemandsLayer = demandsLayer;
+  }
+  if (!originalProductionsLayer && productionsLayer) {
+    originalProductionsLayer = productionsLayer;
+  }
+  if (!originalHydrogenPipeLayer && hydrogenPipeLayer) {
+    originalHydrogenPipeLayer = hydrogenPipeLayer;
+  }
+  if (!originalElectrolyzersLayer && electrolyzersLayer) {
+    originalElectrolyzersLayer = electrolyzersLayer;
+  }
   
   if (selectedCountries.size === 0) {
     // If no countries selected, show all elements (original layers)
@@ -17653,6 +17688,11 @@ function restoreAllOriginalLayers() {
   const prevStorageLayer = storageLayer;
   const prevConsumptionLayer = consumptionLayer;
   const prevShortPipeLayer = shortPipeLayer;
+  const prevBorderpointsLayer = borderpointsLayer;
+  const prevDemandsLayer = demandsLayer;
+  const prevProductionsLayer = productionsLayer;
+  const prevHydrogenPipeLayer = hydrogenPipeLayer;
+  const prevElectrolyzersLayer = electrolyzersLayer;
 
   // Remove current layers from map
   removeAllCurrentLayers();
@@ -17703,6 +17743,31 @@ function restoreAllOriginalLayers() {
     shortPipeLayer = originalShortPipeLayer;
     applyDeletedIdentitiesToLayer(shortPipeLayer);
   }
+  if (originalBorderpointsLayer && !map.hasLayer(originalBorderpointsLayer)) {
+    map.addLayer(originalBorderpointsLayer);
+    borderpointsLayer = originalBorderpointsLayer;
+    applyDeletedIdentitiesToLayer(borderpointsLayer);
+  }
+  if (originalDemandsLayer && !map.hasLayer(originalDemandsLayer)) {
+    map.addLayer(originalDemandsLayer);
+    demandsLayer = originalDemandsLayer;
+    applyDeletedIdentitiesToLayer(demandsLayer);
+  }
+  if (originalProductionsLayer && !map.hasLayer(originalProductionsLayer)) {
+    map.addLayer(originalProductionsLayer);
+    productionsLayer = originalProductionsLayer;
+    applyDeletedIdentitiesToLayer(productionsLayer);
+  }
+  if (originalHydrogenPipeLayer && !map.hasLayer(originalHydrogenPipeLayer)) {
+    map.addLayer(originalHydrogenPipeLayer);
+    hydrogenPipeLayer = originalHydrogenPipeLayer;
+    applyDeletedIdentitiesToLayer(hydrogenPipeLayer);
+  }
+  if (originalElectrolyzersLayer && !map.hasLayer(originalElectrolyzersLayer)) {
+    map.addLayer(originalElectrolyzersLayer);
+    electrolyzersLayer = originalElectrolyzersLayer;
+    applyDeletedIdentitiesToLayer(electrolyzersLayer);
+  }
 
   synchronizeLayerReferences('pipelines', prevPipelineLayer, pipelineLayer);
   synchronizeLayerReferences('pipelines', prevEstimatedLayer, estimatedPipelinesLayer);
@@ -17713,6 +17778,11 @@ function restoreAllOriginalLayers() {
   synchronizeLayerReferences('storages', prevStorageLayer, storageLayer);
   synchronizeLayerReferences('consumption', prevConsumptionLayer, consumptionLayer);
   synchronizeLayerReferences('shortPipes', prevShortPipeLayer, shortPipeLayer);
+  synchronizeLayerReferences('borderpoints', prevBorderpointsLayer, borderpointsLayer);
+  synchronizeLayerReferences('demands', prevDemandsLayer, demandsLayer);
+  synchronizeLayerReferences('productions', prevProductionsLayer, productionsLayer);
+  synchronizeLayerReferences('hydrogenPipes', prevHydrogenPipeLayer, hydrogenPipeLayer);
+  synchronizeLayerReferences('electrolyzers', prevElectrolyzersLayer, electrolyzersLayer);
 
   if (window.selectedPipelineLayer === prevPipelineLayer) {
     window.selectedPipelineLayer = pipelineLayer;
@@ -17767,6 +17837,26 @@ function removeAllCurrentLayers() {
     removeClickLayers(shortPipeLayer);
     map.removeLayer(shortPipeLayer);
   }
+  if (borderpointsLayer && map.hasLayer(borderpointsLayer)) {
+    removeClickLayers(borderpointsLayer);
+    map.removeLayer(borderpointsLayer);
+  }
+  if (demandsLayer && map.hasLayer(demandsLayer)) {
+    removeClickLayers(demandsLayer);
+    map.removeLayer(demandsLayer);
+  }
+  if (productionsLayer && map.hasLayer(productionsLayer)) {
+    removeClickLayers(productionsLayer);
+    map.removeLayer(productionsLayer);
+  }
+  if (hydrogenPipeLayer && map.hasLayer(hydrogenPipeLayer)) {
+    removeClickLayers(hydrogenPipeLayer);
+    map.removeLayer(hydrogenPipeLayer);
+  }
+  if (electrolyzersLayer && map.hasLayer(electrolyzersLayer)) {
+    removeClickLayers(electrolyzersLayer);
+    map.removeLayer(electrolyzersLayer);
+  }
 }
 
 function filterAllElementsByCountries(selectedCountryCodes) {
@@ -17780,6 +17870,12 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   const prevLngLayer = lngLayer;
   const prevStorageLayer = storageLayer;
   const prevConsumptionLayer = consumptionLayer;
+  const prevShortPipeLayer = shortPipeLayer;
+  const prevBorderpointsLayer = borderpointsLayer;
+  const prevDemandsLayer = demandsLayer;
+  const prevProductionsLayer = productionsLayer;
+  const prevHydrogenPipeLayer = hydrogenPipeLayer;
+  const prevElectrolyzersLayer = electrolyzersLayer;
 
   // Remove current layers from map
   removeAllCurrentLayers();
@@ -17793,6 +17889,12 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   const filteredLngLayer = originalLngLayer ? L.layerGroup() : null;
   const filteredStorageLayer = originalStorageLayer ? L.layerGroup() : null;
   const filteredConsumptionLayer = originalConsumptionLayer ? L.layerGroup() : null;
+  const filteredShortPipeLayer = originalShortPipeLayer ? L.layerGroup() : null;
+  const filteredBorderpointsLayer = originalBorderpointsLayer ? L.layerGroup() : null;
+  const filteredDemandsLayer = originalDemandsLayer ? L.layerGroup() : null;
+  const filteredProductionsLayer = originalProductionsLayer ? L.layerGroup() : null;
+  const filteredHydrogenPipeLayer = originalHydrogenPipeLayer ? L.layerGroup() : null;
+  const filteredElectrolyzersLayer = originalElectrolyzersLayer ? L.layerGroup() : null;
   const addFilteredLayerToMap = (layerGroup, label) => {
     if (!layerGroup) return;
     if (!map.hasLayer(layerGroup)) {
@@ -17898,15 +18000,75 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   }
 
   // Filter short pipes
-  if (originalShortPipeLayer && filteredPipelineLayer) {
+  if (originalShortPipeLayer && filteredShortPipeLayer) {
     let shortPipeCount = 0;
     originalShortPipeLayer.eachLayer(layer => {
       if (layer.feature && shouldShowPipeline(layer.feature, selectedCountryCodes)) {
-        filteredPipelineLayer.addLayer(layer); // Add to filtered pipeline layer
+        filteredShortPipeLayer.addLayer(layer);
         shortPipeCount++;
       }
     });
     console.log('Filtered short pipes:', shortPipeCount);
+  }
+
+  // Filter border points
+  if (originalBorderpointsLayer && filteredBorderpointsLayer) {
+    let borderCount = 0;
+    originalBorderpointsLayer.eachLayer(layer => {
+      if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
+        filteredBorderpointsLayer.addLayer(layer);
+        borderCount++;
+      }
+    });
+    console.log('Filtered border points:', borderCount);
+  }
+
+  // Filter demands
+  if (originalDemandsLayer && filteredDemandsLayer) {
+    let demandCount = 0;
+    originalDemandsLayer.eachLayer(layer => {
+      if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
+        filteredDemandsLayer.addLayer(layer);
+        demandCount++;
+      }
+    });
+    console.log('Filtered demands:', demandCount);
+  }
+
+  // Filter productions
+  if (originalProductionsLayer && filteredProductionsLayer) {
+    let productionCount = 0;
+    originalProductionsLayer.eachLayer(layer => {
+      if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
+        filteredProductionsLayer.addLayer(layer);
+        productionCount++;
+      }
+    });
+    console.log('Filtered productions:', productionCount);
+  }
+
+  // Filter hydrogen pipelines
+  if (originalHydrogenPipeLayer && filteredHydrogenPipeLayer) {
+    let hydrogenCount = 0;
+    originalHydrogenPipeLayer.eachLayer(layer => {
+      if (layer.feature && shouldShowPipeline(layer.feature, selectedCountryCodes)) {
+        filteredHydrogenPipeLayer.addLayer(layer);
+        hydrogenCount++;
+      }
+    });
+    console.log('Filtered hydrogen pipelines:', hydrogenCount);
+  }
+
+  // Filter electrolyzers
+  if (originalElectrolyzersLayer && filteredElectrolyzersLayer) {
+    let electrolyzerCount = 0;
+    originalElectrolyzersLayer.eachLayer(layer => {
+      if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
+        filteredElectrolyzersLayer.addLayer(layer);
+        electrolyzerCount++;
+      }
+    });
+    console.log('Filtered electrolyzers:', electrolyzerCount);
   }
 
   // Add filtered layers to map (even if empty, so editing targets exist)
@@ -17918,6 +18080,12 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   applyDeletedIdentitiesToLayer(filteredLngLayer);
   applyDeletedIdentitiesToLayer(filteredStorageLayer);
   applyDeletedIdentitiesToLayer(filteredConsumptionLayer);
+  applyDeletedIdentitiesToLayer(filteredShortPipeLayer);
+  applyDeletedIdentitiesToLayer(filteredBorderpointsLayer);
+  applyDeletedIdentitiesToLayer(filteredDemandsLayer);
+  applyDeletedIdentitiesToLayer(filteredProductionsLayer);
+  applyDeletedIdentitiesToLayer(filteredHydrogenPipeLayer);
+  applyDeletedIdentitiesToLayer(filteredElectrolyzersLayer);
 
   addFilteredLayerToMap(filteredPipelineLayer, 'pipeline');
   addFilteredLayerToMap(filteredEstimatedLayer, 'estimated pipeline');
@@ -17927,6 +18095,12 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   addFilteredLayerToMap(filteredLngLayer, 'lng');
   addFilteredLayerToMap(filteredStorageLayer, 'storage');
   addFilteredLayerToMap(filteredConsumptionLayer, 'consumption');
+  addFilteredLayerToMap(filteredShortPipeLayer, 'short pipe');
+  addFilteredLayerToMap(filteredBorderpointsLayer, 'border point');
+  addFilteredLayerToMap(filteredDemandsLayer, 'demand');
+  addFilteredLayerToMap(filteredProductionsLayer, 'production');
+  addFilteredLayerToMap(filteredHydrogenPipeLayer, 'hydrogen pipeline');
+  addFilteredLayerToMap(filteredElectrolyzersLayer, 'electrolyzer');
 
   // Update current layer references (but keep originals intact)
   pipelineLayer = filteredPipelineLayer;
@@ -17937,6 +18111,12 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   lngLayer = filteredLngLayer;
   storageLayer = filteredStorageLayer;
   consumptionLayer = filteredConsumptionLayer;
+  shortPipeLayer = filteredShortPipeLayer;
+  borderpointsLayer = filteredBorderpointsLayer;
+  demandsLayer = filteredDemandsLayer;
+  productionsLayer = filteredProductionsLayer;
+  hydrogenPipeLayer = filteredHydrogenPipeLayer;
+  electrolyzersLayer = filteredElectrolyzersLayer;
 
   synchronizeLayerReferences('pipelines', prevPipelineLayer, pipelineLayer);
   synchronizeLayerReferences('pipelines', prevEstimatedLayer, estimatedPipelinesLayer);
@@ -17946,6 +18126,12 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   synchronizeLayerReferences('lng', prevLngLayer, lngLayer);
   synchronizeLayerReferences('storages', prevStorageLayer, storageLayer);
   synchronizeLayerReferences('consumption', prevConsumptionLayer, consumptionLayer);
+  synchronizeLayerReferences('shortPipes', prevShortPipeLayer, shortPipeLayer);
+  synchronizeLayerReferences('borderpoints', prevBorderpointsLayer, borderpointsLayer);
+  synchronizeLayerReferences('demands', prevDemandsLayer, demandsLayer);
+  synchronizeLayerReferences('productions', prevProductionsLayer, productionsLayer);
+  synchronizeLayerReferences('hydrogenPipes', prevHydrogenPipeLayer, hydrogenPipeLayer);
+  synchronizeLayerReferences('electrolyzers', prevElectrolyzersLayer, electrolyzersLayer);
 
   if (window.selectedPipelineLayer === prevPipelineLayer) {
     window.selectedPipelineLayer = pipelineLayer;
@@ -17986,6 +18172,11 @@ function enforceFilteredLayerPresence() {
   ensurePair(originalStorageLayer, storageLayer);
   ensurePair(originalConsumptionLayer, consumptionLayer);
   ensurePair(originalShortPipeLayer, shortPipeLayer);
+  ensurePair(originalBorderpointsLayer, borderpointsLayer);
+  ensurePair(originalDemandsLayer, demandsLayer);
+  ensurePair(originalProductionsLayer, productionsLayer);
+  ensurePair(originalHydrogenPipeLayer, hydrogenPipeLayer);
+  ensurePair(originalElectrolyzersLayer, electrolyzersLayer);
 }
 
 // Country name to country code mapping
@@ -18080,11 +18271,28 @@ const elementCountryKeys = [
   'Country_of_Location',
   'Country Location',
   'CountryName',
-  'Country_Name'
+  'Country_Name',
+  'NUTS_ID',
+  'NUTS_CODE',
+  'NUTS3_ID',
+  'NUTS3ID'
 ];
 
-const pipelineStartCountryKeys = ['Country_Start', 'country_start', 'Start_Country'];
-const pipelineEndCountryKeys = ['Country_End', 'country_end', 'End_Country'];
+const pipelineStartCountryKeys = [
+  'Country_Start',
+  'country_start',
+  'Start_Country',
+  'NUTS3_ID_Start',
+  'NUTS_ID_Start'
+];
+
+const pipelineEndCountryKeys = [
+  'Country_End',
+  'country_end',
+  'End_Country',
+  'NUTS3_ID_End',
+  'NUTS_ID_End'
+];
 
 function normalizeCountryCodeToken(rawCode) {
   if (rawCode == null) return null;
@@ -18154,14 +18362,65 @@ function extractCountryCodesFromValue(value) {
   return Array.from(codes);
 }
 
+function normalizePropertyKeyName(key) {
+  if (typeof key !== 'string') {
+    return '';
+  }
+  return key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function getValuesForCandidateKeys(properties, candidateKeys) {
+  if (!properties || !candidateKeys || !candidateKeys.length) {
+    return [];
+  }
+
+  const normalizedCandidates = new Set(
+    candidateKeys
+      .map(normalizePropertyKeyName)
+      .filter(Boolean)
+  );
+
+  if (!normalizedCandidates.size) {
+    return [];
+  }
+
+  const values = [];
+  Object.entries(properties).forEach(([propKey, value]) => {
+    if (!normalizedCandidates.has(normalizePropertyKeyName(propKey))) {
+      return;
+    }
+    values.push(value);
+  });
+  return values;
+}
+
+function hasAnyValueForKeys(properties, keys) {
+  if (!properties || !Array.isArray(keys) || !keys.length) {
+    return false;
+  }
+  const values = getValuesForCandidateKeys(properties, keys);
+  return values.some(value => {
+    if (value === undefined || value === null) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return true;
+  });
+}
+
 function doesFeatureMatchCountryFilter(properties, selectedCountryCodes, candidateKeys) {
   if (!properties) return false;
   if (!(selectedCountryCodes instanceof Set) || selectedCountryCodes.size === 0) {
     return true;
   }
 
-  for (const key of candidateKeys) {
-    const value = properties[key];
+  const values = getValuesForCandidateKeys(properties, candidateKeys);
+  for (const value of values) {
     if (!value) continue;
     const codes = extractCountryCodesFromValue(value);
     if (codes.some(code => selectedCountryCodes.has(code))) {
@@ -18177,8 +18436,21 @@ function shouldShowElement(feature, selectedCountryCodes) {
     return false;
   }
 
-  const result = doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, elementCountryKeys);
-  return result;
+  if (doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, elementCountryKeys)) {
+    return true;
+  }
+
+  const hasLineCountryMetadata = hasAnyValueForKeys(feature.properties, pipelineStartCountryKeys) ||
+    hasAnyValueForKeys(feature.properties, pipelineEndCountryKeys);
+
+  if (hasLineCountryMetadata) {
+    return (
+      doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, pipelineStartCountryKeys) ||
+      doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, pipelineEndCountryKeys)
+    );
+  }
+
+  return false;
 }
 
 function shouldShowPipeline(feature, selectedCountryCodes) {
@@ -18190,7 +18462,11 @@ function shouldShowPipeline(feature, selectedCountryCodes) {
   const startMatches = doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, pipelineStartCountryKeys);
   const endMatches = doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, pipelineEndCountryKeys);
   const result = startMatches || endMatches;
-  return result;
+  if (result) {
+    return true;
+  }
+
+  return doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, elementCountryKeys);
 }
 
 // ==================== Additional Datasets Loading ====================
