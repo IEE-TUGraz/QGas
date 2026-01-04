@@ -10,17 +10,17 @@
 
 # QGas – Interactive Gas Infrastructure Toolkit
 
-QGas is an **interactive software toolkit** designed for the visualization, exploration, and modification of gas infrastructure networks through a **map-based interface**.  
-The toolkit provides researchers, engineers, and energy analysts with the ability to intuitively manage complex gas networks while preserving the **integrity of the underlying network topology**.  
+QGas is an **interactive software toolkit** designed for the visualization, exploration, and modification of gas infrastructure datasets through a **map-based interface**.  
+The toolkit provides researchers, engineers, and energy analysts with the ability to intuitively manage complex datasets while preserving the **integrity of the underlying network topology**.  
 Its design emphasizes **usability, flexibility, and topological consistency**, enabling both detailed operational edits and large-scale network modifications without compromising structural properties.
 
 ---
 
 # Features
 
-- **Topology-preserving network modifications:** QGas allows users to manipulate pipeline geometries and node positions while ensuring that the network's connectivity, flow paths, and topological characteristics remain intact.  
+- **Topology-preserving network modifications:** QGas allows users to manipulate pipeline geometries and node positions while ensuring that the network's connectivity, routing, and topological characteristics remain intact.  
 - **Interactive pipeline creation and rerouting:** Users can seamlessly draw new pipelines, adjust existing routes, or create new connections between nodes using an intuitive, map-based graphical interface.  
-- **Flexible infrastructure management:** The toolkit supports the addition of new infrastructure types beyond conventional gas pipelines, including hydrogen pipelines, storage facilities, LNG terminals, and other energy-relevant assets.  
+- **Flexible infrastructure management:** The toolkit supports the addition of new infrastructure types beyond conventional gas pipelines, including hydrogen pipelines, storage facilities, LNG terminals, and other energy-relevant assets as well as repurposing of existing pipelines.  
 - **Advanced attribute management:** QGas provides a robust mechanism for managing metadata and attributes associated with infrastructure elements. Users can create new attributes, edit existing ones, or remove unnecessary attributes through a straightforward interface.  
 - **Georeferenced background map integration:** Users can import infrastructure plans or other spatial data as images, georeference them accurately, and overlay them as a reference for network construction.  
 
@@ -77,8 +77,8 @@ Currently, you can reference the GitHub repository:
 
 ```bibtex
 @misc{QGAS,
-   author = {Marco Quantschnig and Thomas Klatzer and Yannick Werner},
-   title = {{QGas – Interactive Gas Infrastructure Toolkit}},
+   author = {Marco Quantschnig and Yannick Werner and Thomas Klatzer},
+   title = {{QGas -- Interactive Gas Infrastructure Toolkit}},
    howpublished = {\url{https://github.com/IEE-TUGraz/QGas}},
    year = {2025},
    note = {Developed at the Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Austria}
