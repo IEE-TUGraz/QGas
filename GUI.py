@@ -1,35 +1,36 @@
 # -*- coding: utf-8 -*-
 """
-QGas - Interactive Map Interface
+QGas – Interactive Map Interface
+================================
 
-================================================================================
-ACADEMIC SOFTWARE DESCRIPTION
-================================================================================
+Academic Software Description
+-----------------------------
 
 This application provides an interactive web-based visualization interface for
 European gas pipeline infrastructure data. The system serves processed pipeline
 network data through an integrated web server with real-time updates.
 
-Key Functionalities:
+Key Functionalities
+-------------------
 - Interactive web-based visualization with Folium mapping interface
 - Local HTTP server for serving map data
 - WebSocket support for real-time updates
 - Data caching and compression for optimized performance
 - Manual change management for pipeline data
 
-Technical Implementation:
+Technical Implementation
+------------------------
 The system uses a tkinter-based GUI with an integrated HTTP server and WebSocket
 support for serving interactive maps. Data is cached in memory for performance
 and can be updated in real-time through the web interface.
 
-================================================================================
-Development Information:
+Development Information
+-----------------------
 - Primary Author: Marco Quantschnig, BSc.
-- Institution: Institute of Electricity Economics and Energy Innovation (IEE), 
-               Graz University of Technology (TU Graz)
+- Institution: Institute of Electricity Economics and Energy Innovation (IEE),
+  Graz University of Technology (TU Graz)
 - Created: August 2025
 - License: See LICENSE file
-================================================================================
 """
 
 import sys
@@ -407,8 +408,20 @@ class CombinedGUI:
                                    relief='flat')
             value_widget.pack(anchor=tk.W)
     
+    # ================================================================================
+    # UTILITY METHODS
+    # ================================================================================
+    
     def darken_color(self, color):
-        """Utility function to darken colors for hover effects"""
+        """
+        Utility function to darken colors for hover effects
+        
+        Args:
+            color (str): Hex color code
+            
+        Returns:
+            str: Darker version of the color
+        """
         color_map = {
             "#28a745": "#218838",  # Green darker
             "#007bff": "#0056b3",  # Blue darker  
@@ -417,7 +430,13 @@ class CombinedGUI:
         return color_map.get(color, color)
     
     def update_status(self, status, is_running=False):
-        """Update only the header LED indicator (no status bar)"""
+        """
+        Update the header LED indicator to reflect server status
+        
+        Args:
+            status (str): Status text (e.g., "Running", "Stopped")
+            is_running (bool): True if server is running, False otherwise
+        """
         if is_running:
             # Update LED to green (running) - only in header
             if hasattr(self, 'led_canvas') and hasattr(self, 'led_circle'):
@@ -431,20 +450,36 @@ class CombinedGUI:
             if hasattr(self, 'led_status_text'):
                 self.led_status_text.config(text="Stopped", fg='#dc3545')
     
-    # ========================
-    # MAP SERVER TAB METHODS  
-    # ========================
+    # ================================================================================
+    # MAP SERVER CORE FUNCTIONALITY
+    # ================================================================================
+    
     def create_map_tab(self, parent):
+        """
+        Legacy method for map tab creation
+        Now handled by create_widgets for unified interface
+        """
         # This method is now handled by create_widgets
         pass
     
-    # ========================
-    # MAP SERVER METHODS
-    # ========================
     class ReusableTCPServer(socketserver.TCPServer):
+        """
+        Custom TCP server with address reuse enabled
+        Prevents "Address already in use" errors on rapid restart
+        """
         allow_reuse_address = True
     
     def start_server(self):
+        """
+        Start the HTTP server and WebSocket server for map visualization
+        
+        Features:
+        - Serves static files (HTML, JS, CSS)
+        - Provides API endpoints for dynamic data
+        - Handles GeoJSON with compression
+        - Dynamic project path routing
+        - WebSocket support for real-time updates
+        """
         if self.httpd is not None:
             messagebox.showinfo("Info", "Server is already running.")
             return
@@ -454,11 +489,25 @@ class CombinedGUI:
             
             # Optimized handler with compression and API endpoints
             class OptimizedHandler(http.server.SimpleHTTPRequestHandler):
+                """
+                Custom HTTP request handler with optimization features
+                
+                Features:
+                - API endpoints for data queries
+                - GeoJSON compression for large files
+                - Dynamic project path routing
+                - Cache control headers
+                - Layer statistics without geometry
+                """
                 def __init__(self, *args, gui_instance=None, **kwargs):
                     self.gui_instance = gui_instance
                     super().__init__(*args, **kwargs)
                 
                 def end_headers(self):
+                    """
+                    Add cache-control headers to prevent browser caching
+                    Ensures users always see the latest data
+                    """
                     # Add cache-control headers to prevent caching
                     self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
                     self.send_header('Pragma', 'no-cache')
@@ -466,6 +515,14 @@ class CombinedGUI:
                     super().end_headers()
                 
                 def do_GET(self):
+                    """
+                    Handle GET requests with routing logic
+                    
+                    Routes:
+                    - /api/* -> API endpoints
+                    - *.geojson -> GeoJSON with compression
+                    - Other -> Standard file serving
+                    """
                     from urllib.parse import urlparse, parse_qs
                     parsed_path = urlparse(self.path)
                     path = parsed_path.path
@@ -481,7 +538,18 @@ class CombinedGUI:
                         super().do_GET()
                 
                 def handle_api_request(self, path, query):
-                    """Behandelt API-Anfragen für spezifische Daten"""
+                    """
+                    Handle API requests for specific data queries
+                    
+                    Endpoints:
+                    - /api/layers: List available layers
+                    - /api/current_project: Get active project name
+                    - /api/layer_stats: Get layer statistics without geometry
+                    
+                    Args:
+                        path (str): API endpoint path
+                        query (str): Query string parameters
+                    """
                     try:
                         import json
                         from urllib.parse import parse_qs
@@ -507,7 +575,17 @@ class CombinedGUI:
                         self.send_error(500, f"API Error: {str(e)}")
                 
                 def handle_geojson_request(self, path):
-                    """Behandelt GeoJSON-Anfragen mit dynamischer Projekt-Pfad-Umleitung"""
+                    """
+                    Handle GeoJSON requests with dynamic project path routing and compression
+                    
+                    Features:
+                    - Routes Output/* requests to Input/{project}/*
+                    - Compresses files larger than 1MB with gzip
+                    - Proper content-type and encoding headers
+                    
+                    Args:
+                        path (str): Requested file path
+                    """
                     try:
                         import json
                         import gzip
@@ -591,19 +669,22 @@ class CombinedGUI:
                     except Exception as e:
                         return {'error': str(e), 'count': 0}
             
-            # Erstelle Handler mit GUI-Referenz
+            # Create HTTP request handler with GUI instance reference
             Handler = lambda *args, **kwargs: OptimizedHandler(*args, gui_instance=self, **kwargs)
             
+            # Start HTTP server in daemon thread
             self.httpd = self.ReusableTCPServer(("", self.PORT), Handler)
             self.server_thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
             self.server_thread.start()
             
-            # Start WebSocket server
+            # Start WebSocket server for real-time updates
             self.start_websocket_server()
             
+            # Brief delay to ensure servers are fully initialized
             import time
-            time.sleep(1)  # Short delay to ensure servers are running
+            time.sleep(1)
             
+            # Update UI status indicators
             self.update_status(f"Running - HTTP:{self.PORT} WS:{self.WEBSOCKET_PORT}", is_running=True)
             messagebox.showinfo("Info", f"Servers started - HTTP: {self.PORT}, WebSocket: {self.WEBSOCKET_PORT}")
             
@@ -613,8 +694,15 @@ class CombinedGUI:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to start servers: {str(e)}")
     
+    # ================================================================================
+    # WEBSOCKET SERVER
+    # ================================================================================
+    
     def show_project_selection_after_start(self):
-        """Show project selection dialog after server start to reset any cached state."""
+        """
+        Show project selection dialog after server start
+        Allows user to choose which dataset to visualize
+        """
         try:
             # Get available projects
             input_dir = os.path.join(self.app_dir, "Input")
@@ -640,7 +728,15 @@ class CombinedGUI:
             self.selected_project = "Standard"  # Fallback
     
     def start_websocket_server(self):
-        """Startet WebSocket Server in separatem Thread"""
+        """
+        Start WebSocket server in separate thread for real-time updates
+        
+        Features:
+        - Runs in daemon thread (auto-cleanup on exit)
+        - Handles multiple concurrent client connections
+        - Supports bidirectional communication
+        - Used for live map updates without page refresh
+        """
         def run_websocket_server():
             try:
                 loop = asyncio.new_event_loop()
@@ -666,7 +762,16 @@ class CombinedGUI:
         self.websocket_thread.start()
     
     async def handle_websocket_connection(self, websocket, path):
-        """Behandelt WebSocket-Verbindungen"""
+        """
+        Handle individual WebSocket client connections
+        
+        Maintains client registry and processes incoming messages
+        Automatically removes disconnected clients
+        
+        Args:
+            websocket: WebSocket connection object
+            path: Connection path
+        """
         self.websocket_clients.add(websocket)
         print(f"WebSocket client connected: {websocket.remote_address}")
         
@@ -739,7 +844,13 @@ class CombinedGUI:
             await websocket.send(json.dumps(error_response))
     
     async def broadcast_feature_update(self, layer_name, feature):
-        """Sendet Feature-Updates an alle verbundenen Clients"""
+        """
+        Broadcast feature updates to all connected WebSocket clients
+        
+        Args:
+            layer_name (str): Name of the layer containing the feature
+            feature (dict): Updated GeoJSON feature
+        """
         if self.websocket_clients:
             message = {
                 'action': 'feature_updated',
@@ -752,7 +863,16 @@ class CombinedGUI:
             )
     
     def get_cached_layer_data(self, layer_name, bbox=None):
-        """Lädt Layer-Daten mit Caching und optionaler Bounding-Box-Filterung"""
+        """
+        Load layer data with caching and optional bounding box filtering
+        
+        Args:
+            layer_name (str): Name of the layer to load
+            bbox (str, optional): Bounding box string "minX,minY,maxX,maxY"
+            
+        Returns:
+            dict: GeoJSON FeatureCollection
+        """
         cache_key = f"{layer_name}_{bbox}" if bbox else layer_name
         
         # Prüfe Cache
@@ -790,7 +910,16 @@ class CombinedGUI:
             return {'type': 'FeatureCollection', 'features': []}
     
     def filter_data_by_bbox(self, geojson_data, bbox_str):
-        """Filtert GeoJSON-Daten nach Bounding Box"""
+        """
+        Filter GeoJSON data by bounding box for viewport optimization
+        
+        Args:
+            geojson_data (dict): GeoJSON FeatureCollection
+            bbox_str (str): Bounding box "minX,minY,maxX,maxY"
+            
+        Returns:
+            dict: Filtered GeoJSON FeatureCollection
+        """
         try:
             # Parse bbox: "minX,minY,maxX,maxY"
             minX, minY, maxX, maxY = map(float, bbox_str.split(','))
@@ -823,7 +952,19 @@ class CombinedGUI:
             return geojson_data
     
     def update_layer_feature(self, layer_name, feature):
-        """Updated ein Feature in den Layer-Daten"""
+        """
+        Update a feature in the layer data
+        
+        Note: Currently logs the update. Extend this method to persist
+        changes to files or database as needed.
+        
+        Args:
+            layer_name (str): Name of the layer
+            feature (dict): Updated GeoJSON feature
+            
+        Returns:
+            bool: True if update was successful
+        """
         try:
             print(f"Updating feature in {layer_name}: {feature.get('id', 'unknown')}")
             
@@ -840,7 +981,22 @@ class CombinedGUI:
             print(f"Error updating feature: {e}")
             return False
     
+    # ================================================================================
+    # SERVER SHUTDOWN
+    # ================================================================================
+    
     def stop_server(self):
+        """
+        Stop all running servers and cleanup resources
+        
+        Actions:
+        - Shutdown HTTP server
+        - Stop WebSocket server (daemon thread auto-cleanup)
+        - Clear data cache
+        - Close all WebSocket connections
+        - Reset UI status
+        - Reset selected project
+        """
         # Stop HTTP Server
         if self.httpd is not None:
             self.httpd.shutdown()
@@ -867,8 +1023,20 @@ class CombinedGUI:
         
         messagebox.showinfo("Info", "All servers stopped and cache cleared.")
     
+    # ================================================================================
+    # BROWSER AND PROJECT MANAGEMENT
+    # ================================================================================
+    
     def open_browser(self):
-        """Open the map in browser with optional project selection."""
+        """
+        Open the interactive map in web browser with project selection
+        
+        Features:
+        - Project selection dialog before opening
+        - Automatic URL parameter injection with selected project
+        - Preference for Microsoft Edge browser
+        - Fallback to default browser if Edge unavailable
+        """
         # Check for project selection first
         if not self.select_project():
             return  # User cancelled project selection
@@ -890,7 +1058,12 @@ class CombinedGUI:
             webbrowser.open(final_url)
     
     def select_project(self):
-        """Show project selection dialog if multiple projects exist."""
+        """
+        Show project selection dialog if multiple projects exist
+        
+        Returns:
+            bool: True if project selected or default used, False if cancelled
+        """
         input_path = os.path.join(self.app_dir, "Input")
         
         if not os.path.exists(input_path):
@@ -921,7 +1094,15 @@ class CombinedGUI:
             return False
     
     def show_project_selection_dialog(self, projects):
-        """Show project selection dialog with dropdown."""
+        """
+        Display project selection dialog with dropdown menu
+        
+        Args:
+            projects (list): List of available project folder names
+            
+        Returns:
+            bool: True if project selected, False if cancelled
+        """
         import tkinter.ttk as ttk
         
         # Create modal dialog with even larger size for better button visibility

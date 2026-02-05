@@ -1,0 +1,66 @@
+function showCustomPopup(title, content, buttons, extraElement = null) {
+  console.log('showCustomPopup called with title:', title);
+  const overlay = document.getElementById('custom-popup-overlay');
+  const popup = document.getElementById('custom-popup');
+  const titleEl = document.getElementById('custom-popup-title');
+  const contentEl = document.getElementById('custom-popup-content');
+  const buttonsEl = document.getElementById('custom-popup-buttons');
+
+  if (!overlay || !popup || !titleEl || !contentEl || !buttonsEl) {
+    console.error('Custom popup elements not found');
+    return;
+  }
+
+  // Ensure popup is always clickable above Leaflet panes
+  overlay.style.zIndex = '999999';
+  popup.style.zIndex = '1000000';
+  overlay.style.pointerEvents = 'auto';
+  popup.style.pointerEvents = 'auto';
+
+  resetCustomPopupDocking();
+
+  titleEl.textContent = title;
+  contentEl.innerHTML = content;
+
+  if (extraElement) {
+    contentEl.appendChild(extraElement);
+  }
+
+  buttonsEl.innerHTML = '';
+
+  buttons.forEach(btn => {
+    const button = document.createElement('button');
+    button.className = `custom-popup-btn ${btn.type || 'secondary'}`;
+    button.textContent = btn.text;
+    button.onclick = (evt) => {
+      if (evt) {
+        try { evt.stopPropagation(); } catch (e) {}
+        try { evt.preventDefault(); } catch (e) {}
+      }
+
+      const shouldClose = btn.keepOpen !== true;
+      let okToClose = true;
+
+      if (btn.onClick) {
+        try {
+          btn.onClick();
+        } catch (err) {
+          okToClose = false;
+          console.error('Popup button handler failed:', err);
+          // Do not silently swallow: show a small error popup, keep current popup open.
+          try {
+            showErrorPopup(err && err.message ? err.message : String(err), '⚠️ Error');
+          } catch (e) {}
+        }
+      }
+
+      if (shouldClose && okToClose) {
+        closeCustomPopup();
+      }
+    };
+    buttonsEl.appendChild(button);
+  });
+
+  overlay.style.display = 'block';
+  popup.style.display = 'block';
+}
