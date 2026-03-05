@@ -30,11 +30,18 @@
  * - Updates legend automatically
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Parent and target sublayer selection from layerConfig.
+ * - Map interactions for feature selection.
+ *
+ * Public API:
+ * - activateSwitchSublayerTool(): Start sublayer switching workflow.
  * 
  * ================================================================================
  */
@@ -500,7 +507,9 @@ function attachSublayerSelectionHandlers(context) {
     const geometryType = feature?.geometry?.type;
     if (!geometryType) return;
 
-    // Only attach to actual geometries we can toggle (lines, polygons, points)
+      /*
+       * Only attach to actual geometries we can toggle (lines, polygons, points).
+       */
     const isSelectableGeometry = /LineString|Polygon|Point/i.test(geometryType);
     if (!isSelectableGeometry) return;
 
@@ -531,7 +540,9 @@ function attachSublayerSelectionHandlers(context) {
     enablePointerEvents(candidate);
     boundCount++;
 
-    // Ensure associated click-layer proxies also trigger the same selection handler
+    /*
+     * Ensure associated click-layer proxies also trigger the same selection handler.
+     */
     if (candidate._clickLayer && typeof candidate._clickLayer.eachLayer === 'function') {
       candidate._clickLayer.eachLayer(clickChild => {
         if (!clickChild || typeof clickChild.on !== 'function') return;
@@ -802,7 +813,11 @@ function applyTargetLayerStyling(layer, config) {
   }
 }
 
-// ==================== Infrastructure Plan Georeferencing ====================
+/*
+ * ================================================================================
+ * Infrastructure Plan Georeferencing
+ * ================================================================================
+ */
 
 const planLayers = [];
 const loadedPlanIds = new Set();
@@ -963,7 +978,7 @@ function handlePlanViewportPointerMove(event) {
       try {
         viewport.setPointerCapture(event.pointerId);
       } catch (err) {
-        // ignore if capture fails
+        /* Ignore pointer capture failures for non-supporting browsers. */
       }
     } else {
       return;
@@ -988,7 +1003,7 @@ function handlePlanViewportPointerUp(event) {
       try {
         viewport.releasePointerCapture(pointerId);
       } catch (err) {
-        // ignore if pointer already released
+        /* Ignore pointer release failures if already released. */
       }
     }
   }
@@ -1025,10 +1040,9 @@ function handlePlanViewportWheel(event) {
   viewport.scrollLeft = Math.max(0, (focalX * scaleX) - (event.clientX - rect.left));
   viewport.scrollTop = Math.max(0, (focalY * scaleY) - (event.clientY - rect.top));
 }
-
-
-
-// Public activation wrapper
+/*
+ * Public activation wrapper.
+ */
 window.activateSwitchSublayerTool = function activateSwitchSublayerTool() {
   deactivateAllModes();
   currentMode = 'switch-sublayer';

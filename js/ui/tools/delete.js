@@ -32,11 +32,19 @@
  * - Drawn items
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - User selections (click or box selection).
+ * - Layer registries and deletion identity tracker.
+ *
+ * Public API:
+ * - activateDeleteMode(): Enter delete workflow.
+ * - finalizeDeletion(): Confirm and apply deletions.
  * 
  * ================================================================================
  */
@@ -46,7 +54,8 @@
  * Creates a button that executes batch deletion of all marked elements
  */
 function showSaveDeleteButton() {
-    if (document.getElementById('save-delete-btn')) return; // Nur einen Button zulassen
+    /* Avoid creating duplicate delete buttons. */
+    if (document.getElementById('save-delete-btn')) return;
 
     const btn = document.createElement('button');
     btn.id = 'save-delete-btn';
@@ -201,7 +210,17 @@ function showSaveDeleteButton() {
           } else if (map.hasLayer(item.layer)) {
             map.removeLayer(item.layer);
           }
-          deletedCustomElements.push(item.layer.feature || { type: 'CustomElement' });
+          if (item.layer.feature) {
+            deletedCustomElements.push(item.layer.feature);
+            const elementType = (typeof determineElementType === 'function') ? determineElementType(item.layer) : null;
+            recordDeletedFeatureIdentity(item.layer.feature, elementType);
+            if (elementType) {
+              removeFeatureFromElementLayers(item.layer.feature, elementType, item.layer);
+            }
+            removeFeatureFromAllMapLayers(item.layer.feature);
+          } else {
+            deletedCustomElements.push({ type: 'CustomElement' });
+          }
           delete item.layer?._markedForDeletion;
         });
 
@@ -216,6 +235,12 @@ function showSaveDeleteButton() {
           }
           if (item.layer && item.layer.feature) {
             deletedDrawnItems.push(item.layer.feature);
+            const elementType = (typeof determineElementType === 'function') ? determineElementType(item.layer) : null;
+            recordDeletedFeatureIdentity(item.layer.feature, elementType);
+            if (elementType) {
+              removeFeatureFromElementLayers(item.layer.feature, elementType, item.layer);
+            }
+            removeFeatureFromAllMapLayers(item.layer.feature);
           }
           delete item.layer?._markedForDeletion;
         });
@@ -240,7 +265,7 @@ function showSaveDeleteButton() {
 
       btn.remove();
       document.getElementById('discard-delete-btn')?.remove();
-      // Nach dem Löschen: Zurück zum Info-Modus
+      /* Return to Info mode after deletion. */
       deactivateAllModes();
       activateInfoMode();
     };
@@ -250,7 +275,7 @@ function showSaveDeleteButton() {
     updateDeleteModeButtonsState();
   }
 
-  // Discard Button für Delete Mode
+  /* Discard button for Delete mode. */
   function showDiscardDeleteButton() {
     console.log('showDiscardDeleteButton called');
     if (document.getElementById('discard-delete-btn')) {
@@ -282,13 +307,13 @@ function showSaveDeleteButton() {
         pendingDrawnItemDeletions.length = 0;
         deleteModeBackup = null;
         
-        // Remove buttons
+        /* Remove action buttons. */
         const discardBtn = document.getElementById('discard-delete-btn');
         const saveBtn = document.getElementById('save-delete-btn');
         if (discardBtn) discardBtn.remove();
         if (saveBtn) saveBtn.remove();
         
-        // Switch back to Info Mode (this will restore all click handlers)
+        /* Switch back to Info mode and restore click handlers. */
         deactivateAllModes();
         activateInfoMode();
       } catch (error) {
@@ -354,6 +379,329 @@ function updateDeleteModeButtonsState() {
     deleteBtn.style.opacity = disabled ? '0.6' : '1';
     deleteBtn.style.cursor = disabled ? 'not-allowed' : 'pointer';
   }
+}
+
+const deleteBoxSelectionState = {
+  enabled: false,
+  active: false,
+  moved: false,
+  startLatLng: null,
+  startPoint: null,
+  rect: null,
+  draggingWasEnabled: false
+};
+
+function enableDeleteBoxSelection() {
+  if (!map || deleteBoxSelectionState.enabled) return;
+  deleteBoxSelectionState.enabled = true;
+  map.on('mousedown', handleDeleteBoxMouseDown);
+}
+
+function cleanupDeleteBoxSelection() {
+  if (!map) return;
+  map.off('mousedown', handleDeleteBoxMouseDown);
+  map.off('mousemove', handleDeleteBoxMouseMove);
+  map.off('mouseup', handleDeleteBoxMouseUp);
+  if (deleteBoxSelectionState.rect) {
+    map.removeLayer(deleteBoxSelectionState.rect);
+    deleteBoxSelectionState.rect = null;
+  }
+  if (deleteBoxSelectionState.draggingWasEnabled && map.dragging && !map.dragging.enabled()) {
+    map.dragging.enable();
+  }
+  deleteBoxSelectionState.enabled = false;
+  deleteBoxSelectionState.active = false;
+  deleteBoxSelectionState.moved = false;
+  deleteBoxSelectionState.startLatLng = null;
+  deleteBoxSelectionState.startPoint = null;
+  deleteBoxSelectionState.draggingWasEnabled = false;
+}
+
+function handleDeleteBoxMouseDown(e) {
+  if (currentMode !== 'delete') return;
+  if (!e || !e.originalEvent || e.originalEvent.button !== 0) return;
+
+  deleteBoxSelectionState.active = true;
+  deleteBoxSelectionState.moved = false;
+  deleteBoxSelectionState.startLatLng = e.latlng;
+  deleteBoxSelectionState.startPoint = e.containerPoint;
+  deleteBoxSelectionState.draggingWasEnabled = map.dragging && map.dragging.enabled();
+
+  if (deleteBoxSelectionState.draggingWasEnabled && map.dragging) {
+    map.dragging.disable();
+  }
+
+  if (deleteBoxSelectionState.rect) {
+    map.removeLayer(deleteBoxSelectionState.rect);
+  }
+  deleteBoxSelectionState.rect = L.rectangle(
+    L.latLngBounds(e.latlng, e.latlng),
+    { color: '#dc3545', weight: 1, dashArray: '4 4', fillOpacity: 0.08, interactive: false }
+  ).addTo(map);
+
+  map.on('mousemove', handleDeleteBoxMouseMove);
+  map.on('mouseup', handleDeleteBoxMouseUp);
+}
+
+function handleDeleteBoxMouseMove(e) {
+  if (!deleteBoxSelectionState.active || !deleteBoxSelectionState.rect) return;
+  const bounds = L.latLngBounds(deleteBoxSelectionState.startLatLng, e.latlng);
+  deleteBoxSelectionState.rect.setBounds(bounds);
+
+  const deltaX = Math.abs(e.containerPoint.x - deleteBoxSelectionState.startPoint.x);
+  const deltaY = Math.abs(e.containerPoint.y - deleteBoxSelectionState.startPoint.y);
+  if (deltaX > 4 || deltaY > 4) {
+    deleteBoxSelectionState.moved = true;
+  }
+}
+
+function handleDeleteBoxMouseUp(e) {
+  if (!deleteBoxSelectionState.active) return;
+
+  map.off('mousemove', handleDeleteBoxMouseMove);
+  map.off('mouseup', handleDeleteBoxMouseUp);
+
+  if (deleteBoxSelectionState.rect) {
+    map.removeLayer(deleteBoxSelectionState.rect);
+    deleteBoxSelectionState.rect = null;
+  }
+
+  if (deleteBoxSelectionState.draggingWasEnabled && map.dragging) {
+    map.dragging.enable();
+  }
+
+  const moved = deleteBoxSelectionState.moved;
+  const startLatLng = deleteBoxSelectionState.startLatLng;
+  const startPoint = deleteBoxSelectionState.startPoint;
+  deleteBoxSelectionState.active = false;
+  deleteBoxSelectionState.moved = false;
+  deleteBoxSelectionState.startLatLng = null;
+  deleteBoxSelectionState.startPoint = null;
+
+  if (!moved || !startLatLng || !e?.latlng || !startPoint) return;
+
+  const bounds = L.latLngBounds(startLatLng, e.latlng);
+  const endPoint = e.containerPoint;
+  const rectPixels = {
+    minX: Math.min(startPoint.x, endPoint.x),
+    maxX: Math.max(startPoint.x, endPoint.x),
+    minY: Math.min(startPoint.y, endPoint.y),
+    maxY: Math.max(startPoint.y, endPoint.y)
+  };
+
+  selectLayersInDeleteBounds(bounds, rectPixels);
+  updateDeleteModeButtonsState();
+  L.DomEvent.stop(e);
+}
+
+function selectLayersInDeleteBounds(bounds, rectPixels) {
+  if (!bounds) return;
+
+  [pipelineLayer, shortPipeLayer].forEach(elementLayer => {
+    if (!elementLayer) return;
+    elementLayer.eachLayer(layer => {
+      if (!layer || layer._markedForDeletion) return;
+      if (polylineIntersectsDeleteBox(layer, bounds, rectPixels)) {
+        markPipelineLayerForDeletion(layer, elementLayer);
+      }
+    });
+  });
+
+  forEachNodeMarker(marker => {
+    if (!marker || marker._markedForDeletion) return;
+    if (bounds.contains(marker.getLatLng())) {
+      const owningLayer = findOwningLayerGroup(marker) || marker._parentNodeLayer || resolveNodeLayer();
+      markPointForDeletion(marker, pendingNodeDeletions, owningLayer);
+    }
+  });
+
+  [powerplantsLayer, compressorsLayer, lngLayer, storageLayer].forEach(elementLayer => {
+    if (!elementLayer) return;
+    let pendingList = pendingPowerplantDeletions;
+    if (elementLayer === compressorsLayer) {
+      pendingList = pendingCompressorDeletions;
+    } else if (elementLayer === lngLayer) {
+      pendingList = pendingLNGDeletions;
+    } else if (elementLayer === storageLayer) {
+      pendingList = pendingStorageDeletions;
+    }
+    elementLayer.eachLayer(layer => {
+      if (!layer || layer._markedForDeletion) return;
+      if (layer.getLatLng && bounds.contains(layer.getLatLng())) {
+        markPointForDeletion(layer, pendingList, elementLayer);
+      }
+    });
+  });
+
+  if (window.customLayers) {
+    Object.values(window.customLayers).forEach(customLayer => {
+      if (!customLayer) return;
+      customLayer.eachLayer(layer => {
+        if (!layer || layer._markedForDeletion) return;
+        if (layer.getLatLng && bounds.contains(layer.getLatLng())) {
+          markGenericLayerForDeletion(layer, pendingCustomDeletions, customLayer);
+        } else if (layer.getBounds && layer.getBounds().intersects(bounds)) {
+          markGenericLayerForDeletion(layer, pendingCustomDeletions, customLayer);
+        }
+      });
+    });
+  }
+
+  if (drawnItems) {
+    drawnItems.eachLayer(layer => {
+      if (!layer || layer._markedForDeletion) return;
+      if (layer.getLatLng && bounds.contains(layer.getLatLng())) {
+        markGenericLayerForDeletion(layer, pendingDrawnItemDeletions, drawnItems);
+      } else if (layer.getBounds && layer.getBounds().intersects(bounds)) {
+        markGenericLayerForDeletion(layer, pendingDrawnItemDeletions, drawnItems);
+      }
+    });
+  }
+
+  getExtraDeletableLayerGroups().forEach(extraLayer => {
+    extraLayer.eachLayer(layer => {
+      if (!layer || layer._markedForDeletion) return;
+      if (layer.getLatLng && bounds.contains(layer.getLatLng())) {
+        markGenericLayerForDeletion(layer, pendingCustomDeletions, extraLayer);
+      } else if (layer.getBounds && layer.getBounds().intersects(bounds)) {
+        markGenericLayerForDeletion(layer, pendingCustomDeletions, extraLayer);
+      } else if (polylineIntersectsDeleteBox(layer, bounds, rectPixels)) {
+        markGenericLayerForDeletion(layer, pendingCustomDeletions, extraLayer);
+      }
+    });
+  });
+}
+
+function getExtraDeletableLayerGroups() {
+  if (!Array.isArray(layerConfig)) return [];
+  const excluded = new Set([
+    pipelineLayer,
+    shortPipeLayer,
+    nodeLayer,
+    powerplantsLayer,
+    compressorsLayer,
+    lngLayer,
+    storageLayer,
+    drawnItems
+  ]);
+  if (typeof getAllNodeLayers === 'function') {
+    getAllNodeLayers().forEach(layer => excluded.add(layer));
+  }
+  if (window.customLayers) {
+    Object.values(window.customLayers).forEach(layer => excluded.add(layer));
+  }
+
+  const extras = new Set();
+  layerConfig.forEach(config => {
+    if (!config || !config.filename) return;
+    const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    const layer = dynamicLayers ? dynamicLayers[layerName] : null;
+    if (!layer || excluded.has(layer)) return;
+    extras.add(layer);
+  });
+  return Array.from(extras);
+}
+
+function markPointForDeletion(marker, pendingList, parentLayer) {
+  if (!marker || !Array.isArray(pendingList) || marker._markedForDeletion) return;
+  applyMarkerDeletionStyle(marker);
+  const exists = pendingList.some(item => item.layer === marker);
+  if (!exists) {
+    pendingList.push({ layer: marker, parentLayer: parentLayer || null, feature: marker.feature });
+  }
+}
+
+function markGenericLayerForDeletion(layer, pendingList, parentLayer) {
+  if (!layer || !Array.isArray(pendingList) || layer._markedForDeletion) return;
+  applyGenericDeletionStyle(layer);
+  const exists = pendingList.some(item => item.layer === layer);
+  if (!exists) {
+    pendingList.push({ layer, parentLayer: parentLayer || null });
+  }
+}
+
+function polylineIntersectsDeleteBox(layer, bounds, rectPixels) {
+  if (!layer || !layer.getLatLngs) return false;
+  const latlngs = flattenLatLngs(layer.getLatLngs());
+  if (!latlngs.length) return false;
+
+  const startLatLng = latlngs[0];
+  const endLatLng = latlngs[latlngs.length - 1];
+  if (bounds.contains(startLatLng) || bounds.contains(endLatLng)) return true;
+
+  for (let i = 0; i < latlngs.length; i += 1) {
+    if (bounds.contains(latlngs[i])) return true;
+  }
+
+  if (!rectPixels) return false;
+  for (let i = 1; i < latlngs.length; i += 1) {
+    const p1 = map.latLngToContainerPoint(latlngs[i - 1]);
+    const p2 = map.latLngToContainerPoint(latlngs[i]);
+    if (segmentIntersectsRect(p1, p2, rectPixels)) return true;
+  }
+
+  return false;
+}
+
+function flattenLatLngs(latlngs) {
+  if (!Array.isArray(latlngs)) return [];
+  if (!Array.isArray(latlngs[0])) return latlngs;
+  return latlngs.flatMap(item => flattenLatLngs(item));
+}
+
+function segmentIntersectsRect(p1, p2, rect) {
+  if (!p1 || !p2 || !rect) return false;
+  if (pointInsideRect(p1, rect) || pointInsideRect(p2, rect)) return true;
+
+  const topLeft = { x: rect.minX, y: rect.minY };
+  const topRight = { x: rect.maxX, y: rect.minY };
+  const bottomRight = { x: rect.maxX, y: rect.maxY };
+  const bottomLeft = { x: rect.minX, y: rect.maxY };
+
+  return (
+    segmentsIntersect(p1, p2, topLeft, topRight) ||
+    segmentsIntersect(p1, p2, topRight, bottomRight) ||
+    segmentsIntersect(p1, p2, bottomRight, bottomLeft) ||
+    segmentsIntersect(p1, p2, bottomLeft, topLeft)
+  );
+}
+
+function pointInsideRect(point, rect) {
+  return (
+    point.x >= rect.minX &&
+    point.x <= rect.maxX &&
+    point.y >= rect.minY &&
+    point.y <= rect.maxY
+  );
+}
+
+function segmentsIntersect(p1, p2, p3, p4) {
+  const o1 = orientation(p1, p2, p3);
+  const o2 = orientation(p1, p2, p4);
+  const o3 = orientation(p3, p4, p1);
+  const o4 = orientation(p3, p4, p2);
+
+  if (o1 !== o2 && o3 !== o4) return true;
+  if (o1 === 0 && onSegment(p1, p3, p2)) return true;
+  if (o2 === 0 && onSegment(p1, p4, p2)) return true;
+  if (o3 === 0 && onSegment(p3, p1, p4)) return true;
+  if (o4 === 0 && onSegment(p3, p2, p4)) return true;
+  return false;
+}
+
+function orientation(p, q, r) {
+  const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+  if (val === 0) return 0;
+  return val > 0 ? 1 : 2;
+}
+
+function onSegment(p, q, r) {
+  return (
+    q.x <= Math.max(p.x, r.x) &&
+    q.x >= Math.min(p.x, r.x) &&
+    q.y <= Math.max(p.y, r.y) &&
+    q.y >= Math.min(p.y, r.y)
+  );
 }
 
 function markPipelineLayerForDeletion(layer, parentLayer) {
@@ -596,7 +944,7 @@ function clearPendingDeletionSelections() {
 
 function activateDeleteMode() {
   try {
-    // Erst alle Modi deaktivieren (ohne Button-Highlighting)
+    /* Disable all modes without button highlighting. */
     if (window.polylineDrawer && window.polylineDrawer._enabled) window.polylineDrawer.disable();
     if (window.markerDrawer && window.markerDrawer._enabled) window.markerDrawer.disable();
     map.closePopup();
@@ -605,10 +953,10 @@ function activateDeleteMode() {
       editingLayer = null;
     }
     
-    // Alle Pipeline-Highlights zurücksetzen
+    /* Reset pipeline highlights. */
     resetAllPipelineHighlights();
     
-    // SPEICHERE DEN AKTUELLEN ZUSTAND VOR DELETE MODE
+    /* Capture state before entering delete mode. */
     console.log('Speichere aktuellen Karten-Zustand vor Delete Mode');
     deleteModeBackup = {
       pipelines: pipelineLayer ? getLayerFeatures(pipelineLayer) : [],
@@ -641,7 +989,7 @@ function activateDeleteMode() {
     console.log('Delete Mode aktiviert');
     updateDeleteModeButtonsState();
     
-    // Setup delete handlers for pipeline layers
+    /* Setup delete handlers for pipeline layers. */
     [pipelineLayer, shortPipeLayer].forEach(elementLayer => {
       if (elementLayer) {
         elementLayer.eachLayer(layer => {
@@ -659,7 +1007,7 @@ function activateDeleteMode() {
       }
     });
     
-    // Setup delete handlers for node layers (CircleMarkers)
+    /* Setup delete handlers for node layers (CircleMarkers). */
     forEachNodeMarker(marker => {
       marker.off('click');
       marker.on('click', function (e) {
@@ -673,7 +1021,7 @@ function activateDeleteMode() {
       });
     });
     
-    // Setup delete handlers for infrastructure layers
+    /* Setup delete handlers for infrastructure layers. */
     [powerplantsLayer, compressorsLayer, lngLayer, storageLayer].forEach(elementLayer => {
       if (elementLayer) {
         let pendingList = pendingPowerplantDeletions;
@@ -699,7 +1047,7 @@ function activateDeleteMode() {
       }
     });
     
-    // Setup delete handlers for custom layers
+    /* Setup delete handlers for custom layers. */
     if (window.customLayers) {
       Object.values(window.customLayers).forEach(customLayer => {
         if (customLayer) {
@@ -718,8 +1066,25 @@ function activateDeleteMode() {
         }
       });
     }
+
+    /* Setup delete handlers for remaining layerConfig-based layers. */
+    getExtraDeletableLayerGroups().forEach(extraLayer => {
+      if (!extraLayer) return;
+      extraLayer.eachLayer(layer => {
+        layer.off();
+        layer.unbindPopup();
+        layer.on('click', function (e) {
+          L.DomEvent.stopPropagation(e);
+          try {
+            toggleGenericLayerDeletion(layer, pendingCustomDeletions, extraLayer);
+          } catch (error) {
+            console.error('Error in extra layer deletion toggle:', error);
+          }
+        });
+      });
+    });
     
-    // Drawn Items Delete-Interaktionen
+    /* Drawn-items delete interactions. */
     drawnItems.eachLayer(layer => {
       layer.off('click');
       layer.unbindPopup();
@@ -732,6 +1097,8 @@ function activateDeleteMode() {
         }
       });
     });
+
+    enableDeleteBoxSelection();
   } catch (error) {
     console.error('Error in activateDeleteMode:', error);
   }

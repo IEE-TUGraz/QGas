@@ -28,18 +28,28 @@
  * inline HTML event handlers.
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - DOM elements for the filter modal and country selection UI.
+ * - Map layer registries and country metadata embedded in features.
+ *
+ * Public API:
+ * - openFilterModal(): Open the filter dialog.
+ * - applyCountryFilter(): Apply the selected country filter.
+ * - clearAllFilters(): Reset to unfiltered layers.
  * 
  * ================================================================================
  */
 
-// ================================================================================
-// FILTER MODAL FUNCTIONS
-// ================================================================================
+/* ================================================================================
+ * FILTER MODAL FUNCTIONS
+ * ================================================================================
+ */
 
 /**
  * Open the main filter selection modal
@@ -81,10 +91,11 @@ function clearAllFilters() {
   closeFilterModal();
 }
 
-// ================================================================================
-// COUNTRY DATA
-// ================================================================================
-// List of European countries with names and ISO 3166-1 alpha-2 codes
+/* ================================================================================
+ * COUNTRY DATA
+ * ================================================================================
+ * List of European countries with ISO 3166-1 alpha-2 codes.
+ */
 europeanCountries = [
   { name: 'Germany', code: 'DE' },
   { name: 'Austria', code: 'AT' },
@@ -149,7 +160,7 @@ function populateCountryList() {
     countryItem.appendChild(label);
     countryList.appendChild(countryItem);
     
-    // Add event listener
+    /* Bind checkbox changes to the selection set. */
     checkbox.addEventListener('change', function() {
       if (this.checked) {
         selectedCountries.add(this.value);
@@ -178,7 +189,7 @@ function clearCountrySelection() {
 }
 
 function applyCountryFilter() {
-  // Store original layers if not already stored
+  /* Store original layers if not already stored. */
   if (!originalPipelineLayer && pipelineLayer) {
     originalPipelineLayer = pipelineLayer;
   }
@@ -223,10 +234,10 @@ function applyCountryFilter() {
   }
   
   if (selectedCountries.size === 0) {
-    // If no countries selected, show all elements (original layers)
+    /* If no countries selected, show all elements (original layers). */
     restoreAllOriginalLayers();
   } else {
-    // Filter all elements based on selected countries
+    /* Filter all elements based on selected countries. */
     filterAllElementsByCountries(selectedCountries);
   }
   
@@ -249,10 +260,10 @@ function restoreAllOriginalLayers() {
   const prevHydrogenPipeLayer = hydrogenPipeLayer;
   const prevElectrolyzersLayer = electrolyzersLayer;
 
-  // Remove current layers from map
+  /* Remove current layers from map. */
   removeAllCurrentLayers();
   
-  // Add back original layers
+  /* Add back original layers. */
   if (originalPipelineLayer && !map.hasLayer(originalPipelineLayer)) {
     map.addLayer(originalPipelineLayer);
     pipelineLayer = originalPipelineLayer;
@@ -345,7 +356,7 @@ function restoreAllOriginalLayers() {
 }
 
 function removeAllCurrentLayers() {
-  // Helper function to remove click layers
+  /* Helper to remove click layers. */
   function removeClickLayers(layerGroup) {
     if (layerGroup) {
       layerGroup.eachLayer(layer => {
@@ -432,10 +443,10 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   const prevHydrogenPipeLayer = hydrogenPipeLayer;
   const prevElectrolyzersLayer = electrolyzersLayer;
 
-  // Remove current layers from map
+  /* Remove current layers from map. */
   removeAllCurrentLayers();
 
-  // Create filtered layers from original data
+  /* Create filtered layers from original data. */
   const filteredPipelineLayer = originalPipelineLayer ? L.layerGroup() : null;
   const filteredEstimatedLayer = originalEstimatedPipelinesLayer ? L.layerGroup() : null;
   const filteredNodeLayer = originalNodeLayer ? L.layerGroup() : null;
@@ -458,7 +469,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log(`Added ${label} layer with ${layerGroup.getLayers().length} features`);
   };
 
-  // Filter pipelines
+  /* Filter pipelines. */
   if (originalPipelineLayer) {
     let pipelineCount = 0;
     originalPipelineLayer.eachLayer(layer => {
@@ -470,7 +481,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered pipelines:', pipelineCount);
   }
 
-  // Filter estimated pipelines
+  /* Filter estimated pipelines. */
   if (originalEstimatedPipelinesLayer && filteredEstimatedLayer) {
     let estimatedCount = 0;
     originalEstimatedPipelinesLayer.eachLayer(layer => {
@@ -482,7 +493,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered estimated pipelines:', estimatedCount);
   }
 
-  // Filter nodes
+  /* Filter nodes. */
   if (originalNodeLayer && filteredNodeLayer) {
     let nodeCount = 0;
     originalNodeLayer.eachLayer(layer => {
@@ -494,7 +505,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered nodes:', nodeCount);
   }
 
-  // Filter powerplants
+  /* Filter powerplants. */
   if (originalPowerplantsLayer && filteredPowerplantsLayer) {
     let powerplantCount = 0;
     originalPowerplantsLayer.eachLayer(layer => {
@@ -506,7 +517,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered powerplants:', powerplantCount);
   }
 
-  // Filter compressors
+  /* Filter compressors. */
   if (originalCompressorsLayer && filteredCompressorsLayer) {
     let compressorCount = 0;
     originalCompressorsLayer.eachLayer(layer => {
@@ -518,7 +529,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered compressors:', compressorCount);
   }
 
-  // Filter LNG terminals
+  /* Filter LNG terminals. */
   if (originalLngLayer && filteredLngLayer) {
     let lngCount = 0;
     originalLngLayer.eachLayer(layer => {
@@ -530,7 +541,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered LNG terminals:', lngCount);
   }
 
-  // Filter storage sites
+  /* Filter storage sites. */
   if (originalStorageLayer && filteredStorageLayer) {
     let storageCount = 0;
     originalStorageLayer.eachLayer(layer => {
@@ -542,7 +553,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered storage sites:', storageCount);
   }
 
-  // Filter consumption points
+  /* Filter consumption points. */
   if (originalConsumptionLayer && filteredConsumptionLayer) {
     let consumptionCount = 0;
     originalConsumptionLayer.eachLayer(layer => {
@@ -554,7 +565,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered consumption points:', consumptionCount);
   }
 
-  // Filter short pipes
+  /* Filter short pipes. */
   if (originalShortPipeLayer && filteredShortPipeLayer) {
     let shortPipeCount = 0;
     originalShortPipeLayer.eachLayer(layer => {
@@ -566,7 +577,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered short pipes:', shortPipeCount);
   }
 
-  // Filter border points
+  /* Filter border points. */
   if (originalBorderpointsLayer && filteredBorderpointsLayer) {
     let borderCount = 0;
     originalBorderpointsLayer.eachLayer(layer => {
@@ -578,7 +589,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered border points:', borderCount);
   }
 
-  // Filter demands
+  /* Filter demands. */
   if (originalDemandsLayer && filteredDemandsLayer) {
     let demandCount = 0;
     originalDemandsLayer.eachLayer(layer => {
@@ -590,7 +601,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered demands:', demandCount);
   }
 
-  // Filter productions
+  /* Filter productions. */
   if (originalProductionsLayer && filteredProductionsLayer) {
     let productionCount = 0;
     originalProductionsLayer.eachLayer(layer => {
@@ -602,7 +613,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered productions:', productionCount);
   }
 
-  // Filter hydrogen pipelines
+  /* Filter hydrogen pipelines. */
   if (originalHydrogenPipeLayer && filteredHydrogenPipeLayer) {
     let hydrogenCount = 0;
     originalHydrogenPipeLayer.eachLayer(layer => {
@@ -614,7 +625,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered hydrogen pipelines:', hydrogenCount);
   }
 
-  // Filter electrolyzers
+  /* Filter electrolyzers. */
   if (originalElectrolyzersLayer && filteredElectrolyzersLayer) {
     let electrolyzerCount = 0;
     originalElectrolyzersLayer.eachLayer(layer => {
@@ -626,7 +637,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     console.log('Filtered electrolyzers:', electrolyzerCount);
   }
 
-  // Add filtered layers to map (even if empty, so editing targets exist)
+  /* Add filtered layers to map (even if empty, so editing targets exist). */
   applyDeletedIdentitiesToLayer(filteredPipelineLayer);
   applyDeletedIdentitiesToLayer(filteredEstimatedLayer);
   applyDeletedIdentitiesToLayer(filteredNodeLayer);
@@ -657,7 +668,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   addFilteredLayerToMap(filteredHydrogenPipeLayer, 'hydrogen pipeline');
   addFilteredLayerToMap(filteredElectrolyzersLayer, 'electrolyzer');
 
-  // Update current layer references (but keep originals intact)
+  /* Update current layer references (originals remain intact). */
   pipelineLayer = filteredPipelineLayer;
   estimatedPipelinesLayer = filteredEstimatedLayer;
   nodeLayer = filteredNodeLayer;
@@ -734,7 +745,9 @@ function enforceFilteredLayerPresence() {
   ensurePair(originalElectrolyzersLayer, electrolyzersLayer);
 }
 
-// Country name to country code mapping
+/*
+ * Country name to country code mapping.
+ */
 const countryNameToCode = {
   'Germany': 'DE',
   'France': 'FR',
@@ -773,7 +786,7 @@ const countryNameToCode = {
   'Cyprus': 'CY',
   'Litauen': 'LT',
   'Algeria': 'DZ',
-  // Add more mappings as needed
+  /* Extend mappings as needed. */
 };
 
 const countryNameLookup = {};
@@ -1025,7 +1038,9 @@ function shouldShowPipeline(feature, selectedCountryCodes) {
 }
 
 
-// Alias used by Map.html main screen button
+/*
+ * Alias used by Map.html main screen button.
+ */
 function toggleFilterPanel(){
   try { openFilterModal(); } catch(e){ console.error('toggleFilterPanel failed', e); if (typeof showCustomPopup==='function') showCustomPopup('⚠️ Error', String(e)); }
 }

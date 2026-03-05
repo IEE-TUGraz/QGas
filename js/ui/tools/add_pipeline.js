@@ -23,11 +23,20 @@
  * 5. Pipeline is added to selected layer
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Map clicks for node and pipeline placement.
+ * - Active node and line layer selections.
+ * - Contributor initials for ID generation.
+ *
+ * Public API:
+ * - promptPipelineLayerSelection(onComplete, onCancel): Choose a target line layer.
+ * - proceedWithAddPipeline(): Start the add-pipeline workflow.
  * 
  * ================================================================================
  */
@@ -321,11 +330,12 @@ function getNodeLatLng(layer) {
 
 function proceedWithAddPipeline() {
   console.log('proceedWithAddPipeline called');
-  currentMode = 'add-pipeline'; // Sicherstellen, dass der Modus richtig gesetzt ist
+  /* Ensure the correct mode is set for the workflow. */
+  currentMode = 'add-pipeline';
   if (!window.selectedPipelineLayer) {
     window.selectedPipelineLayer = pipelineLayer || drawnItems;
   }
-  // Node-Auswahl mit schönem Popup
+  /* Prompt for start-node selection. */
   showCustomPopup(
     '➕ Add Pipeline',
     '<p style="text-align: center; margin: 15px 0;">Does the pipeline start at an existing node?</p>',
@@ -410,7 +420,7 @@ function proceedWithAddPipeline() {
           ]
         );
 
-        // Event-Handler für End-Node-Auswahl direkt aktivieren
+        /* Activate end-node selection handlers. */
         currentMode = 'select-end-node';
         setNodeSelectionHandlers(marker => {
           endNodeId = marker.feature.properties.ID;
@@ -440,11 +450,11 @@ function proceedWithAddPipeline() {
           }
         });
       } else {
-        // Kein End-Node - direkt mit Pipeline-Zeichnen starten
+        /* No end node: proceed directly to drawing. */
         closeCustomPopup();
         hasEndNode = false;
 
-        // Pipeline zeichnen starten - erster Klick setzt Start-Node und beginnt Zeichnen
+        /* Start drawing; first click sets start node and begins the line. */
         startPipelineDrawing();
       }
       
@@ -465,14 +475,24 @@ function proceedWithAddPipeline() {
           }
 
           if (needsNewStartNode) {
-            const newNodeId = formatElementId(nodePrefix, contributorInitials, getNextIdNumber('Node'));
+            const nodeIdContext = getNodeIdContext(targetLayerRef);
+            const newNodeId = formatElementId(
+              nodeIdContext.prefix,
+              contributorInitials,
+              getNextIdNumber(nodeIdContext.typeKey, targetLayerRef)
+            );
             createNewNode(startLatLng, newNodeId, { targetLayer: targetLayerRef });
             startNodeId = newNodeId;
             hasStartNode = true;
           }
 
           if (needsNewEndNode) {
-            const newNodeId = formatElementId(nodePrefix, contributorInitials, getNextIdNumber('Node'));
+            const nodeIdContext = getNodeIdContext(targetLayerRef);
+            const newNodeId = formatElementId(
+              nodeIdContext.prefix,
+              contributorInitials,
+              getNextIdNumber(nodeIdContext.typeKey, targetLayerRef)
+            );
             createNewNode(endLatLng, newNodeId, { targetLayer: targetLayerRef });
             endNodeId = newNodeId;
             hasEndNode = true;
@@ -510,7 +530,8 @@ function proceedWithAddPipeline() {
           polyline._originLayerName = layerDisplayName;
           setPipelineInteraction(polyline, 'info');
           currentMode = 'info';
-          activateInfoMode();
+          activateInfoMode(true);
+          selectTool('info');
         };
 
         if (needsNewStartNode || needsNewEndNode) {
@@ -518,7 +539,7 @@ function proceedWithAddPipeline() {
             finalizeDirectCreation();
           }, () => {
             currentMode = 'info';
-            activateInfoMode();
+            activateInfoMode(true);
           });
         } else {
           finalizeDirectCreation();
@@ -581,7 +602,7 @@ function proceedWithAddPipeline() {
             initializeDrawing();
           }, () => {
             currentMode = 'info';
-            activateInfoMode();
+            activateInfoMode(true);
           });
         } else {
           initializeDrawing();
@@ -603,7 +624,7 @@ function proceedWithAddPipeline() {
               if (!availableNodeLayer) {
                 showInfoPopup('Node layer is not available yet. Please load nodes before selecting one.', '🎯 Select Start Node');
                 currentMode = 'info';
-                activateInfoMode();
+                activateInfoMode(true);
                 return;
               }
 
@@ -625,13 +646,13 @@ function proceedWithAddPipeline() {
             onClick: () => {
               clearNodeSelectionHandlers();
               currentMode = 'info';
-              activateInfoMode();
+              activateInfoMode(true);
             }
           }
         ]
       );
     } else {
-      // Direkt die Frage nach dem End-Node stellen
+      /* If no start node is selected, ask for end node directly. */
       askForEndNode();
     }
   }
@@ -671,7 +692,7 @@ function selectElementType(type) {
   );
 }
 
-// startAddNewElement moved to add_new_element.js module
+/* startAddNewElement moved to add_new_element.js module. */
 
 function findSamplePipelineLayer(layerGroup) {
   let sample = null;
@@ -754,10 +775,10 @@ function finalizeDrawnPipeline(polyline) {
   let startNodeId = context.startNodeId;
   let endNodeId = null;
   let startLatLng = context.startLatLng;
-  const nodePrefix = getFacilityPrefix('Node');
   const contextNodeLayer = context.nodeLayer || getActivePipelineNodeLayer();
+  const nodeIdContext = getNodeIdContext(contextNodeLayer);
 
-  // Start-Node: Verwende ausgewählten, sonst neuen erstellen
+  /* Start node: use existing or create a new one. */
   let startNodeIdLocal;
   if (context.startNodeId) {
     startNodeIdLocal = context.startNodeId;
@@ -765,11 +786,15 @@ function finalizeDrawnPipeline(polyline) {
   } else {
     console.log('Creating new start node');
     startLatLng = latlngs[0];
-    startNodeIdLocal = formatElementId(nodePrefix, contributorInitials, getNextIdNumber('Node'));
+    startNodeIdLocal = formatElementId(
+      nodeIdContext.prefix,
+      contributorInitials,
+      getNextIdNumber(nodeIdContext.typeKey, contextNodeLayer)
+    );
     createNewNode(startLatLng, startNodeIdLocal, { targetLayer: contextNodeLayer });
   }
 
-  // End-Node: Verwende ausgewählten, sonst neuen erstellen
+  /* End node: use existing or create a new one. */
   let endNodeIdLocal;
   if (context.endNodeId) {
     endNodeIdLocal = context.endNodeId;
@@ -777,11 +802,15 @@ function finalizeDrawnPipeline(polyline) {
   } else {
     console.log('Creating new end node');
     const endLatLng = latlngs[latlngs.length - 1];
-    endNodeIdLocal = formatElementId(nodePrefix, contributorInitials, getNextIdNumber('Node'));
+    endNodeIdLocal = formatElementId(
+      nodeIdContext.prefix,
+      contributorInitials,
+      getNextIdNumber(nodeIdContext.typeKey, contextNodeLayer)
+    );
     createNewNode(endLatLng, endNodeIdLocal, { targetLayer: contextNodeLayer });
   }
   
-  // Pipeline-Eigenschaften setzen
+  /* Set pipeline properties and metadata. */
   const targetLayer = window.selectedPipelineLayer || pipelineLayer || drawnItems;
   const idContext = getLayerIdContext(targetLayer);
   const pipelineId = formatElementId(idContext.prefix, contributorInitials, getNextIdNumber(idContext.typeKey, targetLayer));
@@ -819,27 +848,30 @@ function finalizeDrawnPipeline(polyline) {
   activateInfoMode(true);
   selectTool('info');
   
-  // Context wird später gelöscht, damit beide draw:created Handler ihn sehen können
+  /* Context is cleared later so both draw:created handlers can access it. */
 }
 
-// createNewLayer and addToLegend moved to add_new_element.js module
+/* createNewLayer and addToLegend moved to add_new_element.js module. */
 
 function toggleFilterPanel() {
   openFilterModal();
 }
 
-// ==================== Pipeline Grouping Functions ====================
+/* ================================================================================
+ * Pipeline Grouping Functions
+ * ================================================================================
+ */
 
 function finalizeGrouping() {
-  // Finalize grouping without start/end node selection
-  // Calculate total length (handle both Length_km and length_km)
+  /* Finalize grouping without start/end node selection. */
+  /* Calculate total length (handle Length_km and length_km). */
   let totalLength = 0;
   selectedPipelinesForGroup.forEach(p => {
     const length = p.layer.feature.properties.Length_km || p.layer.feature.properties.length_km || 0;
     totalLength += parseFloat(length);
   });
   
-  // Create group without start/end points
+  /* Create group without start/end points. */
   const newGroup = {
     name: currentGroupName,
     pipelines: selectedPipelinesForGroup.map(p => p.id),
@@ -849,7 +881,7 @@ function finalizeGrouping() {
   
   pipelineGroups.push(newGroup);
   
-  // Reset colors to original layer styling
+  /* Reset colors to original layer styling. */
   selectedPipelinesForGroup.forEach(p => {
     const originalColor = p.layer._originalColor || '#3388ff';
     const originalWeight = p.layer._originalWeight || 3;
@@ -864,7 +896,7 @@ function finalizeGrouping() {
     });
   });
   
-  // Reset variables
+  /* Reset grouping state. */
   groupingMode = false;
   selectedPipelinesForGroup = [];
   currentGroupName = '';
@@ -873,7 +905,7 @@ function finalizeGrouping() {
     '✅ Group Created',
     `<p style="text-align: center; margin: 15px 0;">Group "<strong>${newGroup.name}</strong>" created successfully!<br><br>Elements: ${newGroup.numElements}<br>Total Length: ${newGroup.totalLength} km</p>`,
     [{text: 'OK', type: 'primary', onClick: () => {
-      // Switch back to info mode
+      /* Switch back to info mode. */
       currentMode = 'info';
       activateInfoMode(true);
       selectTool('info');

@@ -1,4 +1,26 @@
-  // Statistics Modal Functions
+/**
+ * QGas - Statistics Module
+ *
+ * Module Description:
+ * Computes and displays infrastructure statistics in a modal dialog,
+ * including counts and aggregated metrics.
+ *
+ * Author: Dipl.-Ing. Marco Quantschnig
+ * Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Map layers and feature properties for aggregation.
+ * - DOM elements for statistics modal and charts.
+ *
+ * Public API:
+ * - openStatisticsModal(): Show the statistics modal.
+ * - closeStatisticsModal(): Hide the statistics modal.
+ * - updateStatistics(): Recompute and render statistics.
+ */
+  /*
+   * Statistics modal handlers.
+   */
   function openStatisticsModal() {
     updateStatistics();
     document.getElementById('statistics-modal').style.display = 'flex';
@@ -8,8 +30,10 @@
     document.getElementById('statistics-modal').style.display = 'none';
   }
 
-  // Robust click handler: the Statistics button is injected dynamically by the legend.
-  // Use event delegation so it works regardless of when the legend is (re)rendered.
+  /*
+   * Robust click handler: the Statistics button is injected dynamically by the legend.
+   * Uses event delegation so it works regardless of legend render timing.
+   */
   document.addEventListener('click', (e) => {
     const t = e && e.target;
     if (!t) return;
@@ -22,14 +46,14 @@
     }
   });
 
-  // Global statistics cache
+  /* Global statistics cache. */
   let currentStatistics = null;
 
   function updateStatistics() {
     const stats = calculateStatistics();
     displayStatistics(stats);
     
-    // Cache the statistics globally for performance
+    /* Cache the statistics globally for performance. */
     window.cachedStatistics = stats;
   }
 
@@ -42,6 +66,9 @@
       powerplants: 0,
       compressors: 0,
       nodes: 0,
+      nodesBase: 0,
+      nodesSublayer: 0,
+      nodeLayerStats: {},
       borderpoints: 0,
       demands: 0,
       productions: 0,
@@ -52,7 +79,7 @@
       pipelineDiameter: { available: 0, total: 0, lengthAvailable: 0, totalLength: 0 },
       pipelineName: { available: 0, total: 0, lengthAvailable: 0, totalLength: 0 },
       pipelinePressure: { available: 0, total: 0, lengthAvailable: 0, totalLength: 0 },
-      lineLayerStats: {}  // New: statistics for each line layer separately
+      lineLayerStats: {}
     };
 
     const lineGroups = (typeof getLineLayerGroupsForDirectionMode === 'function')
@@ -130,14 +157,14 @@
           return;
         }
 
-        // Get layer name from the individual layer's metadata (more accurate than layerGroup)
+        /* Prefer layer metadata over group metadata for naming. */
         const layerName = layer?._qgasMeta?.legendName || 
                           layer?.feature?.properties?.__elementKey || 
                           layerGroup?._qgasMeta?.legendName || 
                           layerGroup?._customLayerName || 
                           'Pipelines';
         
-        // Initialize stats for this layer if not exists
+        /* Initialize stats for this layer if missing. */
         if (!stats.lineLayerStats[layerName]) {
           stats.lineLayerStats[layerName] = {
             count: 0,
@@ -150,7 +177,7 @@
         stats.pipelineElements++;
         stats.totalLength += length;
         
-        // Add to layer-specific stats
+        /* Add to layer-specific stats. */
         stats.lineLayerStats[layerName].count++;
         stats.lineLayerStats[layerName].totalLength += length;
 
@@ -194,7 +221,7 @@
       });
     });
 
-    // If no pipeline has Source attribute, replace 'No technical attributes' with 'SciGrid_gas'
+    /* If no pipeline has Source attribute, replace the placeholder label. */
     if (!hasAnySourceAttribute && stats.pipelineSources['No technical attributes']) {
       stats.pipelineSources['SciGrid_gas'] = stats.pipelineSources['No technical attributes'];
       stats.pipelineSourcesByCount['SciGrid_gas'] = stats.pipelineSourcesByCount['No technical attributes'];
@@ -202,7 +229,7 @@
       delete stats.pipelineSourcesByCount['No technical attributes'];
     }
 
-    // Count other infrastructure
+    /* Count other infrastructure. */
     if (storageLayer) {
       storageLayer.eachLayer(layer => {
         if (layer.feature) stats.storages++;
@@ -223,12 +250,59 @@
         if (layer.feature) stats.compressors++;
       });
     }
+    const resolveNodeLayerConfig = (meta, layerGroup) => {
+      if (!Array.isArray(layerConfig) || !layerConfig.length) return null;
+      const metaFilename = meta?.filename || '';
+      const metaLayerName = meta?.layerName || '';
+      const metaLegend = meta?.legendName || '';
+      const normalizeName = (value) => {
+        if (typeof normalizeFilenameReference === 'function') {
+          return normalizeFilenameReference(value || '');
+        }
+        return String(value || '').trim().toLowerCase();
+      };
+      const normalizedMetaFilename = normalizeName(metaFilename);
+      return layerConfig.find(cfg => {
+        if (!cfg) return false;
+        const cfgFilename = normalizeName(cfg.filename || cfg.Filename || '');
+        if (normalizedMetaFilename && cfgFilename && normalizedMetaFilename === cfgFilename) return true;
+        if (metaLayerName && cfg.layerName && metaLayerName === cfg.layerName) return true;
+        if (metaLegend && cfg.legendName && metaLegend === cfg.legendName) return true;
+        if (layerGroup?._customLayerName && cfg.legendName && layerGroup._customLayerName === cfg.legendName) return true;
+        return false;
+      }) || null;
+    };
+
     getAllNodeLayers().forEach(layerGroup => {
       if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
+      let meta = null;
+      if (typeof resolveLayerMetadata === 'function') {
+        meta = resolveLayerMetadata(layerGroup);
+      }
+      if (!meta) {
+        meta = layerGroup._qgasMeta || layerGroup._customLayerSettings || null;
+      }
+      const config = resolveNodeLayerConfig(meta, layerGroup);
+      const isSublayer = !!(
+        (meta && (meta.isSublayer || meta.parentFilename)) ||
+        (config && (config.isSublayer || config.parentFilename))
+      );
+      const layerLabel = (meta && (meta.legendName || meta.layerName)) ||
+        (config && (config.legendName || config.layerName)) ||
+        layerGroup._customLayerName ||
+        'Nodes';
+      if (!stats.nodeLayerStats[layerLabel]) {
+        stats.nodeLayerStats[layerLabel] = { count: 0, isSublayer };
+      }
       layerGroup.eachLayer(layer => {
-        if (layer && layer.feature) {
-          stats.nodes++;
+        if (!layer || !layer.feature) return;
+        stats.nodes++;
+        if (isSublayer) {
+          stats.nodesSublayer++;
+        } else {
+          stats.nodesBase++;
         }
+        stats.nodeLayerStats[layerLabel].count++;
       });
     });
     if (borderpointsLayer) {
@@ -261,7 +335,7 @@
   }
 
   function displayStatistics(stats) {
-    // Calculate percentages
+    /* Calculate percentages. */
     const diameterPercentLengthwise = stats.pipelineDiameter.totalLength > 0 ? 
       (stats.pipelineDiameter.lengthAvailable / stats.pipelineDiameter.totalLength * 100) : 0;
     const diameterPercentElementwise = stats.pipelineDiameter.total > 0 ? 
@@ -275,10 +349,10 @@
     const pressurePercentElementwise = stats.pipelinePressure.total > 0 ? 
       (stats.pipelinePressure.available / stats.pipelinePressure.total * 100) : 0;
 
-    // Generate HTML content
+    /* Generate HTML content. */
     let content = '';
 
-    // Line Layers Statistics Section
+    /* Line layers statistics section. */
     if (Object.keys(stats.lineLayerStats).length > 0) {
       content += `
       <h3 style="margin-top: 0; color: #495057;">Line Layers</h3>
@@ -292,7 +366,7 @@
         </thead>
         <tbody>`;
       
-      // Add rows for each line layer
+      /* Add rows for each line layer. */
       Object.entries(stats.lineLayerStats).forEach(([layerName, layerStats]) => {
         content += `
           <tr>
@@ -307,9 +381,10 @@
       </table>`;
     }
 
-    // Define infrastructure items with their counts
+    /* Define infrastructure items with their counts. */
     const infrastructureItems = [
-      { name: 'nodes', count: stats.nodes || 0 },
+      { name: 'nodes (base layers)', count: stats.nodesBase || 0 },
+      { name: 'nodes (sublayers)', count: stats.nodesSublayer || 0 },
       { name: 'storages', count: stats.storages },
       { name: 'LNG terminals', count: stats.lngTerminals },
       { name: 'power plants', count: stats.powerplants },
@@ -321,12 +396,12 @@
       { name: 'electrolyzers', count: stats.electrolyzers }
     ];
 
-    // Filter to only show items that are loaded (count > 0)
+    /* Filter to show only loaded items (count > 0). */
     const visibleItems = infrastructureItems.filter(item => item.count > 0);
 
-    // Add infrastructure section only if there are visible items
+    /* Add infrastructure section only if items are visible. */
     if (visibleItems.length > 0) {
-      // Generate table rows
+      /* Generate table rows. */
       const tableRows = visibleItems.map(item => `
         <tr>
           <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">Number of ${item.name}</td>
@@ -343,7 +418,34 @@
       </table>`;
     }
 
-    // Add pipeline data completeness section only if pipelines are loaded
+    const nodeLayerEntries = Object.entries(stats.nodeLayerStats || {})
+      .filter(([, entry]) => entry && entry.count > 0 && entry.isSublayer)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+
+    if (nodeLayerEntries.length > 0) {
+      const nodeLayerRows = nodeLayerEntries.map(([layerName, entry]) => `
+        <tr>
+          <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">${layerName}</td>
+          <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: right;">${entry.count}</td>
+        </tr>
+      `).join('');
+
+      content += `
+      <h3 style="color: #495057;">Node Sublayer Breakdown</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+        <thead>
+          <tr>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: left; font-weight: bold;">Sublayer</th>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: right; font-weight: bold;">Node Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${nodeLayerRows}
+        </tbody>
+      </table>`;
+    }
+
+    /* Add pipeline data completeness section only if pipelines are loaded. */
     if (stats.pipelineElements > 0) {
       content += `
       
@@ -397,9 +499,9 @@
 
     document.getElementById('statistics-content').innerHTML = content;
     
-    // Create pipeline charts only if pipelines are loaded
+    /* Create pipeline charts only if pipelines are loaded. */
     if (stats.pipelineElements > 0) {
-      // Destroy existing charts if they exist
+      /* Destroy existing charts if they exist. */
       const existingChartElements = Chart.getChart('pipelineSourcesChartElements');
       if (existingChartElements) {
         existingChartElements.destroy();
@@ -409,10 +511,10 @@
         existingChartLength.destroy();
       }
       
-      // Create pipeline sources pie charts
+      /* Create pipeline sources pie charts. */
       const sourceLabels = Object.keys(stats.pipelineSources);
       
-      // Generate colors for the chart - white for "No technical attributes", others use default colors
+      /* Generate colors for the chart; white denotes missing technical attributes. */
       const defaultColors = [
         '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', 
         '#FF9F40', '#C9CBCF', '#9966FF', '#4BC0C0', '#FF9F40'
@@ -426,7 +528,7 @@
         label === 'No technical attributes' ? '#CCCCCC' : defaultColors[index % defaultColors.length].replace('0.2', '1')
       );
       
-      // Chart for element count
+      /* Chart for element count. */
       const ctxElements = document.getElementById('pipelineSourcesChartElements').getContext('2d');
       const sourceDataElements = Object.values(stats.pipelineSourcesByCount);
       
@@ -463,7 +565,7 @@
         }
       });
       
-      // Chart for length
+      /* Chart for length. */
       const ctxLength = document.getElementById('pipelineSourcesChartLength').getContext('2d');
       const sourceDataLength = Object.values(stats.pipelineSources);
       
@@ -500,7 +602,7 @@
         }
       });
       
-      // Create shared legend
+      /* Create shared legend. */
       const legendContainer = document.getElementById('charts-legend');
       legendContainer.innerHTML = '<div style="display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 10px;">';
       

@@ -1,4 +1,24 @@
-// Extracted groups panel logic from core.js (v5)
+/**
+ * QGas - Pipeline Groups Module
+ *
+ * Module Description:
+ * Supports visualizing and highlighting pipeline groups created in the UI.
+ *
+ * Author: Dipl.-Ing. Marco Quantschnig
+ * Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Pipeline group definitions and layer registries.
+ * - Map instance for pan/zoom and style updates.
+ *
+ * Public API:
+ * - highlightGroup(index): Highlight a saved pipeline group.
+ * - unhighlightAllGroups(): Clear group highlights.
+ */
+/*
+ * Extracted groups panel logic from core.js (v5).
+ */
 
 window.highlightGroup = function highlightGroup(index) {
   const group = pipelineGroups[index];
@@ -6,7 +26,7 @@ window.highlightGroup = function highlightGroup(index) {
 
   dockCustomPopupBottomRight();
 
-  // Alle Pipelines zurücksetzen
+  /* Reset all pipeline highlights before applying group highlight. */
   unhighlightAllGroups();
 
   if (!map) return;
@@ -14,7 +34,7 @@ window.highlightGroup = function highlightGroup(index) {
   const targetedIds = Array.isArray(group.pipelines) ? new Set(group.pipelines) : new Set();
   const bounds = L.latLngBounds();
 
-  // Search in all line layers (pipelineLayer, drawnItems, shortPipeLayer, customLayers)
+  /* Search in all line layers (pipelineLayer, drawnItems, shortPipeLayer, customLayers). */
   const lineLayers = [];
   if (typeof pipelineLayer !== 'undefined' && pipelineLayer) lineLayers.push(pipelineLayer);
   if (typeof drawnItems !== 'undefined' && drawnItems) lineLayers.push(drawnItems);
@@ -29,7 +49,7 @@ window.highlightGroup = function highlightGroup(index) {
     if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
     
     layerGroup.eachLayer(layer => {
-      // Skip if not a polyline
+      /* Skip non-polyline features. */
       if (!layer.feature || layer.feature.geometry.type !== 'LineString') return;
       
       const featureId = layer?.feature?.properties?.ID;
@@ -67,7 +87,7 @@ function openGroupsPanel() {
     return;
   }
   
-  // Liste der Gruppen erstellen
+  /* Build the group list for display. */
   let groupsHTML = '<div style="max-height: 400px; overflow-y: auto;">';
   pipelineGroups.forEach((group, index) => {
     groupsHTML += `
@@ -93,7 +113,7 @@ function openGroupsPanel() {
 }
 
 function unhighlightAllGroups() {
-  // Search in all line layers
+  /* Search in all line layers. */
   const lineLayers = [];
   if (typeof pipelineLayer !== 'undefined' && pipelineLayer) lineLayers.push(pipelineLayer);
   if (typeof drawnItems !== 'undefined' && drawnItems) lineLayers.push(drawnItems);
@@ -108,10 +128,10 @@ function unhighlightAllGroups() {
     if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
     
     layerGroup.eachLayer(layer => {
-      // Skip if not a LineString (e.g., skip nodes/points)
+      /* Skip non-LineString features (nodes/points). */
       if (!layer.feature || !layer.feature.geometry || layer.feature.geometry.type !== 'LineString') return;
       
-      // Restore original layer colors instead of hardcoded blue
+      /* Restore original styles instead of hardcoded defaults. */
       const originalColor = layer._originalColor || '#3388ff';
       const originalWeight = layer._originalWeight || 3;
       const originalOpacity = layer._originalOpacity || 0.8;
@@ -131,5 +151,8 @@ function unhighlightAllGroups() {
   });
 }
 
-// ==================== Sublayer Switch Tool ====================
+/* ================================================================================
+ * Sublayer Switch Tool
+ * ================================================================================
+ */
 

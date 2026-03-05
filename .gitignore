@@ -3,6 +3,14 @@ __pycache__/
 
 .idea/
 
+# Windows-specific files
+desktop.ini
+Thumbs.db
+*.lnk
+
+# Documentation
+docs/
+
 Input/*
 !Input/.gitkeep
 !Input/SciGrid_IGGIELGNC_1

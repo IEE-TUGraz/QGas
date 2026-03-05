@@ -29,11 +29,18 @@
  * - Supports all infrastructure types
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Node and infrastructure selections.
+ * - Map layers for connection updates.
+ *
+ * Public API:
+ * - activateReconnectInfrastructureTool(): Start reconnection workflow.
  * 
  * ================================================================================
  */
@@ -47,7 +54,9 @@
     reconnectMode = true;
     selectedInfrastructureElement = null;
     
-    // Layer-Sichtbarkeit speichern
+    /*
+     * Capture layer visibility so we can restore it after reconnection.
+     */
     originalLayerVisibility = {
       powerplants: powerplantsLayer && map.hasLayer(powerplantsLayer),
       compressors: compressorsLayer && map.hasLayer(compressorsLayer),
@@ -57,7 +66,9 @@
       shortPipe: shortPipeLayer && map.hasLayer(shortPipeLayer)
     };
     
-    // Click-Handler für Infrastructure-Elemente aktivieren
+    /*
+     * Activate click handlers for infrastructure elements.
+     */
     setupInfrastructureClickHandlers();
     
     showCustomPopup(
@@ -83,7 +94,7 @@
   }
   
   function setupInfrastructureClickHandlers() {
-    // Storage Layer
+    /* Storage layer selection handlers. */
     if (storageLayer) {
       storageLayer.eachLayer(layer => {
         layer.off('click');
@@ -97,7 +108,7 @@
       });
     }
     
-    // LNG Layer
+    /* LNG layer selection handlers. */
     if (lngLayer) {
       lngLayer.eachLayer(layer => {
         layer.off('click');
@@ -111,7 +122,7 @@
       });
     }
     
-    // Powerplants Layer
+    /* Powerplants layer selection handlers. */
     if (powerplantsLayer) {
       powerplantsLayer.eachLayer(layer => {
         layer.off('click');
@@ -125,7 +136,7 @@
       });
     }
     
-    // Compressors Layer
+    /* Compressors layer selection handlers. */
     if (compressorsLayer) {
       compressorsLayer.eachLayer(layer => {
         layer.off('click');
@@ -143,7 +154,7 @@
   function selectInfrastructureForReconnect(infrastructureLayer) {
     selectedInfrastructureElement = infrastructureLayer;
     
-    // Element hervorheben
+    /* Highlight the selected infrastructure element. */
     if (infrastructureLayer.setStyle) {
       infrastructureLayer.setStyle({
         fillColor: '#ffff00',
@@ -153,20 +164,20 @@
       });
     }
     
-    // Alle anderen Infrastructure-Elemente ausblenden, nur das ausgewählte anzeigen
+    /* Hide other infrastructure elements to focus the selection. */
     hideOtherInfrastructureElements();
     
-    // Nodes Layer vor Pipelines Layer sicherstellen
+    /* Ensure nodes render above pipelines for precise selection. */
     if (nodeLayer && pipelineLayer) {
       if (map.hasLayer(nodeLayer)) map.removeLayer(nodeLayer);
       if (map.hasLayer(pipelineLayer)) map.removeLayer(pipelineLayer);
       
-      // Zuerst Pipelines, dann Nodes (damit Nodes oben sind)
+      /* Add pipelines first, then nodes so nodes appear on top. */
       pipelineLayer.addTo(map);
       nodeLayer.addTo(map);
     }
     
-    // Node Click Handler aktivieren
+    /* Activate node click handlers for reconnection. */
     setupNodeClickHandlers();
     
     const infrastructureName = getInfrastructureName(infrastructureLayer);
@@ -195,7 +206,7 @@
   }
   
   function hideOtherInfrastructureElements() {
-    // Alle Infrastructure Layer ausblenden außer dem ausgewählten Element
+    /* Hide all infrastructure elements except the selected one. */
     if (storageLayer) {
       storageLayer.eachLayer(layer => {
         if (layer !== selectedInfrastructureElement) {
@@ -236,7 +247,7 @@
       });
     }
     
-    // Andere Layer komplett ausblenden
+    /* Hide non-target layers entirely during reconnection. */
     if (consumptionLayer && map.hasLayer(consumptionLayer)) {
       map.removeLayer(consumptionLayer);
     }
@@ -269,11 +280,11 @@
     const nodeName = nodeLayer.feature.properties.Name || nodeId;
     const infrastructureName = getInfrastructureName(selectedInfrastructureElement);
     
-    // Node ID im Infrastructure Element aktualisieren
+    /* Update the node reference in the infrastructure element. */
     selectedInfrastructureElement.feature.properties.Node = nodeId;
     selectedInfrastructureElement.feature.properties.modified = true;
     
-    // Erfolgsmeldung anzeigen
+    /* Show a confirmation popup for the reconnection. */
     showCustomPopup(
       '✅ Reconnection Successful',
       `<p style="text-align: center; margin: 15px 0;"><strong>${infrastructureName}</strong> has been reconnected to node <strong>${nodeName}</strong> (ID: ${nodeId})</p>`,
@@ -282,7 +293,7 @@
           text: 'Continue Reconnecting',
           type: 'primary',
           onClick: () => {
-            // Zurück zum ersten Schritt
+            /* Return to the first step to reconnect another element. */
             restoreInfrastructureVisibility();
             selectedInfrastructureElement = null;
             setupInfrastructureClickHandlers();
@@ -326,7 +337,7 @@
   }
   
   function restoreInfrastructureVisibility() {
-    // Alle Infrastructure Elemente wieder sichtbar machen
+    /* Restore visibility for all infrastructure elements. */
     if (storageLayer) {
       storageLayer.eachLayer(layer => {
         if (layer.setStyle) {
@@ -384,10 +395,10 @@
     reconnectMode = false;
     selectedInfrastructureElement = null;
     
-    // Alle Infrastructure Elemente wieder sichtbar machen
+    /* Restore visibility for all infrastructure elements. */
     restoreInfrastructureVisibility();
     
-    // Ursprüngliche Layer-Sichtbarkeit wiederherstellen
+    /* Restore original layer visibility. */
     if (originalLayerVisibility.consumption && consumptionLayer) {
       consumptionLayer.addTo(map);
     }
@@ -395,10 +406,10 @@
       shortPipeLayer.addTo(map);
     }
     
-    // Click Handler zurücksetzen
+    /* Reset click handlers to default behavior. */
     resetInfrastructureClickHandlers();
     
-    // Switch back to Info Mode
+    /* Switch back to info mode. */
     currentMode = 'info';
     activateInfoMode();
     selectTool('info');
@@ -437,7 +448,7 @@
   }
   
 
-  // Public entry point used by the Tools UI
+  /* Public entry point used by the Tools UI. */
   window.activateReconnectInfrastructureTool = function activateReconnectInfrastructureTool() {
     deactivateAllModes();
     currentMode = 'reconnect-infrastructure';

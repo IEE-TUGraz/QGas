@@ -29,11 +29,18 @@
  * - Updates topology automatically
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Selected compressor feature and target pipeline locations.
+ * - User-entered distribution counts.
+ *
+ * Public API:
+ * - activateDistributeCompressors(): Start compressor distribution workflow.
  * 
  * ================================================================================
  */
@@ -60,13 +67,13 @@ function _getPipelineGroupsForDistribute() {
     out.push(group);
   }
 
-  // Prefer a currently selected pipeline layer if your app uses it
+  /* Prefer the currently selected pipeline layer, if available. */
   try { add(window.selectedPipelineLayer); } catch (e) {}
 
-  // Legacy global
+  /* Legacy global fallback. */
   try { add(pipelineLayer); } catch (e) {}
 
-  // Any dynamically loaded pipeline-like layers (PL_*.geojson)
+  /* Dynamically loaded pipeline-like layers (PL_*.geojson). */
   try {
     if (typeof dynamicLayers === 'object' && dynamicLayers) {
       Object.keys(dynamicLayers).forEach(k => {
@@ -131,10 +138,10 @@ function startDistributeCompressors() {
   subCompressors = [];
   connectionLines = [];
   
-  // Alle Layer außer Pipelines und Compressors ausblenden
+  /* Hide all layers except pipelines and compressors. */
   hideLayersForDistribution();
   
-  // Click Handler für Compressors aktivieren
+  /* Enable compressor click handlers. */
   setupCompressorClickHandlers();
   
   showCustomPopup(
@@ -160,7 +167,7 @@ function startDistributeCompressors() {
 }
 
 function hideLayersForDistribution() {
-  // Sichtbarkeit aller Layer speichern
+  /* Store visibility for all layers. */
   originalPipelineVisibility = {
     powerplants: powerplantsLayer && map.hasLayer(powerplantsLayer),
     storages: storageLayer && map.hasLayer(storageLayer),
@@ -170,7 +177,7 @@ function hideLayersForDistribution() {
     shortPipe: shortPipeLayer && map.hasLayer(shortPipeLayer)
   };
   
-  // Alle Layer außer Pipelines und Compressors ausblenden
+  /* Hide all layers except pipelines and compressors. */
   if (powerplantsLayer && map.hasLayer(powerplantsLayer)) map.removeLayer(powerplantsLayer);
   if (storageLayer && map.hasLayer(storageLayer)) map.removeLayer(storageLayer);
   if (lngLayer && map.hasLayer(lngLayer)) map.removeLayer(lngLayer);
@@ -178,7 +185,7 @@ function hideLayersForDistribution() {
   if (consumptionLayer && map.hasLayer(consumptionLayer)) map.removeLayer(consumptionLayer);
   if (shortPipeLayer && map.hasLayer(shortPipeLayer)) map.removeLayer(shortPipeLayer);
   
-  // Pipelines und Compressors sichtbar halten/machen
+  /* Ensure pipelines and compressors remain visible. */
   if (pipelineLayer && !map.hasLayer(pipelineLayer)) pipelineLayer.addTo(map);
   if (compressorsLayer && !map.hasLayer(compressorsLayer)) compressorsLayer.addTo(map);
 }
@@ -204,7 +211,7 @@ function setupCompressorClickHandlers() {
 function selectCompressorForDistribution(compressorLayer) {
   selectedCompressor = compressorLayer;
   
-  // Original-Style speichern und Compressor hervorheben
+  /* Store original style and highlight the compressor. */
   if (compressorLayer.setStyle) {
     originalCompressorStyle = {
       color: compressorLayer.options.color || '#009',
@@ -263,7 +270,7 @@ function startDistributionPlacement(count) {
   distributionCount = count;
   cachedCompressorMarkerStyle = getCompressorMarkerStyle();
   
-  // Ursprünglichen Compressor Eigenschaften speichern
+  /* Store original compressor properties. */
   const originalPower = selectedCompressor.feature.properties.Rated_Power_MW || 0;
   const distributedPower = originalPower / distributionCount;
   const originalProps = {...selectedCompressor.feature.properties};
@@ -271,12 +278,12 @@ function startDistributionPlacement(count) {
   
   console.log('Original power:', originalPower, 'Distributed power:', distributedPower);
   
-  // Ursprünglichen Compressor entfernen
+  /* Remove the original compressor marker. */
   if (compressorsLayer && compressorsLayer.hasLayer(selectedCompressor)) {
     compressorsLayer.removeLayer(selectedCompressor);
   }
   
-  // Ersten Sub-Compressor (ersetzt den ursprünglichen) erstellen
+  /* Create the first sub-compressor (replaces the original). */
   const firstSubCompressor = {
     type: 'Feature',
     geometry: {
@@ -294,7 +301,7 @@ function startDistributionPlacement(count) {
     }
   };
   
-  // Ersten Sub-Compressor als normalen Compressor hinzufügen
+  /* Add the first sub-compressor to the compressors layer. */
   const firstCompressorLayer = L.geoJSON(firstSubCompressor, {
     pointToLayer: function(feature, latlng) {
       return L.circleMarker(latlng, {
@@ -315,7 +322,7 @@ function startDistributionPlacement(count) {
     });
   }
   
-  // Sub-Compressors Array initialisieren mit dem ersten Sub-Compressor
+  /* Initialize sub-compressor array with the first entry. */
   subCompressors = [firstCompressorLayer.getLayers()[0]];
   selectedCompressor = firstCompressorLayer.getLayers()[0];
   
@@ -323,7 +330,7 @@ function startDistributionPlacement(count) {
   console.log('Distribution count:', distributionCount);
   console.log('Distribute mode:', distributeMode);
   
-  // Pipeline Click Handler für Placement aktivieren
+  /* Enable pipeline click handlers for placement. */
   setupPipelineClickHandlersForPlacement();
   
   showCustomPopup(
@@ -431,7 +438,7 @@ function _findNearestPipelineLayer(clickLatLng, thresholdMeters = 45) {
 function setupPipelineClickHandlersForPlacement() {
   console.log('Setting up pipeline click handlers for placement');
 
-  // Ensure the map panes accept pointer events (some browsers/extensions can toggle this)
+  /* Ensure map panes accept pointer events. */
   try {
     if (map && map.getPanes) {
       const panes = map.getPanes();
@@ -444,8 +451,7 @@ function setupPipelineClickHandlersForPlacement() {
     }
   } catch (e) {}
 
-  // Some browsers / privacy settings can cause pointer-events to be in a bad state.
-  // Force map panes to accept clicks.
+  /* Force map panes to accept clicks if pointer-events were altered. */
   try {
     if (map && map.getPanes) {
       const panes = map.getPanes();
@@ -463,7 +469,7 @@ function setupPipelineClickHandlersForPlacement() {
 
   const pipelineGroups = _getPipelineGroupsForDistribute();
 
-  // Clean previous handlers on all pipeline groups
+  /* Clean previous handlers on all pipeline groups. */
   pipelineGroups.forEach(group => {
     try {
       group.eachLayer(layer => {
@@ -473,7 +479,7 @@ function setupPipelineClickHandlersForPlacement() {
     } catch (e) {}
   });
 
-  // Remove previous map fallback handler
+  /* Remove previous map fallback handler. */
   if (mapClickHandler) {
     try { map.off('click', mapClickHandler); } catch (e) {}
     mapClickHandler = null;
@@ -484,7 +490,7 @@ function setupPipelineClickHandlersForPlacement() {
     return;
   }
 
-  // Direct polyline clicks (preferred)
+  /* Direct polyline clicks (preferred). */
   pipelineGroups.forEach(group => {
     try {
       group.eachLayer(layer => {
@@ -506,7 +512,7 @@ function setupPipelineClickHandlersForPlacement() {
     } catch (e) {}
   });
 
-  // Fallback: resolve nearest pipeline on map click
+  /* Fallback: resolve nearest pipeline on map click. */
   mapClickHandler = function (e) {
     if (!distributeMode || !selectedCompressor) return;
     if (subCompressors.length >= distributionCount) return;
@@ -517,7 +523,7 @@ function setupPipelineClickHandlersForPlacement() {
     }
   };
   try {
-    // Use capturing click on the container as a last resort if Leaflet events are swallowed.
+    /* Use capturing click as a last resort if Leaflet events are swallowed. */
     map.on('click', mapClickHandler);
     const container = map.getContainer();
     if (container && !container._qgasDistributeClickCapture) {
@@ -544,22 +550,22 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
   const currentIndex = subCompressors.length;
   const suffix = String.fromCharCode(97 + currentIndex); // a, b, c, d...
   
-  // Position des letzten platzierten Compressors als Referenz
+  /* Use last placed compressor as reference. */
   const lastCompressorLatLng = subCompressors[subCompressors.length - 1].getLatLng();
   console.log('lastCompressorLatLng:', lastCompressorLatLng);
   
-  // Geografisch nächsten Punkt auf der Pipeline finden (nicht nur Support Points)
+  /* Find the closest point on the pipeline (not just support points). */
   const coords = clickedPipelineFeature.feature.geometry.coordinates;
   let closestPoint = null;
   let closestSegmentIndex = -1;
   let minDistance = Infinity;
   
-  // Durch alle Pipeline-Segmente iterieren und nächsten Punkt finden
+  /* Iterate through pipeline segments to find the nearest point. */
   for (let i = 0; i < coords.length - 1; i++) {
     const segmentStart = {lat: coords[i][1], lng: coords[i][0]};
     const segmentEnd = {lat: coords[i + 1][1], lng: coords[i + 1][0]};
     
-    // Nächsten Punkt auf diesem Segment zum letzten Compressor finden
+    /* Compute nearest point on this segment to the last compressor. */
     const nearestPointOnSegment = getNearestPointOnSegment(lastCompressorLatLng, segmentStart, segmentEnd);
     const distance = getDistance(lastCompressorLatLng, nearestPointOnSegment);
     
@@ -577,16 +583,16 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
   
   console.log('Placing sub-compressor at closest point:', closestPoint, 'Distance:', minDistance);
   
-  // Pipeline am nächsten Punkt aufteilen
+  /* Split the pipeline at the nearest point. */
   const originalPipelineProps = clickedPipelineFeature.feature.properties;
   const originalProps = selectedCompressor.feature.properties;
   const compressorBaseID = originalProps.ID.replace('_a', '');
   
-  // Sub-Knoten IDs erstellen (Format: C_122_a_a und C_122_a_b)
+  /* Build sub-node IDs (format: C_122_a_a and C_122_a_b). */
   const subNodeA_ID = `${compressorBaseID}_${suffix}_a`;
   const subNodeB_ID = `${compressorBaseID}_${suffix}_b`;
   
-  // Neue Pipeline-Koordinaten erstellen mit dem Teilungspunkt
+  /* Create new pipeline coordinate sets with the split point. */
   const firstPipelineCoords = coords.slice(0, closestSegmentIndex + 1);
   firstPipelineCoords.push([closestPoint.lng, closestPoint.lat]); // Teilungspunkt hinzufügen
   
@@ -628,7 +634,7 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     }
   };
   
-  // Remove original pipeline from its owning group (supports multiple pipeline layers)
+  /* Remove original pipeline from its owning group (supports multiple layers). */
   const targetPipelineGroup = _findOwningPipelineGroup(clickedPipelineFeature) || (typeof pipelineLayer !== 'undefined' ? pipelineLayer : null);
   console.log('Removing original pipeline from layer');
   if (targetPipelineGroup && typeof targetPipelineGroup.hasLayer === 'function' && targetPipelineGroup.hasLayer(clickedPipelineFeature)) {
@@ -637,11 +643,11 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
   }
 
   
-  // Markiere Original als deleted für Export
+  /* Mark original as deleted for export. */
   clickedPipelineFeature.feature.properties.modified = true;
   clickedPipelineFeature.feature.properties.deleted = true;
   
-  // Add new pipeline segments back to the same pipeline group
+  /* Add new pipeline segments back to the same pipeline group. */
   const firstPipelineLayer = L.geoJSON(firstPipeline, {
     style: function(feature) {
       return {
@@ -663,7 +669,7 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     tolerance: 40
   });
   
-  // Add new pipeline segments back to the same pipeline group
+  /* Add new pipeline segments back to the same pipeline group. */
   if (targetPipelineGroup) {
     firstPipelineLayer.eachLayer(layer => {
       targetPipelineGroup.addLayer(layer);
@@ -675,7 +681,7 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
   
   const compressorStyle = cachedCompressorMarkerStyle || getCompressorMarkerStyle();
 
-  // Sub-Knoten erstellen (mit Standard-Node-Attributen)
+  /* Create sub-nodes with standard node attributes. */
   const subNodeA = {
     type: 'Feature',
     geometry: {
@@ -716,7 +722,7 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     }
   };
   
-  // Sub-Knoten zum nodeLayer hinzufügen (normales Node-Aussehen)
+  /* Add sub-nodes to the node layer (standard node appearance). */
   if (nodeLayer) {
     const subNodeALayer = L.geoJSON(subNodeA, {
       pointToLayer: function(feature, latlng) {
@@ -748,7 +754,7 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     subNodeBLayer.eachLayer(layer => nodeLayer.addLayer(layer));
   }
   
-  // Neuen Sub-Compressor erstellen mit Sub-Knoten
+  /* Create a new sub-compressor with sub-node links. */
   const newCompressor = {
     type: 'Feature',
     geometry: {
@@ -770,7 +776,7 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     }
   };
   
-  // Sub-Compressor zum compressorsLayer hinzufügen (normales Compressor-Aussehen)
+  /* Add the sub-compressor to the compressors layer. */
   if (compressorsLayer) {
     const newLayer = L.geoJSON(newCompressor, {
       pointToLayer: function(feature, latlng) {
@@ -793,7 +799,7 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     });
   }
   
-  // Verbindungslinie zum vorherigen Compressor erstellen (sequenzielle Kette: a->b->c->d...)
+  /* Create a connection line to the previous compressor (a->b->c...). */
   const previousCompressor = subCompressors[subCompressors.length - 2]; // Vorheriger Compressor
   const previousLatLng = previousCompressor.getLatLng();
   const connectionLine = L.polyline([previousLatLng, closestPoint], {
@@ -805,12 +811,12 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
   
   connectionLines.push(connectionLine);
 
-  // Newly created pipeline segments need click handlers during placement
+  /* Newly created pipeline segments need click handlers during placement. */
   if (distributeMode && subCompressors.length < distributionCount) {
     setupPipelineClickHandlersForPlacement(); // rebind for newly created segments
   }
   
-  // Status aktualisieren
+  /* Update placement status. */
   const remaining = distributionCount - subCompressors.length;
   
   if (remaining > 0) {
@@ -862,7 +868,7 @@ function completeDistribution() {
         text: 'Distribute Another',
         type: 'primary',
         onClick: () => {
-          // Reset für neue Distribution
+          /* Reset for a new distribution. */
           resetForNewDistribution();
           startDistributeCompressors();
         }
@@ -872,7 +878,7 @@ function completeDistribution() {
         type: 'secondary',
         onClick: () => {
           exitDistributeMode();
-          // Nach Beenden in Info-Modus wechseln
+          /* Return to Info mode after finishing. */
           currentMode = 'info';
           activateInfoMode();
           selectTool('info');
@@ -888,7 +894,7 @@ function resetForNewDistribution() {
   subCompressors = [];
   originalCompressorStyle = {};
   
-  // Click Handler zurücksetzen
+  /* Reset click handlers. */
   if (targetPipelineGroup) {
     pipelineLayer.eachLayer(layer => {
       layer.off('click');
@@ -921,29 +927,29 @@ function getDistance(latlng1, latlng2) {
 }
 
 function getNearestPointOnSegment(point, segmentStart, segmentEnd) {
-  // Vektor vom Segment-Start zum Punkt
+  /* Vector from segment start to point. */
   const dx = point.lng - segmentStart.lng;
   const dy = point.lat - segmentStart.lat;
   
-  // Vektor des Segments
+  /* Segment vector. */
   const segmentDx = segmentEnd.lng - segmentStart.lng;
   const segmentDy = segmentEnd.lat - segmentStart.lat;
   
-  // Länge des Segments (quadriert)
+  /* Segment length squared. */
   const segmentLengthSq = segmentDx * segmentDx + segmentDy * segmentDy;
   
   if (segmentLengthSq === 0) {
-    // Segment hat Länge 0, gib Start-Punkt zurück
+    /* Degenerate segment: return start point. */
     return segmentStart;
   }
   
-  // Projektion des Punktes auf das Segment (0 = Start, 1 = Ende)
+  /* Projection of point onto the segment (0=start, 1=end). */
   let t = (dx * segmentDx + dy * segmentDy) / segmentLengthSq;
   
-  // Begrenze t auf das Segment (0 bis 1)
+  /* Clamp t to the segment. */
   t = Math.max(0, Math.min(1, t));
   
-  // Berechne den nächsten Punkt auf dem Segment
+  /* Compute nearest point on the segment. */
   const nearestPoint = {
     lat: segmentStart.lat + t * segmentDy,
     lng: segmentStart.lng + t * segmentDx
@@ -965,7 +971,7 @@ function calculatePipelineLength(coordinates) {
 function exitDistributeMode() {
   distributeMode = false;
   
-  // Ursprüngliche Layer-Sichtbarkeit wiederherstellen
+  /* Restore original layer visibility. */
   if (originalPipelineVisibility.powerplants && powerplantsLayer) {
     powerplantsLayer.addTo(map);
   }
@@ -985,15 +991,15 @@ function exitDistributeMode() {
     shortPipeLayer.addTo(map);
   }
   
-  // Compressor Styles zurücksetzen
+  /* Restore compressor styles. */
   if (selectedCompressor && originalCompressorStyle && selectedCompressor.setStyle) {
     selectedCompressor.setStyle(originalCompressorStyle);
   }
   
-  // Click Handler zurücksetzen
+  /* Reset click handlers. */
   resetDistributeClickHandlers();
   
-  // Variablen zurücksetzen
+  /* Reset state. */
   selectedCompressor = null;
   distributionCount = 0;
   subCompressors = [];
@@ -1022,7 +1028,7 @@ function resetDistributeClickHandlers() {
 }
 
 
-  // Public entry used by Tools UI
+  /* Public entry used by Tools UI. */
   window.activateDistributeCompressorsTool = function activateDistributeCompressorsTool() {
     deactivateAllModes();
     currentMode = 'distribute-compressors';

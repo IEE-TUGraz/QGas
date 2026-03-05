@@ -29,11 +29,19 @@
  * - Prevents simultaneous editing of multiple elements
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Map interactions for geometry edits.
+ * - Target layers for nodes and pipelines.
+ *
+ * Public API:
+ * - activateEditMode(): Enter geometry editing mode.
+ * - updateAllElementInteractions(): Refresh info handlers.
  * 
  * ================================================================================
  */
@@ -45,7 +53,7 @@
 function activateEditModeForExisting() {
   drawnItems.eachLayer(layer => {
     if (layer.feature && layer.feature.geometry && layer.feature.geometry.type === "LineString") {
-      // Nur einen Layer gleichzeitig bearbeiten
+      /* Ensure only one layer is edited at a time. */
       layer.on('click', function () {
         if (window.editingLayer && window.editingLayer !== layer) {
           window.editingLayer.editing.disable();
@@ -57,7 +65,8 @@ function activateEditModeForExisting() {
           layer.editing.enable();
           restorePipelineEditStyle(layer);
           bindPipelineEditStyleHandlers(layer);
-          lockPipelineEndpoints(layer); // Lock the pipeline endpoints
+          /* Lock pipeline endpoints to preserve connections. */
+          lockPipelineEndpoints(layer);
           showSaveButton(layer);
           showDiscardButton(layer);
         }
@@ -66,7 +75,7 @@ function activateEditModeForExisting() {
   });
 }
 
-// Nach dem Laden der Karte: Info-Modus als Standard
+/* Initialize Info mode after map load. */
 currentMode = 'info';
 resetNodeClicks();
 function updateSplitNodeOffsets() {
@@ -80,7 +89,7 @@ function updateSplitNodeOffsets() {
       const newPoint = L.point(basePoint.x + offset.x, basePoint.y + offset.y);
       const newLatLng = map.layerPointToLatLng(newPoint);
       marker.setLatLng(newLatLng);
-      // <<< HIER: Pointer Events im Split-Modus setzen!
+      /* Configure pointer events while split-node mode is active. */
       if (splitNodeActive && marker._path) {
         marker._path.style.pointerEvents = 'none';
       } else if (marker._path) {
@@ -91,20 +100,22 @@ function updateSplitNodeOffsets() {
 }
 map.on('zoomend moveend', updateSplitNodeOffsets);
 
-// Modus-System: Vereinfacht mit Fehlerbehandlung
+/*
+ * Mode system with simplified error handling.
+ */
 function activateInfoMode(force = false) {
   try {
     if (!force && currentMode === 'info') {
       return;
     }
     currentMode = 'info';
-    // Edit-Buttons entfernen, falls vorhanden
+    /* Remove edit buttons if present. */
     const saveBtn = document.getElementById('save-edit-btn');
     if (saveBtn) saveBtn.remove();
     const discardBtn = document.getElementById('discard-edit-btn');
     if (discardBtn) discardBtn.remove();
     
-    // Node-Edit Cleanup
+    /* Cleanup any node-edit state. */
     if (window.selectedNodeMarker) {
       cleanupNodeEdit(window.selectedNodeMarker);
     }
@@ -112,7 +123,7 @@ function activateInfoMode(force = false) {
     console.log('Info Mode aktiviert');
     applyEditGeometryVisibility(false);
     
-    // Toolbox-Buttons aktualisieren
+    /* Update toolbox button highlights. */
     currentActiveTool = 'info';
     document.querySelectorAll('.tool-tile').forEach(tile => {
       tile.classList.remove('active');
@@ -120,13 +131,13 @@ function activateInfoMode(force = false) {
     const activeTile = document.querySelector('.tool-tile[data-mode="info"]');
     if (activeTile) activeTile.classList.add('active');
     
-    // Aktives Tool Display aktualisieren
+    /* Update the active tool display. */
     updateActiveToolDisplay('info');
     
-    // Alle Pipeline-Highlights zurücksetzen
+    /* Reset pipeline highlights. */
     resetAllPipelineHighlights();
 
-    // Pending Delete-Auswahlen zurücksetzen
+    /* Reset pending delete selections. */
     clearPendingDeletionSelections();
     pendingPipelineDeletions.length = 0;
     pendingNodeDeletions.length = 0;
@@ -137,10 +148,10 @@ function activateInfoMode(force = false) {
     pendingCustomDeletions.length = 0;
     pendingDrawnItemDeletions.length = 0;
     
-    // Alle Element-Highlights zurücksetzen
+    /* Reset element highlights. */
     resetAllElementHighlights();
     
-    // Pipeline-Interaktionen für Info Mode
+    /* Pipeline interactions for Info mode. */
     if (pipelineLayer) {
       pipelineLayer.eachLayer(layer => {
         layer.off('click');
@@ -152,10 +163,10 @@ function activateInfoMode(force = false) {
           try {
             console.log('Pipeline geklickt in Info Mode:', layer);
             
-            // Highlighte die angeklickte Pipeline
+            /* Highlight the selected pipeline. */
             highlightPipeline(layer);
             
-            // Modal mit Pipeline-Details anzeigen
+            /* Show modal with pipeline details. */
             const content = createModalPopupContent(layer.feature.properties, layer);
             const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
             showElementModal(title, content, layer);
@@ -168,7 +179,7 @@ function activateInfoMode(force = false) {
       });
     }
     
-    // Drawn Items Pipeline-Interaktionen
+    /* Drawn-item pipeline interactions. */
     drawnItems.eachLayer(layer => {
       if (layer.feature && layer.feature.geometry.type === "LineString") {
         layer.off('click');
@@ -178,12 +189,10 @@ function activateInfoMode(force = false) {
             return;
           }
           try {
-            // Drawn Pipeline geklickt in Info Mode
-            
-            // Highlighte die angeklickte Pipeline
+            /* Highlight the selected drawn pipeline. */
             highlightPipeline(layer);
             
-            // Modal mit Pipeline-Details anzeigen
+            /* Show modal with pipeline details. */
             const content = createModalPopupContent(layer.feature.properties, layer);
             const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
             showElementModal(title, content, layer);
@@ -196,7 +205,7 @@ function activateInfoMode(force = false) {
       }
     });
     
-    // Short-Pipe-Interaktionen für Info Mode
+    /* Short-pipe interactions for Info mode. */
     if (shortPipeLayer) {
       shortPipeLayer.eachLayer(layer => {
         layer.off('click');
@@ -208,10 +217,10 @@ function activateInfoMode(force = false) {
           try {
             console.log('Short-Pipe geklickt in Info Mode:', layer);
             
-            // Highlighte die angeklickte Short-Pipe
+            /* Highlight the selected short pipe. */
             highlightPipeline(layer);
             
-            // Modal mit Short-Pipe-Details anzeigen
+            /* Show modal with short-pipe details. */
             const content = createModalPopupContent(layer.feature.properties, layer);
             const title = `Short-Pipe: ${layer.feature.properties.ID || 'Unnamed'}`;
             showElementModal(title, content, layer);
@@ -224,7 +233,7 @@ function activateInfoMode(force = false) {
       });
     }
     
-    // Node-Interaktionen für Info Mode
+    /* Node interactions for Info mode. */
     forEachNodeMarker(marker => {
       marker.off('click');
       marker.on('click', function (e) {
@@ -245,7 +254,7 @@ function activateInfoMode(force = false) {
       });
     });
     
-    // Element-Interaktionen für Info Mode
+    /* Element interactions for Info mode. */
     updateAllElementInteractions();
   } catch (error) {
     console.error('Error in activateInfoMode:', error);
@@ -324,7 +333,7 @@ function updateAllElementInteractions() {
   }
 }
 
-// Aktiviert den Pipeline-Route-Edit-Modus (normale Pipeline-Bearbeitung)
+/* Activate pipeline route edit mode. */
 function activatePipelineRouteEdit() {
   currentMode = 'edit-pipeline-route';
 
@@ -382,9 +391,14 @@ function activatePipelineRouteEdit() {
   );
 }
 
-// Aktiviert den Node-Position-Edit-Modus
+/* Activate node-position edit mode. */
 function isNodeLayerCandidate(layer, layerName = '') {
     if (!layer) return false;
+  if (layer._customLayerSettings) {
+    if (layer._customLayerSettings.typeKey === 'Node') return true;
+    if (layer._customLayerSettings.isNodeLayer) return true;
+    if (layer._customLayerSettings.elementKey === 'nodes') return true;
+  }
     const metadata = resolveLayerMetadata(layer) || (layerName && layerMetadataRegistry ? layerMetadataRegistry[layerName] : null);
     if (metadata) {
       if (metadata.elementKey === 'nodes') return true;
@@ -881,7 +895,7 @@ function isNodeLayerCandidate(layer, layerName = '') {
   );
 }
 
-// Wählt einen Node für Position-Edit aus
+/* Select a node for position editing. */
 function selectNodeForPositionEdit(nodeMarker) {
   function isInlineMarker(marker) {
     if (!marker) return false;
@@ -938,13 +952,13 @@ function selectNodeForPositionEdit(nodeMarker) {
   const displayLabel = isInline ? (primaryNodeId || 'Inline element') : (primaryNodeId || 'Node');
   console.log('Node selected for position edit:', displayLabel, 'nodes to move:', nodeIdsForEdit);
 
-  // Entferne vorherige Highlights
+  /* Clear previous highlights. */
   resetAllPipelineHighlights();
   if (window.selectedNodeMarker) {
     resetElementStyle(window.selectedNodeMarker);
   }
 
-  // Restore interaction for pipelines from a previous selection so clicks keep working
+  /* Restore pipeline interaction from a previous selection. */
   if (window.selectedNodeConnectedPipelines && window.selectedNodeConnectedPipelines.length) {
     window.selectedNodeConnectedPipelines.forEach(prevLayer => {
       try {
@@ -959,7 +973,7 @@ function selectNodeForPositionEdit(nodeMarker) {
     window.selectedNodeConnectedPipelines = [];
   }
   
-  // Speichere Originalpositionen für Discard (Nodes + Inline Marker)
+  /* Store original positions for discard (nodes and inline markers). */
   const nodePositionSnapshots = collectNodePositionSnapshots(nodeIdsForEdit);
   const inlineSnapshots = isInline ? [{
     marker: nodeMarker,
@@ -970,13 +984,13 @@ function selectNodeForPositionEdit(nodeMarker) {
   const allPositionSnapshots = [...nodePositionSnapshots, ...inlineSnapshots];
   rememberNodePositionSnapshots(allPositionSnapshots);
   
-  // Markiere den ausgewählten Node/Inline (größer und grün)
+  /* Highlight the selected node/inline marker. */
   captureOriginalMarkerStyle(nodeMarker, 'highlight');
   nodeMarker.setStyle({fillColor: "#00ff00", color: "#00aa00", radius: 10, weight: 3});
   window.selectedNodeMarker = nodeMarker;
   window.selectedNodeConnectedPipelines = [];
   
-  // Finde und markiere alle verbundenen Pipelines (ohne Duplikate) für alle betroffenen Nodes
+  /* Find and mark all connected pipelines without duplicates. */
   const connectedPipelines = [];
   const seenIds = new Set();
   const nodeIdSet = new Set(nodeIdsForEdit);
@@ -1002,23 +1016,23 @@ function selectNodeForPositionEdit(nodeMarker) {
   
   console.log('Found', connectedPipelines.length, 'connected pipelines');
   
-  // Zeige Save/Discard Buttons
+  /* Show Save/Discard buttons. */
   showNodeEditButtons(nodeMarker, displayLabel);
   
-  // Mache den Node draggable
+  /* Enable dragging for the selected node(s). */
   enableNodeDragging(nodeMarker, nodeIdsForEdit, isInline ? [nodeMarker] : [], connectedPipelines);
 }
 
-// Zeigt Save/Discard Buttons für Node Position Edit
+/* Show Save/Discard buttons for node position edit. */
 function showNodeEditButtons(nodeMarker, nodeIdLabel) {
-  // Entferne alte Buttons falls vorhanden
+  /* Remove existing buttons if present. */
   document.getElementById('save-edit-btn')?.remove();
   document.getElementById('discard-edit-btn')?.remove();
   
   const toolsSection = document.getElementById('tools-section');
   if (!toolsSection) return;
   
-  // Save Button
+  /* Save button. */
   const saveBtn = document.createElement('button');
   saveBtn.id = 'save-edit-btn';
   saveBtn.textContent = '✔️ Save Changes';
@@ -1047,7 +1061,7 @@ function showNodeEditButtons(nodeMarker, nodeIdLabel) {
     );
   };
   
-  // Discard Button
+  /* Discard button. */
   const discardBtn = document.createElement('button');
   discardBtn.id = 'discard-edit-btn';
   discardBtn.textContent = '❌ Discard Changes';
@@ -1084,7 +1098,7 @@ function showNodeEditButtons(nodeMarker, nodeIdLabel) {
   toolsSection.appendChild(discardBtn);
 }
 
-// Cleanup-Funktion für Node Edit
+/* Cleanup for node edit mode. */
 function cleanupNodeEdit(nodeMarker) {
   const marker = nodeMarker || window.selectedNodeMarker;
   if (marker) {
@@ -1093,7 +1107,7 @@ function cleanupNodeEdit(nodeMarker) {
   }
   window.selectedNodeMarker = null;
   
-  // Setze verbundene Pipelines zurück und aktiviere Interaktionen wieder
+  /* Restore connected pipelines and re-enable interactions. */
   if (window.selectedNodeConnectedPipelines) {
     window.selectedNodeConnectedPipelines.forEach(layer => {
       resetPipelineStyle(layer);
@@ -1104,7 +1118,7 @@ function cleanupNodeEdit(nodeMarker) {
     window.selectedNodeConnectedPipelines = [];
   }
   
-  // Entferne alle Event-Listener
+  /* Remove drag event listeners. */
   map.off('mousemove');
   map.off('mouseup');
   map.dragging.enable();
@@ -1115,7 +1129,7 @@ function cleanupNodeEdit(nodeMarker) {
   nodePositionEditBuffer = null;
 }
 
-// Aktiviert Dragging für Nodes/Inline-Elemente und synchronisiert verbundene Pipelines
+/* Enable dragging for nodes/inline elements and sync connected pipelines. */
 function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelines) {
   const nodeIdSet = new Set(Array.isArray(nodeIds) ? nodeIds : [nodeIds].filter(Boolean));
   console.log('enableNodeDragging called for:', Array.from(nodeIdSet));
@@ -1125,7 +1139,7 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
   let moveHandler = null;
   let upHandler = null;
   
-  // Drag-Start Handler
+  /* Drag-start handler. */
   dragHandler = function(e) {
     L.DomEvent.stopPropagation(e);
     L.DomEvent.preventDefault(e);
@@ -1134,14 +1148,14 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
     console.log('Drag started for node(s):', Array.from(nodeIdSet));
   };
   
-  // Drag-Move Handler
+  /* Drag-move handler. */
   moveHandler = function(e) {
     if (!isDragging) return;
     L.DomEvent.stopPropagation(e);
     
     const newLatLng = e.latlng;
     
-    // Verschiebe ALLE Marker für diese Nodes (in legacy und dynamic layers)
+    /* Move all markers for these nodes (legacy and dynamic layers). */
     const allNodeLayers = getAllNodeLayers();
     
     allNodeLayers.forEach(nLayer => {
@@ -1156,7 +1170,7 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
       }
     });
 
-    // Inline-Marker ebenfalls bewegen
+    /* Move inline markers as well. */
     inlineMarkers.forEach(marker => {
       if (marker && marker.setLatLng) {
         marker.setLatLng(newLatLng);
@@ -1164,7 +1178,7 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
       }
     });
     
-    // Aktualisiere alle verbundenen Linien-Endpunkte
+    /* Update connected pipeline endpoints. */
     connectedPipelines.forEach(pipelineLayer => {
       const props = pipelineLayer.feature.properties;
       const latlngs = pipelineLayer.getLatLngs();
@@ -1183,7 +1197,7 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
     });
   };
   
-  // Drag-End Handler
+  /* Drag-end handler. */
   upHandler = function(e) {
     if (!isDragging) return;
     isDragging = false;
@@ -1192,7 +1206,7 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
     // Benutzer kann jetzt Save oder Discard wählen
   };
   
-  // Registriere Event-Listener
+  /* Register drag event listeners. */
   nodeMarker.on('mousedown', dragHandler);
   map.on('mousemove', moveHandler);
   map.on('mouseup', upHandler);
@@ -1200,11 +1214,11 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
   console.log('Drag handlers registered for node(s):', Array.from(nodeIdSet));
 }
 
-// Verschiebt einen Node und alle verbundenen Pipeline-Endpunkte
+/* Move a node and update connected pipeline endpoints. */
 function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
   console.log('Moving node and connected pipelines:', nodeId, newLatLng);
   
-  // Knoten finden und verschieben (in legacy und dynamic layers)
+  /* Find and move nodes (legacy and dynamic layers). */
   let nodeFound = false;
   const allNodeLayers = getAllNodeLayers();
   
@@ -1275,17 +1289,17 @@ function activateEditMode() {
       editingLayer = null;
     }
     
-    // Alle Pipeline-Highlights zurücksetzen
+    /* Reset pipeline highlights. */
     resetAllPipelineHighlights();
     
-    // Alle Element-Highlights zurücksetzen
+    /* Reset element highlights. */
     resetAllElementHighlights();
     
     currentMode = 'edit';
     console.log('Edit Mode aktiviert');
     applyEditGeometryVisibility(true);
     
-    // Zeige Auswahl-Dialog
+    /* Show selection dialog. */
     showCustomPopup(
       '✏️ Edit Geometry',
       '<p style="text-align: center; margin: 15px 0;">What would you like to edit?</p>',
@@ -1321,4 +1335,4 @@ function activateEditMode() {
   }
 }
 
-// Hilfsfunktion um Features aus einem Layer zu extrahieren
+/* Helper to extract features from a layer. */

@@ -1,3 +1,22 @@
+/**
+ * QGas - Legend UI Module
+ *
+ * Module Description:
+ * Maintains the legend controls, visibility toggles, and synchronization
+ * between legend state and map layers.
+ *
+ * Author: Dipl.-Ing. Marco Quantschnig
+ * Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - DOM legend container and checkbox elements.
+ * - Map layer references and visibility state.
+ *
+ * Public API:
+ * - updateLegendControl(): Rebuild and refresh the legend UI.
+ * - updateLegendSymbols(): Refresh legend swatches after style updates.
+ */
 const legendToggleRegistry = new Map();
 
 function unregisterLegendToggle(elementKey) {
@@ -66,6 +85,28 @@ function registerLegendToggle({ checkbox, resolveLayers, elementKey }) {
   return key;
 }
 
+function setPlanOverlayVisibility(overlay, shouldShow) {
+  if (!overlay) return;
+  if (shouldShow) {
+    if (map && !map.hasLayer(overlay)) {
+      map.addLayer(overlay);
+    }
+    if (overlay._canvas) {
+      overlay._canvas.style.display = 'block';
+    }
+    if (typeof overlay._reset === 'function') {
+      overlay._reset();
+    }
+    return;
+  }
+  if (overlay._canvas) {
+    overlay._canvas.style.display = 'none';
+  }
+  if (map && map.hasLayer(overlay)) {
+    map.removeLayer(overlay);
+  }
+}
+
 function addPlanLayerToLegend(planConfig, overlay) {
   const legendContainer = document.querySelector('.legend-control');
   if (!legendContainer) return;
@@ -87,15 +128,17 @@ function addPlanLayerToLegend(planConfig, overlay) {
   }
   const checkbox = entry.querySelector('input');
   if (checkbox) {
-    registerLegendToggle({
-      checkbox,
-      resolveLayers: () => [overlay],
-      elementKey: planConfig.id
-    });
+    unregisterLegendToggle(planConfig.id);
+    const handler = () => setPlanOverlayVisibility(overlay, checkbox.checked);
+    checkbox.addEventListener('change', handler);
+    legendToggleRegistry.set(planConfig.id, { checkbox, handler });
+    handler();
   }
 }
 
-  // Placeholder function for legend control updates
+  /*
+   * Rebuild and refresh the legend control UI.
+   */
   function updateLegendControl() {
     const legendControl = document.querySelector('.legend-control');
     if (!legendControl) return;
@@ -104,40 +147,43 @@ function addPlanLayerToLegend(planConfig, overlay) {
     const legendEntries = getOrderedLegendConfigs();
     const legendHasShortPipeEntry = legendEntries.some(isShortPipeConfigEntry);
     
-    // Generate legend dynamically from ordered configuration
+    /* Generate legend dynamically from ordered configuration. */
     legendEntries.forEach(config => {
       const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
       const layer = dynamicLayers[layerName];
       
-      // Show legend entry even if layer not yet loaded (will be filled when loaded)
+      /* Show legend entry even if layer not yet loaded (filled when loaded). */
       const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const labelClass = 'legend-label';
       const labelOpen = `<label class="${labelClass}">`;
       const labelClose = '</label><br>';
       
       if (isLineLayerType(config.type)) {
-        // Line layer
+        /* Line layer entry. */
         legendContent += `${labelOpen}<input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line" style="background:${config.color};"></div></span><span style="margin-left: 6px;">${config.legendName}</span>${labelClose}`;
       } else {
-        // Point or In-Line layer
-        legendContent += `${labelOpen}<input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:${config.color};"></span></span><span style="margin-left: 6px;">${config.legendName}</span>${labelClose}`;
+        /* Point or inline layer entry. */
+        const markerShape = config.markerType || 'circle';
+        const markerSize = config.size || 6;
+        const iconHTML = generateLegendIcon(config.color, markerShape, markerSize);
+        legendContent += `${labelOpen}<input type="checkbox" id="${toggleId}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;">${iconHTML}</span><span style="margin-left: 6px;">${config.legendName}</span>${labelClose}`;
       }
     });
   
-  // Add shortPipeLayer if exists (only when not already part of config)
+  /* Add shortPipeLayer if present and not already configured. */
   if (!legendHasShortPipeEntry && shortPipeLayer) {
     legendContent += '<label class="legend-label"><input type="checkbox" id="toggle-shortpipes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><span class="legend-line" style="background:#ff8800; border-radius:2px; border:1px dashed #ff8800;"></span></span><span style="margin-left: 6px;">Short-Pipes</span></label><br>';
   }
   
-  // Add Select All button
+  /* Add "Select All" button. */
   legendContent += '<div style="margin-top: 8px; text-align: center;"><button id="activate-all-btn" style="background: #007cba; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">Select All</button></div>';
   
-  // Statistics button
+  /* Statistics button. */
   const statsContent = '<div style="margin-top: 8px; text-align: center; border-top: 1px solid #dee2e6; padding-top: 8px;"><button id="statistics-btn" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">Statistics</button></div>';
   
   legendControl.innerHTML = legendContent + statsContent;
   
-  // Re-add event listeners
+  /* Re-add event listeners after rebuilding. */
   const statsBtn = legendControl.querySelector('#statistics-btn');
   if (statsBtn) {
     L.DomEvent.on(statsBtn, 'click', function(e) {
@@ -146,10 +192,10 @@ function addPlanLayerToLegend(planConfig, overlay) {
     });
   }
   
-  // Add toggle event listeners for new layers
+  /* Add toggle event listeners for new layers. */
   createLegendEventHandlers();
 
-  // Re-attach infrastructure plan entries after rebuild (keep picture layer toggle visible)
+  /* Re-attach infrastructure plan entries after rebuild. */
   if (Array.isArray(planLayers) && planLayers.length) {
     planLayers.forEach(entry => {
       const overlay = entry?.layer;
@@ -161,7 +207,9 @@ function addPlanLayerToLegend(planConfig, overlay) {
   }
 }
 
-// Funktion zum Erstellen der Event-Handler für Legend-Checkboxen
+/*
+ * Create event handlers for legend checkboxes.
+ */
 function createLegendEventHandlers() {
   const registeredCheckboxes = [];
 
@@ -217,9 +265,9 @@ function createLegendEventHandlers() {
   }
 }
 
-// Legend Toggle Event-Handler
+  /* Legend toggle event handler. */
 document.addEventListener('DOMContentLoaded', () => {
-  // Warte bis alle Layer geladen sind
+  /* Delay binding until layers have loaded. */
   setTimeout(() => {
     createLegendEventHandlers();
   }, 2000); // 2 Sekunden warten bis Layer geladen sind
@@ -229,7 +277,7 @@ function initLegendControl(mapInstance) {
   if (!mapInstance || !window.L) return;
   const map = mapInstance;
 
-    // Legend Control hinzufügen
+    /* Add the legend control container. */
     const legend = L.control({ position: 'topright' });
     legend.onAdd = function (map) {
       const container = L.DomUtil.create('div', 'legend-control leaflet-bar');
@@ -239,7 +287,7 @@ function initLegendControl(mapInstance) {
       container.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
       container.style.fontSize = '14px';
     
-      // Legend content
+      /* Legend content. */
       const legendContent = '<label><input type="checkbox" id="toggle-pipelines" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line"></div></span><span style="margin-left: 6px;">Pipelines</span></label><br>' +
         '<label><input type="checkbox" id="toggle-nodes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#ff7800;"></span></span><span style="margin-left: 6px;">Nodes</span></label><br>' +
         '<label><input type="checkbox" id="toggle-powerplants" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#090;"></span></span><span style="margin-left: 6px;">Power Plants</span></label><br>' +
@@ -249,15 +297,15 @@ function initLegendControl(mapInstance) {
         '<label><input type="checkbox" id="toggle-shortpipes" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><span class="legend-line" style="background:#ff8800; border-radius:2px; border:1px dashed #ff8800;"></span></span><span style="margin-left: 6px;">Short-Pipes</span></label><br>' +
         '<label><input type="checkbox" id="toggle-consumption" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:#ff8800;"></span></span><span style="margin-left: 6px;">Consumption</span></label><br>';
     
-      // Statistics button
+      /* Statistics button. */
       const statsContent = '<div style="margin-top: 8px; text-align: center; border-top: 1px solid #dee2e6; padding-top: 8px;"><button id="statistics-btn" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">Statistics</button></div>';
     
-      // Select All button at the end
+      /* Select All button at the end. */
       const selectAllContent = '<div style="margin-top: 8px; text-align: center;"><button id="activate-all-btn" style="background: #007cba; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">Select All</button></div>';
     
       container.innerHTML = legendContent + statsContent + selectAllContent;
     
-      // Add event listener for statistics button
+      /* Add event listener for statistics button. */
       const statsBtn = container.querySelector('#statistics-btn');
       L.DomEvent.on(statsBtn, 'click', function(e) {
         L.DomEvent.stopPropagation(e);

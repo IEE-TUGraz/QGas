@@ -14,23 +14,28 @@ Key Functionalities
 -------------------
 - Interactive web-based visualization with Folium mapping interface
 - Local HTTP server for serving map data
-- WebSocket support for real-time updates
 - Data caching and compression for optimized performance
 - Manual change management for pipeline data
 
 Technical Implementation
 ------------------------
-The system uses a tkinter-based GUI with an integrated HTTP server and WebSocket
-support for serving interactive maps. Data is cached in memory for performance
-and can be updated in real-time through the web interface.
+The system uses a tkinter-based GUI with an integrated HTTP server for serving
+interactive maps. Data is cached in memory for performance and can be updated
+through the web interface.
 
 Development Information
------------------------
-- Primary Author: Marco Quantschnig, BSc.
-- Institution: Institute of Electricity Economics and Energy Innovation (IEE),
-  Graz University of Technology (TU Graz)
+------------------------
+- Author: Dipl.-Ing. Marco Quantschnig
+- Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
 - Created: August 2025
 - License: See LICENSE file
+- Disclaimer: AI-assisted tools were used to support development and documentation.
+
+Inputs
+------
+- Runtime environment: Python 3.x with Tkinter.
+- Local project folders (Input/ and related assets).
+- Map HTML entry point: Map.html served over the local HTTP server.
 """
 
 import sys
@@ -43,8 +48,6 @@ import socketserver
 import webbrowser
 import json
 import gzip
-import asyncio
-import websockets
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse, parse_qs, quote_plus
 
@@ -94,19 +97,15 @@ class CombinedGUI:
         # === MAP SERVER VARIABLES ===
         # Configuration for the local HTTP server that serves the interactive map
         self.PORT = 8000  # Port number for the local web server
-        self.WEBSOCKET_PORT = 8001  # Port for WebSocket server
         self.filename = "Map.html"  # HTML file containing the interactive map
         self.url = f"http://localhost:{self.PORT}/{self.filename}"  # Complete URL for map access
         self.script_dir = self.app_dir  # Directory containing map files
         self.server_thread = None  # Thread object for running HTTP server in background
-        self.websocket_thread = None  # Thread object for running WebSocket server
         self.httpd = None  # HTTP server instance
-        self.websocket_server = None  # WebSocket server instance
         
         # === OPTIMIZATION FEATURES ===
         self.executor = ThreadPoolExecutor(max_workers=4)  # Thread pool for parallel processing
         self.data_cache = {}  # In-memory cache for GeoJSON data
-        self.websocket_clients = set()  # Connected WebSocket clients
         self.selected_project = "Standard"  # Currently selected project folder
         print("Map server variables initialized")
         
@@ -251,7 +250,7 @@ class CombinedGUI:
         # Tile 1: Start Server
         self.create_action_tile(tiles_frame, 
                                title="Start Server",
-                               description="Initialize the map server and WebSocket connection for pipeline visualization",
+                               description="Initialize the map server for pipeline visualization",
                                icon="🚀",
                                button_text="Start Server",
                                command=self.start_server,
@@ -309,7 +308,7 @@ class CombinedGUI:
         
         # Description with minimal spacing
         short_descriptions = {
-            "Initialize the map server and WebSocket connection for pipeline visualization": "Start HTTP and WebSocket servers for interactive map",
+            "Initialize the map server for pipeline visualization": "Start HTTP server for interactive map",
             "Launch the interactive pipeline map in your default web browser": "Open the gas infrastructure map in your browser",
             "Shutdown the server and close all active connections safely": "Stop all servers and close connections"
         }
@@ -377,7 +376,6 @@ class CombinedGUI:
         info_items = [
             ("Map File:", self.filename),
             ("HTTP Port:", str(self.PORT)),
-            ("WebSocket Port:", str(self.WEBSOCKET_PORT)),
             ("Server URL:", self.url),
             ("Working Dir:", os.path.basename(self.script_dir)),
             ("Features:", "Pipelines, Nodes, Storage, LNG, Consumption")
@@ -471,14 +469,13 @@ class CombinedGUI:
     
     def start_server(self):
         """
-        Start the HTTP server and WebSocket server for map visualization
+        Start the HTTP server for map visualization
         
         Features:
         - Serves static files (HTML, JS, CSS)
         - Provides API endpoints for dynamic data
         - Handles GeoJSON with compression
         - Dynamic project path routing
-        - WebSocket support for real-time updates
         """
         if self.httpd is not None:
             messagebox.showinfo("Info", "Server is already running.")
@@ -589,8 +586,9 @@ class CombinedGUI:
                     try:
                         import json
                         import gzip
+                        from urllib.parse import unquote
                         
-                        file_path = path.lstrip('/')
+                        file_path = unquote(path).lstrip('/')
                         
                         # Dynamic project path routing - redirect Output/ requests to Input/{project}/
                         if file_path.startswith('Output/') and hasattr(self.gui_instance, 'selected_project'):
@@ -602,8 +600,12 @@ class CombinedGUI:
                                 file_path = project_file_path
                                 print(f"Redirected {path} -> {project_file_path}")
                         
-                        if os.path.exists(file_path):
-                            with open(file_path, 'r', encoding='utf-8') as f:
+                        resolved_path = file_path
+                        if not os.path.isabs(resolved_path):
+                            resolved_path = os.path.join(self.gui_instance.app_dir, resolved_path)
+
+                        if os.path.exists(resolved_path):
+                            with open(resolved_path, 'r', encoding='utf-8') as f:
                                 data = json.load(f)
                             
                             # Komprimiere große GeoJSON-Dateien
@@ -677,26 +679,19 @@ class CombinedGUI:
             self.server_thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
             self.server_thread.start()
             
-            # Start WebSocket server for real-time updates
-            self.start_websocket_server()
-            
             # Brief delay to ensure servers are fully initialized
             import time
             time.sleep(1)
             
             # Update UI status indicators
-            self.update_status(f"Running - HTTP:{self.PORT} WS:{self.WEBSOCKET_PORT}", is_running=True)
-            messagebox.showinfo("Info", f"Servers started - HTTP: {self.PORT}, WebSocket: {self.WEBSOCKET_PORT}")
+            self.update_status(f"Running - HTTP:{self.PORT}", is_running=True)
+            messagebox.showinfo("Info", f"Server started - HTTP: {self.PORT}")
             
             # Show project selection dialog after server start
             self.show_project_selection_after_start()
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to start servers: {str(e)}")
-    
-    # ================================================================================
-    # WEBSOCKET SERVER
-    # ================================================================================
     
     def show_project_selection_after_start(self):
         """
@@ -726,141 +721,6 @@ class CombinedGUI:
         except Exception as e:
             print(f"Error in project selection after start: {e}")
             self.selected_project = "Standard"  # Fallback
-    
-    def start_websocket_server(self):
-        """
-        Start WebSocket server in separate thread for real-time updates
-        
-        Features:
-        - Runs in daemon thread (auto-cleanup on exit)
-        - Handles multiple concurrent client connections
-        - Supports bidirectional communication
-        - Used for live map updates without page refresh
-        """
-        def run_websocket_server():
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                
-                async def websocket_handler(websocket, path):
-                    await self.handle_websocket_connection(websocket, path)
-                
-                # Starte WebSocket Server
-                start_server = websockets.serve(
-                    websocket_handler, 
-                    "localhost", 
-                    self.WEBSOCKET_PORT
-                )
-                
-                loop.run_until_complete(start_server)
-                loop.run_forever()
-                
-            except Exception as e:
-                print(f"WebSocket server error: {e}")
-        
-        self.websocket_thread = threading.Thread(target=run_websocket_server, daemon=True)
-        self.websocket_thread.start()
-    
-    async def handle_websocket_connection(self, websocket, path):
-        """
-        Handle individual WebSocket client connections
-        
-        Maintains client registry and processes incoming messages
-        Automatically removes disconnected clients
-        
-        Args:
-            websocket: WebSocket connection object
-            path: Connection path
-        """
-        self.websocket_clients.add(websocket)
-        print(f"WebSocket client connected: {websocket.remote_address}")
-        
-        try:
-            async for message in websocket:
-                data = json.loads(message)
-                await self.handle_websocket_message(websocket, data)
-        except websockets.exceptions.ConnectionClosed:
-            pass
-        except Exception as e:
-            print(f"WebSocket error: {e}")
-        finally:
-            self.websocket_clients.remove(websocket)
-            print(f"WebSocket client disconnected")
-    
-    async def handle_websocket_message(self, websocket, data):
-        """Behandelt WebSocket-Nachrichten"""
-        action = data.get('action')
-        
-        try:
-            if action == 'get_layer_data':
-                layer_name = data.get('layer_name')
-                bbox = data.get('bbox')
-                
-                # Lade Daten in Thread Pool
-                loop = asyncio.get_event_loop()
-                layer_data = await loop.run_in_executor(
-                    self.executor, 
-                    self.get_cached_layer_data, 
-                    layer_name, 
-                    bbox
-                )
-                
-                response = {
-                    'action': 'layer_data_response',
-                    'layer_name': layer_name,
-                    'data': layer_data
-                }
-                await websocket.send(json.dumps(response))
-                
-            elif action == 'update_feature':
-                # Feature-Update von der Karte
-                feature = data.get('feature')
-                layer_name = data.get('layer_name')
-                
-                # Update in Thread Pool
-                loop = asyncio.get_event_loop()
-                success = await loop.run_in_executor(
-                    self.executor,
-                    self.update_layer_feature,
-                    layer_name,
-                    feature
-                )
-                
-                if success:
-                    # Broadcast Update an alle verbundenen Clients
-                    await self.broadcast_feature_update(layer_name, feature)
-                    
-            elif action == 'clear_cache':
-                # Cache leeren
-                self.data_cache.clear()
-                response = {'action': 'cache_cleared', 'success': True}
-                await websocket.send(json.dumps(response))
-                
-        except Exception as e:
-            error_response = {
-                'action': 'error',
-                'message': str(e)
-            }
-            await websocket.send(json.dumps(error_response))
-    
-    async def broadcast_feature_update(self, layer_name, feature):
-        """
-        Broadcast feature updates to all connected WebSocket clients
-        
-        Args:
-            layer_name (str): Name of the layer containing the feature
-            feature (dict): Updated GeoJSON feature
-        """
-        if self.websocket_clients:
-            message = {
-                'action': 'feature_updated',
-                'layer_name': layer_name,
-                'feature': feature
-            }
-            await asyncio.gather(
-                *[client.send(json.dumps(message)) for client in self.websocket_clients],
-                return_exceptions=True
-            )
     
     def get_cached_layer_data(self, layer_name, bbox=None):
         """
@@ -991,9 +851,7 @@ class CombinedGUI:
         
         Actions:
         - Shutdown HTTP server
-        - Stop WebSocket server (daemon thread auto-cleanup)
         - Clear data cache
-        - Close all WebSocket connections
         - Reset UI status
         - Reset selected project
         """
@@ -1003,17 +861,8 @@ class CombinedGUI:
             self.httpd.server_close()
             self.httpd = None
         
-        # Stop WebSocket Server (if running)
-        if self.websocket_thread is not None and self.websocket_thread.is_alive():
-            # WebSocket server wird automatisch gestoppt wenn der Thread beendet wird (daemon=True)
-            pass
-        
         # Clear cache
         self.data_cache.clear()
-        
-        # Close WebSocket connections
-        if self.websocket_clients:
-            self.websocket_clients.clear()
         
         # Update UI
         self.update_status("Stopped", is_running=False)

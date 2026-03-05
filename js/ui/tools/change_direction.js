@@ -27,18 +27,26 @@
  * - Updates all connected references
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Selected pipeline features and their Start_Node/End_Node attributes.
+ * - Map layer references for visual arrows.
+ *
+ * Public API:
+ * - activateChangeDirectionMode(): Begin direction-change workflow.
  * 
  * ================================================================================
  */
 
-// ================================================================================
-// STATE MANAGEMENT
-// ================================================================================
+/* ================================================================================
+ * STATE MANAGEMENT
+ * ================================================================================
+ */
 const directionChangeState = new Map();
 const reversedDirectionLayers = new Set();
 
@@ -278,13 +286,13 @@ function clearDirectionModeArtifacts(restoreGeometry) {
 
 function addArrowDecorator(layer, color) {
   try {
-    // Prüfen ob L.polylineDecorator verfügbar ist
+    /* Check whether L.polylineDecorator is available. */
     if (typeof L.polylineDecorator === 'undefined') {
       console.error('L.polylineDecorator is not loaded. Using alternative arrow display.');
       return;
     }
     
-    // Mehrere Pfeile entlang der Pipeline (alle 20% der Länge)
+    /* Place arrows along the pipeline at regular intervals. */
     const arrowDecorator = L.polylineDecorator(layer, {
       patterns: [
         {
@@ -292,21 +300,21 @@ function addArrowDecorator(layer, color) {
           repeat: '20%',
           symbol: L.Symbol.arrowHead({
             pixelSize: 12,
-            polygon: true,  // Volle Dreiecke
+            polygon: true,
             pathOptions: { 
               color: color, 
               fillColor: color,
               weight: 2, 
               fillOpacity: 1,
               opacity: 1,
-              interactive: false  // Keine Klick-Interaktion
+              interactive: false
             }
           })
         }
       ]
     }).addTo(map);
     
-    // Decorator-Layer nicht-interaktiv machen (damit Klicks durch die Pfeile zur Pipeline gehen)
+    /* Make decorator layers non-interactive so clicks reach the pipeline. */
     arrowDecorator.eachLayer(decoratorLayer => {
       if (decoratorLayer._path) {
         decoratorLayer._path.style.pointerEvents = 'none';

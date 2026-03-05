@@ -27,18 +27,26 @@
  * - Uses distinct visual style for identification
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Map clicks for short pipe placement.
+ * - Node selection and layer context.
+ *
+ * Public API:
+ * - activateShortPipeMode(): Start short pipe workflow.
  * 
  * ================================================================================
  */
 
-// ================================================================================
-// STATE MANAGEMENT
-// ================================================================================
+/* ================================================================================
+ * STATE MANAGEMENT
+ * ================================================================================
+ */
 let shortPipeSelectionActive = false;
 let selectedShortPipes = [];
 
@@ -134,21 +142,21 @@ function showShortPipeSaveBtn() {
   saveBtn.style.background = '#28a745';
 
   saveBtn.onclick = function () {
-    // Entferne aus pipelineLayer, füge zu shortPipeLayer hinzu
+    /* Move selected pipelines into the short-pipe layer. */
     selectedShortPipes.forEach(layer => {
       const owning = (typeof findOwningLayerGroup === 'function' ? findOwningLayerGroup(layer) : null) || (typeof pipelineLayer !== 'undefined' ? pipelineLayer : null);
       if (owning && typeof owning.removeLayer === 'function') owning.removeLayer(layer);
       shortPipeLayer.addLayer(layer);
-      // Setze Short-Pipe Attribute (handle both uppercase and lowercase)
+      /* Set short-pipe attributes (handle uppercase and lowercase). */
       if (layer.feature && layer.feature.properties) {
         const props = layer.feature.properties;
-        // Set Diameter (handle both Diameter_mm and diameter_mm)
+        /* Set Diameter (handle Diameter_mm and diameter_mm). */
         if ('Diameter_mm' in props) {
           props.Diameter_mm = 9999;
         } else if ('diameter_mm' in props) {
           props.diameter_mm = 9999;
         }
-        // Set Length (handle both Length_km and length_km)
+        /* Set Length (handle Length_km and length_km). */
         if ('Length_km' in props) {
           props.Length_km = 0;
         } else if ('length_km' in props) {
@@ -157,7 +165,7 @@ function showShortPipeSaveBtn() {
         props.modified = true;
       }
       
-      // Style vom Short-Pipe Layer aus layerConfig holen
+      /* Load short-pipe style from layerConfig. */
       const shortPipeConfig = Array.isArray(layerConfig) ? layerConfig.find(cfg => 
         cfg && (cfg.legendName === 'Short Pipes' || cfg.layerName === 'Short Pipes' || (cfg.filename || '').includes('Short_Pipe'))
       ) : null;
@@ -170,7 +178,7 @@ function showShortPipeSaveBtn() {
       };
       
       layer.setStyle(shortPipeStyle);
-      // Originalwerte speichern
+      /* Persist original style values. */
       layer._originalColor = shortPipeStyle.color;
       layer._originalWeight = shortPipeStyle.weight;
       layer._originalOpacity = shortPipeStyle.opacity;
@@ -179,13 +187,13 @@ function showShortPipeSaveBtn() {
       layer.off('click');
       delete layer._shortPipeBaseStyle;
     });
-    // Reset Styles und Info-Handler für übrige Pipelines
+    /* Reset styles and info handlers for remaining pipelines. */
     resetPipelineLayersAfterShortPipeMode();
     shortPipeSelectionActive = false;
     selectedShortPipes = [];
     removeShortPipeSaveBtn();
     
-    // Switch back to info mode
+    /* Switch back to Info mode. */
     currentMode = 'info';
     activateInfoMode();
     selectTool('info');
@@ -202,7 +210,7 @@ function showShortPipeSaveBtn() {
   discardBtn.style.background = '#dc3545';
 
   discardBtn.onclick = function () {
-    // Reset Styles und Auswahl
+    /* Reset styles and selection. */
     resetPipelineLayersAfterShortPipeMode();
     selectedShortPipes = [];
     shortPipeSelectionActive = false;
@@ -213,7 +221,7 @@ function showShortPipeSaveBtn() {
     selectTool('info');
   };
   
-  // Add buttons to tools section
+  /* Add buttons to tools section. */
   const toolsSection = document.getElementById('tools-section');
   toolsSection.appendChild(saveBtn);
   toolsSection.appendChild(discardBtn);

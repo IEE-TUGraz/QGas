@@ -29,16 +29,25 @@
  * - Custom infrastructure types from dynamic layers
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Map clicks and optional node selection.
+ * - Active infrastructure layers and contributor initials.
+ *
+ * Public API:
+ * - activateAddInfrastructureTool(): Start the add-infrastructure workflow.
  * 
  * ================================================================================
  */
 
-// Add Infrastructure tool module
+/*
+ * Add Infrastructure tool module.
+ */
 (function(){
   /**
    * Activate the Add Infrastructure tool
@@ -50,9 +59,9 @@
       deactivateAllModes();
       currentMode = 'add-infrastructure';
       
-      // Callback für nach Punkt-Erstellung registrieren
+      /* Register callback after point creation. */
       window.onInfrastructurePointCreated = function() {
-        // Kurze Verzögerung, damit das vorherige Popup Zeit hat sich zu schließen
+        /* Small delay to allow the previous popup to close. */
         setTimeout(() => {
           showCustomPopup(
             '✅ Infrastructure Point Added',
@@ -63,9 +72,9 @@
                 type: 'primary',
                 keepOpen: false,
                 onClick: () => {
-                  // Callback löschen und Workflow neu starten
+                  /* Clear callback and restart workflow. */
                   delete window.onInfrastructurePointCreated;
-                  // Kurze Verzögerung bevor Workflow neu gestartet wird
+                  /* Short delay before restarting the workflow. */
                   setTimeout(() => {
                     activateAddInfrastructureTool();
                   }, 50);
@@ -76,9 +85,9 @@
                 type: 'secondary',
                 keepOpen: false,
                 onClick: () => {
-                  // Callback löschen bevor Info Mode aktiviert wird
+                  /* Clear callback before returning to Info mode. */
                   delete window.onInfrastructurePointCreated;
-                  // Zurück zum Info Mode mit force=true um Event Handler neu zu setzen
+                  /* Return to Info mode with forced handler refresh. */
                   currentMode = 'info';
                   activateInfoMode(true);
                   selectTool('info');

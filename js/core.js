@@ -22,7 +22,6 @@
  * Technical Stack:
  * - Leaflet.js for interactive mapping
  * - GeoJSON for infrastructure data
- * - WebSocket for real-time updates
  * - LocalStorage for client-side persistence
  * 
  * Module Structure:
@@ -35,55 +34,85 @@
  * - UI helpers and utilities
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - DOM containers and UI elements declared in Map.html.
+ * - External libraries: Leaflet, Leaflet.Draw, JSZip, XLSX, Chart.js.
+ * - Global runtime state (layerConfig, dynamicLayers, contributorInitials).
+ *
+ * Public API (selected):
+ * - formatElementId(prefix, contributor, number): Build a standardized element ID.
+ * - getFacilityPrefix(type): Resolve or register a facility prefix.
+ * - getNextIdNumber(type, layerOverride): Compute the next sequential ID number.
+ * - createNewNode(latlng, nodeId, options): Create and register a node marker.
+ * - getAllNodeLayers(): Return active node layers.
+ * - getAllLineLayers(): Return active line layers.
  * 
  * ================================================================================
  */
 
-// ================================================================================
-// GLOBAL STATE - CONTRIBUTOR SYSTEM
-// ================================================================================
-// These variables must be declared at the top level for contributor tracking
+/* ================================================================================
+ * GLOBAL STATE - CONTRIBUTOR SYSTEM
+ * ================================================================================
+ * Top-level declarations required for contributor attribution.
+ */
   let contributorName = '';
   let contributorInitials = '';
   let contributors = [];
   
-// ================================================================================
-// GLOBAL STATE - PROJECT MANAGEMENT
-// ================================================================================
-// Project variable determines which dataset folder is currently active
-  let currentProject = 'Standard'; // Default project
+/* ================================================================================
+ * GLOBAL STATE - PROJECT MANAGEMENT
+ * ================================================================================
+ * The current dataset folder that scopes layer discovery and persistence.
+ */
+  /* Default project selection used when no other context is resolved. */
+  let currentProject = 'Standard';
   
-// ================================================================================
-// GLOBAL STATE - LAYER MANAGEMENT
-// ================================================================================
-// Dynamic layer system for flexible infrastructure visualization
-  let layerConfig = [];                              // Layer configuration loaded from Excel
-  let dynamicLayers = {};                            // Store all dynamically loaded layers
-  const layerMetadataRegistry = {};                  // Metadata for each layer (type, style, etc.)
-  const elementKeyMetadataIndex = {};                // Index for quick element lookup
-  const elementTypeLayerMap = {};                    // Maps element types to their layers
-  const deletedLayerRegistry = {};                   // Tracks deleted elements for undo functionality
-  let styleableLayerRegistry = new Map();            // Registry of layers that can be styled
-  let styleableLayerRegistryDirty = true;            // Flag for registry updates
-  const editModeHiddenPointLayers = new Set();       // Point layers hidden during edit mode
-  let editGeometryVisibilityActive = false;          // Toggle for geometry editing visibility
+/* ================================================================================
+ * GLOBAL STATE - LAYER MANAGEMENT
+ * ================================================================================
+ * Dynamic layer registries and caches for infrastructure visualization.
+ */
+  /* Layer configuration entries loaded from Excel or fallback defaults. */
+  let layerConfig = [];
+  /* Registry for dynamically loaded layers keyed by layer name. */
+  let dynamicLayers = {};
+  /* Layer metadata (type, style, and legend conventions). */
+  const layerMetadataRegistry = {};
+  /* Index mapping element keys to their metadata records. */
+  const elementKeyMetadataIndex = {};
+  /* Mapping from element keys to their layer instances. */
+  const elementTypeLayerMap = {};
+  /* Layer groups holding deleted elements for undo or audit workflows. */
+  const deletedLayerRegistry = {};
+  /* Cache of layers eligible for styling controls. */
+  let styleableLayerRegistry = new Map();
+  /* Dirty flag to force rebuilding the styleable layer cache. */
+  let styleableLayerRegistryDirty = true;
+  /* Temporary store of point layers hidden during edit geometry mode. */
+  const editModeHiddenPointLayers = new Set();
+  /* Toggle that tracks the edit-geometry visibility state. */
+  let editGeometryVisibilityActive = false;
 
-// ================================================================================
-// GLOBAL STATE - STYLING AND COLORS
-// ================================================================================
-// Color management for pipeline and infrastructure elements
+/* ================================================================================
+ * GLOBAL STATE - STYLING AND COLORS
+ * ================================================================================
+ * Centralized color registries and palettes for styling elements.
+ */
   const customLineColorPalette = [
     '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b',
     '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#ff6f61', '#60a917',
     '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395', '#994499'
   ];
-  const usedLineColors = new Map();                  // Track color assignments
-  const quickColorCollections = [                    // Predefined color schemes
+  /* Tracks line colors currently assigned to line layers. */
+  const usedLineColors = new Map();
+  /* Predefined color schemes for quick selection. */
+  const quickColorCollections = [
     {
       title: 'Pipeline essentials',
       description: 'High-contrast line colors',
@@ -100,13 +129,16 @@
       colors: ['#FFCDB2', '#FFAFCC', '#BDE0FE', '#C7F9CC', '#F4E285', '#E0AAFF']
     }
   ];
-  const recentColorSelections = [];                  // Track recently used colors
-  const MAX_RECENT_COLORS = 6;                        // Maximum recent colors to remember
+  /* Recent color history for UI recall. */
+  const recentColorSelections = [];
+  /* Maximum number of recent colors to retain. */
+  const MAX_RECENT_COLORS = 6;
   
-// ================================================================================
-// PROJECT PERSISTENCE
-// ================================================================================
-// LocalStorage keys and defaults for project selection persistence
+/* ================================================================================
+ * PROJECT PERSISTENCE
+ * ================================================================================
+ * LocalStorage keys and defaults for persisting project context.
+ */
   const PROJECT_STORAGE_KEY = 'qgasSelectedProject';
   const DEFAULT_PROJECT = 'Standard';
 
@@ -117,7 +149,7 @@
  */
   function sanitizeProjectName(name) {
     if (!name || typeof name !== 'string') return '';
-    return name.trim().replace(/[^a-zA-Z0-9_\-]/g, '');
+    return name.trim().replace(/[^a-zA-Z0-9_\- ]/g, '');
   }
 
 /**
@@ -195,9 +227,10 @@
     return sanitizeProjectName(currentProject) || DEFAULT_PROJECT;
   }
 
-// ================================================================================
-// COLOR MANAGEMENT UTILITIES
-// ================================================================================
+/* ================================================================================
+ * COLOR MANAGEMENT UTILITIES
+ * ================================================================================
+ */
 
 /**
  * Normalize color values to lowercase hex format (#rrggbb)
@@ -235,6 +268,9 @@
     usedLineColors.set(key, (usedLineColors.get(key) || 0) + 1);
   }
 
+  /*
+   * Decrement usage counts and release colors that are no longer used.
+   */
   function unregisterLineColorUsage(color) {
     const key = normalizeColorHex(color);
     if (!key || !usedLineColors.has(key)) return;
@@ -246,6 +282,9 @@
     }
   }
 
+  /*
+   * Replace a tracked color assignment while keeping usage statistics accurate.
+   */
   function replaceLineColorUsage(oldColor, newColor) {
     if (normalizeColorHex(oldColor) !== normalizeColorHex(newColor)) {
       unregisterLineColorUsage(oldColor);
@@ -253,6 +292,9 @@
     registerLineColorUsage(newColor);
   }
 
+  /*
+   * Maintain a bounded MRU list of recent color selections for UI recall.
+   */
   function recordRecentColor(color) {
     const normalized = normalizeColorHex(color);
     if (!/^#[0-9a-f]{6}$/.test(normalized)) return;
@@ -266,11 +308,17 @@
     }
   }
 
+  /*
+   * Validate hex colors in long format, with or without leading '#'.
+   */
   function isValidHexColor(value) {
     if (!value) return false;
     return /^#?[0-9a-fA-F]{6}$/.test(value.trim());
   }
 
+  /*
+   * Keep the custom color input widgets synchronized with a normalized value.
+   */
   function setCustomColorInputs(color) {
     const normalized = normalizeColorHex(color);
     if (!/^#[0-9a-f]{6}$/.test(normalized)) return;
@@ -284,14 +332,23 @@
     }
   }
 
+  /*
+   * Mark the styleable layer cache as stale so it is rebuilt on demand.
+   */
   function invalidateStyleableLayerRegistry() {
     styleableLayerRegistryDirty = true;
   }
 
+  /*
+   * Check whether a given color is currently assigned to any line layer.
+   */
   function colorIsInUse(color) {
     return usedLineColors.has(normalizeColorHex(color));
   }
 
+  /*
+   * Return an available line color, falling back to randomized candidates.
+   */
   function getUniqueLineColor() {
     for (const color of customLineColorPalette) {
       if (!colorIsInUse(color)) {
@@ -307,11 +364,17 @@
     return '#4a4a4a';
   }
 
+  /*
+   * Derive a stable custom layer ID prefix from a display name.
+   */
   function deriveCustomLayerPrefix(name) {
     if (!name) return generatePrefixFromName('CustomLayer');
     return generatePrefixFromName(name, name);
   }
 
+  /*
+   * Resolve a human-readable name for a layer group, prioritizing metadata.
+   */
   function getLayerGroupDisplayName(layerGroup) {
     if (!layerGroup) return null;
     if (layerGroup._customLayerName) return layerGroup._customLayerName;
@@ -325,6 +388,9 @@
     return null;
   }
 
+  /*
+   * Identify the layer-specific ID context used for new element identifiers.
+   */
   function getLayerIdContext(layerGroup) {
     const fallbackType = 'Pipeline';
     if (!layerGroup) {
@@ -343,6 +409,25 @@
     return { typeKey: resolvedType, prefix: getFacilityPrefix(resolvedType) };
   }
 
+  /*
+   * Resolve the node-specific ID context, honoring custom node-layer settings.
+   */
+  function getNodeIdContext(nodeLayer) {
+    if (nodeLayer && nodeLayer._customLayerSettings) {
+      const settings = nodeLayer._customLayerSettings;
+      const typeKey = settings.typeKey || 'Node';
+      const idPrefix = settings.idPrefix || getFacilityPrefix(typeKey);
+      if (!facilityTypeMap[typeKey]) {
+        facilityTypeMap[typeKey] = idPrefix;
+      }
+      return { typeKey, prefix: idPrefix };
+    }
+    return { typeKey: 'Node', prefix: getFacilityPrefix('Node') };
+  }
+
+  /*
+   * Determine the display name for a feature based on its metadata and layer.
+   */
   function getLayerDisplayNameForFeature(layer) {
     if (!layer) return 'Pipeline';
     if (layer.feature && layer.feature.properties && layer.feature.properties.Layer_Name) {
@@ -358,6 +443,9 @@
     return 'Pipeline';
   }
 
+  /*
+   * Extract default attribute values for custom line layers, when present.
+   */
   function getCustomLineDefaults(layerCandidate) {
     if (layerCandidate && layerCandidate._customLayerSettings && layerCandidate._customLayerSettings.defaultAttributes) {
       return { ...layerCandidate._customLayerSettings.defaultAttributes };
@@ -365,6 +453,9 @@
     return null;
   }
 
+  /*
+   * Order attribute keys with ID fields first, and optionally hide keys.
+   */
   function getOrderedAttributeKeys(properties, hiddenAttributes = []) {
     if (!properties) return [];
     const hiddenSet = new Set(hiddenAttributes || []);
@@ -381,10 +472,11 @@
     return [...idKeys, ...otherKeys];
   }
   
-// ================================================================================
-// COUNTRY FILTER SYSTEM
-// ================================================================================
-// Track selected countries for geographic filtering
+/* ================================================================================
+ * COUNTRY FILTER SYSTEM
+ * ================================================================================
+ * Maintains the current geographic filter selection.
+ */
   let selectedCountries = new Set();
 
 /**
@@ -400,10 +492,11 @@
     return `${sanitizedPrefix}_${sanitizedContributor}_${number}`;
   }
   
-// ================================================================================
-// LEGACY LAYER REFERENCES
-// ================================================================================
-// Keep references for backward compatibility with existing code
+/* ================================================================================
+ * LEGACY LAYER REFERENCES
+ * ================================================================================
+ * Backward-compatible handles to original layer groups.
+ */
   let pipelineLayer = null;
   let nodeLayer = null;
   let powerplantsLayer = null;
@@ -420,10 +513,11 @@
   let electrolyzersLayer = null;
   let nodePositionEditActive = false;
   
-// ================================================================================
-// ORIGINAL LAYERS FOR FILTERING
-// ================================================================================
-// Store original layer state before filtering operations
+/* ================================================================================
+ * ORIGINAL LAYERS FOR FILTERING
+ * ================================================================================
+ * Stores original layer references for filter reset operations.
+ */
   let originalPipelineLayer = null;
   let originalEstimatedPipelinesLayer = null;
   let originalNodeLayer = null;
@@ -439,16 +533,20 @@
   let originalHydrogenPipeLayer = null;
   let originalElectrolyzersLayer = null;
 
-// ================================================================================
-// SUBLAYER AND GROUPING STATE
-// ================================================================================
-  let sublayerOperationContext = null;          // Context for sublayer switching operations
-  let pipelineGroups = [];                       // Array of {name, pipelines: [], startPoint, endPoint, totalLength}
+/* ================================================================================
+ * SUBLAYER AND GROUPING STATE
+ * ================================================================================
+ */
+  /* Context object for sublayer switching operations. */
+  let sublayerOperationContext = null;
+  /* Pipeline grouping cache: {name, pipelines, startPoint, endPoint, totalLength}. */
+  let pipelineGroups = [];
   
-// ================================================================================
-// MAP INITIALIZATION
-// ================================================================================
-// Initialize Leaflet map with custom settings and controls
+/* ================================================================================
+ * MAP INITIALIZATION
+ * ================================================================================
+ * Leaflet map setup and foundational panes.
+ */
 const map = L.map('map', {
     attributionControl: false,
     scrollWheelZoom: true,
@@ -463,7 +561,9 @@ const map = L.map('map', {
     initLegendControl(map);
   }
 
-  // Custom wheel zoom handler for fine control with CTRL key
+  /*
+   * Custom wheel zoom handler with ctrlKey gating for fine-grained control.
+   */
   const mapContainer = map.getContainer();
   mapContainer.addEventListener('wheel', function(e) {
     if (e.ctrlKey) {
@@ -483,7 +583,9 @@ const map = L.map('map', {
     }
   }, { passive: false });
 
-  // Dedicated panes to control layer stacking order
+  /*
+   * Dedicated panes to enforce visual stacking order for map overlays.
+   */
   const planOverlayPane = map.createPane('planOverlayPane');
   planOverlayPane.style.zIndex = 340;
   planOverlayPane.style.pointerEvents = 'none';
@@ -492,10 +594,16 @@ const map = L.map('map', {
   const nodePane = map.createPane('nodePane');
   nodePane.style.zIndex = 360;
 
+  /*
+   * Normalize relative paths to prevent accidental absolute traversal.
+   */
   function sanitizeRelativePath(path) {
     return (path || '').replace(/^\.\/+/, '').replace(/^\/+/, '').replace(/\\/g, '/');
   }
 
+  /*
+   * Resolve file names into project-aware relative layer paths.
+   */
   function resolveLayerFilePath(fileName) {
     const cleaned = sanitizeRelativePath(fileName);
     if (!cleaned) return '';
@@ -508,6 +616,9 @@ const map = L.map('map', {
     return cleaned;
   }
 
+  /*
+   * Build Input/ URLs with optional cache busting and project prefixing.
+   */
   function buildInputUrl(fileName, options = {}) {
     const { skipProjectPrefix = false, cacheBust = true } = options;
     const relativePath = skipProjectPrefix ? sanitizeRelativePath(fileName) : resolveLayerFilePath(fileName);
@@ -516,11 +627,17 @@ const map = L.map('map', {
     return `Input/${relativePath}${cacheParam}`;
   }
 
+  /*
+   * Normalize layer file names for case-insensitive matching.
+   */
   function normalizeFilenameReference(fileName) {
     const sanitized = sanitizeRelativePath(fileName || '');
     return sanitized.toLowerCase();
   }
 
+  /*
+   * Establish parent-child relationships for sublayers in config metadata.
+   */
   function applySublayerRelationships(configList) {
     if (!Array.isArray(configList)) return configList;
     const lookup = new Map();
@@ -550,11 +667,17 @@ const map = L.map('map', {
     return configList;
   }
 
+  /*
+   * Recompute sublayer relationships after config mutations.
+   */
   function rebuildLayerRelationships() {
     if (!Array.isArray(layerConfig)) return;
     applySublayerRelationships(layerConfig);
   }
 
+  /*
+   * Decide whether a layer config should be omitted from legend displays.
+   */
   function shouldSkipLayerConfig(config) {
     if (!config) return false;
     const descriptor = `${config.legendName || ''} ${config.filename || ''}`.toLowerCase();
@@ -562,6 +685,9 @@ const map = L.map('map', {
     return descriptor.includes('estimated pipeline');
   }
 
+  /*
+   * Produce a legend ordering that keeps sublayers adjacent to parents.
+   */
   function getOrderedLegendConfigs() {
     if (!Array.isArray(layerConfig)) return [];
     const ordered = [];
@@ -583,11 +709,17 @@ const map = L.map('map', {
     return ordered;
   }
 
+  /*
+   * Derive the internal JS layer name from the backing filename.
+   */
   function getLayerNameFromConfig(config) {
     if (!config || !config.filename) return '';
     return config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
   }
 
+  /*
+   * Select the Leaflet pane that best matches the layer type.
+   */
   function resolveDefaultPaneForConfig(config) {
     const lowerFilename = (config?.filename || '').toLowerCase();
     const typeHint = (config?.type || '').toLowerCase();
@@ -601,12 +733,18 @@ const map = L.map('map', {
     return null;
   }
 
+  /*
+   * Limit sublayer legend names to stable, human-readable labels.
+   */
   function sanitizeSublayerLegendName(name) {
     const trimmed = (name || '').trim();
     if (!trimmed) return 'Sublayer';
     return trimmed.replace(/\s+/g, ' ').substring(0, 60);
   }
 
+  /*
+   * Generate a unique filename for a new sublayer within a parent directory.
+   */
   function generateUniqueSublayerFilename(parentConfig, sublayerName) {
     const parentFile = sanitizeRelativePath(parentConfig?.filename || '');
     const lastSlash = parentFile.lastIndexOf('/');
@@ -624,6 +762,9 @@ const map = L.map('map', {
     return candidate;
   }
 
+  /*
+   * Generate a unique filename for an ad-hoc custom layer.
+   */
   function generateUniqueCustomFilename(layerDisplayName) {
     const base = (layerDisplayName || 'Custom_Layer').toString().trim();
     const slug = base.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '') || 'Custom_Layer';
@@ -637,12 +778,14 @@ const map = L.map('map', {
     return candidate;
   }
 
+  /*
+   * Insert or update layer configuration entries while preserving order.
+   */
   function upsertLayerConfigEntry(config, metadata) {
     if (!config) return null;
     if (!Array.isArray(layerConfig)) {
       layerConfig = [];
     }
-    if (!config || isLineLayerType(config.type)) return;
     const normalized = normalizeFilenameReference(config.filename);
     let existing = layerConfig.find(cfg => normalizeFilenameReference(cfg.filename) === normalized);
     if (!existing) {
@@ -659,6 +802,9 @@ const map = L.map('map', {
     return existing;
   }
 
+  /*
+   * Insert a new config immediately after a parent and its sublayers.
+   */
   function insertConfigAfterParent(parentConfig, newConfig) {
     if (!Array.isArray(layerConfig)) {
       layerConfig = [];
@@ -682,6 +828,9 @@ const map = L.map('map', {
     rebuildLayerRelationships();
   }
 
+  /*
+   * Infer element keys from filenames, legend names, and type hints.
+   */
   function inferElementKeyFromConfig(config = {}, layerName = '') {
     const descriptor = `${(config.legendName || '')} ${(config.filename || '')} ${layerName}`.toLowerCase();
     const typeHint = (config.type || '').toLowerCase();
@@ -744,6 +893,9 @@ const map = L.map('map', {
     return sanitized || 'layerGroup';
   }
 
+  /*
+   * Register metadata for a newly loaded layer and its classification.
+   */
   function registerLayerMetadata(layerName, config = {}) {
     const providedElementKey = config.elementKey || config.typeKey;
     const elementKey = providedElementKey || inferElementKeyFromConfig(config, layerName);
@@ -776,6 +928,9 @@ const map = L.map('map', {
     return metadata;
   }
 
+  /*
+   * Attach metadata to a layer instance and its underlying GeoJSON feature.
+   */
   function assignMetadataToLayer(layer, metadata) {
     if (!layer || !metadata) return;
     layer._qgasMeta = metadata;
@@ -784,6 +939,9 @@ const map = L.map('map', {
     }
   }
 
+  /*
+   * Track layer instances by element key for targeted lookups.
+   */
   function rememberLayerInstanceForElementKey(elementKey, layerInstance) {
     if (!elementKey || !layerInstance) return;
     if (!elementTypeLayerMap[elementKey]) {
@@ -792,6 +950,9 @@ const map = L.map('map', {
     elementTypeLayerMap[elementKey].add(layerInstance);
   }
 
+  /*
+   * Remove layer references when layers are unloaded or destroyed.
+   */
   function removeLayerReferenceForElementKey(elementKey, layerInstance) {
     if (!elementKey || !layerInstance) return;
     const registry = elementTypeLayerMap[elementKey];
@@ -825,6 +986,9 @@ const map = L.map('map', {
     if (!previousLayer && !newLayer) return;
     replaceDynamicLayerReference(previousLayer, newLayer);
     swapElementLayerReference(elementKey, previousLayer, newLayer);
+    if (previousLayer !== newLayer) {
+      invalidateStyleableLayerRegistry();
+    }
   }
 
   function getMetadataForElementKey(elementKey) {
@@ -1269,7 +1433,9 @@ const map = L.map('map', {
     return { url: null, response: null };
   }
 
-  // Function to load a layer if the file exists
+  /*
+   * Load a GeoJSON layer if the referenced file exists.
+   */
   function loadLayer(fileName, layerName, styleOptions, onEachFeatureCallback, onLoadCallback) {
     styleOptions = styleOptions || {};
     const resolvedPath = resolveLayerFilePath(fileName);
@@ -1363,7 +1529,9 @@ const map = L.map('map', {
   const DEFAULT_LINE_COLOR_SEQUENCE = ['#0070f3', '#ff6b6b', '#20c997', '#a55eea', '#ffb400', '#00b8d9', '#ff5f1f'];
   const DEFAULT_POINT_COLOR_SEQUENCE = ['#ff6b6b', '#2ec4b6', '#f4c430', '#6c63ff', '#1bc47d', '#ff6ec7', '#3d5afe', '#ff924a'];
 
-  // Load layer configuration from Excel
+  /*
+   * Load layer configuration from Excel, falling back to defaults.
+   */
   async function loadLayerConfiguration() {
     try {
       const { response } = await fetchProjectResource('02_Input_and_Configuration.xlsx', { logAttempts: true });
@@ -1519,8 +1687,10 @@ const map = L.map('map', {
     return applySublayerRelationships(defaults);
   }
 
+  /*
+   * Load contributors from localStorage (persistent until cache is cleared).
+   */
   function loadContributors() {
-    // Load from localStorage (persistent until browser cache is cleared)
     const stored = localStorage.getItem('qgas_contributors');
     if (stored) {
       contributors = JSON.parse(stored);
@@ -1530,8 +1700,10 @@ const map = L.map('map', {
     return contributors;
   }
 
+  /*
+   * Persist contributors to localStorage (no server-side storage).
+   */
   function saveContributors() {
-    // Save to localStorage only (persistent until browser cache is cleared)
     localStorage.setItem('qgas_contributors', JSON.stringify(contributors));
     console.log('Contributors saved to browser localStorage');
   }
@@ -1642,7 +1814,9 @@ const map = L.map('map', {
     document.getElementById('new-contributor-modal').style.display = 'none';
   }
 
-  // Cite Modal Functions
+  /*
+   * Citation modal handlers.
+   */
   function openCiteModal() {
     document.getElementById('cite-modal').style.display = 'flex';
   }
@@ -1669,7 +1843,9 @@ const map = L.map('map', {
     });
   }
 
-  // Data and Licensing Modal Functions
+  /*
+   * Data and licensing modal handlers.
+   */
   async function openDataLicensingModal() {
     const modal = document.getElementById('data-licensing-modal');
     const contentDiv = modal.querySelector('div[style*="background: #f8f9fa"]');
@@ -1774,8 +1950,9 @@ const map = L.map('map', {
   }
 
 
-  // Vollständiges Preloading-System für professionellen Start
-  
+  /*
+   * Preload assets and manage the initial loading screen sequence.
+   */
   function preloadAllAssets() {
     return new Promise((resolve) => {
       const logos = ['Images/TU_Graz.png', 'Images/QGas_Logo.png', 'Images/Logo_IEE.png', 'Images/Loading_Screen.png'];
@@ -1800,18 +1977,20 @@ const map = L.map('map', {
     });
   }
   
-  // Warte bis alle Assets geladen sind, dann zeige die Seite
+  /*
+   * Reveal the application once all preload assets are complete.
+   */
   preloadAllAssets().then(() => {
-    // Body sichtbar machen
+    /* Make the body visible after preload completion. */
     document.body.style.visibility = 'visible';
     
-    // Logos in Loading Screen und Top-Logo setzen
-    const logoSources = ['Images/QGas_Logo.png', 'Images/Logo_IEE.png', 'Images/TU_Graz.png']; // Neue Reihenfolge: QGas - IEE - TU Graz
-    const topLogoSources = ['Images/QGas_Logo.png', 'Images/TU_Graz.png', 'Images/Logo_IEE.png']; // Andere Reihenfolge für Top-Logo
+    /* Assign loading-screen and header logos. */
+    const logoSources = ['Images/QGas_Logo.png', 'Images/Logo_IEE.png', 'Images/TU_Graz.png'];
+    const topLogoSources = ['Images/QGas_Logo.png', 'Images/TU_Graz.png', 'Images/Logo_IEE.png'];
     const loadingLogos = document.querySelectorAll('.logo-container img');
     const topLogos = document.querySelectorAll('#top-logo .logo-row img');
     
-    // Hintergrundbild setzen
+    /* Assign the loading-screen background image. */
     const loadingBackground = document.getElementById('loading-background');
     if (loadingBackground) {
       loadingBackground.src = 'Images/Loading_Screen.png';
@@ -1830,7 +2009,7 @@ const map = L.map('map', {
       }
     });
     
-    // Progress Bar starten
+    /* Start the simulated progress bar. */
     const loadingScreen = document.getElementById('loading-screen');
     const progressBar = document.getElementById('progress-bar');
     
@@ -1843,7 +2022,7 @@ const map = L.map('map', {
       
       if (progress >= 100) {
       clearInterval(interval);
-      // Start fade out 500ms after progress bar is complete
+      /* Fade out the loading screen shortly after completion. */
       setTimeout(() => {
         if (loadingScreen) {
           loadingScreen.style.opacity = '0';
@@ -1852,38 +2031,38 @@ const map = L.map('map', {
             loadingScreen.style.display = 'none';
             console.log('Loading beendet, zeige Contributor Popup...');
             
-            // Alle anderen Overlays explizit verstecken
+            /* Hide any lingering overlays before showing contributor flow. */
             document.getElementById('tools-popup-overlay').style.display = 'none';
             document.getElementById('tools-popup').style.display = 'none';
             document.getElementById('custom-popup-overlay').style.display = 'none';
             document.getElementById('custom-popup').style.display = 'none';
             
-            // Contributor Popup anzeigen
+            /* Show contributor selection popup. */
             const popup = document.getElementById('contributor-popup');
             const createBtn = document.getElementById('create-contributor-btn');
             const applyBtn = document.getElementById('contributor-apply-btn');
             
             if (popup) {
-              // Load existing contributors
+              /* Load and render contributor list. */
               loadContributors();
               populateContributorSelect();
               
               popup.style.display = 'flex';
               console.log('Contributor Popup angezeigt');
               
-              // Create new contributor button
+              /* Wire create-contributor action. */
               createBtn.onclick = function() {
                 openNewContributorModal();
               };
               
-              // Apply/Continue button
+              /* Wire apply/continue action. */
               applyBtn.onclick = function(e) {
                 console.log('Continue Button geklickt!', e);
                 const selectedRadio = document.querySelector('input[name="contributor-select"]:checked');
                 const selectedId = selectedRadio ? selectedRadio.value : null;
                 console.log('Selected ID:', selectedId);
                 if (selectedId) {
-                  // Existing contributor selected
+                  /* Existing contributor selected. */
                   const contributor = contributors.find(c => c.id === selectedId);
                   console.log('Found contributor:', contributor);
                   if (contributor) {
@@ -1892,7 +2071,7 @@ const map = L.map('map', {
                     contributorName = fullName;
                     contributorInitials = contributor.fullName.split(/\s+/).map(n => n[0] ? n[0].toUpperCase() : '').join('');
                     
-                    // Popup schließen
+                    /* Close popup on successful selection. */
                     popup.style.display = 'none';
                     console.log('Contributor gesetzt:', fullName);
                   }
@@ -1909,7 +2088,7 @@ const map = L.map('map', {
     }
   }, 75); // 7500ms / 100 steps = 75ms per step
   
-  }); // Schließt das preloadAllAssets().then() Promise
+  });
 
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
@@ -1932,7 +2111,7 @@ const map = L.map('map', {
   }
 
   const drawControl = new L.Control.Draw({
-    draw: false,  // Zeichentools erstmal aus
+    draw: false,
     edit: {
         featureGroup: drawnItems,
         edit: true,
@@ -1951,7 +2130,9 @@ const map = L.map('map', {
     L.EditToolbar.Edit.prototype.options = editOptions;
   }
 
-  // Event-Listener für Popup-Close (Pipeline-Highlight zurücksetzen)
+  /*
+   * Reset pipeline highlights when popups close.
+   */
   map.on('popupclose', function(e) {
     if (activePipeline) {
       resetPipelineStyle(activePipeline);
@@ -1959,20 +2140,22 @@ const map = L.map('map', {
     }
   });
 
-  // Event-Listener für Draw Created (Pipeline zu richtigem Layer hinzufügen)
+  /*
+   * Route newly drawn geometries to the appropriate layer group.
+   */
   map.on('draw:created', function(e) {
     const layer = e.layer;
     if (currentMode === 'draw-pipeline') {
-      // Entferne von drawnItems und füge zu selectedPipelineLayer hinzu
+      /* Remove from drawnItems and add to the selected pipeline layer. */
       drawnItems.removeLayer(layer);
       layer.options = layer.options || {};
       layer.options.pane = 'pipelinePane';
       const targetGroup = (window.selectedPipelineLayer && window.selectedPipelineLayer !== drawnItems) ? window.selectedPipelineLayer : drawnItems;
 
-      // Pipeline fertigstellen
+      /* Finalize pipeline creation and insert into target group. */
       finalizeDrawnPipeline(layer);
       targetGroup.addLayer(layer);
-      // Assign parent layer metadata to the newly created pipeline
+      /* Assign parent layer metadata to the newly created pipeline. */
       if (targetGroup._qgasMeta) {
         assignMetadataToLayer(layer, targetGroup._qgasMeta);
       }
@@ -1980,18 +2163,18 @@ const map = L.map('map', {
         layer.bringToBack();
       }
       
-      // Drawer deaktivieren
+      /* Disable the drawing tool once the pipeline is created. */
       if (window.polylineDrawer) {
         window.polylineDrawer.disable();
         window.polylineDrawer = null;
       }
       
-      // Context löschen NACH allen draw:created Handlern
+      /* Clear draw context after all handlers complete. */
       setTimeout(() => {
         delete window.pipelineDrawContext;
       }, 100);
     } else {
-      // Normales Zeichnen
+      /* Default behavior for non-pipeline drawing. */
       drawnItems.addLayer(layer);
     }
   });
@@ -2604,6 +2787,84 @@ const map = L.map('map', {
     console.log('Automatically registered Short-Pipes configuration after detecting Short_Pipes.geojson.');
   }
 
+  // Helper function to create markers with different shapes based on markerType
+  function createShapedMarker(latlng, options = {}) {
+    const { shape = 'circle', size = 6, color = '#ff7800', pane = 'overlayPane' } = options;
+    
+    // For circle, use native CircleMarker (best performance)
+    if (shape === 'circle' || !shape) {
+      return L.circleMarker(latlng, {
+        pane: pane,
+        radius: size,
+        fillColor: color,
+        color: '#000',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.85
+      });
+    }
+    
+    // For other shapes, use DivIcon with SVG
+    const iconSize = size * 2;
+    let svgContent = '';
+    
+    switch(shape.toLowerCase()) {
+      case 'square':
+        svgContent = `<rect width="${iconSize}" height="${iconSize}" fill="${color}" stroke="#000" stroke-width="1"/>`;
+        break;
+      case 'triangle':
+        svgContent = `<polygon points="${iconSize/2},0 0,${iconSize} ${iconSize},${iconSize}" fill="${color}" stroke="#000" stroke-width="1"/>`;
+        break;
+      case 'diamond':
+        svgContent = `<polygon points="${iconSize/2},0 ${iconSize},${iconSize/2} ${iconSize/2},${iconSize} 0,${iconSize/2}" fill="${color}" stroke="#000" stroke-width="1"/>`;
+        break;
+      case 'star': {
+        const cx = iconSize / 2;
+        const cy = iconSize / 2;
+        const outerRadius = iconSize / 2;
+        const innerRadius = iconSize / 4;
+        const points = [];
+        for (let i = 0; i < 10; i++) {
+          const radius = i % 2 === 0 ? outerRadius : innerRadius;
+          const angle = (Math.PI * 2 * i) / 10 - Math.PI / 2;
+          points.push(`${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`);
+        }
+        svgContent = `<polygon points="${points.join(' ')}" fill="${color}" stroke="#000" stroke-width="1"/>`;
+        break;
+      }
+      case 'cross': {
+        const w = iconSize / 3;
+        svgContent = `<polygon points="${w},0 ${w*2},0 ${w*2},${w} ${iconSize},${w} ${iconSize},${w*2} ${w*2},${w*2} ${w*2},${iconSize} ${w},${iconSize} ${w},${w*2} 0,${w*2} 0,${w} ${w},${w}" fill="${color}" stroke="#000" stroke-width="1"/>`;
+        break;
+      }
+      default:
+        // Fallback to circle
+        return L.circleMarker(latlng, {
+          pane: pane,
+          radius: size,
+          fillColor: color,
+          color: '#000',
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.85
+        });
+    }
+    
+    const svg = `<svg width="${iconSize}" height="${iconSize}" xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>`;
+    
+    const icon = L.divIcon({
+      html: svg,
+      className: 'custom-shape-marker',
+      iconSize: [iconSize, iconSize],
+      iconAnchor: [iconSize / 2, iconSize / 2]
+    });
+    
+    return L.marker(latlng, { 
+      icon: icon,
+      pane: pane
+    });
+  }
+
   // Dynamic layer loading based on configuration
   async function loadAllLayersFromConfig() {
     console.log('=== Starting dynamic layer loading ===');
@@ -2660,14 +2921,11 @@ const map = L.map('map', {
         loadLayer(config.filename, layerName, {
           pane: targetPane,
           pointToLayer: (feature, latlng) => {
-            const marker = L.circleMarker(latlng, {
-              pane: targetPane || 'overlayPane',
-              radius: config.size,
-              fillColor: config.color,
-              color: '#000',
-              weight: 1,
-              opacity: 1,
-              fillOpacity: 0.85
+            const marker = createShapedMarker(latlng, {
+              shape: config.markerType || 'circle',
+              size: config.size || 6,
+              color: config.color || '#ff7800',
+              pane: targetPane || 'overlayPane'
             });
             marker.feature = feature;
             captureOriginalMarkerStyle(marker, 'default');
@@ -2743,14 +3001,11 @@ const map = L.map('map', {
       };
     } else {
       geojsonOptions.pointToLayer = (feature, latlng) => {
-        const marker = L.circleMarker(latlng, {
-          pane: targetPane || 'overlayPane',
-          radius: config.size || 6,
-          fillColor: config.color || '#ff7800',
-          color: '#000',
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.85
+        const marker = createShapedMarker(latlng, {
+          shape: config.markerType || 'circle',
+          size: config.size || 6,
+          color: config.color || '#ff7800',
+          pane: targetPane || 'overlayPane'
         });
         marker.feature = feature;
         captureOriginalMarkerStyle(marker, 'default');
@@ -2835,8 +3090,8 @@ map.on(L.Draw.Event.CREATED, function (e) {
     const latlngs = layer.getLatLngs();
     let startNodeId = ctx.startNodeId;
     let endNodeId = null;
-    const nodePrefix = getFacilityPrefix('Node');
     const nodeLayerTarget = ctx.nodeLayer || getActivePipelineNodeLayer();
+    const nodeIdContext = getNodeIdContext(nodeLayerTarget);
     if (!ctx.nodeLayer && nodeLayerTarget) {
       ctx.nodeLayer = nodeLayerTarget;
     }
@@ -2844,7 +3099,11 @@ map.on(L.Draw.Event.CREATED, function (e) {
     // Start-Node erstellen falls nicht vorhanden
     if (!ctx.hasStartNode && latlngs.length > 0) {
       const startPos = latlngs[0];
-      const newNodeId = formatElementId(nodePrefix, contributorInitials, getNextIdNumber('Node'));
+      const newNodeId = formatElementId(
+        nodeIdContext.prefix,
+        contributorInitials,
+        getNextIdNumber(nodeIdContext.typeKey, nodeLayerTarget)
+      );
       createNewNode(startPos, newNodeId, { targetLayer: nodeLayerTarget });
       startNodeId = newNodeId;
     }
@@ -2852,7 +3111,11 @@ map.on(L.Draw.Event.CREATED, function (e) {
     // End-Node erstellen falls nicht vorhanden
     if (!ctx.hasEndNode && latlngs.length > 0) {
       const endPos = latlngs[latlngs.length - 1];
-      const newNodeId = formatElementId(nodePrefix, contributorInitials, getNextIdNumber('Node'));
+      const newNodeId = formatElementId(
+        nodeIdContext.prefix,
+        contributorInitials,
+        getNextIdNumber(nodeIdContext.typeKey, nodeLayerTarget)
+      );
       createNewNode(endPos, newNodeId, { targetLayer: nodeLayerTarget });
       endNodeId = newNodeId;
     }
@@ -3148,6 +3411,8 @@ function captureOriginalMarkerStyle(layer, mode = 'default') {
     layer.eachLayer(subLayer => captureOriginalMarkerStyle(subLayer, mode));
     return;
   }
+  
+  // Handle CircleMarker
   if (layer instanceof L.CircleMarker) {
     const styleSnapshot = {
       color: layer.options.color,
@@ -3155,6 +3420,24 @@ function captureOriginalMarkerStyle(layer, mode = 'default') {
       fillColor: layer.options.fillColor,
       fillOpacity: layer.options.fillOpacity,
       radius: layer.options.radius
+    };
+    if (mode === 'highlight') {
+      if (!layer._highlightBackupStyle) {
+        layer._highlightBackupStyle = styleSnapshot;
+      }
+    } else {
+      layer._defaultMarkerStyle = styleSnapshot;
+    }
+  }
+  
+  // Handle DivIcon Marker (for custom shapes)
+  if (layer instanceof L.Marker && layer.options.icon instanceof L.DivIcon) {
+    const icon = layer.options.icon;
+    const styleSnapshot = {
+      html: icon.options.html,
+      iconSize: icon.options.iconSize,
+      iconAnchor: icon.options.iconAnchor,
+      className: icon.options.className
     };
     if (mode === 'highlight') {
       if (!layer._highlightBackupStyle) {
@@ -4841,6 +5124,18 @@ function findSampleNodeMarker(sourceLayer = null) {
 
 function getDefaultNodeStyleOptions(preferredLayer = null) {
   const fallback = { pane: 'nodePane', radius: 6, fillColor: '#ff7800', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.85 };
+  const customSettings = preferredLayer?._customLayerSettings || null;
+  if (customSettings && (customSettings.typeKey === 'Node' || customSettings.geometryClass === 'point')) {
+    return {
+      pane: customSettings.pane || fallback.pane,
+      radius: customSettings.radius ?? customSettings.size ?? fallback.radius,
+      fillColor: customSettings.color || fallback.fillColor,
+      color: fallback.color,
+      weight: fallback.weight,
+      opacity: fallback.opacity,
+      fillOpacity: fallback.fillOpacity
+    };
+  }
   const sample = findSampleNodeMarker(preferredLayer);
 
   if (sample && sample.options) {
@@ -4917,6 +5212,10 @@ function createNewNode(latlng, nodeId, options = {}) {
   };
   
   nodeMarker.on('click', clickHandler);
+
+  if (targetLayer && targetLayer._qgasMeta) {
+    assignMetadataToLayer(nodeMarker, targetLayer._qgasMeta);
+  }
   
   const destinationLayer = targetLayer || resolveNodeLayer({ createIfMissing: true });
   if (destinationLayer && typeof destinationLayer.addLayer === 'function') {
@@ -5894,6 +6193,10 @@ function deactivateAllModes() {
     
     // Popups schließen
     map.closePopup();
+
+    if (typeof cleanupDeleteBoxSelection === 'function') {
+      cleanupDeleteBoxSelection();
+    }
     
     // Edit-Modus beenden
     if (editingLayer && editingLayer.editing) {

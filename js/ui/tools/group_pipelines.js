@@ -28,18 +28,26 @@
  * - Maintains visual feedback during selection
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Selected pipeline segments and group naming.
+ * - Map layers for selection highlighting.
+ *
+ * Public API:
+ * - activateGroupPipelinesTool(): Begin grouping workflow.
  * 
  * ================================================================================
  */
 
-// ================================================================================
-// STATE MANAGEMENT
-// ================================================================================
+/* ================================================================================
+ * STATE MANAGEMENT
+ * ================================================================================
+ */
 let groupingMode = false;
 let currentGroupName = '';
 let selectedPipelinesForGroup = [];
@@ -74,7 +82,7 @@ let groupEndPoint = null;
 function startPipelineGrouping() {
   deactivateAllModes();
   
-  // Schritt 1: Group Name abfragen
+  /* Step 1: request the group name. */
   const groupNameInput = document.createElement('input');
   groupNameInput.type = 'text';
   groupNameInput.placeholder = 'Enter group name';
@@ -115,7 +123,7 @@ function startPipelineSelection() {
   groupingMode = false; // Noch nicht aktiv
   selectedPipelinesForGroup = [];
   
-  // Schritt 2a: Start Selection Button
+  /* Step 2: start selection. */
   showCustomPopup(
     '📦 Group Pipelines - Step 2',
     '<p style="text-align: center; margin: 15px 0;">Click "Start Selection" to begin selecting pipelines.</p>',
@@ -137,10 +145,10 @@ function startPipelineSelection() {
 function activatePipelineSelection() {
   groupingMode = true;
   
-  // Reset all pipeline highlights first
+  /* Reset all pipeline highlights first. */
   resetAllPipelineHighlights();
   
-  // Finish Selection Button erstellen (floating)
+  /* Create the floating Finish Selection button. */
   const finishBtn = document.createElement('button');
   finishBtn.id = 'finish-selection-btn';
   finishBtn.innerHTML = '✅ Finish Selection<br><span id="selected-count" style="font-size: 12px; font-weight: normal;">Selected: 0 pipelines</span>';
@@ -180,7 +188,7 @@ function activatePipelineSelection() {
   
   document.body.appendChild(finishBtn);
   
-  // Pipeline Click Handler (all line layers)
+  /* Pipeline click handler (all line layers). */
   const __lineLayers = (typeof getAllLineLayers === 'function' ? getAllLineLayers() : (typeof pipelineLayer !== 'undefined' && pipelineLayer ? [pipelineLayer] : []));
   __lineLayers.forEach(__group => {
     if (!__group) return;
@@ -193,20 +201,20 @@ function activatePipelineSelection() {
         const index = selectedPipelinesForGroup.findIndex(p => p.id === pipelineId);
         
         if (index === -1) {
-          // Hinzufügen
+          /* Add selection. */
           selectedPipelinesForGroup.push({
             id: pipelineId,
             layer: layer
           });
-          // Use direct DOM manipulation for styling
+          /* Use direct DOM manipulation for styling. */
           if (layer._path) {
             layer._path.style.stroke = 'orange';
             layer._path.style.strokeWidth = '5';
           }
-          // Also try setStyle as fallback
+          /* Also try setStyle as fallback. */
           layer.setStyle({color: 'orange', weight: 5});
         } else {
-          // Entfernen - restore original colors
+          /* Remove selection and restore original colors. */
           selectedPipelinesForGroup.splice(index, 1);
           const originalColor = layer._originalColor || '#3388ff';
           const originalWeight = layer._originalWeight || 3;
@@ -225,7 +233,7 @@ function activatePipelineSelection() {
           });
         }
         
-        // Update counter
+        /* Update selection counter. */
         const countSpan = document.getElementById('selected-count');
         if (countSpan) {
           countSpan.textContent = `Selected: ${selectedPipelinesForGroup.length} pipelines`;
@@ -296,16 +304,16 @@ function activateEndPointSelection() {
 }
 
 function finalizePipelineGroup() {
-  // Pipelines orientieren basierend auf Start und End Point
+  /* Order pipelines by flow between start and end points. */
   const orderedPipelines = orderPipelinesByFlow(selectedPipelinesForGroup, groupStartPoint, groupEndPoint);
   
-  // Gesamtlänge berechnen
+  /* Compute total length. */
   let totalLength = 0;
   orderedPipelines.forEach(p => {
     totalLength += __computeLineLengthKm(p.layer);
   });
   
-  // Gruppe speichern
+  /* Persist group metadata. */
   const newGroup = {
     name: currentGroupName,
     pipelines: orderedPipelines.map(p => p.id),
@@ -317,14 +325,14 @@ function finalizePipelineGroup() {
   
   pipelineGroups.push(newGroup);
   
-  // Farben zurücksetzen auf Original-Layer-Farben
+  /* Restore original layer styles. */
   selectedPipelinesForGroup.forEach(p => {
     const originalColor = p.layer._originalColor || '#3388ff';
     const originalWeight = p.layer._originalWeight || 3;
     const originalOpacity = p.layer._originalOpacity || 0.8;
     const originalDashArray = p.layer._originalDashArray || null;
     
-    // Reset both Leaflet style and direct DOM manipulation
+    /* Reset Leaflet style and direct DOM manipulation. */
     if (p.layer._path) {
       p.layer._path.style.stroke = originalColor;
       p.layer._path.style.strokeWidth = String(originalWeight);
@@ -337,7 +345,7 @@ function finalizePipelineGroup() {
     });
   });
   
-  // Variablen zurücksetzen
+  /* Reset grouping state. */
   groupingMode = false;
   selectedPipelinesForGroup = [];
   currentGroupName = '';
@@ -358,7 +366,7 @@ function finalizePipelineGroup() {
 }
 
 function orderPipelinesByFlow(pipelines, startNode, endNode) {
-  // Diese Funktion orientiert die Pipelines basierend auf dem Flow
+  /* Orient pipelines based on flow along the path. */
   const ordered = [];
   let currentNode = startNode;
   const remaining = [...pipelines];
@@ -371,23 +379,23 @@ function orderPipelinesByFlow(pipelines, startNode, endNode) {
       const props = p.layer.feature.properties;
       
       if (props.Start_Node === currentNode) {
-        // Richtige Orientierung
+        /* Correct orientation. */
         ordered.push(p);
         currentNode = props.End_Node;
         remaining.splice(i, 1);
         found = true;
         break;
       } else if (props.End_Node === currentNode) {
-        // Umdrehen nötig
+        /* Reverse orientation. */
         const temp = props.Start_Node;
         props.Start_Node = props.End_Node;
         props.End_Node = temp;
         
-        // LatLngs umkehren
+        /* Reverse the LatLng order. */
         const latlngs = p.layer.getLatLngs();
         p.layer.setLatLngs(latlngs.reverse());
         
-        // Modified flag setzen
+        /* Mark modified. */
         props.modified = true;
         
         ordered.push(p);
@@ -400,7 +408,7 @@ function orderPipelinesByFlow(pipelines, startNode, endNode) {
     
     if (!found) {
       console.warn('Could not connect all pipelines in sequence');
-      // Restliche Pipelines einfach hinzufügen
+      /* Append remaining pipelines without ordering. */
       ordered.push(...remaining);
       break;
     }
@@ -412,7 +420,7 @@ function orderPipelinesByFlow(pipelines, startNode, endNode) {
 function cancelGrouping() {
   groupingMode = false;
   
-  // Farben zurücksetzen using direct DOM manipulation
+  /* Reset styles using direct DOM manipulation. */
   selectedPipelinesForGroup.forEach(p => {
     if (p.layer._path) {
       p.layer._path.style.stroke = '#3388ff';
@@ -426,13 +434,13 @@ function cancelGrouping() {
   groupStartPoint = null;
   groupEndPoint = null;
   
-  // Finish Selection Button entfernen falls vorhanden
+  /* Remove the Finish Selection button if present. */
   const finishBtn = document.getElementById('finish-selection-btn');
   if (finishBtn) {
     document.body.removeChild(finishBtn);
   }
   
-  // Click Handler entfernen
+  /* Remove click handlers. */
   if (pipelineLayer) {
     pipelineLayer.eachLayer(layer => {
       layer.off('click');
@@ -440,7 +448,7 @@ function cancelGrouping() {
   }
   clearNodeSelectionHandlers();
   
-  // Switch back to Info Mode
+  /* Switch back to Info mode. */
   currentMode = 'info';
   activateInfoMode();
   selectTool('info');

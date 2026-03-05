@@ -1,5 +1,27 @@
-// UI Options module (extracted from core.js)
-// Keeps global scope for compatibility.
+/**
+ * QGas - Options UI Module
+ *
+ * Module Description:
+ * Manages the options dialog for styling layers, including color, size, and
+ * line style controls, while keeping a global scope for UI compatibility.
+ *
+ * Author: Dipl.-Ing. Marco Quantschnig
+ * Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - DOM elements for options, color, size, and line-type modals.
+ * - Layer registries and styling helpers from core modules.
+ *
+ * Public API:
+ * - openOptionsModal(): Open the layer options dialog.
+ * - closeOptionsModal(): Close the layer options dialog.
+ * - updateLayerColor(layerKey, newColor): Apply color updates to a layer.
+ */
+/*
+ * UI Options module (extracted from core.js).
+ * Maintains global scope for UI compatibility.
+ */
 
 document.getElementById('size-picker-modal').addEventListener('click', function(e) {
   if (e.target === this) {
@@ -13,7 +35,9 @@ document.getElementById('linetype-picker-modal').addEventListener('click', funct
   }
 });
 
-// Options Modal Funktionen
+/*
+ * Options modal state and handlers.
+ */
 let currentLayerBeingChanged = null;
 
 function openOptionsModal() {
@@ -51,7 +75,9 @@ function closeLineTypePickerModal() {
 
 
 
-// Globale Variablen für Style/Size Picker (zusätzlich zu currentLayerBeingChanged)
+/*
+ * State for style/size pickers (in addition to currentLayerBeingChanged).
+ */
 let selectedShape = null;
 let selectedSize = null;
 let selectedLineType = 'solid';
@@ -209,7 +235,9 @@ function getLineStyleForLayer(layerInstance) {
   return 'solid';
 }
 
-// OLD layerConfig object - replaced by dynamic layerConfig array at line ~1300
+/*
+ * Legacy note: layerConfig now uses a dynamic array (see core module).
+ */
 
 function populateLayerList() {
   const layerList = document.getElementById('layer-list');
@@ -434,10 +462,10 @@ function applyColorChange() {
   updateLayerColor(layerKey, newColor);
   recordRecentColor(newColor);
   
-  // Aktualisiere Layer-Liste
+  /* Refresh the layer list UI. */
   populateLayerList();
   
-  // Aktualisiere Legend
+  /* Refresh legend symbols to reflect new colors. */
   updateLegendSymbols();
   
   closeColorPickerModal();
@@ -457,9 +485,29 @@ function updateLayerColor(layerKey, newColor) {
     }
   };
 
+  const targets = new Set();
+  const addTarget = (layer) => {
+    if (layer) targets.add(layer);
+  };
+
   if (Array.isArray(entry.layerRefs) && entry.layerRefs.length) {
-    entry.layerRefs.forEach(applyColor);
+    entry.layerRefs.forEach(addTarget);
   }
+
+  if (entry.customLayer) {
+    addTarget(entry.customLayer);
+  }
+
+  const hasDirectTargets = targets.size > 0;
+  if (!hasDirectTargets && entry.elementKey && typeof getLayersForElementType === 'function') {
+    const elementLayers = getLayersForElementType(entry.elementKey) || [];
+    if (elementLayers.length === 1) {
+      elementLayers.forEach(addTarget);
+    }
+  }
+
+  if (!targets.size) return;
+  targets.forEach(applyColor);
 }
 
 function applyColorToLineLayer(targetLayer, newColor) {
@@ -487,6 +535,9 @@ function applyColorToLineLayer(targetLayer, newColor) {
 function applyColorToPointLayer(targetLayer, newColor, styleEntry) {
   const radius = styleEntry?.size || 6;
   const shape = styleEntry?.shape || 'circle';
+  if (targetLayer && targetLayer._customLayerSettings) {
+    targetLayer._customLayerSettings.color = newColor;
+  }
 
   const visit = (layer) => {
     if (!layer) return;
@@ -574,6 +625,9 @@ function applyWidthToLineLayer(targetLayer, newWidth) {
       }
       layer.setStyle(style);
       layer._originalWeight = newWidth;
+      if (layer._path) {
+        layer._path.style.strokeWidth = `${newWidth}px`;
+      }
     }
   };
 
@@ -612,7 +666,9 @@ function applySizeToPointLayer(targetLayer, newRadius, styleEntry) {
   }
 }
 
-// Style Picker Funktionen
+/*
+ * Style picker handlers (point layers only).
+ */
 function openStylePicker(layerKey) {
   currentLayerBeingChanged = layerKey;
   const entry = getStyleableLayerEntry(layerKey);
@@ -620,7 +676,7 @@ function openStylePicker(layerKey) {
   
   document.getElementById('style-picker-title').textContent = `Change ${entry.name} Shape`;
   
-  // Aktuelle Shape markieren
+  /* Highlight the current shape in the picker UI. */
   document.querySelectorAll('.shape-option').forEach(option => {
     option.classList.remove('selected');
     if (option.dataset.shape === entry.shape) {
@@ -668,10 +724,11 @@ function applyShapeChange() {
       }
       updateLayerShape(currentLayerBeingChanged, selectedShape);
     }
-    populateLayerList(); // Options-Liste aktualisieren
-    updateLegendSymbols(); // Legend aktualisieren
+    /* Update option list and legend to reflect the new shape. */
+    populateLayerList();
+    updateLegendSymbols();
     
-    // Info Mode Event-Handler wiederherstellen falls aktiv
+    /* Restore info-mode handlers if the mode is active. */
     if (currentMode === 'info') {
       updateAllElementInteractions();
     }
@@ -681,7 +738,9 @@ function applyShapeChange() {
   closeStylePickerModal();
 }
 
-// Size Picker Funktionen
+/*
+ * Size picker handlers (line width or point size).
+ */
 function openSizePicker(layerKey) {
   currentLayerBeingChanged = layerKey;
   const entry = getStyleableLayerEntry(layerKey);
@@ -697,7 +756,7 @@ function openSizePicker(layerKey) {
   const preview = document.getElementById('size-preview');
   const label = document.getElementById('size-label');
   
-  // Slider konfigurieren
+  /* Configure slider bounds and preview for line vs point layers. */
   if (isLine) {
     slider.min = '1';
     slider.max = '10';
@@ -717,7 +776,7 @@ function openSizePicker(layerKey) {
     label.textContent = `Size: ${currentValue}px`;
   }
   
-  // Slider Event Listener
+  /* Sync preview as the slider moves. */
   slider.oninput = function() {
     const value = this.value;
     if (isLine) {
@@ -794,7 +853,9 @@ function applyLineTypeChange() {
   closeLineTypePickerModal();
 }
 
-// Layer Shape und Size Update Funktionen
+/*
+ * Layer shape and size update helpers.
+ */
 function updateLayerShape(layerKey, newShape) {
   console.log(`updateLayerShape aufgerufen: ${layerKey} zu ${newShape}`);
   const entry = getStyleableLayerEntry(layerKey);
@@ -833,9 +894,25 @@ function updateLayerSize(layerKey, newSize) {
     }
   };
 
+  const targets = new Set();
+  const addTarget = (layer) => {
+    if (layer) targets.add(layer);
+  };
+
   if (Array.isArray(entry.layerRefs) && entry.layerRefs.length) {
-    entry.layerRefs.forEach(applySize);
+    entry.layerRefs.forEach(addTarget);
   }
+
+  if (entry.customLayer) {
+    addTarget(entry.customLayer);
+  }
+
+  if (!targets.size && entry.elementKey && typeof getLayersForElementType === 'function') {
+    const elementLayers = getLayersForElementType(entry.elementKey) || [];
+    elementLayers.forEach(addTarget);
+  }
+
+  targets.forEach(applySize);
 }
 
 function recreateElementMarkersWithShape(elementLayer, newShape, styleEntry = null) {
@@ -906,13 +983,17 @@ function recreateElementMarkersWithShape(elementLayer, newShape, styleEntry = nu
   });
 }
 
-// Hilfsfunktion um LayerKey von Layer-Objekt zu ermitteln
+/*
+ * Resolve the style registry key from a layer instance.
+ */
 function getLayerKeyFromLayer(elementLayer) {
   const entry = resolveStyleEntryForLayer(elementLayer);
   return entry ? entry.key : null;
 }
 
-// Custom SVG Icon erstellen
+/*
+ * Build a custom SVG icon for non-circular point markers.
+ */
 function createCustomIcon(shape, color, radius) {
   const size = radius * 2;
   let svgContent = '';
@@ -941,7 +1022,7 @@ function createCustomIcon(shape, color, radius) {
       `;
       break;
     default:
-      // Fallback zu Circle
+      /* Fallback to a circular marker. */
       svgContent = `<circle cx="${size/2}" cy="${size/2}" r="${radius-2}" fill="${color}" stroke="#333" stroke-width="1"/>`;
   }
   
@@ -955,7 +1036,9 @@ function createCustomIcon(shape, color, radius) {
   return svgIcon;
 }
 
-// Funktion zum Generieren der Punkte für einen Stern
+/*
+ * Generate polygon points for a star icon.
+ */
 function generateStarPoints(cx, cy, spikes, outerRadius, innerRadius) {
   let points = [];
   const step = Math.PI / spikes;
@@ -971,7 +1054,9 @@ function generateStarPoints(cx, cy, spikes, outerRadius, innerRadius) {
   return points.join(' ');
 }
 
-// Funktion zum Generieren von Legend-Icons basierend auf Farbe und Form
+/*
+ * Generate legend icon HTML based on color and shape.
+ */
 function generateLegendIcon(color, shape, size = 6) {
   const diameter = Math.max(10, Math.round(size * 2));
   const baseStyle = `width:${diameter}px; height:${diameter}px; display:inline-block; margin-right:6px;`;
@@ -980,9 +1065,8 @@ function generateLegendIcon(color, shape, size = 6) {
     case 'square':
       return `<span class="legend-icon" style="${baseStyle} background:${color}; border-radius:0;"></span>`;
     case 'triangle': {
-      const half = Math.max(6, Math.round(size));
-      const height = Math.max(10, Math.round(size * 1.8));
-      return `<span class="legend-icon" style="width:0; height:0; border-left:${half}px solid transparent; border-right:${half}px solid transparent; border-bottom:${height}px solid ${color}; background:transparent; margin-right:6px;"></span>`;
+      /* Use clip-path for a proper triangle shape. */
+      return `<span class="legend-icon" style="${baseStyle} background:${color}; clip-path:polygon(50% 0%, 0% 100%, 100% 100%); border-radius:0;"></span>`;
     }
     case 'diamond':
       return `<span class="legend-icon" style="${baseStyle} background:${color}; transform:rotate(45deg); transform-origin:center;"></span>`;
@@ -991,7 +1075,7 @@ function generateLegendIcon(color, shape, size = 6) {
     case 'cross':
       return `<span class="legend-icon" style="${baseStyle} background:${color}; clip-path:polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);"></span>`;
     default:
-      // Circle
+      /* Default circle swatch. */
       return `<span class="legend-icon" style="${baseStyle} background:${color}; border-radius:50%;"></span>`;
   }
 }
@@ -1013,16 +1097,21 @@ function styleLegendLineElement(element, color, lineStyle = 'solid') {
   }
 }
 
-// Funktion zum Generieren des Legend-HTML basierend auf aktueller Layer-Konfiguration
+/*
+ * Resolve legend toggle IDs for styleable entries.
+ */
 function getLegendToggleIdForEntry(entry) {
   if (!entry) return null;
+  const candidates = [];
   if (entry.configRef && entry.configRef.filename) {
-    return 'toggle-' + entry.configRef.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    candidates.push('toggle-' + entry.configRef.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, ''));
   }
   if (entry.customLayer && entry.name) {
-    return 'toggle-' + entry.name.toLowerCase().replace(/\s+/g, '-');
+    candidates.push('toggle-' + entry.name.toLowerCase().replace(/\s+/g, '-'));
   }
-  return null;
+  if (!candidates.length) return null;
+  const existing = candidates.find(id => document.getElementById(id));
+  return existing || candidates[0];
 }
 
 function updateLegendSymbols() {
@@ -1056,9 +1145,11 @@ function updateLegendSymbols() {
 }
 
 
-// Graustufen-Toggle Funktionalität
+/*
+ * Grayscale map toggle and color input bindings.
+ */
 document.addEventListener('DOMContentLoaded', function() {
-  // Ensure all overlays are hidden on load
+  /* Ensure overlays are hidden on load. */
   const toolsOverlay = document.getElementById('tools-popup-overlay');
   const customOverlay = document.getElementById('custom-popup-overlay');
   if (toolsOverlay) toolsOverlay.style.display = 'none';
@@ -1149,10 +1240,13 @@ function createModalPopupContent(properties, layer) {
 }
 
 
-// Country Filter Functions
-// Variablen wurden an den Anfang des Scripts verschoben
+/*
+ * Country filter helpers are defined in core; variables are initialized there.
+ */
 
-// Alias used by Map.html main screen button
+/*
+ * Alias used by the Map.html main screen button.
+ */
 function toggleOptionsPanel(){
   openOptionsModal();
 }

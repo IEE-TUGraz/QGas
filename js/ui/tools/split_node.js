@@ -31,21 +31,32 @@
  * - Interactive highlighting for pipeline selection
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Selected node and connected pipelines.
+ * - Map interactions for split confirmation.
+ *
+ * Public API:
+ * - activateSplitNodeTool(): Begin node split workflow.
  * 
  * ================================================================================
  */
 
-// ==================== Split Node Tool ====================
-// Extracted from core.js to keep tool logic modular.
+/*
+ * ================================================================================
+ * Split Node Tool
+ * ================================================================================
+ * Extracted from core.js to keep tool logic modular.
+ */
 
-/**
- * Activate the split node tool
- * Deactivates other modes and initiates node splitting workflow
+/*
+ * Activate the split node tool.
+ * Deactivates other modes and initiates the splitting workflow.
  */
 function activateSplitNodeTool() {
   deactivateAllModes();
@@ -381,7 +392,9 @@ function cleanupSplitNodeState(showMessage) {
   }
 }
 
-// Split Node Button
+/*
+ * Split node entry point.
+ */
 function startSplitNode() {
   splitNodeActive = true;
   showInfoPopup('Click on a node you want to split.', '🔀 Split Node');
@@ -478,24 +491,36 @@ function performSplitNode(nodeLayerObj, latlng, origId, count) {
   assignPipelinesToSubnodes(subnodes, origId, initialEntries);
 }
 
-// Tools Popup Management
+/*
+ * Tools popup management.
+ */
 
-// Custom Popup System
+/*
+ * Custom popup system.
+ */
 function resetCustomPopupDocking() {
   const popup = document.getElementById('custom-popup');
   const overlay = document.getElementById('custom-popup-overlay');
   if (popup) popup.classList.remove('custom-popup--bottom-right');
-  if (overlay) overlay.classList.remove('custom-popup-overlay--nonmodal');
+  if (overlay) {
+    overlay.classList.remove('custom-popup-overlay--nonmodal');
+    overlay.style.pointerEvents = 'auto';
+  }
 }
 
 function dockCustomPopupBottomRight() {
   const popup = document.getElementById('custom-popup');
   const overlay = document.getElementById('custom-popup-overlay');
   if (popup) popup.classList.add('custom-popup--bottom-right');
-  if (overlay) overlay.classList.add('custom-popup-overlay--nonmodal');
+  if (overlay) {
+    overlay.classList.add('custom-popup-overlay--nonmodal');
+    overlay.style.pointerEvents = 'none';
+  }
 }
 
-// Custom Popup System
+/*
+ * Custom popup system.
+ */
 function showCustomPopup(title, content, buttons, extraElement = null) {
   console.log('showCustomPopup called with title:', title);
   const overlay = document.getElementById('custom-popup-overlay');
@@ -509,7 +534,7 @@ function showCustomPopup(title, content, buttons, extraElement = null) {
     return;
   }
 
-  // Ensure popup is always clickable above Leaflet panes
+  /* Ensure the popup stays clickable above Leaflet panes. */
   overlay.style.zIndex = '999999';
   popup.style.zIndex = '1000000';
   overlay.style.pointerEvents = 'auto';
@@ -545,7 +570,7 @@ function showCustomPopup(title, content, buttons, extraElement = null) {
         } catch (err) {
           okToClose = false;
           console.error('Popup button handler failed:', err);
-          // Do not silently swallow: show a small error popup, keep current popup open.
+          /* Show a small error popup and keep the current popup open. */
           try {
             showErrorPopup(err && err.message ? err.message : String(err), '⚠️ Error');
           } catch (e) {}
@@ -712,8 +737,9 @@ if (typeof window !== 'undefined') {
   };
 }
 
-// Export Dialog
-// Screenshot Mode
+/*
+ * Export dialog and screenshot mode hooks (reserved for shared UI features).
+ */
 
 
 function assignPipelinesToSubnodes(subnodes, origId, highlightedEntries = []) {
@@ -791,7 +817,7 @@ function assignPipelinesToSubnodes(subnodes, origId, highlightedEntries = []) {
 }
 
 function resetNodeClicks() {
-  // Setze Info-Handler wieder
+  /* Restore info handlers for node clicks. */
   if (!getAllNodeLayers().length) return;
   forEachNodeMarker(layer => {
     layer.off('click');

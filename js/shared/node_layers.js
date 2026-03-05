@@ -21,16 +21,26 @@
  * polluting the global scope while exposing necessary functions.
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Global layer registries (dynamicLayers, layerMetadataRegistry).
+ * - Legacy layer references (nodeLayer, hydrogenNodeLayer).
+ *
+ * Public API:
+ * - getAllNodeLayers(): Return all discovered node layers.
+ * - getNodeLayerEntries(): Return node layer entries with metadata.
  * 
  * ================================================================================
  */
 
-// Shared helper loaded early so tools can call getAllNodeLayers() reliably.
+/*
+ * Shared helper loaded early so tools can call getAllNodeLayers() reliably.
+ */
 (function () {
   
   /**
@@ -49,7 +59,7 @@
           if (meta && (meta.geometryClass === 'node' || meta.geometryClass === 'point')) push(layer);
         }
       }
-      // legacy fallbacks
+      /* Legacy fallbacks for pre-dynamic layer setups. */
       if (window.nodeLayer) push(window.nodeLayer);
       if (window.hydrogenNodeLayer) push(window.hydrogenNodeLayer);
     } catch (e) {}
@@ -65,7 +75,7 @@
     if (typeof window.__coreGetAllNodeLayers === 'function') {
       try { return window.__coreGetAllNodeLayers() || []; } catch (e) { return fallbackScan(); }
     }
-    // If core defined getAllNodeLayers on window already, use it
+    /* Use a core-defined global alias when present. */
     if (typeof window._core_getAllNodeLayers === 'function') {
       try { return window._core_getAllNodeLayers() || []; } catch (e) { return fallbackScan(); }
     }
@@ -91,12 +101,12 @@
           }
         }
       }
-      // legacy fallbacks
+      /* Legacy fallbacks when metadata entries are missing. */
       if (window.nodeLayer) entries.push({ key: 'nodeLayer', label: 'Nodes', layer: window.nodeLayer, meta: { geometryClass: 'node' } });
       if (window.hydrogenNodeLayer) entries.push({ key: 'hydrogenNodeLayer', label: 'H2 Nodes', layer: window.hydrogenNodeLayer, meta: { geometryClass: 'node' } });
     } catch (e) {}
     
-    // De-duplicate by layer reference to avoid processing same layer multiple times
+    /* De-duplicate by layer reference to avoid processing layers twice. */
     const seen = new Set();
     return entries.filter(e => {
       if (!e.layer) return false;

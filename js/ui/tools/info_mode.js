@@ -26,16 +26,26 @@
  * editing operations.
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Map click events and feature properties.
+ * - Modal UI helpers for info display.
+ *
+ * Public API:
+ * - activateInfoTool(): Activate info tool with contributor checks.
+ * - activateInfoMode(force): Bind info handlers for the map.
  * 
  * ================================================================================
  */
 
-// Info Mode tool module
+/*
+ * Info Mode tool module.
+ */
 (function(){
   /**
    * Activate info tool (wrapper with contributor check)
@@ -44,7 +54,7 @@
     if (!checkContributorName()) return;
     deactivateAllModes();
     currentMode = 'info';
-    activateInfoMode();
+    activateInfoMode(true);
   };
 
   /**
@@ -57,13 +67,13 @@
         return;
       }
       currentMode = 'info';
-      // Edit-Buttons entfernen, falls vorhanden
+      /* Remove edit buttons if present. */
       const saveBtn = document.getElementById('save-edit-btn');
       if (saveBtn) saveBtn.remove();
       const discardBtn = document.getElementById('discard-edit-btn');
       if (discardBtn) discardBtn.remove();
       
-      // Node-Edit Cleanup
+      /* Cleanup any node-edit state. */
       if (window.selectedNodeMarker) {
         cleanupNodeEdit(window.selectedNodeMarker);
       }
@@ -71,7 +81,7 @@
       console.log('Info Mode aktiviert');
       applyEditGeometryVisibility(false);
       
-      // Toolbox-Buttons aktualisieren
+      /* Update toolbox button highlights. */
       currentActiveTool = 'info';
       document.querySelectorAll('.tool-tile').forEach(tile => {
         tile.classList.remove('active');
@@ -79,13 +89,13 @@
       const activeTile = document.querySelector('.tool-tile[data-mode="info"]');
       if (activeTile) activeTile.classList.add('active');
       
-      // Aktives Tool Display aktualisieren
+      /* Update the active tool display. */
       updateActiveToolDisplay('info');
       
-      // Alle Pipeline-Highlights zurücksetzen
+      /* Reset pipeline highlights. */
       resetAllPipelineHighlights();
 
-      // Pending Delete-Auswahlen zurücksetzen
+      /* Reset pending delete selections. */
       clearPendingDeletionSelections();
       pendingPipelineDeletions.length = 0;
       pendingNodeDeletions.length = 0;
@@ -96,10 +106,10 @@
       pendingCustomDeletions.length = 0;
       pendingDrawnItemDeletions.length = 0;
       
-      // Alle Element-Highlights zurücksetzen
+      /* Reset element highlights. */
       resetAllElementHighlights();
       
-      // Pipeline-Interaktionen für Info Mode
+      /* Pipeline interactions for Info mode. */
       if (pipelineLayer) {
         pipelineLayer.eachLayer(layer => {
           layer.off('click');
@@ -111,10 +121,10 @@
             try {
               console.log('Pipeline geklickt in Info Mode:', layer);
               
-              // Highlighte die angeklickte Pipeline
+              /* Highlight the selected pipeline. */
               highlightPipeline(layer);
               
-              // Modal mit Pipeline-Details anzeigen
+              /* Show modal with pipeline details. */
               const content = createModalPopupContent(layer.feature.properties, layer);
               const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
               showElementModal(title, content, layer);
@@ -127,7 +137,7 @@
         });
       }
       
-      // Drawn Items Pipeline-Interaktionen
+      /* Drawn-item pipeline interactions. */
       drawnItems.eachLayer(layer => {
         if (layer.feature && layer.feature.geometry.type === "LineString") {
           layer.off('click');
@@ -137,12 +147,10 @@
               return;
             }
             try {
-              // Drawn Pipeline geklickt in Info Mode
-              
-              // Highlighte die angeklickte Pipeline
+              /* Highlight the selected drawn pipeline. */
               highlightPipeline(layer);
               
-              // Modal mit Pipeline-Details anzeigen
+              /* Show modal with pipeline details. */
               const content = createModalPopupContent(layer.feature.properties, layer);
               const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
               showElementModal(title, content, layer);
@@ -155,7 +163,7 @@
         }
       });
       
-      // Short-Pipe-Interaktionen für Info Mode
+      /* Short-pipe interactions for Info mode. */
       if (shortPipeLayer) {
         shortPipeLayer.eachLayer(layer => {
           layer.off('click');
@@ -167,10 +175,10 @@
             try {
               console.log('Short-Pipe geklickt in Info Mode:', layer);
               
-              // Highlighte die angeklickte Short-Pipe
+              /* Highlight the selected short pipe. */
               highlightPipeline(layer);
               
-              // Modal mit Short-Pipe-Details anzeigen
+              /* Show modal with short-pipe details. */
               const content = createModalPopupContent(layer.feature.properties, layer);
               const title = `Short-Pipe: ${layer.feature.properties.ID || 'Unnamed'}`;
               showElementModal(title, content, layer);
@@ -183,7 +191,7 @@
         });
       }
       
-      // Node-Interaktionen für Info Mode
+      /* Node interactions for Info mode. */
       forEachNodeMarker(marker => {
         marker.off('click');
         marker.on('click', function (e) {
@@ -204,7 +212,7 @@
         });
       });
       
-      // Element-Interaktionen für Info Mode
+      /* Element interactions for Info mode. */
       updateAllElementInteractions();
     } catch (error) {
       console.error('Error in activateInfoMode:', error);

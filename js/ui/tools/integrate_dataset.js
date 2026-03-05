@@ -29,11 +29,18 @@
  * - Registers in layer metadata
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - User-selected datasets and file paths.
+ * - Map instance for temporary layer previews.
+ *
+ * Public API:
+ * - activateIntegrateDatasetTool(): Start dataset integration workflow.
  * 
  * ================================================================================
  */
@@ -48,10 +55,12 @@ function startDatasetIntegration() {
   console.log('Starting dataset integration...');
   console.log('Available datasets:', Object.keys(additionalDatasets));
   
-  // Kombinierter Ansatz: Zeige sowohl geladene Datasets als auch File Input Option
+  /*
+   * Combined approach: present preloaded datasets and a file upload option.
+   */
   let optionsHtml = '<div style="text-align: center; margin: 15px 0;">';
   
-  // Geladene Datasets anzeigen (falls vorhanden)
+  /* Render preloaded datasets when available. */
   const loadedDatasets = Object.keys(additionalDatasets);
   if (loadedDatasets.length > 0) {
     optionsHtml += '<p><strong>Preloaded datasets:</strong></p>';
@@ -65,7 +74,7 @@ function startDatasetIntegration() {
     optionsHtml += '<hr style="margin: 15px 0;">';
   }
   
-  // File Input Option (immer verfügbar)
+  /* File input option (always available). */
   optionsHtml += '<p><strong>Or upload your own .geojson file:</strong></p>';
   optionsHtml += '<input type="file" id="dataset-file-input" accept=".geojson" style="width: 100%; padding: 8px; margin: 5px 0;">';
   optionsHtml += '<button onclick="loadFileDataset()" style="width: 100%; padding: 8px; margin: 5px 0; background: #007bff; color: white; border: none; border-radius: 4px;">Upload & Use File</button>';
@@ -84,7 +93,9 @@ function startDatasetIntegration() {
   );
 }
 
-// Global functions für die Buttons im Popup
+/*
+ * Global functions for popup button handlers.
+ */
 window.loadPreloadedDataset = function() {
   const select = document.getElementById('preloaded-select');
   const selectedFile = select.value;
@@ -108,7 +119,7 @@ window.loadFileDataset = function() {
         const data = JSON.parse(e.target.result);
         console.log('✅ File loaded successfully for integration');
         
-        // Temporären Layer erstellen und Integration starten
+        /* Create a temporary layer and start integration. */
         const tempFilename = file.name;
         createDatasetLayer(tempFilename, data);
         
@@ -149,7 +160,7 @@ function setupIntegrationModeWithPreloaded(filename) {
   selectedQGasElements.clear();
   integrationLayer = dataset.layer;
   
-  // Alle Layer außer Pipelines ausblenden
+  /* Hide all layers except pipelines. */
   if (typeof powerplantsLayer !== 'undefined' && powerplantsLayer && map.hasLayer(powerplantsLayer)) {
     map.removeLayer(powerplantsLayer);
   }
@@ -172,12 +183,12 @@ function setupIntegrationModeWithPreloaded(filename) {
     map.removeLayer(consumptionLayer);
   }
   
-  // Sicherstellen dass Pipelines Layer sichtbar ist
+  /* Ensure the pipelines layer remains visible. */
   if (typeof pipelineLayer !== 'undefined' && pipelineLayer && !map.hasLayer(pipelineLayer)) {
     pipelineLayer.addTo(map);
   }
   
-  // Integration Layer sichtbar machen und Farbe setzen
+  /* Highlight the integration layer for selection. */
   integrationLayer.setStyle({
     color: '#ff6600',
     weight: 4,
@@ -185,7 +196,7 @@ function setupIntegrationModeWithPreloaded(filename) {
     fillOpacity: 0.1
   });
   
-  // Click Handler für Integration Layer aktualisieren
+  /* Update click handlers for the integration layer. */
   integrationLayer.eachLayer(layer => {
     layer.off('click');
     layer.on('click', function(e) {
@@ -196,7 +207,7 @@ function setupIntegrationModeWithPreloaded(filename) {
     });
   });
   
-  // Pipeline Layer Click Handler aktivieren
+  /* Activate pipeline click handlers for mapping. */
   if (pipelineLayer) {
     pipelineLayer.eachLayer(layer => {
       layer.off('click');
@@ -234,7 +245,7 @@ function selectIntegrationElement(feature, layer) {
   
   currentIntegrationElement = { feature, layer };
   
-  // Highlight
+  /* Briefly highlight the selected integration feature. */
   layer.setStyle({ color: '#ff0000', weight: 6 });
   
   setTimeout(() => {
@@ -246,7 +257,7 @@ function selectIntegrationElement(feature, layer) {
     return;
   }
   
-  // Link erstellen
+  /* Create the mapping entry between dataset and QGas elements. */
   const qgasIds = Array.from(selectedQGasElements);
   const datasetIdField = detectIdField(feature.properties);
   const datasetId = datasetIdField ? feature.properties[datasetIdField] : 'unknown';
@@ -258,7 +269,7 @@ function selectIntegrationElement(feature, layer) {
   
   console.log('Created link:', { datasetElement: datasetId, qgasElements: qgasIds });
   
-  // Reset Auswahl
+  /* Reset the current selection state. */
   selectedQGasElements.clear();
   if (pipelineLayer) {
     pipelineLayer.eachLayer(l => {
@@ -318,7 +329,7 @@ function updateIntegrationCount() {
 window.finishIntegration = function() {
   console.log('Finishing integration with equivalences:', equivalenceList);
   
-  // Export equivalence list
+  /* Export the equivalence list. */
   const dataStr = JSON.stringify(equivalenceList, null, 2);
   const dataBlob = new Blob([dataStr], { type: 'application/json' });
   const url = URL.createObjectURL(dataBlob);
@@ -348,13 +359,13 @@ function cleanupIntegrationMode() {
   integrationLayer = null;
   currentIntegrationElement = null;
   
-  // Controls entfernen
+  /* Remove integration controls. */
   const controlDiv = document.getElementById('integration-controls');
   if (controlDiv) {
     controlDiv.remove();
   }
   
-  // Layer wiederherstellen
+  /* Restore previously hidden layers. */
   if (powerplantsLayer) powerplantsLayer.addTo(map);
   if (compressorsLayer) compressorsLayer.addTo(map);
   if (storageLayer) storageLayer.addTo(map);
@@ -363,7 +374,7 @@ function cleanupIntegrationMode() {
   if (nodeLayer) nodeLayer.addTo(map);
   if (consumptionLayer) consumptionLayer.addTo(map);
   
-  // Click Handler zurücksetzen
+  /* Reset click handlers to default. */
   if (pipelineLayer) {
     pipelineLayer.eachLayer(layer => {
       layer.off('click');
@@ -371,7 +382,7 @@ function cleanupIntegrationMode() {
     });
   }
   
-  // Zurück zum Info Mode
+  /* Return to info mode. */
   currentMode = 'info';
   activateInfoMode();
   selectTool('info');

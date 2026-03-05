@@ -33,11 +33,18 @@
  * Note: Functions exposed in global scope for cross-module compatibility
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Image files (JPG/PNG) and control point pairs.
+ * - Map instance for georeferenced overlays.
+ *
+ * Public API:
+ * - activateAddPlanTool(): Start the infrastructure plan workflow.
  * 
  * ================================================================================
  */

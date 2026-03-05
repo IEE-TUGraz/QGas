@@ -29,21 +29,31 @@
  * - Maintains attribute consistency across segments
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - Selected pipeline and user-defined division points.
+ * - Node and pipeline layers for updates.
+ *
+ * Public API:
+ * - activateDividePipelineTool(): Begin pipeline division workflow.
  * 
  * ================================================================================
  */
 
 function activateDividePipelineTool() {
-  // startPipelineDivision already handles popups and cleanup
+  /* startPipelineDivision already handles popups and cleanup. */
   startPipelineDivision();
 }
 
-// ==================== Pipeline Division Functions ====================
+/* ================================================================================
+ * Pipeline Division Functions
+ * ================================================================================
+ */
 
 let divisionMode = false;
 let selectedPipelineForDivision = null;
@@ -507,8 +517,8 @@ function calculateLineLength(coordinates) {
     const from = coordinates[i];
     const to = coordinates[i + 1];
     
-    // Haversine Formel für Distanzberechnung in km
-    const R = 6371; // Erdradius in km
+    /* Haversine formula for distance calculation in km. */
+    const R = 6371;
     const lat1 = from[1] * Math.PI / 180;
     const lat2 = to[1] * Math.PI / 180;
     const deltaLat = (to[1] - from[1]) * Math.PI / 180;
@@ -557,4 +567,7 @@ function cancelPipelineDivision() {
   activateInfoMode();
 }
 
-// ==================== End of Pipeline Division Functions ====================
+/* ================================================================================
+ * End of Pipeline Division Functions
+ * ================================================================================
+ */

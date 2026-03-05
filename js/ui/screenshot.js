@@ -1,4 +1,26 @@
-// Extracted screenshot logic from core.js (v5)
+/**
+ * QGas - Screenshot Module
+ *
+ * Module Description:
+ * Provides a screenshot mode for highlighting elements and preparing the map
+ * for manual capture.
+ *
+ * Author: Dipl.-Ing. Marco Quantschnig
+ * Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - DOM elements for tool controls and legend.
+ * - Map layers for highlight toggling.
+ *
+ * Public API:
+ * - openScreenshotMode(): Launch the screenshot mode dialog.
+ * - activateScreenshotMode(): Enter screenshot mode.
+ * - deactivateScreenshotMode(): Exit screenshot mode.
+ */
+/*
+ * Extracted screenshot logic from core.js (v5).
+ */
 
 function openScreenshotMode() {
   showCustomPopup(
@@ -22,24 +44,26 @@ function openScreenshotMode() {
 }
 
 
-// Screenshot Mode Funktionen
+/*
+ * Screenshot mode handlers.
+ */
 function activateScreenshotMode() {
   try {
     console.log('Aktiviere Screenshot Mode');
 
-    // Speichere Original-Legende für Wiederherstellung
+    /* Store original legend HTML for restoration. */
     const legendControl = document.querySelector('.legend-control');
     if (legendControl) {
       window._originalLegendHTML = legendControl.innerHTML;
     }
 
-    // Alle function-btn Buttons ausblenden
+    /* Hide function buttons. */
     const functionBtns = document.querySelectorAll('.function-btn');
     functionBtns.forEach(btn => {
       btn.style.display = 'none';
     });
 
-    // Main menu ausblenden
+    /* Hide main menu. */
     const mainMenu = document.getElementById('main-menu');
     if (mainMenu) {
       mainMenu.style.display = 'none';
@@ -59,7 +83,7 @@ function activateScreenshotMode() {
       window._citeBtnWasVisible = true;
     }
 
-    // Data and Licensing Button ausblenden
+    /* Hide Data and Licensing button. */
     const dataLicensingBtn = document.getElementById('data-licensing-btn');
     if (dataLicensingBtn) {
       window._dataLicensingBtnDisplay = dataLicensingBtn.style.display; // Original speichern
@@ -67,7 +91,7 @@ function activateScreenshotMode() {
       window._dataLicensingBtnWasVisible = true;
     }
 
-    // Logo komplett ausblenden
+    /* Hide top logo container. */
     const topLogo = document.getElementById('top-logo');
     if (topLogo) {
       window._logoDisplay = topLogo.style.display || ''; // Original speichern
@@ -75,7 +99,7 @@ function activateScreenshotMode() {
       window._logoWasVisible = true;
     }
 
-    // Export und Screenshot Buttons ausblenden
+    /* Hide export and screenshot buttons. */
     const exportBtn = document.getElementById('export-btn');
     if (exportBtn) {
       exportBtn.style.display = 'none';
@@ -86,9 +110,9 @@ function activateScreenshotMode() {
       screenshotBtn.style.display = 'none';
     }
 
-    // Legende bereinigen: Checkboxen entfernen und nur aktive Layer anzeigen
+    /* Clean legend: remove checkboxes and show only active layers. */
     if (legendControl) {
-      // Make sure legend is visible
+      /* Ensure legend remains visible. */
       legendControl.style.display = 'block';
       
       const labels = legendControl.querySelectorAll('label');
@@ -98,14 +122,14 @@ function activateScreenshotMode() {
         const checkbox = label.querySelector('input[type="checkbox"]');
         const layerName = label.textContent.trim();
 
-        // Prüfe ob Layer aktiv ist (Checkbox ist checked)
+        /* Include only active layers (checked checkboxes). */
         if (checkbox && checkbox.checked) {
-          // Entferne Checkbox und passe margin an, um Layout zu erhalten
+          /* Remove checkbox and adjust margins to preserve layout. */
           const labelClone = label.cloneNode(true);
           const checkboxClone = labelClone.querySelector('input[type="checkbox"]');
           if (checkboxClone) {
             checkboxClone.remove();
-            // Füge margin zum ersten span hinzu, um den Platz der Checkbox zu kompensieren
+            /* Compensate for the removed checkbox spacing. */
             const firstSpan = labelClone.querySelector('span');
             if (firstSpan) {
               firstSpan.style.marginLeft = '6px';
@@ -118,17 +142,17 @@ function activateScreenshotMode() {
       if (cleanLegendHTML) {
         legendControl.innerHTML = cleanLegendHTML;
       } else {
-        // If no layers are checked, show a message
+        /* If no layers are checked, show a placeholder message. */
         legendControl.innerHTML = '<div style="padding: 5px;">No active layers</div>';
       }
       
       console.log('Legend HTML in screenshot mode:', legendControl.innerHTML);
       
-      // Enable drag and drop for legend
+      /* Enable drag and drop for legend. */
       makeLegendDraggable(legendControl);
     }
 
-    // Escape-Taste Event-Listener hinzufügen
+    /* Bind Escape key to exit screenshot mode. */
     document.addEventListener('keydown', handleScreenshotModeEscape);
 
     console.log('Screenshot Mode aktiviert');
@@ -141,13 +165,13 @@ function exitScreenshotMode() {
   try {
     console.log('Verlasse Screenshot Mode');
 
-    // Function-Buttons wieder anzeigen
+    /* Restore function buttons. */
     const functionBtns = document.querySelectorAll('.function-btn');
     functionBtns.forEach(btn => {
       btn.style.display = '';
     });
 
-    // Main menu wieder anzeigen
+    /* Restore main menu. */
     if (window._mainMenuWasVisible) {
       const mainMenu = document.getElementById('main-menu');
       if (mainMenu) mainMenu.style.display = '';
@@ -169,7 +193,7 @@ function exitScreenshotMode() {
       delete window._citeBtnWasVisible;
     }
 
-    // Data and Licensing Button wieder anzeigen
+    /* Restore Data and Licensing button. */
     if (window._dataLicensingBtnWasVisible) {
       const dataLicensingBtn = document.getElementById('data-licensing-btn');
       if (dataLicensingBtn && window._dataLicensingBtnDisplay !== undefined) {
@@ -179,7 +203,7 @@ function exitScreenshotMode() {
       delete window._dataLicensingBtnWasVisible;
     }
 
-    // Logo wieder anzeigen
+    /* Restore top logo container. */
     if (window._logoWasVisible) {
       const topLogo = document.getElementById('top-logo');
       if (topLogo && window._logoDisplay !== undefined) {
@@ -189,7 +213,7 @@ function exitScreenshotMode() {
       delete window._logoWasVisible;
     }
 
-    // Export und Screenshot Buttons wieder anzeigen
+    /* Restore export and screenshot buttons. */
     const exportBtn = document.getElementById('export-btn');
     if (exportBtn) exportBtn.style.display = '';
 
@@ -199,25 +223,25 @@ function exitScreenshotMode() {
       screenshotBtn.style.background = '#ff6b35'; // Normale Farbe wiederherstellen
     }
 
-    // Original-Legende wiederherstellen
+    /* Restore original legend HTML and handlers. */
     const legendControl = document.querySelector('.legend-control');
     if (legendControl && window._originalLegendHTML) {
       legendControl.innerHTML = window._originalLegendHTML;
       delete window._originalLegendHTML;
-      // Event-Handler für Checkboxen wieder hinzufügen
+      /* Rebind legend checkbox handlers. */
       createLegendEventHandlers();
-      // Remove draggable styling to restore default position
+      /* Remove draggable styling to restore default position. */
       removeLegendDraggable(legendControl);
     }
 
-    // Escape-Event-Listener entfernen
+    /* Remove Escape key handler. */
     document.removeEventListener('keydown', handleScreenshotModeEscape);
 
-    // Zurück zum Info Mode
+    /* Return to Info mode. */
     currentMode = 'info';
     activateInfoMode();
 
-    // Info Mode Button als aktiv markieren
+    /* Mark Info mode button as active. */
     const infoBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Info Mode');
     if (infoBtn) {
       setActiveBtn(infoBtn);
@@ -236,4 +260,6 @@ function handleScreenshotModeEscape(event) {
   }
 }
 
-// Funktion zum Anzeigen der Zeitreihen-Charts
+/*
+ * Time-series chart helpers are implemented in core.
+ */

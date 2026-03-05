@@ -8,7 +8,7 @@
  * 
  * Key Features:
  * - Custom layer creation
- * - Layer type selection (line/point/inline)
+ * - Layer type selection (line/point/inline/node)
  * - User-defined layer names
  * - Automatic legend integration
  * - Layer metadata generation
@@ -18,6 +18,7 @@
  * - Pipeline (Line Layer): For linear infrastructure
  * - Infrastructure (Point Layer): For point-based facilities
  * - In-Line Element Layer: For elements positioned along pipelines
+ * - Node Layer: For standard node handling
  * 
  * Workflow:
  * 1. User selects layer type
@@ -34,11 +35,18 @@
  * - Configures default styling
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - User-selected layer type and name.
+ * - Map instance and layer registries.
+ *
+ * Public API:
+ * - activateAddNewElementTool(): Start the custom-layer creation flow.
  * 
  * ================================================================================
  */
@@ -53,7 +61,7 @@
   function startAddNewElement() {
     showCustomPopup(
       '➕ Add New Element',
-      '<p style="text-align: center; margin: 15px 0;">Choose the type of element to create:</p><select id="element-type-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"><option value="pipeline">Line Layer</option><option value="infrastructure">Point Layer</option><option value="inline">In-Line Element Layer</option></select><br><br><label for="element-name-input" style="display: block; margin-bottom: 5px;">Layer Name:</label><input type="text" id="element-name-input" placeholder="Enter layer name" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">',
+      '<p style="text-align: center; margin: 15px 0;">Choose the type of element to create:</p><select id="element-type-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"><option value="pipeline">Line Layer</option><option value="infrastructure">Point Layer</option><option value="inline">In-Line Element Layer</option><option value="node">Node Layer</option></select><br><br><label for="element-name-input" style="display: block; margin-bottom: 5px;">Layer Name:</label><input type="text" id="element-name-input" placeholder="Enter layer name" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">',
       [
         {
           text: 'Create',
@@ -72,7 +80,7 @@
               return;
             }
             
-            // Check if layer name already exists
+            /* Validate uniqueness of the layer name. */
             if (window.customLayers && window.customLayers[name]) {
               showCustomPopup(
                 '⚠️ Error',
@@ -115,12 +123,12 @@
     let metadata = null;
     
     if (type === 'pipeline') {
-      // Linienlayer
+      /* Line layer. */
       layerGroup = L.layerGroup().addTo(map);
       const uniqueColor = getUniqueLineColor();
       registerLineColorUsage(uniqueColor);
       const defaultWeight = 4;
-      // Zur Legende hinzufügen
+      /* Add to legend. */
       addToLegend(displayName, 'line', { color: uniqueColor });
       layerGroup._customLineLayer = true;
       layerGroup._customLayerName = displayName;
@@ -149,11 +157,45 @@
         geometryClass: 'line',
         elementKey: displayName
       };
+    } else if (type === 'node') {
+      /* Node layer (treated like standard nodes). */
+      layerGroup = L.layerGroup().addTo(map);
+      const nodeStyle = getDefaultNodeStyleOptions(layerGroup);
+      const defaultColor = nodeStyle.fillColor || '#ff7800';
+      const defaultRadius = nodeStyle.radius ?? 6;
+      addToLegend(displayName, 'point', { color: defaultColor });
+      layerGroup._customLayerName = displayName;
+      layerGroup._customLayerColor = defaultColor;
+      const nodeIdPrefix = deriveCustomLayerPrefix(displayName);
+      const nodeTypeKey = `Node:${displayName}`;
+      facilityTypeMap[nodeTypeKey] = nodeIdPrefix;
+      layerGroup._customLayerSettings = {
+        name: displayName,
+        geometryClass: 'point',
+        defaultAttributes: getDefaultPointAttributes('Node'),
+        idPrefix: nodeIdPrefix,
+        typeKey: nodeTypeKey,
+        elementKey: 'nodes',
+        isNodeLayer: true,
+        color: defaultColor,
+        radius: defaultRadius,
+        size: defaultRadius,
+        shape: 'circle'
+      };
+      configEntry = {
+        ...baseConfig,
+        color: defaultColor,
+        markerType: 'circle',
+        size: defaultRadius,
+        type: 'Node',
+        geometryClass: 'point',
+        elementKey: 'nodes'
+      };
     } else if (type === 'inline') {
-      // In-Line Element Layer (Punktlayer mit spezieller Behandlung)
+      /* Inline element layer (point layer with special handling). */
       layerGroup = L.layerGroup().addTo(map);
       const defaultColor = '#f03';
-      // Zur Legende hinzufügen
+      /* Add to legend. */
       addToLegend(displayName, 'point', { color: defaultColor });
       isInline = true;
       const defaultRadius = 6;
@@ -182,10 +224,10 @@
         elementKey: displayName
       };
     } else {
-      // Punktlayer (Infrastructure)
+      /* Point layer (infrastructure). */
       layerGroup = L.layerGroup().addTo(map);
       const defaultColor = '#f03';
-      // Zur Legende hinzufügen
+      /* Add to legend. */
       addToLegend(displayName, 'point', { color: defaultColor });
       const defaultRadius = 6;
       const idPrefix = deriveCustomLayerPrefix(displayName);
@@ -232,7 +274,7 @@
       upsertLayerConfigEntry(configEntry, metadata);
     }
     
-    // Layer speichern
+    /* Register custom layer in global registry. */
     if (!window.customLayers) window.customLayers = {};
     window.customLayers[displayName] = layerGroup;
     if (type === 'pipeline') {
@@ -261,13 +303,13 @@
     
     const legendItem = document.createElement('div');
     
-    // Generate legend HTML based on layer type (matching legend.js structure exactly)
+    /* Generate legend HTML based on layer type (matching legend.js structure). */
     let legendHTML;
     if (layerType === 'line') {
-      // Line layer
+      /* Line layer. */
       legendHTML = `<label class="legend-label"><input type="checkbox" id="toggle-${name.toLowerCase().replace(/\s+/g, '-')}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block;"><div class="legend-line" style="background:${resolvedColor};"></div></span><span style="margin-left: 6px;">${name}</span></label><br>`;
     } else {
-      // Point or In-Line layer
+      /* Point or inline layer. */
       legendHTML = `<label class="legend-label"><input type="checkbox" id="toggle-${name.toLowerCase().replace(/\s+/g, '-')}" checked style="margin-right: 6px;"><span style="width: 20px; display: inline-block; text-align: center;"><span class="legend-icon" style="background:${resolvedColor};"></span></span><span style="margin-left: 6px;">${name}</span></label><br>`;
     }
     
@@ -278,7 +320,7 @@
       styleLegendLineElement(legendLineEl, resolvedColor, resolvedLineStyle);
     }
     
-    // Vor dem Select All Button einfügen
+    /* Insert before the Select All button. */
     const selectAllBtn = legendContainer.querySelector('#activate-all-btn');
     if (selectAllBtn) {
       const selectAllDiv = selectAllBtn.parentElement;
@@ -287,7 +329,7 @@
       legendContainer.appendChild(legendItem);
     }
     
-    // Event handler für die Checkbox
+    /* Toggle handler for the legend checkbox. */
     const checkbox = legendItem.querySelector('input');
     checkbox.addEventListener('change', function() {
       if (this.checked) {

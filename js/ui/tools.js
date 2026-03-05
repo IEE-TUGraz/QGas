@@ -36,19 +36,30 @@
  * inline HTML event handlers (e.g., onclick="openToolsPopup()")
  * 
  * Development Information:
- * - Primary Author: Marco Quantschnig, BSc.
- * - Institution: Institute of Electricity Economics and Energy Innovation (IEE),
- *                Graz University of Technology (TU Graz)
+ * - Author: Dipl.-Ing. Marco Quantschnig
+ * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
+ * - Disclaimer: AI-assisted tools were used to support development and documentation.
+ *
+ * Inputs:
+ * - DOM elements for the tools popup and tiles.
+ * - Global tool activation functions (e.g., activateInfoTool).
+ *
+ * Public API:
+ * - openToolsPopup(): Open the tools selection overlay.
+ * - closeToolsPopup(): Close the tools selection overlay.
+ * - selectTool(mode): Activate a tool by mode identifier.
+ * - updateActiveToolDisplay(mode): Update the active tool label.
  * 
  * ================================================================================
  */
 
-// ================================================================================
-// ACTIVE TOOL STATE
-// ================================================================================
-// Track currently active tool for UI highlighting and mode management
+/* ================================================================================
+ * ACTIVE TOOL STATE
+ * ================================================================================
+ * Tracks the active tool for UI highlighting and mode management.
+ */
 let currentActiveTool = 'info';
 
 /**
@@ -75,15 +86,17 @@ function updateActiveToolDisplay(mode) {
     'integrate-dataset': '🔗 Integrate Dataset',
     'split-node': '🔀 Split Node',
     'reconnect-infrastructure': '🔌 Reconnect Infrastructure',
-    'distribute-compressors': '🔄 Distribute Compressors'
+    'distribute-compressors': '🔄 Distribute Compressors',
+    'topology-check': '🧭 Topology Check'
   };
   
   displayElement.textContent = modeNames[mode] || 'ℹ️ Info Mode';
 }
 
-// ================================================================================
-// TOOLS POPUP MANAGEMENT
-// ================================================================================
+/* ================================================================================
+ * TOOLS POPUP MANAGEMENT
+ * ================================================================================
+ */
 
 /**
  * Open the tools selection popup
@@ -93,7 +106,7 @@ function openToolsPopup() {
   document.getElementById('tools-popup-overlay').style.display = 'block';
   document.getElementById('tools-popup').style.display = 'block';
   
-  // Mark currently active tool with visual highlight
+  /* Mark currently active tool with visual highlight. */
   document.querySelectorAll('.tool-tile').forEach(tile => {
     tile.classList.remove('active');
     if (tile.dataset.mode === currentActiveTool) {
@@ -110,9 +123,10 @@ function closeToolsPopup() {
   document.getElementById('tools-popup').style.display = 'none';
 }
 
-// ================================================================================
-// TOOL SELECTION AND DISPATCH
-// ================================================================================
+/* ================================================================================
+ * TOOL SELECTION AND DISPATCH
+ * ================================================================================
+ */
 
 /**
  * Select and activate a specific tool mode
@@ -121,19 +135,19 @@ function closeToolsPopup() {
 function selectTool(mode) {
   currentActiveTool = mode;
   
-  // Reset all tile highlights
+  /* Reset all tile highlights. */
   document.querySelectorAll('.tool-tile').forEach(tile => {
     tile.classList.remove('active');
   });
   
-  // Aktives Tool markieren
+  /* Mark the active tool tile. */
   const activeTile = document.querySelector(`.tool-tile[data-mode="${mode}"]`);
   if (activeTile) activeTile.classList.add('active');
   
-  // Aktives Tool Display aktualisieren
+  /* Update the active tool display. */
   updateActiveToolDisplay(mode);
   
-  // Tool-Logik ausführen
+  /* Dispatch tool logic. */
   switch(mode) {
     case 'info':
       activateInfoTool();
@@ -227,7 +241,7 @@ function selectTool(mode) {
             }
           },
           {text: 'Cancel', type: 'secondary', onClick: () => {
-            // Reset to info mode if cancelled
+            /* Reset to info mode if canceled. */
             currentMode = 'info';
             activateInfoMode();
           }}
@@ -269,6 +283,9 @@ function selectTool(mode) {
     case 'integrate-dataset':
       if (!checkContributorName()) return;
       activateIntegrateDatasetTool();
+      break;
+    case 'topology-check':
+      activateTopologyCheckTool();
       break;
   }
   

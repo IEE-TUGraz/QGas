@@ -1,5 +1,20 @@
 
 <!DOCTYPE html>
+<!--
+  QGas - Interactive Map UI (Academic Header)
+
+  Module Description:
+  Main HTML entry point for the QGas web interface, providing the map container,
+  UI layout, and script loading order for all JavaScript modules.
+
+  Author: Dipl.-Ing. Marco Quantschnig
+  Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+  Disclaimer: AI-assisted tools were used to support development and documentation.
+
+  Inputs:
+  - DOM structure for map, tools, dialogs, and overlays.
+  - External libraries loaded via CDN (Leaflet, Leaflet.Draw, JSZip, XLSX, Chart.js).
+-->
 <html>
 <head>
   <meta charset="utf-8" />
@@ -116,6 +131,15 @@
       margin-right: 6px;
       vertical-align: middle;
       flex-shrink: 0;
+    }
+
+    .custom-shape-marker {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .custom-shape-marker svg {
+      display: block;
     }
 
     .legend-line {
@@ -1629,6 +1653,7 @@
   </div>
   <button id="cite-btn" onclick="openCiteModal()" style="display: block; margin: 6px auto; padding: 6px 12px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Cite This Project</button>
   <button id="data-licensing-btn" onclick="openDataLicensingModal()" style="display: block; margin: 4px auto; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px;">Data and Licensing</button>
+  <button id="documentation-btn" onclick="openDocumentation()" style="display: block; margin: 4px auto; padding: 5px 10px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px;">📚 Documentation</button>
 </div>
 
 <div id="map"></div>
@@ -1695,6 +1720,9 @@
     </button>
     <button class="tool-tile" data-mode="reconnect-infrastructure" onclick="selectTool('reconnect-infrastructure')">
       🔌<br>Reconnect Infrastructure
+    </button>
+    <button class="tool-tile" data-mode="topology-check" onclick="selectTool('topology-check')">
+      🧭<br>Topology Check
     </button>
     <button class="tool-tile" data-mode="distribute-compressors" onclick="selectTool('distribute-compressors')">
       🔄<br>Distribute Compressors
@@ -1775,6 +1803,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 <script src="js/ui/statistics.js"></script>
+<script src="js/ui/options.js"></script>
 <script src="js/ui/legend.js"></script>
   <script src="js/ui/export.js"></script>
   <script src="js/ui/screenshot.js"></script>
@@ -1788,6 +1817,7 @@
   
 <script src="js/ui/tools/switch_sublayer.js"></script>
 <script src="js/ui/tools/split_node.js"></script>
+<script src="js/ui/tools/topology_check.js"></script>
 <script src="js/ui/tools/divide_pipeline.js"></script>
 <script src="js/ui/tools/reconnect_infrastructure.js"></script>
 <script src="js/ui/tools/distribute_compressors.js"></script>
@@ -1799,8 +1829,40 @@
 
 <script src="js/ui/tools.js"></script>
 <script src="js/ui/filter.js"></script>
-  <script src="js/ui/options.js"></script>
   <script src="js/core.js"></script>
+
+<script>
+// Open documentation in new window/tab
+function openDocumentation() {
+  window.open('docs/index.html', '_blank');
+}
+
+// Placeholder functions for cite and data licensing buttons
+function openCiteModal() {
+  alert('Cite This Project:\n\nQuantschnig, M. (2025). QGas - Interactive Gas Infrastructure Toolkit. Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology.\n\nFor more information, see the documentation.');
+}
+
+function openDataLicensingModal() {
+  // Check if there's a data licensing file in the current project
+  const projectName = new URLSearchParams(window.location.search).get('project') || 'Standard';
+  const licensingFile = `Input// Try to fetch and display the file
+  fetch(licensingFile)
+    .then(response => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        throw new Error('File not found');
+      }
+    })
+    .then(text => {
+      alert('Data and Licensing:\n\n' + text);
+    })
+    .catch(error => {
+      alert('Data and Licensing:\n\nNo licensing information available for this project.\nPlease check the project folder for details.');
+    });
+}
+</script>
+
 </html>
 
 
