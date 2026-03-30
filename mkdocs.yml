@@ -1,0 +1,52 @@
+site_name: QGas Documentation
+site_description: QGas - Interactive Gas Infrastructure Toolkit
+site_url: https://qgas.readthedocs.io/
+repo_url: https://github.com/IEE-TUGraz/QGas
+repo_name: IEE-TUGraz/QGas
+edit_uri: ""
+
+docs_dir: docs
+
+theme:
+  name: mkdocs
+  custom_dir: docs/docs_md_theme
+
+extra_css:
+  - assets/style.css
+
+hooks:
+  - docs/hooks.py
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            docstring_style: google
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - tables
+  - footnotes
+
+nav:
+  - Home: index.md
+  - User Guide:
+      - Quickstart: user/quickstart.md
+      - Running QGas: user/running.md
+      - Interface Overview: user/interface-overview.md
+      - Main Screen: user/main-screen.md
+      - Toolkit / Tools: user/tools.md
+  - Developer:
+      - Project Structure: dev/project-structure.md
+      - Development Setup: dev/setup-development.md
+      - Dependencies & Packages: dev/packages.md
+      - Licensing: dev/licensing.md
+  - API Reference:
+      - "Python: Server_Control.py": api/python-gui.md
+      - JavaScript Modules: api/js-modules.md

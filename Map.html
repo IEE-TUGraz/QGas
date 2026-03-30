@@ -1837,30 +1837,7 @@ function openDocumentation() {
   window.open('docs/index.html', '_blank');
 }
 
-// Placeholder functions for cite and data licensing buttons
-function openCiteModal() {
-  alert('Cite This Project:\n\nQuantschnig, M. (2025). QGas - Interactive Gas Infrastructure Toolkit. Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology.\n\nFor more information, see the documentation.');
-}
-
-function openDataLicensingModal() {
-  // Check if there's a data licensing file in the current project
-  const projectName = new URLSearchParams(window.location.search).get('project') || 'Standard';
-  const licensingFile = `Input// Try to fetch and display the file
-  fetch(licensingFile)
-    .then(response => {
-      if (response.ok) {
-        return response.text();
-      } else {
-        throw new Error('File not found');
-      }
-    })
-    .then(text => {
-      alert('Data and Licensing:\n\n' + text);
-    })
-    .catch(error => {
-      alert('Data and Licensing:\n\nNo licensing information available for this project.\nPlease check the project folder for details.');
-    });
-}
+// Placeholder functions removed; modal handlers are defined in core.js
 </script>
 
 </html>

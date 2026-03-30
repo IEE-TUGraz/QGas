@@ -1,0 +1,2955 @@
+{
+  "type": "FeatureCollection",
+  "name": "B_Borderpoints",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_0",
+        "name": "Almeria_[208]",
+        "Node": "SEQ_1381_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.67,
+        "tags": {},
+        "from_TSO": "Medgaz",
+        "from_country": "DZ",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 25.42499976532461,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Enagas",
+        "to_country": "ES"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.24066,
+          36.72766
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_1",
+        "name": "Alveringem_[86]",
+        "Node": "SEQ_1096_p",
+        "NUTS3_ID": "BE258",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.63,
+        "tags": {},
+        "from_TSO": "GRTgaz",
+        "from_country": "FR",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 23.753459988365552,
+        "max_cap_to_from_M_m3_per_d": 23.753459988365552,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.68738,
+          51.00838
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_2",
+        "name": "Annemasse_[68]",
+        "Node": "N_1954_S_LMGN",
+        "NUTS3_ID": "FRK28",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "GRTgaz",
+        "from_country": "FR",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 3.2902940872773025,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Gaznat",
+        "to_country": "CH"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.27049,
+          46.1943
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_3",
+        "name": "Bacton_BE_[18]",
+        "Node": "INET_N_376",
+        "NUTS3_ID": null,
+        "start_year": 1998.0,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.25,
+        "tags": {},
+        "from_TSO": "National Grid Gas",
+        "from_country": "UK",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 57.33381434969567,
+        "max_cap_to_from_M_m3_per_d": 21.730017100467748,
+        "to_TSO": "Interconnector",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.44754,
+          52.878453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_4",
+        "name": "Bacton_NL_[18]",
+        "Node": "INET_N_376",
+        "NUTS3_ID": null,
+        "start_year": 2006.0,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.0,
+        "tags": {},
+        "from_TSO": "BBL Company",
+        "from_country": "NL",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 43.460034200935496,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "National Grid Gas",
+        "to_country": "UK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.44754,
+          52.878453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_5",
+        "name": "Badajoz_[67]",
+        "Node": "SEQ_2255_p",
+        "NUTS3_ID": "ES431",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.8325,
+        "tags": {},
+        "from_TSO": "Enagas",
+        "from_country": "ES",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 12.4045846605909,
+        "max_cap_to_from_M_m3_per_d": 9.23745666214216,
+        "to_TSO": "REN - Gasodutos",
+        "to_country": "PT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -6.96152,
+          38.89603
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_6",
+        "name": "Balassagyarmat_[75]",
+        "Node": "SEQ_891_p",
+        "NUTS3_ID": "HU313",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.16,
+        "tags": {},
+        "from_TSO": "eustream",
+        "from_country": "SK",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 11.172923772305278,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "MGT",
+        "to_country": "HU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          19.26114,
+          48.06674
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_8",
+        "name": "Basel_[77]",
+        "Node": "SEQ_5103__L_LMGN",
+        "NUTS3_ID": "CH032",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.422,
+        "tags": {},
+        "from_TSO": "terranets bw",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 0.7741868440652477,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GVM",
+        "to_country": "CH"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.6285,
+          47.51811
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_9",
+        "name": "Baumgarten_[46]",
+        "Node": "INET_N_900",
+        "NUTS3_ID": "SK010",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.16,
+        "tags": {},
+        "from_TSO": "multiple_TSOs",
+        "from_country": "AT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 21.77400498933509,
+        "max_cap_to_from_M_m3_per_d": 138.15716135455284,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "SK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          16.9,
+          48.35
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_10",
+        "name": "Beregdaroc_1400_[219]",
+        "Node": "INET_N_168",
+        "NUTS3_ID": "HU323",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.34,
+        "tags": {},
+        "from_TSO": "Ukrtransgaz",
+        "from_country": "UA",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 45.448286777739426,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "FGSZ",
+        "to_country": "HU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.532007,
+          48.198511
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_11",
+        "name": "Bilisht Qendr_[]",
+        "Node": "INET_N_191",
+        "NUTS3_ID": "AL034",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "GR",
+        "is_EU_to_EU": null,
+        "max_cap_from_to_M_m3_per_d": 14.6771783675684,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "AL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          21.000003,
+          40.581944
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_12",
+        "name": "Bizzarone_[66]",
+        "Node": "SEQ_1117_p",
+        "NUTS3_ID": "ITC14",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.364,
+        "tags": {},
+        "from_TSO": "Snam Rete Gas",
+        "from_country": "IT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 1.1348875327774652,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "CH"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.36329,
+          46.42379
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_13",
+        "name": "Blaregnies_LowGas_[10]",
+        "Node": "N_239_L_LMGN",
+        "NUTS3_ID": "FRE11",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 10.035,
+        "tags": {},
+        "from_TSO": "Fluxys Belgium",
+        "from_country": "BE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 20.234428878978065,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GRTgaz",
+        "to_country": "FR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.81163,
+          50.34567
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_14",
+        "name": "Bocholtz_[11]",
+        "Node": "SEQ_577_p",
+        "NUTS3_ID": "NL423",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.5,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 35.26948929383611,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.98559,
+          50.7936
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_15",
+        "name": "Brandov_[40, 42, 84]",
+        "Node": "INET_N_229",
+        "NUTS3_ID": "CZ042",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "NET4GAS",
+        "from_country": "CZ",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 16.13475763654164,
+        "max_cap_to_from_M_m3_per_d": 115.40662523236271,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.39,
+          50.635
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_16",
+        "name": "Bras_[134]",
+        "Node": "SEQ_1479_p",
+        "NUTS3_ID": "LU000",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.36,
+        "tags": {},
+        "from_TSO": "Fluxys Belgium",
+        "from_country": "BE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 4.293217953452737,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "CREOS Luxembourg",
+        "to_country": "LU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.89234,
+          50.06895
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_17",
+        "name": "Budince_[71]",
+        "Node": "INET_N_1731",
+        "NUTS3_ID": "SK042",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.16,
+        "tags": {},
+        "from_TSO": "eustream",
+        "from_country": "SK",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 36.59792353762989,
+        "max_cap_to_from_M_m3_per_d": 21.958754122577933,
+        "to_TSO": "Ukrtransgaz",
+        "to_country": "UA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.121625,
+          48.552002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_18",
+        "name": "Cieszyn_[44]",
+        "Node": "SEQ_1252_p",
+        "NUTS3_ID": "PL225",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.235,
+        "tags": {},
+        "from_TSO": "NET4GAS",
+        "from_country": "CZ",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 2.4633217765712425,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GAZ-SYSTEM S.A.",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          18.59525,
+          49.81172
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_19",
+        "name": "Csanadpalota_[57]",
+        "Node": "SEQ_566_p",
+        "NUTS3_ID": "HU333",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.16,
+        "tags": {},
+        "from_TSO": "FGSZ",
+        "from_country": "HU",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 4.583538019977205,
+        "max_cap_to_from_M_m3_per_d": 0.21993944433671808,
+        "to_TSO": "Transgaz",
+        "to_country": "RO"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          20.61434,
+          46.23446
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_20",
+        "name": "Deutschneudorf_[41]",
+        "Node": "INET_N_229",
+        "NUTS3_ID": "CZ042",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.225,
+        "tags": {},
+        "from_TSO": "ONTRAS",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 8.357698884795287,
+        "max_cap_to_from_M_m3_per_d": 1.3108390882468397,
+        "to_TSO": "NET4GAS",
+        "to_country": "CZ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.39,
+          50.635
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_21",
+        "name": "Dilsen_[5]",
+        "Node": "SEQ_3862_p",
+        "NUTS3_ID": "BE223",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.63,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 9.994048350660469,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.74592,
+          51.0019
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_22",
+        "name": "Dolni Bojanovice_[59]",
+        "Node": "SEQ_10352_p",
+        "NUTS3_ID": "CZ064",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "SPP Storage",
+        "from_country": "CZ",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 8.410484351436098,
+        "max_cap_to_from_M_m3_per_d": 6.536600285687261,
+        "to_TSO": "eustream",
+        "to_country": "SK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.04115,
+          48.77895
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_23",
+        "name": "Dornum_[201, 228]",
+        "Node": "LKD_N_163",
+        "NUTS3_ID": "DE947",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Gassco",
+        "from_country": "NO",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 64.14313954636046,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.428634,
+          53.644992
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_24",
+        "name": "Dragor_[37]",
+        "Node": "SEQ_680_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 12.1,
+        "tags": {},
+        "from_TSO": "Energinet.dk",
+        "from_country": "DK",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 7.7242732851055385,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "SwedegasAB",
+        "to_country": "SE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.79133,
+          55.63544
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_25",
+        "name": "Dravaszerdahely_[58]",
+        "Node": "SEQ_94_p",
+        "NUTS3_ID": "HU231",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.345,
+        "tags": {},
+        "from_TSO": "FGSZ",
+        "from_country": "HU",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 6.88850339662601,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Plinacro Ltd",
+        "to_country": "HR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          18.18131,
+          45.84678
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_26",
+        "name": "Drozdwicze_[217]",
+        "Node": "SEQ_835_p",
+        "NUTS3_ID": "PL822",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3,
+        "tags": {},
+        "from_TSO": "Ukrtransgaz",
+        "from_country": "UA",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 11.929515460823588,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GAS-SYSTEM",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.73082,
+          49.76771
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_27",
+        "name": "Dunkerque_[205]",
+        "Node": "N_3_NS_LMGN",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.425,
+        "tags": {},
+        "from_TSO": "Gassco",
+        "from_country": "NO",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 50.14619330877172,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GRTgaz",
+        "to_country": "FR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.19056,
+          51.03479
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_28",
+        "name": "Easington_[206]",
+        "Node": "SEQ_3994_p",
+        "NUTS3_ID": "UKE12",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.0,
+        "tags": {},
+        "from_TSO": "Gassco",
+        "from_country": "NO",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 69.79118447692738,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "National Grid Gas",
+        "to_country": "UK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.02079,
+          53.76147
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_29",
+        "name": "Ellund_[36]",
+        "Node": "LKD_N_173",
+        "NUTS3_ID": "DEF0C",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.2,
+        "tags": {},
+        "from_TSO": "ENERGINET",
+        "from_country": "DK",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 8.005795773856539,
+        "max_cap_to_from_M_m3_per_d": 10.249178106091062,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.28109,
+          54.803874
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_30",
+        "name": "Emden_[202]",
+        "Node": "SEQ_12161_p",
+        "NUTS3_ID": "DE94C",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Gassco",
+        "from_country": "NO",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 130.3449122917126,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.28694,
+          53.314881
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_31",
+        "name": "Epe_[15]",
+        "Node": "LKD_N_233",
+        "NUTS3_ID": "DEA34",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 14.841513703841736,
+        "max_cap_to_from_M_m3_per_d": 27.6507869420122,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.129816,
+          52.137442
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_32",
+        "name": "Eynatten_[6]",
+        "Node": "LKD_N_136",
+        "NUTS3_ID": "DEA2D",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.63,
+        "tags": {},
+        "from_TSO": "Fluxys Belgium",
+        "from_country": "BE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 25.468987654191952,
+        "max_cap_to_from_M_m3_per_d": 35.23429898274224,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.207367,
+          50.760751
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_33",
+        "name": "Fallentor_[79]",
+        "Node": "SEQ_1713_p",
+        "NUTS3_ID": "CH040",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.313,
+        "tags": {},
+        "from_TSO": "terranets bw",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 0.9237456662142159,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Erdgas Ostschweiz",
+        "to_country": "CH"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.6492,
+          47.64837
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_34",
+        "name": "Gela_[210]",
+        "Node": "SEQ_1444_p",
+        "NUTS3_ID": "ITG18",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.599,
+        "tags": {},
+        "from_TSO": "Green Stream",
+        "from_country": "LY",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 38.691747047715445,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Snam Rete Gas",
+        "to_country": "IT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.50326,
+          36.97973
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_35",
+        "name": "Gorizia_[29]",
+        "Node": "SEQ_10633__M_LMGN",
+        "NUTS3_ID": "ITH43",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3135,
+        "tags": {},
+        "from_TSO": "Snam Rete Gas",
+        "from_country": "IT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 2.4897145098916487,
+        "max_cap_to_from_M_m3_per_d": 1.8826816435223066,
+        "to_TSO": "Plinovodi",
+        "to_country": "SI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.62858,
+          45.92898
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_36",
+        "name": "Gormansto_[19]",
+        "Node": "SEQ_4411__S_LMGN",
+        "NUTS3_ID": "IE062",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.0,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "UK",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 30.317332765150567,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "IE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -6.27612,
+          53.6666
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_37",
+        "name": "Gravenvoeren_[5]",
+        "Node": "INET_N_178",
+        "NUTS3_ID": "BE332",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.63,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 19.988096701320938,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.739351,
+          50.753777
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_38",
+        "name": "Gubin_[82]",
+        "Node": "INET_N_933",
+        "NUTS3_ID": "DE409",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "PL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 22.380169131540434,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.543,
+          52.427
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_39",
+        "name": "Haanrade_[63]",
+        "Node": "SEQ_577_p",
+        "NUTS3_ID": "NL423",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 0.16715397769590573,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Thyssengas",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.98559,
+          50.7936
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_40",
+        "name": "Haiming_2_[61]",
+        "Node": "INET_N_1183",
+        "NUTS3_ID": "AT313",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.305,
+        "tags": {},
+        "from_TSO": "multiple_TSOs",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 21.35172125620859,
+        "max_cap_to_from_M_m3_per_d": 14.621574259505017,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "AT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.751863,
+          48.55443
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_41",
+        "name": "Hilvarenbeek_[4]",
+        "Node": "SEQ_647_p",
+        "NUTS3_ID": "NL412",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 9.77,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 56.480449305669204,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.11676,
+          51.52743
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_42",
+        "name": "Imatra_[211]",
+        "Node": "SEQ_205_p",
+        "NUTS3_ID": "FI1C5",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.2865,
+        "tags": {},
+        "from_TSO": "Gazprom",
+        "from_country": "RU",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 19.35467110163119,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Gasum Oy",
+        "to_country": "FI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.98897,
+          61.1918
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_43",
+        "name": "Irun_[76]",
+        "Node": "SEQ_1679_p",
+        "NUTS3_ID": "FRI15",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.678,
+        "tags": {},
+        "from_TSO": "Enagas",
+        "from_country": "ES",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 5.278546664081234,
+        "max_cap_to_from_M_m3_per_d": 5.278546664081234,
+        "to_TSO": "TEREGA",
+        "to_country": "FR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.71111,
+          43.30877
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_44",
+        "name": "Isaccea_[221, 226]",
+        "Node": "INET_N_742",
+        "NUTS3_ID": "RO225",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.325,
+        "tags": {},
+        "from_TSO": "Ukrtransgaz",
+        "from_country": "UA ",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 98.01381397421504,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Transgaz",
+        "to_country": "RO"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.460727,
+          45.265423
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_45",
+        "name": "Jemgum_[74]",
+        "Node": "SEQ_1863_p",
+        "NUTS3_ID": "DE94C",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "multiple_TSOs",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 33.97624536113621,
+        "max_cap_to_from_M_m3_per_d": 24.422075899149178,
+        "to_TSO": "Gasunie TS",
+        "to_country": "NL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.423593,
+          53.233796
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_46",
+        "name": "Kamminke_[82]",
+        "Node": "SEQ_3535_p",
+        "NUTS3_ID": "PL428",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.228,
+        "tags": {},
+        "from_TSO": "ONTRAS",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 0.008797577773468724,
+        "max_cap_to_from_M_m3_per_d": 0.008797577773468724,
+        "to_TSO": "GAZ-SYSTEM",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.2571,
+          53.86568
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_47",
+        "name": "Karksi_[54]",
+        "Node": "SEQ_1357_p",
+        "NUTS3_ID": "EE008",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.2855,
+        "tags": {},
+        "from_TSO": "Conexus",
+        "from_country": "EE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 5.542473997285295,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Elering",
+        "to_country": "LV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          25.59511,
+          57.95161
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_48",
+        "name": "Kiefersfelden_[69]",
+        "Node": "LKD_N_72",
+        "NUTS3_ID": "DE21K",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.28,
+        "tags": {},
+        "from_TSO": "bayernets",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 2.023442887897806,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "AGGM",
+        "to_country": "AT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.131762,
+          47.607411
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_49",
+        "name": "Kiemenai_[55]",
+        "Node": "SEQ_4931__M_LMGN",
+        "NUTS3_ID": "LT025",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.5565,
+        "tags": {},
+        "from_TSO": "Amber Grid",
+        "from_country": "LV",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 5.947162574864857,
+        "max_cap_to_from_M_m3_per_d": 5.727223130528138,
+        "to_TSO": "Conexus",
+        "to_country": "LT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.42295,
+          56.22492
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_50",
+        "name": "Killeen_[]",
+        "Node": "SEQ_978_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "UK",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 14.6771783675684,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "IE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -6.17007,
+          53.71176
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_51",
+        "name": "Kipoi_[222]",
+        "Node": "INET_N_830",
+        "NUTS3_ID": "EL511",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.301,
+        "tags": {},
+        "from_TSO": "Botas",
+        "from_country": "TR",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 4.2756227979057995,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "GR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          26.307161,
+          40.970417
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_52",
+        "name": "Kiskundorozsma_[48]",
+        "Node": "SEQ_1042_p",
+        "NUTS3_ID": "HU333",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.345,
+        "tags": {},
+        "from_TSO": "FGSZ",
+        "from_country": "HU",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 12.492560438325587,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Srbijagas",
+        "to_country": "RS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          19.93941,
+          46.17909
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_53",
+        "name": "Kondratki_[215]",
+        "Node": "SEQ_706_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.078,
+        "tags": {},
+        "from_TSO": "Gazprom",
+        "from_country": "BY",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 0.6422231774632168,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GAZ-SYSTEM",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.97908,
+          52.97687
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_54",
+        "name": "Korneti_[212]",
+        "Node": "SEQ_936_p",
+        "NUTS3_ID": "LV008",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.274,
+        "tags": {},
+        "from_TSO": "Elering",
+        "from_country": "EE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 9.23745666214216,
+        "max_cap_to_from_M_m3_per_d": 15.703676325641672,
+        "to_TSO": "Conexus",
+        "to_country": "LV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          26.99581,
+          57.5837
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_55",
+        "name": "Kotlovka_[213]",
+        "Node": "N_11_L_LMGN",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.239,
+        "tags": {},
+        "from_TSO": "Gazprom",
+        "from_country": "BY",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 28.627318074867222,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Amber Grid",
+        "to_country": "LT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          25.79474,
+          54.81404
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_56",
+        "name": "Kulata_[51]",
+        "Node": "SEQ_887_p",
+        "NUTS3_ID": "BG413",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.35,
+        "tags": {},
+        "from_TSO": "Bulgartransgaz",
+        "from_country": "BG",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 10.301963572731875,
+        "max_cap_to_from_M_m3_per_d": 4.090873664662956,
+        "to_TSO": "DESFA",
+        "to_country": "GR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.18725,
+          41.37304
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_57",
+        "name": "Lab_[60]",
+        "Node": "INET_N_900",
+        "NUTS3_ID": "SK010",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Gas Connect Austria",
+        "from_country": "AT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 12.167050060707245,
+        "max_cap_to_from_M_m3_per_d": 12.167050060707245,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "SK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          16.9,
+          48.35
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_58",
+        "name": "Lanzhot_[45]",
+        "Node": "SEQ_10352_p",
+        "NUTS3_ID": "CZ064",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.195,
+        "tags": {},
+        "from_TSO": "NET4GAS",
+        "from_country": "CZ",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 80.38346811618374,
+        "max_cap_to_from_M_m3_per_d": 35.22550140496877,
+        "to_TSO": "eustream",
+        "to_country": "SK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.04115,
+          48.77895
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_59",
+        "name": "Larrau_[76]",
+        "Node": "SEQ_792_p",
+        "NUTS3_ID": "FRI15",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.678,
+        "tags": {},
+        "from_TSO": "Enagas",
+        "from_country": "ES",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 14.516003326223393,
+        "max_cap_to_from_M_m3_per_d": 14.516003326223393,
+        "to_TSO": "TEREGA",
+        "to_country": "FR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.88551,
+          42.99799
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_60",
+        "name": "Lasow_[82]",
+        "Node": "SEQ_3460_p",
+        "NUTS3_ID": "PL515",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.228,
+        "tags": {},
+        "from_TSO": "ONTRAS",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 4.284420375679269,
+        "max_cap_to_from_M_m3_per_d": 4.284420375679269,
+        "to_TSO": "GAZ-SYSTEM",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.06651,
+          51.23989
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_61",
+        "name": "Lindau_[78]",
+        "Node": "SEQ_1893_p",
+        "NUTS3_ID": "DE147",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.392,
+        "tags": {},
+        "from_TSO": "terranets bw",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 2.2345847544610558,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Vorarlberger Erdgas",
+        "to_country": "AT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.60101,
+          47.62449
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_62",
+        "name": "Loughshinny_[19]",
+        "Node": "SEQ_4411__S_LMGN",
+        "NUTS3_ID": "IE062",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.0,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "UK",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 11.57761234988484,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "IE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -6.27612,
+          53.6666
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_63",
+        "name": "Lubmin_[224]",
+        "Node": "INET_N_984",
+        "NUTS3_ID": "DE80N",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Nordstream",
+        "from_country": "RU",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 153.25380481382516,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.655607,
+          54.151055
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_64",
+        "name": "Mallnow_[38]",
+        "Node": "INET_N_933",
+        "NUTS3_ID": "DE409",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.078,
+        "tags": {},
+        "from_TSO": "GASCADE",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 16.2579237253702,
+        "max_cap_to_from_M_m3_per_d": 81.94943695986116,
+        "to_TSO": "GAZ-SYSTEM(ISO)",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.543,
+          52.427
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_65",
+        "name": "MazaraDelVallo_[209]",
+        "Node": "SEQ_1160_p",
+        "NUTS3_ID": "ITG11",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.782,
+        "tags": {},
+        "from_TSO": "TPMC",
+        "from_country": "TN",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 101.19853712821072,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Snam Rete Gas",
+        "to_country": "IT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.51862,
+          37.67033
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_66",
+        "name": "Medelsheim_[22]",
+        "Node": "SEQ_1921_p",
+        "NUTS3_ID": "DEC05",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3,
+        "tags": {},
+        "from_TSO": "multiple_TSOs",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 53.28692857390006,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GRTgaz",
+        "to_country": "FR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.3067,
+          49.17171
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_67",
+        "name": "MissoIzborsk_[81]",
+        "Node": "SEQ_339_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3,
+        "tags": {},
+        "from_TSO": "Elering",
+        "from_country": "RU",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 9.23745666214216,
+        "max_cap_to_from_M_m3_per_d": 15.703676325641672,
+        "to_TSO": "Gazprom",
+        "to_country": "EE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.52687,
+          57.67768
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_68",
+        "name": "Mosonmagyarovar_[47]",
+        "Node": "SEQ_67_p",
+        "NUTS3_ID": "HU221",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.325,
+        "tags": {},
+        "from_TSO": "Gas Connect Austria",
+        "from_country": "AT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 13.469091571180615,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "FGSZ",
+        "to_country": "HU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.13919,
+          47.95343
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_69",
+        "name": "Murfeld_[25]",
+        "Node": "SEQ_1090_p",
+        "NUTS3_ID": "AT225",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.331,
+        "tags": {},
+        "from_TSO": "Gas Connect Austria",
+        "from_country": "AT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 9.897274995152314,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Plinovodi",
+        "to_country": "SI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.67915,
+          46.75045
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_70",
+        "name": "Narva_[225]",
+        "Node": "INET_N_1124",
+        "NUTS3_ID": "EE00A",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "RU",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 21.27100605943982,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "EE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.179075,
+          59.379693
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_71",
+        "name": "NegruVoda_[53]",
+        "Node": "SEQ_961_p",
+        "NUTS3_ID": "BG332",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3375,
+        "tags": {},
+        "from_TSO": "Transgaz",
+        "from_country": "RO",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 64.12554439081352,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Bulgartransgaz",
+        "to_country": "BG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.84224,
+          43.94706
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_72",
+        "name": "Nybro_[100]",
+        "Node": "N_304_M_LMGN",
+        "NUTS3_ID": "DK032",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 12.1,
+        "tags": {},
+        "from_TSO": "Orsted",
+        "from_country": "XX",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 34.83840798293615,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "ENERGINET",
+        "to_country": "DK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.18126,
+          55.69908
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_74",
+        "name": "Oltinigue_[31]",
+        "Node": "SEQ_5101__L_LMGN",
+        "NUTS3_ID": "FRF12",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.457,
+        "tags": {},
+        "from_TSO": "GRTgaz",
+        "from_country": "FR",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 19.618598434835253,
+        "max_cap_to_from_M_m3_per_d": 8.797577773468724,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "CH"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.43246,
+          47.51129
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_75",
+        "name": "Ostermiething_[62]",
+        "Node": "LKD_N_89",
+        "NUTS3_ID": "AT311",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.27,
+        "tags": {},
+        "from_TSO": "bayernets",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 23.559913277349242,
+        "max_cap_to_from_M_m3_per_d": 26.383935742632698,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "AT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.818238,
+          48.118827
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_76",
+        "name": "OudeStatenzijl_[16]",
+        "Node": "N_1377_S_LMGN",
+        "NUTS3_ID": "NL111",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "multiple_TSOs",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 98.04020670753546,
+        "max_cap_to_from_M_m3_per_d": 44.90283695578436,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.18757,
+          53.2104
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_77",
+        "name": "Paldiski_[]",
+        "Node": "INET_N_1226",
+        "NUTS3_ID": "EE001",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "EE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 22.41279157483751,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "FI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.07494,
+          59.38445
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_78",
+        "name": "PassoGries_[27]",
+        "Node": "SEQ_1117_p",
+        "NUTS3_ID": "ITC14",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3705,
+        "tags": {},
+        "from_TSO": "multiple_TSOs",
+        "from_country": "CH",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 55.899809172620266,
+        "max_cap_to_from_M_m3_per_d": 37.69762075931348,
+        "to_TSO": "Snam Rete Gas",
+        "to_country": "IT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.36329,
+          46.42379
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_79",
+        "name": "Petange_[134]",
+        "Node": "SEQ_6547__M_LMGN",
+        "NUTS3_ID": "LU000",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.36,
+        "tags": {},
+        "from_TSO": "Fluxys Belgium",
+        "from_country": "BE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 4.293217953452737,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "CREOS Luxembourg",
+        "to_country": "LU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.91481,
+          49.55627
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_80",
+        "name": "Remich_[8]",
+        "Node": "SEQ_998_p",
+        "NUTS3_ID": "LU000",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3,
+        "tags": {},
+        "from_TSO": "Open Grid Europe",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 3.3782698650119896,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "CREOS Luxembourg",
+        "to_country": "LU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.32509,
+          49.54096
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_81",
+        "name": "Rogatec_[30]",
+        "Node": "SEQ_886_p",
+        "NUTS3_ID": "SI034",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3155,
+        "tags": {},
+        "from_TSO": "Plinovodi",
+        "from_country": "SI",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 4.724299264352704,
+        "max_cap_to_from_M_m3_per_d": 0.6774134885570917,
+        "to_TSO": "Plinacro Ltd",
+        "to_country": "HR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          15.67228,
+          46.23421
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_82",
+        "name": "Ruse_[83]",
+        "Node": "SEQ_232_p",
+        "NUTS3_ID": "BG323",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3545,
+        "tags": {},
+        "from_TSO": "Bulgartransgaz",
+        "from_country": "RO",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 0.6950086441040292,
+        "max_cap_to_from_M_m3_per_d": 0.14076124437549958,
+        "to_TSO": "Transgaz",
+        "to_country": "BG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          26.22311,
+          43.96751
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_83",
+        "name": "Sakiai_[56]",
+        "Node": "SEQ_990_p",
+        "NUTS3_ID": "LT024",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.4295,
+        "tags": {},
+        "from_TSO": "Amber Grid",
+        "from_country": "LT",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 10.046833817301282,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Gazprom",
+        "to_country": "RU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.79175,
+          54.94733
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_84",
+        "name": "SanFoca_[]",
+        "Node": "SEQ_490_p",
+        "NUTS3_ID": "ITF45",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": null,
+        "from_country": "IT",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 14.6771783675684,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": null,
+        "to_country": "AL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          18.38,
+          40.265
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_85",
+        "name": "StFergus_[200]",
+        "Node": "N_113_NS_LMGN",
+        "NUTS3_ID": "UKM50",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.0,
+        "tags": {},
+        "from_TSO": "Gassco",
+        "from_country": "NO",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 62.093303925142244,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "National Grid Gas",
+        "to_country": "UK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.89108,
+          57.58608
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_86",
+        "name": "Strandja_[52]",
+        "Node": "SEQ_342_p",
+        "NUTS3_ID": "BG341",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.35,
+        "tags": {},
+        "from_TSO": "Bulgartransgaz",
+        "from_country": "BG",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 39.325172647405196,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Botas",
+        "to_country": "TR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.01331,
+          42.11175
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_87",
+        "name": "Taisnieres_H_[86]",
+        "Node": "N_239_L_LMGN",
+        "NUTS3_ID": "FRE11",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.595,
+        "tags": {},
+        "from_TSO": "GRTgaz",
+        "from_country": "FR",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 56.30449775019983,
+        "max_cap_to_from_M_m3_per_d": 56.30449775019983,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.81163,
+          50.34567
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_88",
+        "name": "Tarifa_[207]",
+        "Node": "SEQ_4779__L_LMGN",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.5,
+        "tags": {},
+        "from_TSO": "EMPL",
+        "from_country": "MA",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 38.94687680314604,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Enagas",
+        "to_country": "ES"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.83643,
+          36.09059
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_89",
+        "name": "Tarvisio_[26]",
+        "Node": "INET_N_1613",
+        "NUTS3_ID": "ITH42",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.095,
+        "tags": {},
+        "from_TSO": "TAG",
+        "from_country": "AT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 101.06657346160868,
+        "max_cap_to_from_M_m3_per_d": 17.005717836115043,
+        "to_TSO": "Snam Rete Gas",
+        "to_country": "IT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.592806,
+          46.505528
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_90",
+        "name": "Tegelen_[70]",
+        "Node": "SEQ_687_p",
+        "NUTS3_ID": "NL421",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "GTS",
+        "from_country": "SK",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 0.41348615535303,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "OGE",
+        "to_country": "UA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.12893,
+          51.31844
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_91",
+        "name": "Tekovo_[226]",
+        "Node": "SEQ_86_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Ukrtransgaz",
+        "from_country": "UA",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 10.381141772693093,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Transgaz",
+        "to_country": "RO"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.34832,
+          48.17028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_92",
+        "name": "Tietierowka_[214]",
+        "Node": "SEQ_1631_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.27,
+        "tags": {},
+        "from_TSO": "Gazprom",
+        "from_country": "BY",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 0.6422231774632168,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GAZ-SYSTEM SA",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.91865,
+          53.1667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_93",
+        "name": "Tuy_[67]",
+        "Node": "SEQ_1015_p",
+        "NUTS3_ID": "ES114",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.5275,
+        "tags": {},
+        "from_TSO": "Enagas",
+        "from_country": "ES",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 3.5190311093874893,
+        "max_cap_to_from_M_m3_per_d": 3.5190311093874893,
+        "to_TSO": "REN - Gasodutos",
+        "to_country": "PT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -8.59351,
+          42.11784
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_94",
+        "name": "Ueberackern_[23]",
+        "Node": "N_2631_S_LMGN",
+        "NUTS3_ID": "DE214",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.27,
+        "tags": {},
+        "from_TSO": "Gas Connect Austria",
+        "from_country": "AT",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 15.36057079247639,
+        "max_cap_to_from_M_m3_per_d": 10.029238661754345,
+        "to_TSO": "bayernets",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.86439,
+          48.19555
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_95",
+        "name": "Ungheni_[72]",
+        "Node": "N_1661_S_LMGN",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.245,
+        "tags": {},
+        "from_TSO": "Transgaz",
+        "from_country": "RO",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 0.11436851105509341,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Vestmoldtransgaz",
+        "to_country": "MD"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.89498,
+          46.57521
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_96",
+        "name": "Uzhgorod_[218]",
+        "Node": "INET_N_1715",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.16,
+        "tags": {},
+        "from_TSO": "Ukrtransgaz",
+        "from_country": "UA",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 178.41487724594572,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Eustream",
+        "to_country": "SK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.287883,
+          48.6208
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_97",
+        "name": "Varska_[223]",
+        "Node": "SEQ_339_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.3,
+        "tags": {},
+        "from_TSO": "Gazprom",
+        "from_country": "RU",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 3.1407352651283347,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Elering",
+        "to_country": "EE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.52687,
+          57.67768
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_98",
+        "name": "Vlieghuis_[14]",
+        "Node": "SEQ_1625_p",
+        "NUTS3_ID": "NL132",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 6.334255996897481,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "RWE",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.82606,
+          52.67805
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_99",
+        "name": "Waidhaus_[43]",
+        "Node": "INET_N_1391",
+        "NUTS3_ID": "CZ032",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.2825,
+        "tags": {},
+        "from_TSO": "NET4GAS",
+        "from_country": "CZ",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 79.78523282758785,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.549857,
+          49.663384
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_100",
+        "name": "Wallbach_[28]",
+        "Node": "LKD_N_155",
+        "NUTS3_ID": "DE139",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.375,
+        "tags": {},
+        "from_TSO": "multiple_TSOs",
+        "from_country": "DE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 27.96749974185707,
+        "max_cap_to_from_M_m3_per_d": 15.202214392553955,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "CH"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.827246,
+          47.616503
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_101",
+        "name": "Beregdaroc_800_[229]",
+        "Node": "SEQ_2023_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Ukrtransgaz",
+        "from_country": "UA",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 15.835639992243703,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "FGSZ",
+        "to_country": "HU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.71795,
+          48.13751
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_102",
+        "name": "Winterswijk_[13]",
+        "Node": "SEQ_1885_p",
+        "NUTS3_ID": "NL225",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.27,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 15.71247390341514,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Open Grid Europe",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.80335,
+          51.99243
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_103",
+        "name": "Wysokoje_[216]",
+        "Node": "SEQ_699_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.27,
+        "tags": {},
+        "from_TSO": "Gazprom",
+        "from_country": "BY",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 14.87670401493561,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GAZ-SYSTEM",
+        "to_country": "PL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.26215,
+          52.35832
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_104",
+        "name": "Zandvliet_[3]",
+        "Node": "N_791_S_LMGN",
+        "NUTS3_ID": "NL341",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.63,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 4.1348615535303,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.15428,
+          51.34212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_105",
+        "name": "Zeebrugge_UK_[1]",
+        "Node": "SEQ_61_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.565,
+        "tags": {},
+        "from_TSO": "Interconnector",
+        "from_country": "UK",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 57.33381434969567,
+        "max_cap_to_from_M_m3_per_d": 70.67973983204772,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.1628,
+          51.35808
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_106",
+        "name": "Zeebrugge_NO_[204]",
+        "Node": "SEQ_2022_p",
+        "NUTS3_ID": null,
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.63,
+        "tags": {},
+        "from_TSO": "Gassco",
+        "from_country": "NO",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 42.93217953452737,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "Fluxys Belgium",
+        "to_country": "BE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.235887,
+          51.374082
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_107",
+        "name": "Zelzate_[2]",
+        "Node": "SEQ_15843__S_LMGN",
+        "NUTS3_ID": "BE233",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.63,
+        "tags": {},
+        "from_TSO": "Fluxys Belgium",
+        "from_country": "BE",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 34.57448064973208,
+        "max_cap_to_from_M_m3_per_d": 35.806141538017705,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "NL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.81321,
+          51.19842
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_108",
+        "name": "Zevenaar_[12]",
+        "Node": "SEQ_1132_p",
+        "NUTS3_ID": "NL226",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 9.5,
+        "tags": {},
+        "from_TSO": "Gasunie TS",
+        "from_country": "NL",
+        "is_EU_to_EU": 1.0,
+        "max_cap_from_to_M_m3_per_d": 28.82086478588354,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "multiple_TSOs",
+        "to_country": "DE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.11577,
+          51.90844
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_109",
+        "name": "Zhidilovo_[50]",
+        "Node": "SEQ_1073_p",
+        "NUTS3_ID": "MK007",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 10.44,
+        "tags": {},
+        "from_TSO": "Bulgartransgaz",
+        "from_country": "BG",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 1.7947058657876194,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "GA-MA - Skopje",
+        "to_country": "MK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          22.35629,
+          42.17137
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "INET_BP_110",
+        "name": "Zvornik_[49]",
+        "Node": "SEQ_526_p",
+        "NUTS3_ID": "RS213",
+        "start_year": null,
+        "end_year": null,
+        "GCV_mean_kWh_per_m3": 11.30895402298849,
+        "tags": {},
+        "from_TSO": "Srbijagas",
+        "from_country": "RS ",
+        "is_EU_to_EU": 0.0,
+        "max_cap_from_to_M_m3_per_d": 1.5835639992243702,
+        "max_cap_to_from_M_m3_per_d": 0.0,
+        "to_TSO": "BH-gas",
+        "to_country": "BA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          19.21389,
+          44.3159
+        ]
+      }
+    }
+  ]
+}

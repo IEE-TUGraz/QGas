@@ -1,0 +1,1988 @@
+{
+  "type": "FeatureCollection",
+  "name": "PR_Productions",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod0",
+        "name": "Prod0",
+        "Node": "Prod_0",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -11.04853,
+          54.18307
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod1",
+        "name": "Prod1",
+        "Node": "Prod_1",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.09757,
+          43.15539
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod2",
+        "name": "Prod2",
+        "Node": "Prod_2",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.49689,
+          34.39425
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod3",
+        "name": "Prod3",
+        "Node": "Prod_3",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.37273,
+          45.42187
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod4",
+        "name": "Prod4",
+        "Node": "Prod_4",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.39614,
+          43.15453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod5",
+        "name": "Prod5",
+        "Node": "Prod_5",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.06088,
+          43.1029
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod6",
+        "name": "Prod6",
+        "Node": "N_33_S_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.79747,
+          52.25203
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod7",
+        "name": "Prod7",
+        "Node": "Prod_7",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          34.97778,
+          45.51566
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod8",
+        "name": "Prod8",
+        "Node": "Prod_8",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.15898,
+          55.51782
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod9",
+        "name": "Prod9",
+        "Node": "Prod_9",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.51561,
+          53.72259
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod10",
+        "name": "Prod10",
+        "Node": "Prod_10",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          34.42415,
+          32.12608
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod11",
+        "name": "Prod11",
+        "Node": "Prod_11",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.58376,
+          43.87352
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod12",
+        "name": "Prod12",
+        "Node": "Prod_12",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -8.01499,
+          51.45021
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod13",
+        "name": "Prod13",
+        "Node": "Prod_13",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.18736,
+          45.13994
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod14",
+        "name": "Prod14",
+        "Node": "Prod_14",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.48413,
+          44.3355
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod15",
+        "name": "Prod15",
+        "Node": "Prod_15",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.18211,
+          44.46848
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod17",
+        "name": "Prod17",
+        "Node": "Prod_17",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.45083,
+          44.0054
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod18",
+        "name": "Prod18",
+        "Node": "N_363_M_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          34.57178,
+          33.25527
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod19",
+        "name": "Prod19",
+        "Node": "Prod_19",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.91494,
+          45.31751
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod20",
+        "name": "Prod20",
+        "Node": "Prod_20",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.48694,
+          54.61267
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod21",
+        "name": "Prod21",
+        "Node": "Prod_21",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.68486,
+          65.70589
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod22",
+        "name": "Prod22",
+        "Node": "Prod_22",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.78318,
+          64.28153
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod23",
+        "name": "Prod23",
+        "Node": "Prod_23",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.04726,
+          32.24282
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod24",
+        "name": "Prod24",
+        "Node": "Prod_24",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.51016,
+          42.99639
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod25",
+        "name": "Prod25",
+        "Node": "Prod_25",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          34.73709,
+          32.42212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod26",
+        "name": "Prod26",
+        "Node": "Prod_26",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          34.88659,
+          32.3248
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod27",
+        "name": "Prod27",
+        "Node": "Prod_27",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -10.89533,
+          54.2194
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod28",
+        "name": "Prod28",
+        "Node": "N_2342_S_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.63397,
+          45.27044
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod29",
+        "name": "Prod29",
+        "Node": "Prod_29",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.54606,
+          56.1227
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod30",
+        "name": "Prod30",
+        "Node": "N_29_NS_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.97171,
+          65.98564
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod31",
+        "name": "Prod31",
+        "Node": "Prod_31",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.86116,
+          65.94639
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod32",
+        "name": "Prod32",
+        "Node": "Prod_32",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.56891,
+          65.67103
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod33",
+        "name": "Prod33",
+        "Node": "Prod_33",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.61159,
+          64.98232
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod34",
+        "name": "Prod34",
+        "Node": "Prod_34",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.93669,
+          32.11804
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod35",
+        "name": "Prod35",
+        "Node": "Prod_35",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.44032,
+          32.33194
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod36",
+        "name": "Prod36",
+        "Node": "Prod_36",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.26869,
+          40.73811
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod37",
+        "name": "Prod37",
+        "Node": "Prod_37",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -7.90321,
+          51.39759
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod38",
+        "name": "Prod38",
+        "Node": "Prod_38",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.95703,
+          43.55604
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod39",
+        "name": "Prod39",
+        "Node": "Prod_39",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.27395,
+          53.73811
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod40",
+        "name": "Prod40",
+        "Node": "Prod_40",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.28618,
+          54.38332
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod41",
+        "name": "Prod41",
+        "Node": "Prod_41",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.09009,
+          31.95676
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod42",
+        "name": "Prod42",
+        "Node": "Prod_42",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.79108,
+          32.51472
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod43",
+        "name": "Prod43",
+        "Node": "Prod_43",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.16877,
+          32.35902
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod44",
+        "name": "Prod44",
+        "Node": "Prod_44",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.04055,
+          32.5665
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod45",
+        "name": "Prod45",
+        "Node": "Prod_45",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.04162,
+          57.15996
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod46",
+        "name": "Prod46",
+        "Node": "Prod_46",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.7383,
+          57.39842
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod47",
+        "name": "Prod47",
+        "Node": "Prod_47",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.84402,
+          53.56514
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod48",
+        "name": "Prod48",
+        "Node": "Prod_48",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.93389,
+          53.69984
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod49",
+        "name": "Prod49",
+        "Node": "Prod_49",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.87711,
+          54.05486
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod50",
+        "name": "Prod50",
+        "Node": "Prod_50",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.82934,
+          57.78984
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod51",
+        "name": "Prod51",
+        "Node": "Prod_51",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.83319,
+          32.19238
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod52",
+        "name": "Prod52",
+        "Node": "Prod_52",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.5096,
+          32.17164
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod53",
+        "name": "Prod53",
+        "Node": "Prod_53",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.27863,
+          32.20794
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod54",
+        "name": "Prod54",
+        "Node": "Prod_54",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.93439,
+          57.2925
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod55",
+        "name": "Prod55",
+        "Node": "Prod_55",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25958,
+          57.06002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod56",
+        "name": "Prod56",
+        "Node": "Prod_56",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.8844,
+          57.26519
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod57",
+        "name": "Prod57",
+        "Node": "Prod_57",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.68827,
+          45.61847
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod58",
+        "name": "Prod58",
+        "Node": "Prod_58",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.14864,
+          53.16142
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod59",
+        "name": "Prod59",
+        "Node": "Prod_59",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.864,
+          53.07406
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod60",
+        "name": "Prod60",
+        "Node": "Prod_60",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.00237,
+          57.15221
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod61",
+        "name": "Prod61",
+        "Node": "Prod_61",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.89624,
+          56.92577
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod62",
+        "name": "Prod62",
+        "Node": "N_37_NS_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.17482,
+          61.35048
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod63",
+        "name": "Prod63",
+        "Node": "SEQ_13045_p",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.261128,
+          64.376278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod64",
+        "name": "Prod64",
+        "Node": "Prod_64",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.32341,
+          64.3921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod65",
+        "name": "Prod65",
+        "Node": "Prod_65",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.55904,
+          32.44425
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod66",
+        "name": "Prod66",
+        "Node": "Prod_66",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.8375,
+          57.6198
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod67",
+        "name": "Prod67",
+        "Node": "Prod_67",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.7605,
+          57.85582
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod68",
+        "name": "Prod68",
+        "Node": "Prod_68",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.02784,
+          57.99441
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod69",
+        "name": "Prod69",
+        "Node": "Prod_69",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.99848,
+          59.19034
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod70",
+        "name": "Prod70",
+        "Node": "Prod_70",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.73661,
+          65.0017
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod71",
+        "name": "Prod71",
+        "Node": "Prod_71",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.95724,
+          58.5369
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod72",
+        "name": "Prod72",
+        "Node": "Prod_72",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.74205,
+          58.46497
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod73",
+        "name": "Prod73",
+        "Node": "Prod_73",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.48451,
+          63.32893
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod74",
+        "name": "Prod74",
+        "Node": "Prod_74",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.36658,
+          32.72161
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod75",
+        "name": "Prod75",
+        "Node": "Prod_75",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.5551,
+          32.68294
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod76",
+        "name": "Prod76",
+        "Node": "Prod_76",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.82418,
+          43.89683
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod77",
+        "name": "Prod77",
+        "Node": "Prod_77",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.0326,
+          43.98256
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod78",
+        "name": "Prod78",
+        "Node": "Prod_78",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.36824,
+          53.42418
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod79",
+        "name": "Prod79",
+        "Node": "Prod_79",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.43508,
+          53.40756
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod80",
+        "name": "Prod80",
+        "Node": "Prod_80",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.96875,
+          60.44403
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod81",
+        "name": "Prod81",
+        "Node": "Prod_81",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.2213,
+          59.18114
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod82",
+        "name": "Prod82",
+        "Node": "N_72_NS_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.52161,
+          59.17722
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod83",
+        "name": "Prod83",
+        "Node": "Prod_83",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.71016,
+          58.8782
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod84",
+        "name": "Prod84",
+        "Node": "Prod_84",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.89938,
+          65.03563
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod85",
+        "name": "Prod85",
+        "Node": "Prod_85",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.30784,
+          60.23457
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod86",
+        "name": "Prod86",
+        "Node": "Prod_86",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.51377,
+          60.29139
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod87",
+        "name": "Prod87",
+        "Node": "Prod_87",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.37545,
+          63.31667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod88",
+        "name": "Prod88",
+        "Node": "Prod_88",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.26474,
+          64.43615
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod89",
+        "name": "Prod89",
+        "Node": "Prod_89",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.86071,
+          32.02137
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod91",
+        "name": "Prod91",
+        "Node": "Prod_91",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.09087,
+          60.84458
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod92",
+        "name": "Prod92",
+        "Node": "SEQ_13197_p",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.168788,
+          60.393756
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod94",
+        "name": "Prod94",
+        "Node": "Prod_94",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.66443,
+          61.23191
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod95",
+        "name": "Prod95",
+        "Node": "Prod_95",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.92746,
+          57.68124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod96",
+        "name": "Prod96",
+        "Node": "Prod_96",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.70398,
+          58.65086
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod97",
+        "name": "Prod97",
+        "Node": "Prod_97",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.58273,
+          58.07062
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod98",
+        "name": "Prod98",
+        "Node": "N_214_NS_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.06705,
+          58.17131
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod99",
+        "name": "Prod99",
+        "Node": "N_159_NS_LMGN",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.52395,
+          58.56345
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "Prod100",
+        "name": "Prod100",
+        "Node": "Prod_100",
+        "NUTS3_ID": null,
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.38341,
+          60.07798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "LKD_PD_0",
+        "name": "Production (DE) (GUD) H-Gas-Summe Produktion",
+        "Node": "LKD_N_217",
+        "NUTS3_ID": "DE938",
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 2180.446943519577,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.106537,
+          53.022223
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "LKD_PD_1",
+        "name": "Schneeren",
+        "Node": "LKD_N_208",
+        "NUTS3_ID": "DE927",
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 253.6622600743284,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.130456,
+          52.600633
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "LKD_PD_2",
+        "name": "Aggregate Production H-Gas (Thyssengas)",
+        "Node": "LKD_N_268",
+        "NUTS3_ID": "DEA1C",
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1334.0455078111888,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.882478,
+          51.35175
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "LKD_PD_3",
+        "name": "Aggregate Production L-Gas (Thyssengas)",
+        "Node": "LKD_N_309",
+        "NUTS3_ID": "DEA1C",
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1230.405195054132,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.89157,
+          51.099864
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "LKD_PD_4",
+        "name": "Production (OGE) (DE)",
+        "Node": "LKD_N_317",
+        "NUTS3_ID": "DE947",
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 1161.3116532160939,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.275472,
+          53.472621
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ID": "LKD_PD_5",
+        "name": "Nowega Zone Production",
+        "Node": "LKD_N_53",
+        "NUTS3_ID": "DE944",
+        "is_H_gas": 1,
+        "max_supply_M_m3_per_d": 3403.5869308146425,
+        "status": "operational"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.011674,
+          52.317116
+        ]
+      }
+    }
+  ]
+}

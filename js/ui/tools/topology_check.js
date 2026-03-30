@@ -247,8 +247,8 @@
       const id = props.ID || props.Id || props.id || props.Name || props.name || `Inline ${lineIndex}`;
       const startIdRaw = getPropertyValueCaseInsensitive(props, startKeys);
       const endIdRaw = getPropertyValueCaseInsensitive(props, endKeys);
-      const subStartIdRaw = getPropertyValueCaseInsensitive(props, ['SubNode_A', 'SubNodeA', 'Sub_Node_A', 'subnode_a', 'sub_node_a']);
-      const subEndIdRaw = getPropertyValueCaseInsensitive(props, ['SubNode_B', 'SubNodeB', 'Sub_Node_B', 'subnode_b', 'sub_node_b']);
+      const subStartIdRaw = getPropertyValueCaseInsensitive(props, ['SubNode_A', 'Subnode_A', 'SubNodeA', 'SubnodeA', 'Sub_Node_A', 'subnode_a', 'sub_node_a']);
+      const subEndIdRaw = getPropertyValueCaseInsensitive(props, ['SubNode_B', 'Subnode_B', 'SubNodeB', 'SubnodeB', 'Sub_Node_B', 'subnode_b', 'sub_node_b']);
       const nodeIdRaw = getPropertyValueCaseInsensitive(props, ['Node', 'node', 'NODE']);
       const startNorm = normalizeId(startIdRaw);
       const endNorm = normalizeId(endIdRaw);
@@ -256,8 +256,6 @@
       const subEndNorm = normalizeId(subEndIdRaw);
       const nodeNorm = normalizeId(nodeIdRaw);
 
-      const hasSubStart = subStartNorm && nodeMap.has(subStartNorm);
-      const hasSubEnd = subEndNorm && nodeMap.has(subEndNorm);
       const hasStart = startNorm && nodeMap.has(startNorm);
       const hasEnd = endNorm && nodeMap.has(endNorm);
       const hasNode = nodeNorm && nodeMap.has(nodeNorm);
@@ -267,18 +265,21 @@
       let effectiveStartNorm = startNorm;
       let effectiveEndNorm = endNorm;
 
-      if (hasSubStart && hasSubEnd) {
+      if (subStartIdRaw || subEndIdRaw) {
         effectiveStartRaw = subStartIdRaw;
         effectiveEndRaw = subEndIdRaw;
         effectiveStartNorm = subStartNorm;
         effectiveEndNorm = subEndNorm;
       }
 
+      const effectiveHasStart = effectiveStartNorm && nodeMap.has(effectiveStartNorm);
+      const effectiveHasEnd = effectiveEndNorm && nodeMap.has(effectiveEndNorm);
+
       if (effectiveStartNorm) referencedNodes.add(effectiveStartNorm);
       if (effectiveEndNorm) referencedNodes.add(effectiveEndNorm);
       if (nodeNorm) referencedNodes.add(nodeNorm);
 
-      const isConnected = Boolean((effectiveStartNorm && effectiveEndNorm) || hasNode);
+      const isConnected = Boolean((effectiveHasStart && effectiveHasEnd) || hasNode);
 
       const key = `inline-${lineIndex}`;
       const layerName = (typeof getLayerGroupDisplayName === 'function') ? getLayerGroupDisplayName(group) : '';
@@ -309,8 +310,8 @@
         if (!effectiveStartRaw && !effectiveEndRaw && !nodeIdRaw) {
           reasons.push('missing node reference');
         } else {
-          if (effectiveStartRaw && !effectiveStartNorm) reasons.push(`start node not found: ${effectiveStartRaw}`);
-          if (effectiveEndRaw && !effectiveEndNorm) reasons.push(`end node not found: ${effectiveEndRaw}`);
+          if (effectiveStartRaw && !effectiveHasStart) reasons.push(`start node not found: ${effectiveStartRaw}`);
+          if (effectiveEndRaw && !effectiveHasEnd) reasons.push(`end node not found: ${effectiveEndRaw}`);
           if (nodeIdRaw && !hasNode) reasons.push(`node not found: ${nodeIdRaw}`);
         }
         unconnectedLines.push({
@@ -319,7 +320,7 @@
           layerName,
           reason: reasons.join(', ') || 'missing node connection'
         });
-      } else if (effectiveStartNorm && effectiveEndNorm) {
+      } else if (effectiveHasStart && effectiveHasEnd) {
         if (!adjacency.has(effectiveStartNorm)) adjacency.set(effectiveStartNorm, new Set());
         if (!adjacency.has(effectiveEndNorm)) adjacency.set(effectiveEndNorm, new Set());
         adjacency.get(effectiveStartNorm).add(effectiveEndNorm);
@@ -340,8 +341,8 @@
     const isInlineCandidate = (props) => {
       if (!props) return false;
       if (getPropertyValueCaseInsensitive(props, startKeys) || getPropertyValueCaseInsensitive(props, endKeys)) return true;
-      if (getPropertyValueCaseInsensitive(props, ['SubNode_A', 'SubNodeA', 'Sub_Node_A', 'subnode_a', 'sub_node_a'])) return true;
-      if (getPropertyValueCaseInsensitive(props, ['SubNode_B', 'SubNodeB', 'Sub_Node_B', 'subnode_b', 'sub_node_b'])) return true;
+      if (getPropertyValueCaseInsensitive(props, ['SubNode_A', 'Subnode_A', 'SubNodeA', 'SubnodeA', 'Sub_Node_A', 'subnode_a', 'sub_node_a'])) return true;
+      if (getPropertyValueCaseInsensitive(props, ['SubNode_B', 'Subnode_B', 'SubNodeB', 'SubnodeB', 'Sub_Node_B', 'subnode_b', 'sub_node_b'])) return true;
       if (getPropertyValueCaseInsensitive(props, ['Node', 'node', 'NODE'])) return true;
       const typeValue = String(props.Type || props.type || '').toLowerCase();
       return typeValue.includes('inline') || typeValue.includes('in-line');
@@ -529,10 +530,28 @@
   }
 
   function focusNode(entry) {
-    if (!entry || !entry.marker) return;
+    if (!entry || !entry.marker || !topologyState.results) return;
     clearTopologyNetworkFilter();
     resetAllPipelineHighlights();
     resetAllElementHighlights();
+
+    const { nodeList, lineList } = topologyState.results;
+    nodeList.forEach(node => {
+      if (node.marker !== entry.marker) {
+        hideMarker(node.marker);
+      }
+    });
+    lineList.forEach(lineEntry => {
+      if (lineEntry.isInline) {
+        if (lineEntry.layer !== entry.marker) {
+          hideMarker(lineEntry.layer);
+        }
+      } else {
+        hideLine(lineEntry.layer);
+      }
+    });
+    topologyState.filterActive = true;
+
     highlightElement(entry.marker);
     if (typeof entry.marker.bringToFront === 'function') {
       entry.marker.bringToFront();
@@ -544,10 +563,23 @@
   }
 
   function focusLine(entry) {
-    if (!entry || !entry.layer) return;
+    if (!entry || !entry.layer || !topologyState.results) return;
     clearTopologyNetworkFilter();
     resetAllPipelineHighlights();
     resetAllElementHighlights();
+
+    const { nodeList, lineList } = topologyState.results;
+    nodeList.forEach(node => hideMarker(node.marker));
+    lineList.forEach(lineEntry => {
+      if (lineEntry.key === entry.key) return;
+      if (lineEntry.isInline) {
+        hideMarker(lineEntry.layer);
+      } else {
+        hideLine(lineEntry.layer);
+      }
+    });
+    topologyState.filterActive = true;
+
     if (entry.isInline) {
       highlightElement(entry.layer);
       if (typeof entry.layer.bringToFront === 'function') {

@@ -258,10 +258,55 @@ function showFolderNameDialog() {
 /*
  * Export filtered data as a ZIP archive.
  */
-function exportFilteredData(folderName) {
+async function exportFilteredData(folderName) {
   const zip = new JSZip();
+  const exportedFilenames = new Set();
+  const exportedConfigFilenames = new Set();
+  const configList = Array.isArray(layerConfig) ? layerConfig : [];
+  const knownConfigFilenames = new Set(
+    configList.map(cfg => normalizeFilenameReference(cfg?.filename))
+  );
+  const additionalConfigEntries = [];
+  const deletedIdentities = (typeof collectAllDeletedIdentities === 'function')
+    ? collectAllDeletedIdentities()
+    : new Set();
 
-  /* Helper to add GeoJSON files to the ZIP. */
+  const buildCustomConfigEntry = (layer, name, filename) => {
+    const settings = layer?._customLayerSettings || {};
+    const legendName = settings.name || layer?._customLayerName || name || filename.replace(/\.geojson$/i, '');
+    const geometryClass = settings.geometryClass || (layer?._customLineLayer ? 'line' : 'point');
+    const isLine = geometryClass === 'line';
+    const isInline = geometryClass === 'inline';
+    const isNode = settings.typeKey === 'Node' || settings.elementKey === 'nodes';
+    const type = isLine ? 'Line' : (isInline ? 'In-Line' : (isNode ? 'Node' : 'Point'));
+    const color = isLine
+      ? (layer?._customLineColor || settings.color || '#3388ff')
+      : (layer?._customLayerColor || settings.color || '#ff7800');
+    const size = isLine
+      ? (layer?._customLineWeight || settings.size || 4)
+      : (settings.radius || settings.size || 6);
+    const markerType = isLine ? 'line' : (settings.shape || 'circle');
+    const parentFilename = settings.parentFilename || '';
+    return { filename, legendName, color, markerType, size, type, parentFilename };
+  };
+
+  const isDeletedFeature = (feature) => {
+    if (!feature) return false;
+    if (feature.properties && feature.properties.deleted) return true;
+    if (typeof buildFeatureIdentity !== 'function') return false;
+    const identity = buildFeatureIdentity(feature);
+    return identity ? deletedIdentities.has(identity) : false;
+  };
+
+  const extractFeatureForExport = (layer) => {
+    if (!layer || typeof layer.toGeoJSON !== 'function') return null;
+    const geo = layer.toGeoJSON();
+    if (!geo || !geo.geometry) return null;
+    geo.properties = { ...(layer.feature?.properties || {}), ...(geo.properties || {}) };
+    if (isDeletedFeature(layer.feature || geo)) return null;
+    return geo;
+  };
+
   function addGeoJSONToZip(features, filename) {
     if (features.length === 0) return;
     const geojson = {
@@ -269,96 +314,169 @@ function exportFilteredData(folderName) {
       features: features
     };
     zip.file(filename, JSON.stringify(geojson, null, 2));
+    exportedFilenames.add(normalizeFilenameReference(filename));
   }
 
-  /* Collect filtered data from current layers. */
-  const pipelines = [];
-  const nodes = [];
-  const powerplants = [];
-  const compressors = [];
-  const lngs = [];
-  const storages = [];
-  const consumption = [];
-
-  /* Collect pipelines (regular and estimated). */
-  if (pipelineLayer) {
-    pipelineLayer.eachLayer(layer => {
-      if (layer.feature) {
-        pipelines.push(layer.feature);
-      }
+  /* Collect data dynamically from all layers in layerConfig. */
+  configList.forEach(config => {
+    const layerName = typeof getLayerNameFromConfig === 'function'
+      ? getLayerNameFromConfig(config)
+      : config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    const layer = dynamicLayers[layerName];
+    if (!layer) return;
+    const features = [];
+    layer.eachLayer(l => {
+      const f = extractFeatureForExport(l);
+      if (f) features.push(f);
     });
-  }
-  if (estimatedPipelinesLayer) {
-    estimatedPipelinesLayer.eachLayer(layer => {
-      if (layer.feature) {
-        pipelines.push(layer.feature);
-      }
-    });
-  }
-
-  /* Collect nodes. */
-  getAllNodeLayers().forEach(layerGroup => {
-    if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
-    layerGroup.eachLayer(layer => {
-      if (layer.feature) {
-        nodes.push(layer.feature);
-      }
-    });
+    if (features.length > 0) {
+      addGeoJSONToZip(features, config.filename);
+      exportedConfigFilenames.add(normalizeFilenameReference(config.filename));
+      console.log(`Exported ${features.length} features to ${config.filename}`);
+    }
   });
 
-  /* Collect powerplants. */
-  if (powerplantsLayer) {
-    powerplantsLayer.eachLayer(layer => {
-      if (layer.feature) {
-        powerplants.push(layer.feature);
+  /* Include estimated pipelines if present. */
+  if (typeof estimatedPipelinesLayer !== 'undefined' && estimatedPipelinesLayer) {
+    const features = [];
+    estimatedPipelinesLayer.eachLayer(layer => {
+      const f = extractFeatureForExport(layer);
+      if (f) features.push(f);
+    });
+    if (features.length > 0) {
+      addGeoJSONToZip(features, 'Estimated_Pipelines.geojson');
+    }
+  }
+
+  /* Include short pipes if present. */
+  if (shortPipeLayer) {
+    const features = [];
+    shortPipeLayer.eachLayer(layer => {
+      const f = extractFeatureForExport(layer);
+      if (f) features.push(f);
+    });
+    if (features.length > 0) {
+      const fullPath = getShortPipeResolvedExportPath();
+      const filename = fullPath.includes('/') ? fullPath.split('/').pop() : fullPath;
+      addGeoJSONToZip(features, filename);
+    }
+  }
+
+  /* Include custom layers not already covered by layerConfig. */
+  if (window.customLayers) {
+    Object.entries(window.customLayers).forEach(([name, layer]) => {
+      if (!layer) return;
+      const settings = layer._customLayerSettings || {};
+      const fallbackFilename = settings.filename || `${name}.geojson`;
+      if (exportedFilenames.has(normalizeFilenameReference(fallbackFilename))) {
+        return;
+      }
+      const features = [];
+      layer.eachLayer(l => {
+        const f = extractFeatureForExport(l);
+        if (f) features.push(f);
+      });
+      if (features.length > 0) {
+        addGeoJSONToZip(features, fallbackFilename);
+        exportedConfigFilenames.add(normalizeFilenameReference(fallbackFilename));
+        const normalized = normalizeFilenameReference(fallbackFilename);
+        if (!knownConfigFilenames.has(normalized)) {
+          additionalConfigEntries.push(buildCustomConfigEntry(layer, name, fallbackFilename));
+        }
+        console.log(`Exported ${features.length} features from custom layer ${name} to ${fallbackFilename}`);
       }
     });
   }
 
-  /* Collect compressors. */
-  if (compressorsLayer) {
-    compressorsLayer.eachLayer(layer => {
-      if (layer.feature) {
-        compressors.push(layer.feature);
+  /* Add Excel configuration for the exported layers. */
+  try {
+    const configList = Array.isArray(layerConfig) ? layerConfig : [];
+    const workbook = XLSX.utils.book_new();
+    const wsData = [
+      ['Filename', 'Legend Name', 'Color', 'Marker Type', 'Size', 'Layer Type', 'Parent Filename'],
+      []
+    ];
+
+    configList.forEach(config => {
+      const normalized = normalizeFilenameReference(config?.filename || '');
+      if (!exportedConfigFilenames.has(normalized)) {
+        return;
       }
+      wsData.push([
+        config.filename,
+        config.legendName,
+        config.color,
+        config.markerType,
+        config.size,
+        config.type,
+        config.parentFilename || ''
+      ]);
     });
+
+    additionalConfigEntries.forEach(config => {
+      const normalized = normalizeFilenameReference(config.filename);
+      if (!exportedConfigFilenames.has(normalized)) {
+        return;
+      }
+      if (knownConfigFilenames.has(normalized)) {
+        return;
+      }
+      wsData.push([
+        config.filename,
+        config.legendName,
+        config.color,
+        config.markerType,
+        config.size,
+        config.type,
+        config.parentFilename || ''
+      ]);
+    });
+
+    const hasShortPipeConfig = Array.isArray(layerConfig) && layerConfig.some(isShortPipeConfigEntry);
+    if (!hasShortPipeConfig && shortPipeLayerHasFeatures()) {
+      const shortPipeConfig = getShortPipeConfigTemplate();
+      wsData.push([
+        shortPipeConfig.filename,
+        shortPipeConfig.legendName,
+        shortPipeConfig.color,
+        shortPipeConfig.markerType,
+        shortPipeConfig.size,
+        shortPipeConfig.type,
+        shortPipeConfig.parentFilename
+      ]);
+    }
+
+    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Input_Files');
+    const excelBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    zip.file('02_Input_and_Configuration.xlsx', excelBinary);
+  } catch (error) {
+    console.error('Error creating Excel file for filtered export:', error);
   }
 
-  /* Collect LNG terminals. */
-  if (lngLayer) {
-    lngLayer.eachLayer(layer => {
-      if (layer.feature) {
-        lngs.push(layer.feature);
+  /* Add Data and Licensing file if available. */
+  try {
+    let response = null;
+    if (typeof fetchProjectResource === 'function') {
+      const result = await fetchProjectResource('01_Data_and_Licensing.txt');
+      response = result?.response || null;
+    }
+    if (!response) {
+      const fallbackUrl = typeof buildInputUrl === 'function'
+        ? buildInputUrl('01_Data_and_Licensing.txt')
+        : `Input/${(currentProject || 'Standard')}/01_Data_and_Licensing.txt?v=${Date.now()}`;
+      const fallbackResponse = await fetch(fallbackUrl);
+      if (fallbackResponse.ok) {
+        response = fallbackResponse;
       }
-    });
+    }
+    if (response) {
+      const text = await response.text();
+      zip.file('01_Data_and_Licensing.txt', text);
+    }
+  } catch (error) {
+    console.log('No Data and Licensing file found for filtered export');
   }
-
-  /* Collect storage sites. */
-  if (storageLayer) {
-    storageLayer.eachLayer(layer => {
-      if (layer.feature) {
-        storages.push(layer.feature);
-      }
-    });
-  }
-
-  /* Collect consumption points. */
-  if (consumptionLayer) {
-    consumptionLayer.eachLayer(layer => {
-      if (layer.feature) {
-        consumption.push(layer.feature);
-      }
-    });
-  }
-
-  /* Add files to ZIP. */
-  addGeoJSONToZip(pipelines, 'PL_Pipelines.geojson');
-  addGeoJSONToZip(nodes, 'N_Nodes.geojson');
-  addGeoJSONToZip(powerplants, 'P_Powerplants.geojson');
-  addGeoJSONToZip(compressors, 'C_Compressors.geojson');
-  addGeoJSONToZip(lngs, 'L_LNG.geojson');
-  addGeoJSONToZip(storages, 'S_Storages.geojson');
-  addGeoJSONToZip(consumption, 'Consumption_Points.geojson');
 
   /* Generate and download ZIP. */
   zip.generateAsync({ type: "blob" }).then(function(content) {
@@ -724,7 +842,7 @@ function openExportDialog() {
       {
         text: 'Export Filtered Data',
         type: 'primary',
-        onClick: exportFilteredData
+        onClick: showFolderNameDialog
       },
       {
         text: 'Export Complete Dataset',

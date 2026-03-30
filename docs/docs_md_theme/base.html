@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ page.title }} - {{ config.site_name }}</title>
+  <link rel="stylesheet" href="{{ 'assets/style.css'|url }}">
+</head>
+<body data-base-url="{{ base_url }}">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="{{ 'assets/QGas_Logo.png'|url }}" alt="QGas Logo" onerror="this.style.display='none'">
+        <div>
+          <div class="title">QGas Docs</div>
+          <div class="sub">Updated: 2026-02-09</div>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <input id="search" class="search" placeholder="Search docs..." autocomplete="off" />
+        <div id="search-results" class="search-results" aria-live="polite"></div>
+      </div>
+      <nav class="nav">
+        {% for item in nav %}
+          {% if item.is_section %}
+            <h3>{{ item.title }}</h3>
+            {% for child in item.children %}
+              {% if child.is_page %}
+                <a class="{% if child.active %}active{% endif %}" href="{{ child.url|url }}">&bull; {{ child.title }}</a>
+              {% endif %}
+            {% endfor %}
+          {% elif item.is_page %}
+            <a class="{% if item.active %}active{% endif %}" href="{{ item.url|url }}">{{ item.title }}</a>
+          {% endif %}
+        {% endfor %}
+      </nav>
+      <div class="footer">
+        <div class="badge">Offline-capable HTML Docs</div>
+        <div style="margin-top:8px">Source: User Manual (Dec 2025) + Codebase</div>
+      </div>
+    </aside>
+    <main class="main">
+      {{ page.content }}
+    </main>
+  </div>
+  <script src="{{ 'assets/script.js'|url }}"></script>
+</body>
+</html>

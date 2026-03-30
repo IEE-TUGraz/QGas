@@ -8,8 +8,11 @@ desktop.ini
 Thumbs.db
 *.lnk
 
-# Documentation
-docs/
+# Documentation build output only
+site/
+
+# MkDocs build output
+site/
 
 Input/*
 !Input/.gitkeep

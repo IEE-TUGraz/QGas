@@ -1912,8 +1912,8 @@ const map = L.map('map', {
           htmlContent += '</div></div>';
           contentDiv.innerHTML = htmlContent;
         } else {
-          // File is empty, use default content
-          contentDiv.innerHTML = getDefaultDataLicensingContent();
+          // File is empty, show no content
+          contentDiv.innerHTML = '';
         }
       } else {
         // File not found, use default content
