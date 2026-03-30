@@ -45,6 +45,18 @@
  * ================================================================================
  */
 
+/**
+ * Activate the integrate-dataset tool.
+ *
+ * Validates that a contributor name has been entered, deactivates all
+ * other editing modes, and launches the dataset integration workflow via
+ * {@link startDatasetIntegration}. The workflow guides the user through
+ * selecting a GeoJSON source (preloaded server dataset or local file
+ * upload) and creating pairwise element-equivalence links between the
+ * integration dataset and the currently loaded QGas layers.
+ *
+ * @returns {void}
+ */
 function activateIntegrateDatasetTool() {
   if (!checkContributorName || !checkContributorName()) return;
   deactivateAllModes();
@@ -96,6 +108,16 @@ function startDatasetIntegration() {
 /*
  * Global functions for popup button handlers.
  */
+/**
+ * Load and activate a preloaded server-side dataset for integration.
+ *
+ * Reads the selected value from the <code>#preloaded-select</code> dropdown
+ * element rendered inside the current popup and calls
+ * {@link setupIntegrationModeWithPreloaded} with the chosen filename.
+ * Shows an info popup if no selection has been made.
+ *
+ * @returns {void}
+ */
 window.loadPreloadedDataset = function() {
   const select = document.getElementById('preloaded-select');
   const selectedFile = select.value;
@@ -107,6 +129,17 @@ window.loadPreloadedDataset = function() {
   }
 };
 
+/**
+ * Load a user-supplied GeoJSON file and activate it for integration.
+ *
+ * Reads the file selected in <code>#dataset-file-input</code>, parses it
+ * as JSON, and registers the resulting feature collection under the
+ * original filename key in the integration dataset registry. Then calls
+ * {@link setupIntegrationModeWithPreloaded} to activate the integration
+ * workflow. Shows an error popup if parsing fails or no file is selected.
+ *
+ * @returns {void}
+ */
 window.loadFileDataset = function() {
   const fileInput = document.getElementById('dataset-file-input');
   const file = fileInput.files[0];
@@ -326,6 +359,16 @@ function updateIntegrationCount() {
   }
 }
 
+/**
+ * Finish the integration session and export the equivalence list.
+ *
+ * Serialises the current <code>equivalenceList</code> array to a JSON
+ * file (<code>integration_equivalences.json</code>) and triggers a browser
+ * download. After the download is initiated, the integration overlay
+ * is cleaned up and a success summary popup is shown.
+ *
+ * @returns {void}
+ */
 window.finishIntegration = function() {
   console.log('Finishing integration with equivalences:', equivalenceList);
   
@@ -347,6 +390,15 @@ window.finishIntegration = function() {
   );
 };
 
+/**
+ * Cancel the integration session and clean up all temporary state.
+ *
+ * Delegates to {@link cleanupIntegrationMode} to remove the integration
+ * overlay, restore hidden layers, and clear all pending equivalences.
+ * Shows a brief cancellation info popup.
+ *
+ * @returns {void}
+ */
 window.cancelIntegration = function() {
   cleanupIntegrationMode();
   showInfoPopup('Integration cancelled.', '🔗 Integration');

@@ -50,6 +50,18 @@
 const directionChangeState = new Map();
 const reversedDirectionLayers = new Set();
 
+/**
+ * Activate the change-direction editing mode.
+ *
+ * Resets all pipeline highlights, clears internal direction state, and
+ * attaches click handlers to every polyline in all active line-layer groups.
+ * Each click toggles the geometric direction of the selected pipeline
+ * (reverses the coordinate array) and updates the directional arrow
+ * decorator. A Save/Discard toolbar strip is shown for confirmation.
+ * Exits automatically on Escape key or explicit user discard.
+ *
+ * @returns {void}
+ */
 function activateChangeDirectionMode() {
   resetAllPipelineHighlights();
   directionChangeState.clear();

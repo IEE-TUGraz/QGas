@@ -22,6 +22,15 @@
  * Extracted screenshot logic from core.js (v5).
  */
 
+/**
+ * Open the screenshot mode dialog.
+ *
+ * Presents a modal popup that explains the screenshot workflow and offers the
+ * user a single-click entry into screenshot mode. No map state is altered until
+ * the user confirms by pressing "Activate Screenshot Mode".
+ *
+ * @returns {void}
+ */
 function openScreenshotMode() {
   showCustomPopup(
     '📸 Screenshot Mode',
@@ -44,8 +53,16 @@ function openScreenshotMode() {
 }
 
 
-/*
- * Screenshot mode handlers.
+/**
+ * Enter screenshot mode.
+ *
+ * Hides all UI chrome (menus, toolbars, export buttons, contributor box) and
+ * strips the map legend down to only the currently visible layers. Enables
+ * element highlighting on click and registers an Escape-key listener that calls
+ * {@link exitScreenshotMode}. Intended to produce a clean, publication-ready
+ * map view without interactive controls.
+ *
+ * @returns {void}
  */
 function activateScreenshotMode() {
   try {
@@ -161,6 +178,17 @@ function activateScreenshotMode() {
   }
 }
 
+/**
+ * Exit screenshot mode and restore the full UI.
+ *
+ * Re-displays all previously hidden interface elements (menus, toolbars,
+ * contributor box, logos, export and screenshot buttons) and restores the
+ * original legend HTML. Removes the Escape-key listener registered by
+ * {@link activateScreenshotMode}. Safe to call even if screenshot mode is
+ * not currently active.
+ *
+ * @returns {void}
+ */
 function exitScreenshotMode() {
   try {
     console.log('Verlasse Screenshot Mode');

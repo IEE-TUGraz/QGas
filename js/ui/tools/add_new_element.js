@@ -52,6 +52,19 @@
  */
 
 (function () {
+  /**
+   * Activate the Add New Element tool.
+   *
+   * Deactivates any currently active editing mode, sets the application
+   * mode to {@code 'add-new-element'}, and launches the custom-layer
+   * creation dialog. The dialog allows the user to select a layer geometry
+   * type (line, point, in-line, or node) and provide a user-defined name.
+   * On confirmation, an empty GeoJSON layer is created, registered in the
+   * {@code customLayers} registry, added to the map, and integrated into
+   * the legend — enabling immediate element placement.
+   *
+   * @returns {void}
+   */
   window.activateAddNewElementTool = function activateAddNewElementTool() {
     deactivateAllModes();
     currentMode = 'add-new-element';

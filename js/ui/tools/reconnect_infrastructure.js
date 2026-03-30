@@ -448,7 +448,20 @@
   }
   
 
-  /* Public entry point used by the Tools UI. */
+  /**
+   * Activate the Reconnect Infrastructure tool.
+   *
+   * Deactivates any currently active editing mode, sets the application mode
+   * to {@code 'reconnect-infrastructure'}, and initiates the two-step
+   * reconnection workflow. In the first step the user selects an existing
+   * infrastructure element (storage, LNG terminal, power plant, or
+   * compressor); in the second step the user clicks a target node, and the
+   * element's node-reference property is updated accordingly. Layer
+   * visibility is temporarily adjusted during the workflow and restored upon
+   * completion or cancellation.
+   *
+   * @returns {void}
+   */
   window.activateReconnectInfrastructureTool = function activateReconnectInfrastructureTool() {
     deactivateAllModes();
     currentMode = 'reconnect-infrastructure';

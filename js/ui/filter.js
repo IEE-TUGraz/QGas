@@ -52,22 +52,40 @@
  */
 
 /**
- * Open the main filter selection modal
+ * Open the main filter selection modal.
+ *
+ * Makes the primary filter modal visible by setting its CSS display property
+ * to <code>flex</code>. The modal lists available filter categories (e.g.,
+ * country-based filtering) and acts as the entry point for all spatial
+ * filtering operations.
+ *
+ * @returns {void}
  */
 function openFilterModal() {
   document.getElementById('filter-modal').style.display = 'flex';
 }
 
 /**
- * Close the main filter selection modal
+ * Close the main filter selection modal.
+ *
+ * Hides the primary filter modal without discarding any pending selection.
+ * May be called programmatically, e.g., before transitioning to the
+ * country-filter sub-modal.
+ *
+ * @returns {void}
  */
 function closeFilterModal() {
   document.getElementById('filter-modal').style.display = 'none';
 }
 
 /**
- * Open the country-specific filter modal
- * Transitions from main filter modal to country selection interface
+ * Open the country-specific filter modal.
+ *
+ * Closes the main filter modal, populates the country selection list by
+ * calling {@link populateCountryList}, and displays the country-filter
+ * sub-modal. Previously selected countries are preserved between invocations.
+ *
+ * @returns {void}
  */
 function openCountryFilterModal() {
   closeFilterModal();
@@ -76,14 +94,27 @@ function openCountryFilterModal() {
 }
 
 /**
- * Close the country filter modal
+ * Close the country filter modal.
+ *
+ * Hides the country-filter sub-modal. Any countries that were checked remain
+ * selected in memory until {@link applyCountryFilter} is called or the
+ * selection is explicitly cleared.
+ *
+ * @returns {void}
  */
 function closeCountryFilterModal() {
   document.getElementById('country-filter-modal').style.display = 'none';
 }
 
 /**
- * Clear all active filters and restore original layer state
+ * Clear all active filters and restore the original layer state.
+ *
+ * Calls {@link restoreAllOriginalLayers} to put back the unfiltered Leaflet
+ * layer objects, empties the <code>selectedCountries</code> set, and closes
+ * the filter modal. This is the single authoritative reset point for all
+ * spatial filter state.
+ *
+ * @returns {void}
  */
 function clearAllFilters() {
   restoreAllOriginalLayers();
@@ -188,6 +219,18 @@ function clearCountrySelection() {
   });
 }
 
+/**
+ * Apply the current country selection as a geographic filter.
+ *
+ * Snapshots each unfiltered layer reference if not already cached, then
+ * either restores all layers (when no countries are selected) or delegates to
+ * {@link filterAllElementsByCountries} to rebuild each layer with only the
+ * features whose country-code property matches an entry in
+ * <code>selectedCountries</code>. Closes the country-filter modal on
+ * completion.
+ *
+ * @returns {void}
+ */
 function applyCountryFilter() {
   /* Store original layers if not already stored. */
   if (!originalPipelineLayer && pipelineLayer) {
@@ -1040,6 +1083,15 @@ function shouldShowPipeline(feature, selectedCountryCodes) {
 
 /*
  * Alias used by Map.html main screen button.
+ */
+/**
+ * Toggle (open) the filter panel from a toolbar button.
+ *
+ * Thin error-guarded alias of {@link openFilterModal} used by the main-screen
+ * toolbar button. Wraps the call in a try/catch so that a misconfigured DOM
+ * state surfaces as an info popup rather than a silent failure.
+ *
+ * @returns {void}
  */
 function toggleFilterPanel(){
   try { openFilterModal(); } catch(e){ console.error('toggleFilterPanel failed', e); if (typeof showCustomPopup==='function') showCustomPopup('⚠️ Error', String(e)); }

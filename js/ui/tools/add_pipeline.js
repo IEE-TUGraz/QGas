@@ -267,6 +267,20 @@ function resolveNodeLayer(options = {}) {
   return null;
 }
 
+/**
+ * Iterate every node marker across all active node layers.
+ *
+ * Traverses the full layer tree of each group returned by
+ * {@link getAllNodeLayers}, descending into nested
+ * <code>LayerGroup</code> and <code>FeatureGroup</code> instances, and
+ * invokes <code>callback</code> for every individual point-feature marker
+ * found. Internal structure layers are skipped.
+ *
+ * @param {Function} callback - Function called with each node
+ *   <code>L.CircleMarker</code> or <code>L.Marker</code> as its sole
+ *   argument.
+ * @returns {void}
+ */
 function forEachNodeMarker(callback) {
   if (typeof callback !== 'function') {
     return;
@@ -295,6 +309,20 @@ function forEachNodeMarker(callback) {
   layerGroups.forEach(layerGroup => traverse(layerGroup));
 }
 
+/**
+ * Attach a unified click handler to all node markers.
+ *
+ * Removes any existing click listeners from every node marker (via
+ * {@link forEachNodeMarker}) and registers <code>handler</code> as the
+ * new listener. The handler receives the marker instance and the
+ * Leaflet click event. Event propagation to the map is suppressed.
+ * Used during pipeline-drawing mode so that clicking a node acts as
+ * a pipeline endpoint selection rather than opening an info popup.
+ *
+ * @param {Function} handler - Callback invoked with
+ *   <code>(marker, event)</code> when a node is clicked.
+ * @returns {void}
+ */
 function setNodeSelectionHandlers(handler) {
   if (typeof handler !== 'function') {
     return;
@@ -311,6 +339,16 @@ function setNodeSelectionHandlers(handler) {
   });
 }
 
+/**
+ * Remove all node click handlers registered during pipeline drawing.
+ *
+ * Iterates every node marker via {@link forEachNodeMarker} and removes
+ * all <code>'click'</code> listeners. Called when the pipeline-drawing
+ * workflow ends (after save or discard) to restore normal info-mode
+ * click behaviour.
+ *
+ * @returns {void}
+ */
 function clearNodeSelectionHandlers() {
   forEachNodeMarker(marker => marker.off('click'));
 }
@@ -328,6 +366,19 @@ function getNodeLatLng(layer) {
   return null;
 }
 
+/**
+ * Launch the interactive pipeline-creation workflow.
+ *
+ * Sets <code>currentMode</code> to <code>'add-pipeline'</code>, resolves
+ * the target pipeline layer, and opens a modal dialog asking whether the
+ * pipeline starts at an existing node or a free map location. Subsequent
+ * steps guide the user through endpoint selection (start and end), live
+ * polyline drawing between selected points, and finally saving the new
+ * pipeline feature with auto-generated ID and default attributes to the
+ * target layer.
+ *
+ * @returns {void}
+ */
 function proceedWithAddPipeline() {
   console.log('proceedWithAddPipeline called');
   /* Ensure the correct mode is set for the workflow. */

@@ -20,6 +20,18 @@
  * Extracted groups panel logic from core.js (v5).
  */
 
+/**
+ * Highlight all pipelines belonging to a saved pipeline group.
+ *
+ * Resets any existing group highlights, then applies a red stroke
+ * (<code>#ff2b2b</code>, weight 6) to every pipeline whose ID is listed in
+ * the specified group. The map viewport is automatically fitted to the bounding
+ * box of the highlighted elements with 80 px padding.
+ *
+ * @param {number} index - Zero-based index of the pipeline group in the
+ *   global <code>pipelineGroups</code> array.
+ * @returns {void}
+ */
 window.highlightGroup = function highlightGroup(index) {
   const group = pipelineGroups[index];
   if (!group) return;
@@ -77,6 +89,16 @@ window.highlightGroup = function highlightGroup(index) {
   }
 };
 
+/**
+ * Open the pipeline groups panel.
+ *
+ * Displays a scrollable modal popup listing all saved pipeline groups. Each
+ * group entry shows the group name, pipeline count, and total length. Clicking
+ * an entry calls {@link highlightGroup} to visualise the group on the map.
+ * If no groups exist yet the user is informed with a guidance message.
+ *
+ * @returns {void}
+ */
 function openGroupsPanel() {
   if (pipelineGroups.length === 0) {
     showCustomPopup(
@@ -112,6 +134,16 @@ function openGroupsPanel() {
   );
 }
 
+/**
+ * Remove all group highlights from the map.
+ *
+ * Iterates every pipeline in all active line layers and resets their
+ * Leaflet path styles to the defaults defined in the layer configuration.
+ * Should be called before applying a new group highlight or when the
+ * groups panel is closed.
+ *
+ * @returns {void}
+ */
 function unhighlightAllGroups() {
   /* Search in all line layers. */
   const lineLayers = [];

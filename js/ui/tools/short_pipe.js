@@ -96,6 +96,18 @@ function resetPipelineLayersAfterShortPipeMode() {
   });
 }
 
+/**
+ * Start the short-pipe selection workflow.
+ *
+ * Activates short-pipe selection mode and attaches click handlers to all
+ * polyline features in every active line layer. Clicking a pipeline
+ * segment toggles its short-pipe status (visual cue: orange dashed
+ * stroke). A save button at the top of the map commits the selection as
+ * short-pipe entries in the dataset; a discard button resets all styles
+ * and exits the mode without saving.
+ *
+ * @returns {void}
+ */
 function startShortPipeSelection() {
   shortPipeSelectionActive = true;
   selectedShortPipes = [];

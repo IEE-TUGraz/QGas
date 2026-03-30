@@ -50,8 +50,19 @@
  */
 (function(){
   /**
-   * Activate the Add Infrastructure tool
-   * Presents user with connection options and initiates placement workflow
+   * Activate the Add Infrastructure tool.
+   *
+   * Verifies that a contributor name has been set, deactivates any active
+   * editing mode, and sets the application mode to
+   * {@code 'add-infrastructure'}. The user is first prompted to choose
+   * whether the new element should be connected to an existing node. After
+   * confirmation, the user selects the target infrastructure layer
+   * (compressor, storage, LNG terminal, power plant, or custom type) and
+   * clicks a map location to place the point. An auto-generated ID
+   * incorporating contributor initials is assigned, and the tool allows
+   * continuous placement until the user opts to stop.
+   *
+   * @returns {void}
    */
   window.activateAddInfrastructureTool = function activateAddInfrastructureTool() {
 

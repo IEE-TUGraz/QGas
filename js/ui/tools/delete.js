@@ -876,6 +876,17 @@ function toggleGenericLayerDeletion(layer, pendingList, parentLayer) {
   updateDeleteModeButtonsState();
 }
 
+/**
+ * Clear all pending deletion selections without committing any deletions.
+ *
+ * Iterates every pending-deletion list (pipelines, nodes, compressors,
+ * storages, LNG terminals, power-plants, custom elements, drawn items) and
+ * restores the original visual style of each marked element. All pending
+ * lists are emptied and the toolbar button state is refreshed. Useful for
+ * resetting the selection before exiting delete mode.
+ *
+ * @returns {void}
+ */
 function clearPendingDeletionSelections() {
   const pendingPipelines = [...pendingPipelineDeletions];
   pendingPipelines.forEach(item => {
@@ -942,6 +953,19 @@ function clearPendingDeletionSelections() {
   updateDeleteModeButtonsState();
 }
 
+/**
+ * Activate the element deletion mode.
+ *
+ * Disables any active drawing tools, captures a snapshot of the current
+ * map state for undo support, and attaches click handlers to every
+ * deletable element (pipelines, nodes, compressors, storages, LNG
+ * terminals, power-plants, custom layers). Clicking an element marks it
+ * for deletion (visual cue: red overlay) without immediately removing it.
+ * A Save/Discard toolbar strip is shown; confirming commits all pending
+ * deletions to the soft-delete registry.
+ *
+ * @returns {void}
+ */
 function activateDeleteMode() {
   try {
     /* Disable all modes without button highlighting. */

@@ -46,6 +46,18 @@
  * ================================================================================
  */
 
+/**
+ * Start the sublayer switching workflow.
+ *
+ * Retrieves all layer configurations that declare sublayer children, presents
+ * a selection dialog for the parent layer, and then guides the user through
+ * selecting individual features to reassign to a sublayer. Selected elements
+ * are moved from the parent layer to the target sublayer (creating the
+ * sublayer on demand if it does not yet exist) and the legend is updated
+ * to reflect the new layer.
+ *
+ * @returns {void}
+ */
 function startSublayerSwitchFlow() {
   const parentOptions = getEligibleSublayerParents();
   if (!parentOptions.length) {
@@ -1042,6 +1054,17 @@ function handlePlanViewportWheel(event) {
 }
 /*
  * Public activation wrapper.
+ */
+/**
+ * Activate the switch-to-sublayer tool.
+ *
+ * Public entry point registered on <code>window</code>. Deactivates all
+ * other editing modes, sets <code>currentMode</code> to
+ * <code>'switch-sublayer'</code>, and delegates to
+ * {@link startSublayerSwitchFlow} to run the interactive layer-transfer
+ * workflow.
+ *
+ * @returns {void}
  */
 window.activateSwitchSublayerTool = function activateSwitchSublayerTool() {
   deactivateAllModes();

@@ -40,14 +40,30 @@ document.getElementById('linetype-picker-modal').addEventListener('click', funct
  */
 let currentLayerBeingChanged = null;
 
+/**
+ * Open the layer options modal.
+ *
+ * Populates the layer list by calling {@link populateLayerList} and then
+ * makes the options modal visible. Users can change colours, point shapes,
+ * line types, and sizes for all registered styleable layers.
+ *
+ * @returns {void}
+ */
 function openOptionsModal() {
   populateLayerList();
   document.getElementById('options-modal').style.display = 'flex';
 }
 
+/**
+ * Close the layer options modal.
+ *
+ * Hides the options modal overlay without saving any unsaved changes in
+ * sub-pickers (colour, shape, size, line-type). Sub-pickers must be closed
+ * separately before or after this call.
+ *
+ * @returns {void}
+ */
 function closeOptionsModal() {
-  document.getElementById('options-modal').style.display = 'none';
-}
 
 function closeColorPickerModal() {
   document.getElementById('color-picker-modal').style.display = 'none';
@@ -327,6 +343,17 @@ function populateLayerList() {
   });
 }
 
+/**
+ * Open the colour picker sub-modal for a specific layer.
+ *
+ * Stores the target layer key, loads its current colour into the native
+ * colour input and custom-hex input fields, populates the colour palette
+ * highlights, and shows the colour-picker modal.
+ *
+ * @param {string} layerKey - Registry key of the layer whose colour should
+ *   be edited (e.g., <code>'pipelines'</code>, <code>'compressors'</code>).
+ * @returns {void}
+ */
 function openColorPicker(layerKey) {
   currentLayerBeingChanged = layerKey;
   const entry = getStyleableLayerEntry(layerKey);
@@ -471,6 +498,18 @@ function applyColorChange() {
   closeColorPickerModal();
 }
 
+/**
+ * Apply a new colour to all visual representations of a layer.
+ *
+ * Retrieves the styleable-layer entry for <code>layerKey</code>, resolves
+ * all associated Leaflet layer refs (including custom overlay layers), and
+ * applies the colour via {@link applyColorToLineLayer} (polylines) or
+ * {@link applyColorToPointLayer} (circle markers / custom icons).
+ *
+ * @param {string} layerKey - Registry key identifying the target layer.
+ * @param {string} newColor - Hex colour string (e.g., <code>'#2563eb'</code>).
+ * @returns {void}
+ */
 function updateLayerColor(layerKey, newColor) {
   console.log(`Ändere ${layerKey} Farbe zu ${newColor}`);
   const entry = getStyleableLayerEntry(layerKey);
@@ -856,6 +895,19 @@ function applyLineTypeChange() {
 /*
  * Layer shape and size update helpers.
  */
+/**
+ * Apply a new marker shape to all point features of a layer.
+ *
+ * Iterates through all layer refs registered under <code>layerKey</code> and
+ * recreates each point marker using the specified shape symbol. Only operates
+ * on point-geometry layers; line layers are silently ignored.
+ *
+ * @param {string} layerKey - Registry key identifying the target layer.
+ * @param {string} newShape - Shape identifier: <code>'circle'</code>,
+ *   <code>'square'</code>, <code>'triangle'</code>, or
+ *   <code>'diamond'</code>.
+ * @returns {void}
+ */
 function updateLayerShape(layerKey, newShape) {
   console.log(`updateLayerShape aufgerufen: ${layerKey} zu ${newShape}`);
   const entry = getStyleableLayerEntry(layerKey);
@@ -865,6 +917,19 @@ function updateLayerShape(layerKey, newShape) {
   }
 }
 
+/**
+ * Apply a new dash style to all polylines of a line layer.
+ *
+ * Updates the <code>lineStyle</code> property of the registry entry and all
+ * associated configuration references, then calls
+ * {@link applyLinePattern} on every resolved polyline layer. Only operates
+ * on line-geometry layers.
+ *
+ * @param {string} layerKey - Registry key identifying the target layer.
+ * @param {string} newLineType - Line dash style: <code>'solid'</code>,
+ *   <code>'dotted'</code>, or <code>'segmented'</code>.
+ * @returns {void}
+ */
 function updateLineType(layerKey, newLineType) {
   const entry = getStyleableLayerEntry(layerKey);
   if (!entry || entry.geometry !== 'line') return;
@@ -880,6 +945,19 @@ function updateLineType(layerKey, newLineType) {
   }
 }
 
+/**
+ * Apply a new size value to all features of a layer.
+ *
+ * Dispatches to {@link applyWidthToLineLayer} for polylines or
+ * {@link applySizeToPointLayer} for point markers, depending on the
+ * layer geometry class. Updates the registry entry and all configuration
+ * references so the new size persists across re-renders.
+ *
+ * @param {string} layerKey - Registry key identifying the target layer.
+ * @param {number} newSize - Pixel size value. For line layers this sets
+ *   stroke weight; for point layers it sets marker radius.
+ * @returns {void}
+ */
 function updateLayerSize(layerKey, newSize) {
   console.log(`Ändere ${layerKey} Größe zu ${newSize}`);
   const entry = getStyleableLayerEntry(layerKey);
@@ -1114,6 +1192,16 @@ function getLegendToggleIdForEntry(entry) {
   return existing || candidates[0];
 }
 
+/**
+ * Synchronise all legend icon elements with current layer style settings.
+ *
+ * Iterates every styleable layer entry and updates the corresponding legend
+ * DOM elements: polyline legend strips are resized and recoloured; point
+ * legend icons are regenerated via {@link generateLegendIcon}. Should be
+ * called after any colour, shape, size, or line-type change.
+ *
+ * @returns {void}
+ */
 function updateLegendSymbols() {
   const legendDiv = document.querySelector('.legend-control');
   if (!legendDiv) return;
@@ -1203,6 +1291,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+/**
+ * Build the HTML content for an element attribute edit popup.
+ *
+ * Constructs an editable attribute table from the provided GeoJSON feature
+ * properties, honouring both static and user-configured hidden-attribute
+ * lists. The table includes text inputs for each visible attribute and
+ * action buttons (Save, Add Attribute, Delete, Hide).
+ *
+ * @param {Object} properties - GeoJSON feature property object.
+ * @param {Object} layer - Leaflet layer instance used to determine the
+ *   element type for dynamic hidden-attribute lookup.
+ * @returns {string} HTML string representing the popup content.
+ */
 function createModalPopupContent(properties, layer) {
   console.log('createModalPopupContent properties:', properties);
   // Statisch versteckte Attribute
@@ -1246,6 +1347,14 @@ function createModalPopupContent(properties, layer) {
 
 /*
  * Alias used by the Map.html main screen button.
+ */
+/**
+ * Toggle (open) the options panel from a toolbar button.
+ *
+ * Alias of {@link openOptionsModal} used by the main-screen toolbar. Ensures
+ * consistent entry point for toolbar-driven interactions.
+ *
+ * @returns {void}
  */
 function toggleOptionsPanel(){
   openOptionsModal();

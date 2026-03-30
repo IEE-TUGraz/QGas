@@ -131,6 +131,18 @@ function getCompressorMarkerStyle() {
   };
 }
 
+/**
+ * Start the compressor distribution workflow.
+ *
+ * Initialises distribution state, hides all map layers except pipelines
+ * and compressors to reduce visual clutter, and activates click handlers
+ * on every compressor marker. The user selects a source compressor, then
+ * specifies how many sub-compressors to place along pipeline segments.
+ * Sub-compressor positions are computed geometrically on the selected
+ * pipeline and persisted via the standard layer write-back mechanism.
+ *
+ * @returns {void}
+ */
 function startDistributeCompressors() {
   distributeMode = true;
   selectedCompressor = null;
@@ -968,6 +980,17 @@ function calculatePipelineLength(coordinates) {
   return totalLength / 1000; // Convert to kilometers
 }
 
+/**
+ * Exit distribute-compressor mode and restore normal map state.
+ *
+ * Re-adds any layers that were hidden during distribution (power-plants,
+ * storages, nodes, etc.), removes all temporary connection-line polylines
+ * and sub-compressor markers from the map, and resets all internal
+ * distribution state variables. Safe to call both after a completed
+ * distribution and after an explicit cancellation.
+ *
+ * @returns {void}
+ */
 function exitDistributeMode() {
   distributeMode = false;
   

@@ -750,6 +750,19 @@
     });
   }
 
+  /**
+   * Run the network topology analysis and display results.
+   *
+   * Resets all active editing modes, performs a full topological analysis
+   * of the loaded node and line layers (via {@link buildTopologyAnalysis}),
+   * and renders the results in a popup. The analysis identifies:
+   * (a) isolated nodes not connected to any pipeline,
+   * (b) pipelines not connected at either endpoint to a node,
+   * (c) disconnected network sub-graphs (islands). Each result entry is
+   * clickable and pans/zooms the map to the offending element.
+   *
+   * @returns {void}
+   */
   function activateTopologyCheckTool() {
     try {
       deactivateAllModes();

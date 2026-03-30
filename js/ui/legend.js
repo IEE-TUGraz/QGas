@@ -29,6 +29,25 @@ function unregisterLegendToggle(elementKey) {
   legendToggleRegistry.delete(elementKey);
 }
 
+/**
+ * Register a checkbox-driven layer toggle in the legend.
+ *
+ * Attaches a <code>change</code> event listener to <code>checkbox</code> that
+ * resolves the associated Leaflet layer(s) via <code>resolveLayers</code> and
+ * adds them to or removes them from the map. Previously registered handlers
+ * for the same <code>elementKey</code> are unregistered first to prevent
+ * duplicates. The handler is fired once immediately to synchronise the
+ * initial visibility state.
+ *
+ * @param {Object} options - Configuration object.
+ * @param {HTMLInputElement} options.checkbox - The legend checkbox element.
+ * @param {Function} options.resolveLayers - Callback that returns the Leaflet
+ *   layer or array of layers to control.
+ * @param {string|symbol} [options.elementKey] - Optional unique key used for
+ *   de-duplication and later unregistration.
+ * @returns {string|symbol|null} The registry key used, or <code>null</code> if
+ *   registration failed.
+ */
 function registerLegendToggle({ checkbox, resolveLayers, elementKey }) {
   if (!checkbox || typeof resolveLayers !== 'function') return null;
   if (elementKey) {
@@ -107,6 +126,22 @@ function setPlanOverlayVisibility(overlay, shouldShow) {
   }
 }
 
+/**
+ * Add a plan overlay entry to the map legend.
+ *
+ * Creates a labelled checkbox in the legend control for the given
+ * infrastructure plan and wires it to show or hide the Leaflet
+ * <code>overlay</code> layer. The checkbox is inserted above the
+ * "Select All" button if present, otherwise appended at the bottom.
+ *
+ * @param {Object} planConfig - Infrastructure plan configuration object.
+ * @param {string} planConfig.id - Unique plan identifier used as the
+ *   toggle registry key.
+ * @param {string} planConfig.name - Human-readable plan name shown in
+ *   the legend.
+ * @param {Object} overlay - Leaflet layer instance to show/hide.
+ * @returns {void}
+ */
 function addPlanLayerToLegend(planConfig, overlay) {
   const legendContainer = document.querySelector('.legend-control');
   if (!legendContainer) return;
@@ -273,6 +308,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 2000); // 2 Sekunden warten bis Layer geladen sind
 });
 
+/**
+ * Initialise the map legend control.
+ *
+ * Creates a Leaflet custom control in the top-right corner of
+ * <code>mapInstance</code> containing layer-visibility checkboxes,
+ * a statistics button, and a "Select All" toggle. Event handlers for
+ * the checkboxes are bound after a 2-second delay to ensure all
+ * GeoJSON layers have finished loading.
+ *
+ * @param {L.Map} mapInstance - The initialised Leaflet map instance to
+ *   which the legend control will be added.
+ * @returns {void}
+ */
 function initLegendControl(mapInstance) {
   if (!mapInstance || !window.L) return;
   const map = mapInstance;

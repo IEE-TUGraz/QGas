@@ -40,3 +40,13 @@ table{border-collapse:collapse;width:100%;margin:14px 0}th,td{border:1px solid v
 .guide-btn{display:inline-block;padding:6px 12px;border-radius:999px;border:1px solid rgba(37,99,235,.35);background:rgba(37,99,235,.12);color:var(--fg);font-weight:600}
 .guide-btn:hover{text-decoration:none;background:rgba(37,99,235,.18)}
 .guide-text{color:var(--muted)}
+.api-functions{margin-top:16px}
+.api-functions h3{font-size:16px;margin-bottom:12px;color:var(--h);border-bottom:1px solid var(--border);padding-bottom:6px}
+.api-func{border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:10px 0;background:rgba(37,99,235,.03)}
+.api-sig{margin:0 0 8px;font-size:15px;font-weight:600}
+.api-desc{margin:6px 0;color:var(--fg)}
+.api-params{margin:8px 0;width:100%;border-collapse:collapse}
+.api-params th{background:rgba(125,125,125,.1);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.api-params td,.api-params th{border:1px solid var(--border);padding:6px 10px;vertical-align:top;font-size:14px}
+.api-returns{margin:8px 0;font-size:14px;color:var(--muted)}
+.api-throws{margin:8px 0;font-size:14px;color:#ef4444}

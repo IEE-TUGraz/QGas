@@ -45,6 +45,19 @@
  * ================================================================================
  */
 
+/**
+ * Activate the pipeline divide tool.
+ *
+ * Entry point for the divide-pipeline workflow. Delegates to
+ * {@link startPipelineDivision}, which guides the user through selecting a
+ * pipeline segment and clicking the desired split point. The original
+ * pipeline feature is replaced by two new child features whose coordinate
+ * arrays cover each half; attributes are inherited with a sequence suffix
+ * appended to the ID. A node marker is automatically inserted at the
+ * division point.
+ *
+ * @returns {void}
+ */
 function activateDividePipelineTool() {
   /* startPipelineDivision already handles popups and cleanup. */
   startPipelineDivision();

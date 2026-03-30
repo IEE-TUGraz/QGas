@@ -18,14 +18,30 @@
  * - closeStatisticsModal(): Hide the statistics modal.
  * - updateStatistics(): Recompute and render statistics.
  */
-  /*
-   * Statistics modal handlers.
+  /**
+   * Open the statistics modal dialog.
+   *
+   * Triggers a full recomputation of infrastructure statistics via
+   * {@link updateStatistics} before making the modal visible. This ensures
+   * that all displayed values reflect the current map state at the time of
+   * opening.
+   *
+   * @returns {void}
    */
   function openStatisticsModal() {
     updateStatistics();
     document.getElementById('statistics-modal').style.display = 'flex';
   }
 
+  /**
+   * Close the statistics modal dialog.
+   *
+   * Hides the statistics modal by setting its CSS display property to
+   * {@code none}. No statistical data is cleared; subsequent calls to
+   * {@link openStatisticsModal} will recompute and re-display updated values.
+   *
+   * @returns {void}
+   */
   function closeStatisticsModal() {
     document.getElementById('statistics-modal').style.display = 'none';
   }
@@ -49,6 +65,17 @@
   /* Global statistics cache. */
   let currentStatistics = null;
 
+  /**
+   * Recompute and render all infrastructure statistics.
+   *
+   * Calculates aggregate metrics (pipeline counts, total lengths, node
+   * counts, storage capacities, etc.) from the current map layers and
+   * renders the results into the statistics modal. The computed statistics
+   * object is also cached in {@link window.cachedStatistics} for subsequent
+   * use by other modules without redundant recalculation.
+   *
+   * @returns {void}
+   */
   function updateStatistics() {
     const stats = calculateStatistics();
     displayStatistics(stats);

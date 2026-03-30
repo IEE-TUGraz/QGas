@@ -54,9 +54,17 @@
  * Extracted from core.js to keep tool logic modular.
  */
 
-/*
- * Activate the split node tool.
- * Deactivates other modes and initiates the splitting workflow.
+/**
+ * Activate the split-node tool.
+ *
+ * Deactivates all other active editing modes, sets <code>currentMode</code>
+ * to <code>'split-node'</code>, and starts the interactive node-splitting
+ * workflow. The user selects a node to split; the tool then creates
+ * a duplicate node offset from the original and reassigns a user-selected
+ * subset of the connected pipelines to the new node, thereby restructuring
+ * the network topology.
+ *
+ * @returns {void}
  */
 function activateSplitNodeTool() {
   deactivateAllModes();
@@ -521,6 +529,28 @@ function dockCustomPopupBottomRight() {
 /*
  * Custom popup system.
  */
+/**
+ * Display a fully configurable modal popup.
+ *
+ * Renders a modal dialog with a title, arbitrary HTML content, an optional
+ * extra DOM element appended below the content, and one or more action
+ * buttons. Each button carries an <code>onClick</code> callback; setting
+ * <code>keepOpen: true</code> on a button prevents the popup from closing
+ * after the callback executes. Errors thrown inside button callbacks are
+ * caught and shown as a secondary error popup.
+ *
+ * @param {string} title - Popup heading text.
+ * @param {string} content - HTML string for the popup body.
+ * @param {Array<Object>} buttons - Array of button descriptors.
+ * @param {string} buttons[].text - Button label.
+ * @param {string} [buttons[].type='secondary'] - CSS modifier class
+ *   (<code>'primary'</code> or <code>'secondary'</code>).
+ * @param {Function} [buttons[].onClick] - Callback invoked on click.
+ * @param {boolean} [buttons[].keepOpen=false] - Prevent auto-close.
+ * @param {HTMLElement|null} [extraElement=null] - Optional DOM node
+ *   appended to the content area.
+ * @returns {void}
+ */
 function showCustomPopup(title, content, buttons, extraElement = null) {
   console.log('showCustomPopup called with title:', title);
   const overlay = document.getElementById('custom-popup-overlay');
@@ -588,6 +618,14 @@ function showCustomPopup(title, content, buttons, extraElement = null) {
   popup.style.display = 'block';
 }
 
+/**
+ * Close the currently open custom popup.
+ *
+ * Hides the popup overlay and container and resets the docking state.
+ * Safe to call even when no popup is currently displayed.
+ *
+ * @returns {void}
+ */
 function closeCustomPopup() {
   resetCustomPopupDocking();
   document.getElementById('custom-popup-overlay').style.display = 'none';
@@ -601,6 +639,18 @@ function formatPopupMessage(message) {
   return String(message).replace(/\r?\n/g, '<br>');
 }
 
+/**
+ * Show a simple informational popup.
+ *
+ * Convenience wrapper around {@link showCustomPopup} that renders a
+ * centred message paragraph and a single OK button.
+ *
+ * @param {string} message - Plain text or newline-separated message to
+ *   display. Newlines are converted to <code>&lt;br&gt;</code>.
+ * @param {string} [title='\u2139\ufe0f Notice'] - Popup heading.
+ * @param {string} [buttonText='OK'] - Label of the dismiss button.
+ * @returns {void}
+ */
 function showInfoPopup(message, title = 'ℹ️ Notice', buttonText = 'OK') {
   showCustomPopup(
     title,
@@ -609,6 +659,17 @@ function showInfoPopup(message, title = 'ℹ️ Notice', buttonText = 'OK') {
   );
 }
 
+/**
+ * Show an error popup with visually distinct styling.
+ *
+ * Convenience wrapper around {@link showCustomPopup} that renders the
+ * message in red and uses a single OK button for dismissal.
+ *
+ * @param {string} message - Error description text.
+ * @param {string} [title='\u26a0\ufe0f Error'] - Popup heading.
+ * @param {string} [buttonText='OK'] - Label of the dismiss button.
+ * @returns {void}
+ */
 function showErrorPopup(message, title = '⚠️ Error', buttonText = 'OK') {
   showCustomPopup(
     title,
@@ -617,6 +678,22 @@ function showErrorPopup(message, title = '⚠️ Error', buttonText = 'OK') {
   );
 }
 
+/**
+ * Show a two-button confirmation popup.
+ *
+ * Presents a message with a Cancel and a Confirm button. Executes
+ * <code>options.onConfirm</code> when confirmed or
+ * <code>options.onCancel</code> when cancelled.
+ *
+ * @param {Object} [options={}] - Configuration object.
+ * @param {string} [options.title='Confirm'] - Popup heading.
+ * @param {string} [options.message=''] - Body message text.
+ * @param {string} [options.confirmText='OK'] - Confirm button label.
+ * @param {string} [options.cancelText='Cancel'] - Cancel button label.
+ * @param {Function} [options.onConfirm] - Called on confirmation.
+ * @param {Function} [options.onCancel] - Called on cancellation.
+ * @returns {void}
+ */
 function showConfirmationPopup(options = {}) {
   const {
     title = 'Confirm',
@@ -637,6 +714,37 @@ function showConfirmationPopup(options = {}) {
   );
 }
 
+/**
+ * Show a modal prompt with a text or numeric input field.
+ *
+ * Renders a popup with an input element pre-filled with
+ * <code>options.defaultValue</code>. Optional validator callback is
+ * invoked on confirm; if it returns a non-empty string the value is
+ * treated as an error message and the popup remains open. On successful
+ * confirmation <code>options.onConfirm</code> receives the trimmed input
+ * value.
+ *
+ * @param {Object} [options={}] - Configuration object.
+ * @param {string} [options.title='Input Required'] - Popup heading.
+ * @param {string} [options.message=''] - Instructional message text.
+ * @param {string} [options.defaultValue=''] - Pre-filled input value.
+ * @param {string} [options.placeholder=''] - Input placeholder text.
+ * @param {string} [options.inputType='text'] - HTML input type attribute.
+ * @param {string} [options.confirmText='OK'] - Confirm button label.
+ * @param {string} [options.cancelText='Cancel'] - Cancel button label.
+ * @param {number|null} [options.min=null] - Minimum value (numeric inputs).
+ * @param {number|null} [options.max=null] - Maximum value (numeric inputs).
+ * @param {number|null} [options.step=null] - Step value (numeric inputs).
+ * @param {Function|null} [options.validator=null] - Synchronous validation
+ *   callback; receives the raw input string and returns an error message
+ *   string or a falsy value.
+ * @param {boolean} [options.required=true] - Whether an empty value is
+ *   rejected.
+ * @param {Function} [options.onConfirm] - Called with the trimmed input
+ *   value on successful confirmation.
+ * @param {Function} [options.onCancel] - Called when the popup is cancelled.
+ * @returns {void}
+ */
 function showInputPrompt(options = {}) {
   const {
     title = 'Input Required',

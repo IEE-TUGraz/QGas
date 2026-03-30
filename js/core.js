@@ -3747,6 +3747,19 @@ function resetAllElementHighlights() {
   }
 }
 
+/**
+ * Open the attribute info overlay for a pipeline feature.
+ *
+ * Highlights the clicked pipeline layer, stores it as the active popup
+ * layer for attribute editing, generates the attribute form via
+ * {@link createAttributeForm}, and binds Save, Add Attribute, and Delete
+ * action handlers. The overlay remains visible until the user dismisses
+ * it or selects another element.
+ *
+ * @param {L.Path} layer - The Leaflet polyline layer whose attributes
+ *   should be displayed.
+ * @returns {void}
+ */
 function openInfoOverlay(layer) {
   // Highlighte die angeklickte Pipeline
   highlightPipeline(layer);
@@ -5002,6 +5015,18 @@ document.getElementById('contributor-form').addEventListener('submit', function(
 });
 
 // Funktion zur Überprüfung des Contributor-Namens
+/**
+ * Check whether a valid contributor name has been entered.
+ *
+ * Reads the <code>#contributor-input</code> field and returns
+ * <code>false</code> (showing a contributor dialog) when the value is
+ * empty or still the default placeholder <em>"Max Mustermann"</em>.
+ * All editing tools call this guard before modifying map data to ensure
+ * every change is attributed to a real contributor.
+ *
+ * @returns {boolean} <code>true</code> if a valid contributor name is
+ *   present; <code>false</code> otherwise.
+ */
 function checkContributorName() {
   const currentName = document.getElementById('contributor-input').value.trim();
   if (currentName === 'Max Mustermann' || currentName === '') {
@@ -5172,6 +5197,24 @@ function getDefaultNodeStyleOptions(preferredLayer = null) {
   return { ...fallback };
 }
 
+/**
+ * Create and register a new node marker on the map.
+ *
+ * Creates a Leaflet CircleMarker at <code>latlng</code> with the default
+ * node style, attaches a GeoJSON feature with <code>Type: 'Node'</code>
+ * and the provided <code>nodeId</code>, and adds it to the appropriate
+ * node layer (determined via <code>options.targetLayer</code> or the
+ * global <code>nodeLayer</code>). Wires up mode-aware click handlers for
+ * info display and pipeline-connection callbacks.
+ *
+ * @param {L.LatLng} latlng - Geographic position for the new node.
+ * @param {string} nodeId - Unique identifier to assign to the node
+ *   feature (<code>properties.ID</code>).
+ * @param {Object} [options={}] - Optional configuration.
+ * @param {L.LayerGroup|null} [options.targetLayer=null] - Target layer
+ *   group; falls back to the global <code>nodeLayer</code>.
+ * @returns {L.CircleMarker} The created node marker.
+ */
 function createNewNode(latlng, nodeId, options = {}) {
   const targetLayer = options.targetLayer || null;
   const nodeStyle = getDefaultNodeStyleOptions(targetLayer);
@@ -5491,6 +5534,19 @@ function generatePrefixFromName(name, ignoreType = null) {
   return cleaned.substring(0, Math.min(3, cleaned.length)) || 'X';
 }
 
+/**
+ * Return the GeoJSON type prefix string for a given element type.
+ *
+ * Looks up the internal <code>facilityTypeMap</code> for a registered
+ * prefix; if none exists, derives one from the type name via
+ * {@link generatePrefixFromName} and registers it. Used to construct
+ * standardised element IDs (<code>PREFIX_CONTRIBUTOR_NNN</code>).
+ *
+ * @param {string} type - Element type name (e.g., <code>'Pipeline'</code>,
+ *   <code>'Node'</code>, <code>'Compressor'</code>).
+ * @returns {string} Two-to-three-character prefix string
+ *   (e.g., <code>'PL'</code>, <code>'N'</code>, <code>'C'</code>).
+ */
 function getFacilityPrefix(type) {
   const resolvedType = (type && type.trim()) || 'Element';
   if (!facilityTypeMap[resolvedType]) {
@@ -5525,6 +5581,19 @@ function resolveFacilityTypeAlias(name) {
 });
 
 // Hilfsfunktion: nächste freie Nummer für diesen Typ finden
+/**
+ * Return the next available sequential ID number for a given element type.
+ *
+ * Scans all layers of the specified type to collect existing numeric
+ * suffixes matching the pattern <code>PREFIX_CONTRIBUTOR_NNN</code> and
+ * returns the lowest unused positive integer. Accepts an optional
+ * <code>layerOverride</code> to restrict scanning to a specific layer.
+ *
+ * @param {string} type - Element type (e.g., <code>'Pipeline'</code>).
+ * @param {L.LayerGroup|null} [layerOverride=null] - Optional specific
+ *   layer to scan; if <code>null</code> all layers are searched.
+ * @returns {number} Next unused sequential number (always ≥ 1).
+ */
 function getNextIdNumber(type, layerOverride = null) {
   const existingNumbers = new Set();
   const typePrefix = getFacilityPrefix(type);
@@ -6182,6 +6251,17 @@ function setActiveBtn(activeBtn) {
 deactivateAllModes();
 
 // Funktion zum Aktivieren des Bearbeitungsmodus für bestehende Features
+/**
+ * Deactivate all active editing modes and return to a clean state.
+ *
+ * Disables any open Leaflet Draw tool, closes popups, ends the current
+ * node-position edit, clears pending delete selections, removes transient
+ * UI overlays (direction buttons, save/discard strips), and resets all
+ * mode-specific state variables. Called as a prerequisite by every
+ * tool-activation function to prevent mode conflicts.
+ *
+ * @returns {void}
+ */
 function deactivateAllModes() {
   try {
     console.log('Deaktiviere alle Modi');
@@ -7026,6 +7106,20 @@ let pendingDrawnItemDeletions = [];
 // Modal-System Funktionen
 let currentLayer = null;
 
+/**
+ * Display the element details modal.
+ *
+ * Stores the active layer reference, injects the provided title and HTML
+ * content into the modal DOM elements, and makes the modal visible.
+ * The modal remains open until {@link closeElementModal} is called.
+ *
+ * @param {string} title - Heading text for the modal.
+ * @param {string} content - HTML string for the modal body (typically
+ *   generated by {@link createModalPopupContent}).
+ * @param {L.Layer} layer - Leaflet layer instance associated with the
+ *   displayed element.
+ * @returns {void}
+ */
 function showElementModal(title, content, layer) {
   currentLayer = layer;
   currentPopupLayer = layer;
@@ -7034,6 +7128,16 @@ function showElementModal(title, content, layer) {
   document.getElementById('element-modal').style.display = 'flex';
 }
 
+/**
+ * Close the element details modal.
+ *
+ * Hides the modal overlay and resets the highlight styles of any
+ * previously highlighted pipeline or point-element layer. Clears the
+ * internal <code>currentLayer</code>, <code>activePipeline</code>, and
+ * <code>activeElement</code> references.
+ *
+ * @returns {void}
+ */
 function closeElementModal() {
   const modal = document.getElementById('element-modal');
   modal.style.display = 'none';
@@ -7101,6 +7205,18 @@ document.getElementById('style-picker-modal').addEventListener('click', function
 
 // ==================== Additional Datasets Loading ====================
 
+/**
+ * Load supplementary GeoJSON datasets from the <code>Additional Datasets/</code>
+ * server directory.
+ *
+ * Iterates a hardcoded list of dataset filenames and calls
+ * {@link loadSingleDatasetWithCallback} for each. Loaded datasets are
+ * added to the map as hidden layers and stored in the
+ * <code>additionalDatasets</code> registry, making them available for
+ * the integrate-dataset tool.
+ *
+ * @returns {void}
+ */
 function loadAdditionalDatasets() {
   const datasetFiles = [
     'INET_PipeSegments.geojson',
@@ -7236,6 +7352,17 @@ function createDatasetLayer(filename, data) {
 
 // ===== Global layer helper functions (added for modular tools) =====
 // Tools modules rely on these to work across *all* configured layers.
+/**
+ * Return all node-type Leaflet layers currently registered in the project.
+ *
+ * First queries <code>layerConfig</code> for entries with
+ * <code>Type === 'node'</code>, then performs a fallback heuristic scan
+ * of <code>dynamicLayers</code> using metadata type hints and key names.
+ * Both the primary and fallback result sets are deduplicated.
+ *
+ * @returns {Array<L.LayerGroup>} Array of Leaflet layer groups whose
+ *   features represent network nodes.
+ */
 function getAllNodeLayers() {
   try {
     const layers = [];
@@ -7270,6 +7397,19 @@ function getAllNodeLayers() {
   }
 }
 
+/**
+ * Return all line-type Leaflet layers currently registered in the project.
+ *
+ * Queries <code>layerConfig</code> for entries with
+ * <code>Type === 'line'</code> or <code>'pipeline'</code>, then performs
+ * a heuristic scan of <code>dynamicLayers</code>. If metadata hints are
+ * unavailable, samples the first feature geometry of each layer to
+ * determine whether it is a <code>LineString</code> or
+ * <code>MultiLineString</code>.
+ *
+ * @returns {Array<L.LayerGroup>} Array of Leaflet layer groups whose
+ *   features represent pipeline or line-string infrastructure.
+ */
 function getAllLineLayers() {
   try {
     const layers = [];

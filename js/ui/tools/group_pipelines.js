@@ -79,6 +79,18 @@ function __computeLineLengthKm(layer) {
 let groupStartPoint = null;
 let groupEndPoint = null;
 
+/**
+ * Start the pipeline grouping workflow.
+ *
+ * Deactivates all active modes, prompts the user to enter a group name,
+ * and then guides them through selecting a set of pipeline segments and
+ * optionally specifying a start and end node. The resulting group is
+ * stored in the <code>pipelineGroups</code> array with metadata (name,
+ * pipeline IDs, total length, element count) and persisted to the project
+ * state. The group can later be highlighted via {@link highlightGroup}.
+ *
+ * @returns {void}
+ */
 function startPipelineGrouping() {
   deactivateAllModes();
   

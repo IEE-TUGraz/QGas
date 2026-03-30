@@ -22,6 +22,17 @@
  * Extracted export logic from core.js (v5).
  */
 
+/**
+ * Export all modified and deleted elements as GeoJSON files in a ZIP archive.
+ *
+ * Collects every layer feature marked with <code>modified: true</code> and all
+ * entries in the soft-deletion registry. Organises the output into
+ * GeoJSON files per infrastructure type (pipelines, nodes, compressors,
+ * storages, power-plants, etc.) and triggers a browser download of the
+ * resulting ZIP archive (<code>changes.zip</code>).
+ *
+ * @returns {void}
+ */
 function exportChanges() {
   const extractFeatureForExport = (layer) => {
     if (!layer || typeof layer.toGeoJSON !== 'function') return null;
@@ -258,6 +269,19 @@ function showFolderNameDialog() {
 /*
  * Export filtered data as a ZIP archive.
  */
+/**
+ * Export the currently filtered dataset as a ZIP archive.
+ *
+ * Iterates all active layer configurations, applies the current attribute
+ * filter state, and serialises each layer to a GeoJSON file. Supplementary
+ * files (Excel configuration workbook, short-pipe definitions) are appended
+ * and the archive is offered for browser download as
+ * <code>&lt;folderName&gt;.zip</code>.
+ *
+ * @param {string} folderName - Name used for the top-level ZIP folder and the
+ *   downloaded filename.
+ * @returns {Promise<void>}
+ */
 async function exportFilteredData(folderName) {
   const zip = new JSZip();
   const exportedFilenames = new Set();
@@ -491,6 +515,17 @@ async function exportFilteredData(folderName) {
 
 /*
  * Export the complete dataset (dynamic layer configuration).
+ */
+/**
+ * Export the complete current dataset as a ZIP archive.
+ *
+ * Serialises all registered dynamic layers — including layers that have no
+ * unsaved modifications — together with the Excel configuration workbook and
+ * short-pipe definitions. The archive is downloaded as
+ * <code>complete_dataset.zip</code>. Useful for creating a full project
+ * snapshot or preparing input for a fresh run.
+ *
+ * @returns {Promise<void>}
  */
 async function exportCompleteDataset() {
   const zip = new JSZip();
@@ -829,6 +864,16 @@ function getShortPipeResolvedExportPath() {
   return resolveLayerFilePath(filename);
 }
 
+/**
+ * Open the export type selection dialog.
+ *
+ * Presents a modal popup with three export options: changes only, filtered
+ * data (prompts for a folder name), and the complete dataset. Delegates to
+ * {@link exportChanges}, {@link showFolderNameDialog}, or
+ * {@link exportCompleteDataset} on confirmation.
+ *
+ * @returns {void}
+ */
 function openExportDialog() {
   showCustomPopup(
     '💾 Export Data',
