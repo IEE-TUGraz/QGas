@@ -33,8 +33,8 @@
  * Note: Functions exposed in global scope for cross-module compatibility
  * 
  * Development Information:
- * - Author: Dipl.-Ing. Marco Quantschnig
- * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
  * - Disclaimer: AI-assisted tools were used to support development and documentation.
@@ -49,14 +49,15 @@
  * ================================================================================
  */
 
+
 /**
- * Start the add-infrastructure-plan workflow.
+ * Open the file-picker dialog to begin the plan georeferencing workflow.
  *
- * Initialises the georeferencing UI (if not already initialised) and
- * programmatically triggers the hidden file input to open the OS
- * file-selection dialog. The selected JPEG or PNG image is then loaded
- * into the georeferencing overlay where the user defines at least three
- * ground-control-point pairs before the plan is projected onto the map.
+ * Initialises the georeferencing UI via {@link initializePlanGeorefUI} and
+ * programmatically triggers the browser file-input dialog so the user can
+ * select a JPG or PNG plan image. Called automatically by
+ * {@link activateAddPlanTool} and by the retry button inside the
+ * georeferencing panel.
  *
  * @returns {void}
  */
@@ -668,26 +669,6 @@ function applyAffine(transform, x, y) {
   };
 }
 
-/**
- * Create and add a georeferenced plan image overlay to the map.
- *
- * Instantiates a <code>PlanImageLayer</code> from a pre-built plan
- * configuration object that must contain at least three ground-control
- * pairs. The overlay is added to the map, registered in
- * <code>planLayers</code>, inserted into the legend, and recorded in
- * <code>loadedPlanIds</code> to prevent duplicate loading. Returns the
- * existing overlay layer if this plan ID was loaded earlier.
- *
- * @param {Object} planConfig - Plan configuration object.
- * @param {string} planConfig.id - Unique plan identifier.
- * @param {string} planConfig.name - Human-readable plan name.
- * @param {Array<Object>} planConfig.controlPairs - Array of at least three
- *   ground-control-pair objects <code>{image: {x,y}, map: {lat,lng}}</code>.
- * @param {Object} [options={}] - Additional rendering options.
- * @param {number} [options.opacity=0.75] - Initial overlay opacity (0–1).
- * @returns {PlanImageLayer|null} The created or existing Leaflet overlay
- *   layer, or <code>null</code> if the configuration is insufficient.
- */
 function addPlanOverlayFromConfig(planConfig, options = {}) {
   if (!planConfig || !Array.isArray(planConfig.controlPairs) || planConfig.controlPairs.length < 3) {
     console.warn('Cannot add plan overlay without at least three control pairs.');
@@ -906,18 +887,6 @@ async function loadPlanEntryFromDescriptor(descriptor, index) {
 }
 
 let planManifestLoadPromise = null;
-/**
- * Load all persisted infrastructure plans from the project manifest.
- *
- * Fetches the plan manifest (list of saved plan descriptors) from the
- * server, then sequentially loads each plan entry by fetching its
- * configuration JSON and image data. Already-loaded plan IDs are skipped.
- * Uses a singleton promise so that concurrent calls do not trigger
- * multiple parallel manifest fetches. Called automatically on project
- * load.
- *
- * @returns {Promise<void>}
- */
 async function loadPersistedInfrastructurePlans() {
   if (planManifestLoadPromise) return planManifestLoadPromise;
   planManifestLoadPromise = (async () => {
@@ -948,16 +917,6 @@ async function loadPersistedInfrastructurePlans() {
 window.loadPersistedInfrastructurePlans = loadPersistedInfrastructurePlans;
 window.handlePlanFileSelection = handlePlanFileSelection;
 
-/**
- * Activate the add-infrastructure-plan tool.
- *
- * Public entry point registered on <code>window</code>. Verifies that a
- * contributor name is set, deactivates all other editing modes, and
- * delegates to {@link startAddInfrastructurePlan} to open the
- * georeferencing workflow.
- *
- * @returns {void}
- */
 window.activateAddPlanTool = function activateAddPlanTool() {
   if (!checkContributorName()) return;
   deactivateAllModes();

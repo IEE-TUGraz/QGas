@@ -8,8 +8,8 @@
  * on the selected element or isolate a specific network component.
  *
  * Development Information:
- * - Author: Dipl.-Ing. Marco Quantschnig
- * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * - Created: March 2026
  * - License: See LICENSE file
  * - Disclaimer: AI-assisted tools were used to support development and documentation.

@@ -35,7 +35,7 @@ Inputs
 ------
 - Runtime environment: Python 3.x with Tkinter.
 - Local project folders (Input/ and related assets).
-- Map HTML entry point: Map.html served over the local HTTP server.
+- Map HTML entry point: GUI.html served over the local HTTP server.
 """
 
 import sys
@@ -55,6 +55,16 @@ from urllib.parse import urlparse, parse_qs, quote_plus
 
 class CombinedGUI:
     def __init__(self, root):
+        """
+        Initialize the QGas application GUI.
+
+        Configures the main window geometry, determines the application base path
+        (supporting both script and PyInstaller frozen-exe execution), initializes
+        the HTTP server state variables, and builds all UI widgets.
+
+        Args:
+            root (tk.Tk): The root Tkinter window instance created by ``main()``.
+        """
         print("Initializing QGas Map Interface...")
         self.root = root
         self.root.title("QGas - Interactive Gas Infrastructure Toolkit")
@@ -99,7 +109,7 @@ class CombinedGUI:
         # === MAP SERVER VARIABLES ===
         # Configuration for the local HTTP server that serves the interactive map
         self.PORT = 8000  # Port number for the local web server
-        self.filename = "Map.html"  # HTML file containing the interactive map
+        self.filename = "GUI.html"  # HTML file containing the interactive map
         self.url = f"http://localhost:{self.PORT}/{self.filename}"  # Complete URL for map access
         self.script_dir = self.app_dir  # Directory containing map files
         self.server_thread = None  # Thread object for running HTTP server in background
@@ -154,7 +164,17 @@ class CombinedGUI:
         print("Modern widget creation completed successfully")
     
     def create_header(self, parent):
-        """Create modern header with logo and title"""
+        """
+        Create the header section with logo, application title, and LED server-status indicator.
+
+        Attempts to load ``Images/QGas_Logo.png`` (requires Pillow); falls back to a
+        text emoji placeholder if the image is unavailable. The LED indicator in the
+        top-right corner is updated by ``update_status()`` whenever the server state
+        changes.
+
+        Args:
+            parent (tk.Frame): Parent container frame that the header is packed into.
+        """
         header_frame = tk.Frame(parent, bg='#ffffff', relief='flat', bd=2)
         header_frame.pack(fill=tk.X, pady=(0, 20))
         
@@ -183,12 +203,21 @@ class CombinedGUI:
                 self.logo_photo = ImageTk.PhotoImage(logo_image)
                 logo_label = tk.Label(logo_frame, image=self.logo_photo, bg='#ffffff')
                 logo_label.pack()
+                # Also set window/taskbar icon
+                try:
+                    icon_image = Image.open(logo_path).resize((32, 32), Image.Resampling.LANCZOS)
+                    self.icon_photo = ImageTk.PhotoImage(icon_image)
+                    self.root.iconphoto(True, self.icon_photo)
+                except Exception:
+                    pass
             else:
+                print(f"Logo not found at: {logo_path}")
                 # Fallback logo placeholder
                 logo_label = tk.Label(logo_frame, text="🏭", font=("Arial", 48), bg='#ffffff', fg='#007bff')
                 logo_label.pack()
         except Exception as e:
             # If any error occurs (PIL not available, image loading fails, etc.), use text placeholder
+            print(f"Logo load error: {e}")
             logo_label = tk.Label(logo_frame, text="🏭", font=("Arial", 48), bg='#ffffff', fg='#007bff')
             logo_label.pack()
         
@@ -238,7 +267,16 @@ class CombinedGUI:
         version_label.pack()
     
     def create_control_tiles(self, parent):
-        """Create modern tile-based control interface with larger action tiles"""
+        """
+        Create the tile-based control interface with Start, Open Map, and Stop action tiles.
+
+        Arranges three action tiles in a responsive 3-column grid (row 0) and an
+        information tile spanning all columns below (row 1). Row weights are set so
+        action tiles receive three times more vertical space than the info tile.
+
+        Args:
+            parent (tk.Frame): Parent container frame for the tile grid.
+        """
         tiles_frame = tk.Frame(parent, bg='#f8f9fa')
         tiles_frame.pack(fill=tk.BOTH, expand=True)
         
@@ -283,7 +321,24 @@ class CombinedGUI:
         self.create_info_tile(tiles_frame)
     
     def create_action_tile(self, parent, title, description, icon, button_text, command, color, row, column):
-        """Create a modern action tile with compressed height and minimal spacing"""
+        """
+        Create a single action tile widget and place it in the given grid cell.
+
+        Each tile contains a large emoji icon, a heading, a short description and a
+        colored action button. Hover effects darken the button color using
+        ``darken_color()``.
+
+        Args:
+            parent (tk.Frame): Parent grid container.
+            title (str): Heading text displayed inside the tile.
+            description (str): Longer description text shown below the heading.
+            icon (str): Unicode emoji used as the tile icon (e.g. ``"🚀"``).
+            button_text (str): Label text of the action button.
+            command (callable): Callback invoked when the button is clicked.
+            color (str): Hex color code for the button background (e.g. ``"#28a745"``).
+            row (int): Grid row index for tile placement.
+            column (int): Grid column index for tile placement.
+        """
         tile_frame = tk.Frame(parent, bg='#ffffff', relief='flat', bd=1, highlightbackground='#dee2e6', highlightthickness=1)
         tile_frame.grid(row=row, column=column, padx=12, pady=10, sticky='nsew', ipadx=20, ipady=12)
         
@@ -345,7 +400,15 @@ class CombinedGUI:
         button.bind("<Leave>", on_leave)
     
     def create_info_tile(self, parent):
-        """Create compact information display tile with minimal height"""
+        """
+        Create the compact information tile that spans all three columns.
+
+        Displays static server metadata in a 3-column grid: map file name, HTTP port,
+        server URL, working directory, and a feature summary.
+
+        Args:
+            parent (tk.Frame): Parent container whose grid row 1 receives the tile.
+        """
         info_frame = tk.Frame(parent, bg='#ffffff', relief='flat', bd=1, highlightbackground='#dee2e6', highlightthickness=1)
         info_frame.grid(row=1, column=0, columnspan=3, padx=20, pady=(10, 15), sticky='ew', ipadx=15, ipady=8)
         
@@ -632,7 +695,15 @@ class CombinedGUI:
                         self.send_error(500, f"GeoJSON Error: {str(e)}")
                 
                 def send_json_response(self, data):
-                    """Sendet JSON-Antwort"""
+                    """
+                    Serialize *data* as UTF-8 JSON and write a complete HTTP 200 response.
+
+                    Sets ``Content-Type: application/json; charset=utf-8`` and a matching
+                    ``Content-Length`` header before writing the body.
+
+                    Args:
+                        data (dict | list): Python object to serialize with ``json.dumps``.
+                    """
                     import json
                     json_data = json.dumps(data, ensure_ascii=False)
                     
@@ -643,7 +714,23 @@ class CombinedGUI:
                     self.wfile.write(json_data.encode('utf-8'))
                 
                 def get_layer_statistics(self, layer_name):
-                    """Gibt Layer-Statistiken zurück ohne Geometrie-Daten"""
+                    """
+                    Return feature count and file metadata for a layer without loading geometry.
+
+                    Looks up the layer's GeoJSON file via a fixed name mapping and reads only
+                    the ``features`` array length plus OS-level file metadata, keeping the
+                    response payload small.
+
+                    Args:
+                        layer_name (str): Logical layer key, one of ``'pipelines'``,
+                            ``'nodes'``, ``'compressors'``, ``'storages'``,
+                            ``'powerplants'``, ``'lng'``.
+
+                    Returns:
+                        dict: ``{'layer': str, 'count': int, 'file_size': int,
+                        'last_modified': float}`` on success, or
+                        ``{'error': str, 'count': 0}`` if the file is missing or unreadable.
+                    """
                     try:
                         import json
                         
@@ -694,8 +781,11 @@ class CombinedGUI:
     
     def show_project_selection_after_start(self):
         """
-        Show project selection dialog after server start
-        Allows user to choose which dataset to visualize
+        Scan the ``Input/`` folder and auto-select or prompt for a project after server start.
+
+        If only one sub-folder exists it is selected automatically. If multiple folders
+        exist the user is shown the project selection dialog. Falls back to
+        ``"Standard"`` on any error.
         """
         try:
             # Get available projects
@@ -707,7 +797,7 @@ class CombinedGUI:
                 # Show project selection dialog
                 selected_project = self.show_project_selection_dialog(projects)
                 if selected_project:
-                    # Store selected project for server routing instead of modifying Map.html
+                    # Store selected project for server routing instead of modifying GUI.html
                     self.selected_project = selected_project
                     print(f"Project selected for new session: {selected_project}")
             elif len(projects) == 1:
@@ -950,13 +1040,18 @@ class CombinedGUI:
     
     def show_project_selection_dialog(self, projects):
         """
-        Display project selection dialog with dropdown menu
-        
+        Display a modal project-selection dialog with a dropdown and project-creation support.
+
+        Defaults to ``"Standard"`` in the dropdown if that folder exists.  The dialog
+        also exposes a *Create New Project* button that calls
+        ``prompt_new_project_dialog()`` before returning.
+
         Args:
-            projects (list): List of available project folder names
-            
+            projects (list[str]): Sorted list of available project folder names.
+
         Returns:
-            bool: True if project selected, False if cancelled
+            str | None: The selected or newly created project name, or ``None`` if the
+            user cancelled the dialog.
         """
         import tkinter.ttk as ttk
         
@@ -1084,7 +1179,20 @@ class CombinedGUI:
         return self.dialog_result
 
     def prompt_new_project_dialog(self, parent, projects):
-        """Prompt for a new project name and create the project on disk."""
+        """
+        Show a secondary modal dialog to collect a new project name and create it on disk.
+
+        Validates the name with ``validate_project_name()`` and then calls
+        ``create_project_from_template()`` to scaffold the folder structure.
+
+        Args:
+            parent (tk.Toplevel): Parent dialog window used as the transient owner.
+            projects (list[str]): Existing project names used for duplicate detection.
+
+        Returns:
+            str | None: The validated new project name on success, or ``None`` if the
+            user cancelled or validation failed.
+        """
         dialog = tk.Toplevel(parent)
         dialog.title("Create New Project")
         dialog.geometry("460x300")
@@ -1157,7 +1265,21 @@ class CombinedGUI:
         return result['name']
 
     def validate_project_name(self, name, projects):
-        """Validate project name for Windows filesystem constraints."""
+        """
+        Validate a proposed project name against Windows filesystem and uniqueness rules.
+
+        Checks for empty input, forbidden characters (``< > : / \\ | ? * "``),
+        reserved names (``"."`` / ``".."``), trailing spaces or dots, and
+        case-insensitive duplicates in *projects*. Displays an error dialog for each
+        violation.
+
+        Args:
+            name (str): Raw name string entered by the user.
+            projects (list[str]): Existing project folder names for duplicate checking.
+
+        Returns:
+            str | None: The validated name if all checks pass, ``None`` otherwise.
+        """
         if not name:
             messagebox.showerror("Error", "Project name cannot be empty.")
             return None
@@ -1179,7 +1301,22 @@ class CombinedGUI:
         return name
 
     def create_project_from_template(self, project_name):
-        """Create a new project with empty pipelines and nodes plus config files."""
+        """
+        Scaffold a new project folder under ``Input/`` with minimal required files.
+
+        Creates ``Input/<project_name>/`` and populates it with:
+
+        - ``PL_Pipelines.geojson`` — empty feature collection (schema from Standard)
+        - ``N_Nodes.geojson`` — empty feature collection (schema from Standard)
+        - ``config.xlsx`` — minimal configuration workbook
+        - ``license.txt`` — empty placeholder
+
+        Args:
+            project_name (str): Validated name for the new project folder.
+
+        Returns:
+            bool: ``True`` if the project was created successfully, ``False`` on error.
+        """
         input_dir = os.path.join(self.app_dir, "Input")
         project_dir = os.path.join(input_dir, project_name)
         if os.path.exists(project_dir):
@@ -1196,10 +1333,10 @@ class CombinedGUI:
             self.write_empty_geojson(pipelines_src, os.path.join(project_dir, "PL_Pipelines.geojson"))
             self.write_empty_geojson(nodes_src, os.path.join(project_dir, "N_Nodes.geojson"))
 
-            config_dst = os.path.join(project_dir, "02_Input_and_Configuration.xlsx")
+            config_dst = os.path.join(project_dir, "config.xlsx")
             self.write_minimal_configuration_xlsx(config_dst)
 
-            license_dst = os.path.join(project_dir, "01_Data_and_Licensing.txt")
+            license_dst = os.path.join(project_dir, "license.txt")
             with open(license_dst, 'w', encoding='utf-8') as f:
                 f.write("")
 
@@ -1210,7 +1347,18 @@ class CombinedGUI:
             return False
 
     def write_empty_geojson(self, template_path, dest_path):
-        """Create an empty GeoJSON file while keeping schema and CRS."""
+        """
+        Write an empty GeoJSON FeatureCollection to *dest_path*.
+
+        Preserves the ``name`` and ``crs`` fields from *template_path* if it exists;
+        otherwise writes a minimal FeatureCollection whose ``name`` is derived from
+        the destination filename stem.
+
+        Args:
+            template_path (str): Path to an existing GeoJSON used as schema source.
+                If the file does not exist, a bare FeatureCollection is created.
+            dest_path (str): Absolute or relative output path for the new GeoJSON file.
+        """
         data = None
         if os.path.exists(template_path):
             with open(template_path, 'r', encoding='utf-8') as f:
@@ -1230,7 +1378,16 @@ class CombinedGUI:
             json.dump(data, f, ensure_ascii=True, indent=2)
 
     def write_minimal_configuration_xlsx(self, dest_path):
-        """Create a minimal configuration Excel with only pipelines and nodes."""
+        """
+        Write a minimal OOXML ``.xlsx`` workbook to *dest_path* without requiring openpyxl.
+
+        The workbook contains a single ``Input_Files`` sheet pre-populated with header
+        row and two data rows (pipelines and nodes) matching the expected QGas
+        configuration schema.
+
+        Args:
+            dest_path (str): Absolute or relative path where the ``.xlsx`` file is written.
+        """
         content_types = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
     <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
@@ -1305,13 +1462,22 @@ class CombinedGUI:
             zf.writestr('xl/styles.xml', styles)
     
     def update_map_paths(self, project_name):
-        """Update the map HTML file to use the selected project paths."""
+        """
+        Rewrite ``fetch()`` URLs in ``GUI.html`` to point to ``Input/<project_name>/``.
+
+        First normalises any pre-existing ``Input/<old_project>/`` prefix to plain
+        ``Input/`` (prevents double-nesting on repeated calls), then replaces all
+        ``fetch('Input/`` occurrences with ``fetch('Input/<project_name>/``.
+
+        Args:
+            project_name (str): Name of the project folder to activate in the map.
+        """
         import re
         try:
-            map_file_path = os.path.join(self.app_dir, "Map.html")
+            map_file_path = os.path.join(self.app_dir, "GUI.html")
             
             if not os.path.exists(map_file_path):
-                print("Map.html not found!")
+                print("GUI.html not found!")
                 return
             
             # Read current map file
@@ -1340,9 +1506,14 @@ class CombinedGUI:
             messagebox.showerror("Error", f"Could not update map for project {project_name}: {e}")
     
     def reset_map_paths(self):
-        """Reset map paths back to Output/ (original default state)."""
+        """
+        Revert all ``fetch('Input/<project>/``) URLs in ``GUI.html`` back to ``fetch('Output/``.
+
+        Intended as a cleanup step when the application shuts down or when the user
+        reverts to the legacy Output-folder layout.
+        """
         try:
-            map_file_path = os.path.join(self.app_dir, "Map.html")
+            map_file_path = os.path.join(self.app_dir, "GUI.html")
             
             if not os.path.exists(map_file_path):
                 return
@@ -1365,11 +1536,17 @@ class CombinedGUI:
             print(f"Error resetting map paths: {e}")
     
     def clear_browser_cache(self):
-        """Add cache-busting parameters to Map.html to force browser reload."""
+        """
+        Add or update a ``?v=<timestamp>`` cache-busting query parameter in ``GUI.html``.
+
+        Scans all ``.geojson`` fetch URLs in the HTML and replaces or appends a ``v``
+        parameter set to the current Unix timestamp so the browser fetches fresh data
+        on the next page load.
+        """
         try:
             import time
             cache_buster = str(int(time.time()))
-            map_file_path = os.path.join(self.app_dir, "Map.html")
+            map_file_path = os.path.join(self.app_dir, "GUI.html")
             
             if not os.path.exists(map_file_path):
                 return

@@ -5,8 +5,8 @@
  * Handles export workflows for changed, filtered, and complete datasets,
  * including ZIP assembly and Excel configuration generation.
  *
- * Author: Dipl.-Ing. Marco Quantschnig
- * Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * Disclaimer: AI-assisted tools were used to support development and documentation.
  *
  * Inputs:
@@ -276,7 +276,7 @@ function showFolderNameDialog() {
  * filter state, and serialises each layer to a GeoJSON file. Supplementary
  * files (Excel configuration workbook, short-pipe definitions) are appended
  * and the archive is offered for browser download as
- * <code>&lt;folderName&gt;.zip</code>.
+ * {@code <folderName>.zip}.
  *
  * @param {string} folderName - Name used for the top-level ZIP folder and the
  *   downloaded filename.
@@ -473,22 +473,22 @@ async function exportFilteredData(folderName) {
     const worksheet = XLSX.utils.aoa_to_sheet(wsData);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Input_Files');
     const excelBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    zip.file('02_Input_and_Configuration.xlsx', excelBinary);
+    zip.file('config.xlsx', excelBinary);
   } catch (error) {
     console.error('Error creating Excel file for filtered export:', error);
   }
 
-  /* Add Data and Licensing file if available. */
+  /* Add license file if available. */
   try {
     let response = null;
     if (typeof fetchProjectResource === 'function') {
-      const result = await fetchProjectResource('01_Data_and_Licensing.txt');
+      const result = await fetchProjectResource('license.txt');
       response = result?.response || null;
     }
     if (!response) {
       const fallbackUrl = typeof buildInputUrl === 'function'
-        ? buildInputUrl('01_Data_and_Licensing.txt')
-        : `Input/${(currentProject || 'Standard')}/01_Data_and_Licensing.txt?v=${Date.now()}`;
+        ? buildInputUrl('license.txt')
+        : `Input/${(currentProject || 'Standard')}/license.txt?v=${Date.now()}`;
       const fallbackResponse = await fetch(fallbackUrl);
       if (fallbackResponse.ok) {
         response = fallbackResponse;
@@ -496,7 +496,7 @@ async function exportFilteredData(folderName) {
     }
     if (response) {
       const text = await response.text();
-      zip.file('01_Data_and_Licensing.txt', text);
+      zip.file('license.txt', text);
     }
   } catch (error) {
     console.log('No Data and Licensing file found for filtered export');
@@ -526,6 +526,11 @@ async function exportFilteredData(folderName) {
  * snapshot or preparing input for a fresh run.
  *
  * @returns {Promise<void>}
+ * @example
+ * // Trigger a full project snapshot download
+ * exportCompleteDataset().then(() => {
+ *   console.log('complete_dataset.zip downloaded');
+ * });
  */
 async function exportCompleteDataset() {
   const zip = new JSZip();
@@ -823,19 +828,19 @@ async function exportCompleteDataset() {
     
     /* Convert to binary and add to ZIP. */
     const excelBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    zip.file('02_Input_and_Configuration.xlsx', excelBinary);
+    zip.file('config.xlsx', excelBinary);
     console.log('Added updated Excel configuration to export');
   } catch (error) {
     console.error('Error creating Excel file:', error);
   }
 
-  /* Add Data and Licensing file if available. */
+  /* Add license file if available. */
   try {
-    const { response } = await fetchProjectResource('01_Data_and_Licensing.txt');
+    const { response } = await fetchProjectResource('license.txt');
     if (response) {
       const text = await response.text();
-      zip.file('01_Data_and_Licensing.txt', text);
-      console.log('Added Data and Licensing file to export');
+      zip.file('license.txt', text);
+      console.log('Added license file to export');
     }
   } catch (error) {
     console.log('No Data and Licensing file found');

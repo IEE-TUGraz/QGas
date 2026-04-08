@@ -40,10 +40,20 @@ table{border-collapse:collapse;width:100%;margin:14px 0}th,td{border:1px solid v
 .guide-btn{display:inline-block;padding:6px 12px;border-radius:999px;border:1px solid rgba(37,99,235,.35);background:rgba(37,99,235,.12);color:var(--fg);font-weight:600}
 .guide-btn:hover{text-decoration:none;background:rgba(37,99,235,.18)}
 .guide-text{color:var(--muted)}
-.api-functions{margin-top:16px}
-.api-functions h3{font-size:16px;margin-bottom:12px;color:var(--h);border-bottom:1px solid var(--border);padding-bottom:6px}
-.api-func{border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:10px 0;background:rgba(37,99,235,.03)}
-.api-sig{margin:0 0 8px;font-size:15px;font-weight:600}
+.api-functions-section{margin-top:16px}
+.api-functions-section>summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--h);padding:8px 14px;background:rgba(37,99,235,.07);border-radius:8px;border:1px solid var(--border);list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+.api-functions-section>summary::-webkit-details-marker{display:none}
+.api-functions-section>summary::before{content:"▶";font-size:10px;color:var(--muted);transition:transform .2s}
+.api-functions-section[open]>summary::before{transform:rotate(90deg)}
+.api-func-count{font-size:12px;font-weight:400;color:var(--muted)}
+.api-functions{padding:4px 0}
+.api-func{border:1px solid var(--border);border-radius:10px;margin:8px 0;background:rgba(37,99,235,.03)}
+.api-func>summary{cursor:pointer;list-style:none;padding:10px 16px;display:flex;align-items:center;gap:8px;user-select:none}
+.api-func>summary::-webkit-details-marker{display:none}
+.api-func>summary::before{content:"▶";font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.api-func[open]>summary::before{transform:rotate(90deg)}
+.api-sig{margin:0;font-size:14px;font-weight:600}
+.api-func-body{padding:0 16px 14px}
 .api-desc{margin:6px 0;color:var(--fg)}
 .api-params{margin:8px 0;width:100%;border-collapse:collapse}
 .api-params th{background:rgba(125,125,125,.1);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}

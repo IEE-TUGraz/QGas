@@ -34,14 +34,14 @@
  * - UI helpers and utilities
  * 
  * Development Information:
- * - Author: Dipl.-Ing. Marco Quantschnig
- * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
  * - Disclaimer: AI-assisted tools were used to support development and documentation.
  *
  * Inputs:
- * - DOM containers and UI elements declared in Map.html.
+ * - DOM containers and UI elements declared in GUI.html.
  * - External libraries: Leaflet, Leaflet.Draw, JSZip, XLSX, Chart.js.
  * - Global runtime state (layerConfig, dynamicLayers, contributorInitials).
  *
@@ -1534,7 +1534,7 @@ const map = L.map('map', {
    */
   async function loadLayerConfiguration() {
     try {
-      const { response } = await fetchProjectResource('02_Input_and_Configuration.xlsx', { logAttempts: true });
+      const { response } = await fetchProjectResource('config.xlsx', { logAttempts: true });
       if (!response) {
         console.log('Configuration file not found, using defaults');
         return getDefaultLayerConfiguration();
@@ -1852,7 +1852,7 @@ const map = L.map('map', {
     
     try {
       // Load the data and licensing file from the current project folder
-      const { response } = await fetchProjectResource('01_Data_and_Licensing.txt');
+      const { response } = await fetchProjectResource('license.txt');
       
       if (response) {
         const text = await response.text();
@@ -5020,7 +5020,7 @@ document.getElementById('contributor-form').addEventListener('submit', function(
  *
  * Reads the <code>#contributor-input</code> field and returns
  * <code>false</code> (showing a contributor dialog) when the value is
- * empty or still the default placeholder <em>"Max Mustermann"</em>.
+ * empty or still the default placeholder "Max Mustermann".
  * All editing tools call this guard before modifying map data to ensure
  * every change is attributed to a real contributor.
  *
@@ -5214,6 +5214,14 @@ function getDefaultNodeStyleOptions(preferredLayer = null) {
  * @param {L.LayerGroup|null} [options.targetLayer=null] - Target layer
  *   group; falls back to the global <code>nodeLayer</code>.
  * @returns {L.CircleMarker} The created node marker.
+ * @example
+ * // Place a node on the default node layer
+ * const marker = createNewNode(L.latLng(48.21, 16.37), 'N_MQ_001');
+ *
+ * // Place a node on a specific layer (e.g. hydrogen nodes)
+ * const h2marker = createNewNode(L.latLng(48.21, 16.37), 'N_MQ_002', {
+ *   targetLayer: hydrogenNodeLayer
+ * });
  */
 function createNewNode(latlng, nodeId, options = {}) {
   const targetLayer = options.targetLayer || null;
@@ -7362,6 +7370,11 @@ function createDatasetLayer(filename, data) {
  *
  * @returns {Array<L.LayerGroup>} Array of Leaflet layer groups whose
  *   features represent network nodes.
+ * @example
+ * // Count all node markers across the project
+ * let count = 0;
+ * getAllNodeLayers().forEach(lg => lg.eachLayer(() => count++));
+ * console.log('Total nodes:', count);
  */
 function getAllNodeLayers() {
   try {
@@ -7460,11 +7473,11 @@ window.getAllNodeLayers = getAllNodeLayers;
 window.getAllLineLayers = getAllLineLayers;
 
 
-// --- Restored from original Map.html to support modular tools ---
+// --- Restored from original GUI.html to support modular tools ---
 // activateInfoMode moved to info_mode.js module
 
 
-// --- Restored from original Map.html (used after layer load) ---
+// --- Restored from original GUI.html (used after layer load) ---
 function linkInlineElementsToNearbyNodes(toleranceMeters = 50) {
     if (!map) return;
     const inlineLayers = getAllInlineLayers();

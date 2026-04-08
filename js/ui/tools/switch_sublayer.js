@@ -30,8 +30,8 @@
  * - Updates legend automatically
  * 
  * Development Information:
- * - Author: Dipl.-Ing. Marco Quantschnig
- * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
  * - Disclaimer: AI-assisted tools were used to support development and documentation.
@@ -46,15 +46,16 @@
  * ================================================================================
  */
 
+
 /**
- * Start the sublayer switching workflow.
+ * Begin the sublayer-switching workflow.
  *
- * Retrieves all layer configurations that declare sublayer children, presents
- * a selection dialog for the parent layer, and then guides the user through
- * selecting individual features to reassign to a sublayer. Selected elements
- * are moved from the parent layer to the target sublayer (creating the
- * sublayer on demand if it does not yet exist) and the legend is updated
- * to reflect the new layer.
+ * Validates that at least one eligible parent layer is loaded, then
+ * presents a selection dialog that lets the user choose a parent layer and
+ * a destination sublayer. After confirmation, click handlers are attached
+ * to every matching element so the user can mark features for transfer.
+ * Completes by moving the selected elements to the destination sublayer and
+ * updating the legend.
  *
  * @returns {void}
  */
@@ -1054,17 +1055,6 @@ function handlePlanViewportWheel(event) {
 }
 /*
  * Public activation wrapper.
- */
-/**
- * Activate the switch-to-sublayer tool.
- *
- * Public entry point registered on <code>window</code>. Deactivates all
- * other editing modes, sets <code>currentMode</code> to
- * <code>'switch-sublayer'</code>, and delegates to
- * {@link startSublayerSwitchFlow} to run the interactive layer-transfer
- * workflow.
- *
- * @returns {void}
  */
 window.activateSwitchSublayerTool = function activateSwitchSublayerTool() {
   deactivateAllModes();

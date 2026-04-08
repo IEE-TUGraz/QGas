@@ -38,7 +38,7 @@ conda activate QGas
 <h2>2) Start QGas GUI</h2>
 
 <div class="codehilite">
-<pre><span></span><code>python Server_Control.py
+<pre><span></span><code>python Server.py
 </code></pre>
 </div>
 
@@ -46,13 +46,13 @@ conda activate QGas
 
 <ul>
 <li>In the GUI, select a project from the <strong><code>Input/</code></strong> folder</li>
-<li>Start the server (GUI controls web server and WebSocket)</li>
+<li>Start the server (GUI controls the web server)</li>
 </ul>
 
 <h2>4) Open Interactive Map</h2>
 
 <ul>
-<li><code>http://localhost:8000/Map.html</code></li>
+<li><code>http://localhost:8000/GUI.html</code></li>
 </ul>
 
 <p>If a contributor dialog appears: create a new contributor or select an existing one.</p>

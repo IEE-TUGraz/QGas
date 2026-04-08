@@ -11,7 +11,7 @@
 
 <p><strong>Server Status LED</strong> - Real-time indicator showing server status (red = stopped, green = running).</p>
 
-<p><strong>Start Server Button</strong> - Initializes HTTP and WebSocket servers on ports 8000 and 8001.</p>
+<p><strong>Start Server Button</strong> - Initializes the HTTP server on port 8000.</p>
 
 <p><strong>Open Map Button</strong> - Launches the interactive map interface in the default web browser.</p>
 

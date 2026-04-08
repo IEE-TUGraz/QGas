@@ -23,8 +23,8 @@
  * 5. Pipeline is added to selected layer
  * 
  * Development Information:
- * - Author: Dipl.-Ing. Marco Quantschnig
- * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
  * - Disclaimer: AI-assisted tools were used to support development and documentation.
@@ -280,6 +280,7 @@ function resolveNodeLayer(options = {}) {
  *   <code>L.CircleMarker</code> or <code>L.Marker</code> as its sole
  *   argument.
  * @returns {void}
+ * @internal
  */
 function forEachNodeMarker(callback) {
   if (typeof callback !== 'function') {
@@ -322,6 +323,7 @@ function forEachNodeMarker(callback) {
  * @param {Function} handler - Callback invoked with
  *   <code>(marker, event)</code> when a node is clicked.
  * @returns {void}
+ * @internal
  */
 function setNodeSelectionHandlers(handler) {
   if (typeof handler !== 'function') {
@@ -348,6 +350,7 @@ function setNodeSelectionHandlers(handler) {
  * click behaviour.
  *
  * @returns {void}
+ * @internal
  */
 function clearNodeSelectionHandlers() {
   forEachNodeMarker(marker => marker.off('click'));

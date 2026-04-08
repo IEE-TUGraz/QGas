@@ -5,8 +5,8 @@
  * Provides a screenshot mode for highlighting elements and preparing the map
  * for manual capture.
  *
- * Author: Dipl.-Ing. Marco Quantschnig
- * Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * Disclaimer: AI-assisted tools were used to support development and documentation.
  *
  * Inputs:

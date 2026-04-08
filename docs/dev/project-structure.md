@@ -54,8 +54,8 @@
 ├── Plans/
 │   └── Image Infrastructure Plans
 ├── environment.yml
-├── Server_Control.py
-├── Map.html
+├── Server.py
+├── GUI.html
 └── readme.md
 </code></pre>
 </div>
@@ -63,8 +63,8 @@
 <h2>Key Entry Points</h2>
 
 <ul>
-<li><strong><code>Server_Control.py</code></strong>: Desktop GUI + HTTP server</li>
-<li><strong><code>Map.html</code></strong>: Entry point for the web interface</li>
+<li><strong><code>Server.py</code></strong>: Desktop GUI + HTTP server</li>
+<li><strong><code>GUI.html</code></strong>: Entry point for the web interface</li>
 <li><strong><code>js/core.js</code></strong>: Core front-end logic</li>
 <li><strong><code>docs/</code></strong>: Documentation source (MkDocs)</li>
 </ul>
@@ -75,8 +75,8 @@
 
 <div class="codehilite">
 <pre><span></span><code>Input/&lt;ProjectName&gt;/
-├── 01_Data_and_Licensing.txt
-├── 02_Input_and_Configuration.xlsx
+├── license.txt
+├── config.xlsx
 ├── pipelines.geojson
 ├── nodes.geojson
 ├── Additional_Layers.geojson
@@ -95,6 +95,6 @@
 <h3>Project Metadata</h3>
 
 <ul>
-<li><code>01_Data_and_Licensing.txt</code> - Data sources, licensing, and notes. This is plain text and can be edited freely.</li>
-<li><code>02_Input_and_Configuration.xlsx</code> - Layer configuration used by the UI (layer names, colors, type, and styling). You can edit the legend names, colors, marker type, size, and which files are loaded.</li>
+<li><code>license.txt</code> - Data sources, licensing, and notes. This is plain text and can be edited freely.</li>
+<li><code>config.xlsx</code> - Layer configuration used by the UI (layer names, colors, type, and styling). You can edit the legend names, colors, marker type, size, and which files are loaded.</li>
 </ul>

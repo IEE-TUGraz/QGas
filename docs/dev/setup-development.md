@@ -32,7 +32,7 @@ git branch
 <li>Data: add to a project folder under <code>Input/</code></li>
 </ul>
 
-<p>Set breakpoints in <code>Server_Control.py</code>, then press F5 to start debugging.</p>
+<p>Set breakpoints in <code>Server.py</code>, then press F5 to start debugging.</p>
 
 <h3>JavaScript Debugging</h3>
 
@@ -59,14 +59,13 @@ git branch
 <ul>
 <li>Ensure server is running (green LED in GUI)</li>
 <li>Check browser console for JavaScript errors</li>
-<li>Verify WebSocket connection (check Network tab)</li>
 <li>Try hard refresh (Ctrl+F5)</li>
 </ul>
 
 <h4>Tool Not Working</h4>
 <ul>
 <li>Check browser console for JavaScript errors</li>
-<li>Verify tool module is loaded in Map.html</li>
+<li>Verify tool module is loaded in GUI.html</li>
 <li>Check if tool is properly registered in <code>tools.js</code></li>
 </ul>
 
@@ -77,7 +76,7 @@ git branch
 <ol>
 <li>Create new file: <code>js/ui/tools/my_tool.js</code></li>
 <li>Implement tool with activation/deactivation functions</li>
-<li>Add script tag in <code>Map.html</code></li>
+<li>Add script tag in <code>GUI.html</code></li>
 <li>Register in <code>js/ui/tools.js</code> tool list</li>
 <li>Add button in tools popup grid</li>
 </ol>

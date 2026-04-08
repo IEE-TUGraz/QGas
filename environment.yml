@@ -17,4 +17,3 @@ dependencies:
 
   # pip packages for specialized dependencies
   - pip:
-    - websockets>=11.0

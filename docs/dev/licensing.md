@@ -80,11 +80,6 @@ SOFTWARE.
 <td>HPND License</td>
 <td>Historical Permission Notice and Disclaimer (permissive)</td>
 </tr>
-<tr>
-<td><strong>websockets</strong></td>
-<td>BSD 3-Clause</td>
-<td>Permissive open source license</td>
-</tr>
 </tbody>
 </table>
 

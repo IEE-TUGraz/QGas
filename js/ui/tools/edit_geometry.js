@@ -29,8 +29,8 @@
  * - Prevents simultaneous editing of multiple elements
  * 
  * Development Information:
- * - Author: Dipl.-Ing. Marco Quantschnig
- * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
  * - Disclaimer: AI-assisted tools were used to support development and documentation.
@@ -47,16 +47,8 @@
  */
 
 /**
- * Activate edit mode for existing drawn pipeline features.
- *
- * Attaches per-feature click handlers to all line-string features in the
- * <code>drawnItems</code> layer group. Clicking a feature opens Leaflet
- * Draw editing for that feature, locks its endpoints to preserve node
- * connectivity, and shows Save/Discard toolbar buttons. Only one feature
- * can be edited at a time; selecting a new one automatically disables
- * the previously active edit session.
- *
- * @returns {void}
+ * Activate edit mode for existing drawn items
+ * Binds click handlers to enable editing on selected features
  */
 function activateEditModeForExisting() {
   drawnItems.eachLayer(layer => {
@@ -86,17 +78,6 @@ function activateEditModeForExisting() {
 /* Initialize Info mode after map load. */
 currentMode = 'info';
 resetNodeClicks();
-/**
- * Recalculate and apply positional offsets for split-node sub-markers.
- *
- * Iterates all node markers that carry a <code>_splitOffset</code> pixel
- * offset (assigned during a node-split operation) and recomputes their
- * geographic position after map pan/zoom using Leaflet’s layer-point
- * conversion. Called automatically on <code>zoomend</code> and
- * <code>moveend</code> map events.
- *
- * @returns {void}
- */
 function updateSplitNodeOffsets() {
   forEachNodeMarker(marker => {
     if (marker._splitOffset) {
@@ -281,17 +262,6 @@ function activateInfoMode(force = false) {
 }
 
 
-/**
- * Rebind all element click and popup handlers for the current mode.
- *
- * Clears existing event listeners on every node, power-plant, compressor,
- * LNG terminal, storage, consumption, and other point-layer feature, then
- * re-attaches the appropriate handler for the active <code>currentMode</code>.
- * Must be called after any operation that changes node markers (e.g.,
- * shape changes, icon replacement) to restore interactivity.
- *
- * @returns {void}
- */
 function updateAllElementInteractions() {
   try {
     const handledLayers = new Set();
@@ -1307,18 +1277,6 @@ function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
   });
 }
 
-/**
- * Activate the full geometry editing mode.
- *
- * Disables any active drawing tools, closes open popups, and releases any
- * in-progress Leaflet Draw edit session. Binds per-layer click handlers
- * for node-position editing (click to select, drag to reposition) and
- * pipeline routing editing (via {@link activatePipelineRouteEdit}).
- * Connected pipelines are updated in real time as nodes are dragged.
- * Save and Discard buttons are shown for each edit session.
- *
- * @returns {void}
- */
 function activateEditMode() {
   try {
     // Erst alle Modi deaktivieren (ohne Button-Highlighting)

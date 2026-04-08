@@ -226,14 +226,6 @@
 <td>VS Code Python language support and debugging</td>
 </tr>
 <tr>
-<td><strong>ESLint</strong></td>
-<td>JavaScript linting (optional)</td>
-</tr>
-<tr>
-<td><strong>Prettier</strong></td>
-<td>Code formatting (optional)</td>
-</tr>
-<tr>
 <td><strong>Git</strong></td>
 <td>Version control</td>
 </tr>
@@ -258,24 +250,6 @@
 <li>Canvas API (for charts)</li>
 <li>File API (for exports)</li>
 <li>localStorage</li>
-</ul>
-
-<h2>System Requirements</h2>
-
-<h3>Minimum Requirements</h3>
-<ul>
-<li><strong>OS:</strong> Windows 10+ or Linux (Ubuntu 20.04+)</li>
-<li><strong>RAM:</strong> 4 GB</li>
-<li><strong>Disk:</strong> 500 MB free space (plus space for projects)</li>
-<li><strong>Python:</strong> 3.11 or higher</li>
-<li><strong>Network:</strong> Internet connection for map tiles and CDN resources</li>
-</ul>
-
-<h3>Recommended Requirements</h3>
-<ul>
-<li><strong>RAM:</strong> 8 GB or more</li>
-<li><strong>CPU:</strong> Multi-core processor for better performance</li>
-<li><strong>Display:</strong> 1920x1080 or higher resolution</li>
 </ul>
 
 <h2>Network Ports</h2>
@@ -334,7 +308,7 @@ conda activate QGas
 
 <p>To add a new JavaScript library:</p>
 <ol>
-<li>Add CDN link in <code>Map.html</code> header</li>
+<li>Add CDN link in <code>GUI.html</code> header</li>
 <li>Ensure it's loaded before scripts that use it</li>
 <li>Document it in this file</li>
 <li>Consider fallback for offline scenarios if critical</li>

@@ -21,8 +21,8 @@
  * polluting the global scope while exposing necessary functions.
  * 
  * Development Information:
- * - Author: Dipl.-Ing. Marco Quantschnig
- * - Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
+ * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
  * - Created: August 2025
  * - License: See LICENSE file
  * - Disclaimer: AI-assisted tools were used to support development and documentation.
@@ -44,9 +44,10 @@
 (function () {
   
   /**
-   * Fallback scan for node layers when core functions are not yet available
-   * Searches through dynamicLayers and legacy layer references
+   * Fallback scan for node layers when core functions are not yet available.
+   * Searches through dynamicLayers and legacy layer references.
    * @returns {Array} Array of node layer objects
+   * @internal
    */
   function fallbackScan() {
     const out = [];

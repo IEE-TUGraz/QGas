@@ -48,5 +48,5 @@ nav:
       - Dependencies & Packages: dev/packages.md
       - Licensing: dev/licensing.md
   - API Reference:
-      - "Python: Server_Control.py": api/python-gui.md
+      - "Python: Server.py": api/python-gui.md
       - JavaScript Modules: api/js-modules.md
