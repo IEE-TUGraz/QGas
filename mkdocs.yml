@@ -47,6 +47,8 @@ nav:
       - Development Setup: dev/setup-development.md
       - Dependencies & Packages: dev/packages.md
       - Licensing: dev/licensing.md
+  - Reference:
+      - Citing: ref/citing.md
   - API Reference:
       - "Python: Server.py": api/python-gui.md
       - JavaScript Modules: api/js-modules.md

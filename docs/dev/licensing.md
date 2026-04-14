@@ -12,7 +12,7 @@
 <div class="codehilite">
 <pre><span></span><code>MIT License
 
-Copyright (c) 2025 Marco Quantschnig, Yannick Werner, Thomas Klatzer
+Copyright (c) 2025 Marco Quantschnig, Yannick Werner, Sonja Wogrin, Thomas Klatzer
 Institute of Electricity Economics and Energy Innovation (IEE)
 Graz University of Technology, Austria
 
@@ -182,29 +182,6 @@ SOFTWARE.
 }
 </code></pre>
 </div>
-
-<h2>Citation</h2>
-
-<p>If you use QGas in academic or commercial work, please cite it:</p>
-
-<h3>BibTeX Format</h3>
-
-<div class="codehilite">
-<pre><span></span><code>@misc{QGAS,
-   author = {Marco Quantschnig and Yannick Werner and Thomas Klatzer and Sonja Wogrin},
-   title = {{QGas: Interactive Gas Infrastructure Toolkit}},
-   howpublished = {\url{https://github.com/IEE-TUGraz/QGas}},
-   year = {2025},
-   note = {Developed at the Institute of Electricity Economics 
-           and Energy Innovation (IEE), Graz University of 
-           Technology, Austria}
-}
-</code></pre>
-</div>
-
-<h3>Text Format</h3>
-
-<p>M. Quantschnig, Y. Werner, T. Klatzer, and S. Wogrin (2025). <em>QGas: Interactive Gas Infrastructure Toolkit</em>. Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology. https://github.com/IEE-TUGraz/QGas</p>
 
 <h2>Contributing</h2>
 
