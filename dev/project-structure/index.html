@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Project Structure - QGas Documentation</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-base-url="../..">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="../../assets/QGas_Logo.png" alt="QGas Logo" onerror="this.style.display='none'">
+        <div>
+          <div class="title">QGas Docs</div>
+          <div class="sub">Updated: 2026-02-09</div>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <input id="search" class="search" placeholder="Search docs..." autocomplete="off" />
+        <div id="search-results" class="search-results" aria-live="polite"></div>
+      </div>
+      <nav class="nav">
+        
+          
+            <a class="" href="../..">Home</a>
+          
+        
+          
+            <h3>User Guide</h3>
+            
+              
+                <a class="" href="../../user/quickstart/">&bull; Quickstart</a>
+              
+            
+              
+                <a class="" href="../../user/running/">&bull; Running QGas</a>
+              
+            
+              
+                <a class="" href="../../user/interface-overview/">&bull; Interface Overview</a>
+              
+            
+              
+                <a class="" href="../../user/main-screen/">&bull; Main Screen</a>
+              
+            
+              
+                <a class="" href="../../user/tools/">&bull; Toolkit / Tools</a>
+              
+            
+          
+        
+          
+            <h3>Developer</h3>
+            
+              
+                <a class="active" href="./">&bull; Project Structure</a>
+              
+            
+              
+                <a class="" href="../setup-development/">&bull; Development Setup</a>
+              
+            
+              
+                <a class="" href="../packages/">&bull; Dependencies & Packages</a>
+              
+            
+              
+                <a class="" href="../licensing/">&bull; Licensing</a>
+              
+            
+          
+        
+          
+            <h3>API Reference</h3>
+            
+              
+                <a class="" href="../../api/python-gui/">&bull; Python: Server.py</a>
+              
+            
+              
+                <a class="" href="../../api/js-modules/">&bull; JavaScript Modules</a>
+              
+            
+          
+        
+      </nav>
+      <div class="footer">
+        <div class="badge">Offline-capable HTML Docs</div>
+        <div style="margin-top:8px">Source: User Manual (Dec 2025) + Codebase</div>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="breadcrumb">QGas / Developer / Project Structure</div>
+<h1>Project Structure</h1>
+
+<h2>Overview</h2>
+
+<div class="codehilite">
+<pre><span></span><code>QGas/
+├── Conda-Activation-Scripts/
+├── docs/
+│   ├── api/
+│   ├── assets/
+│   ├── dev/
+│   └── user/
+│   ├── docs_md_theme/
+├── Images/
+│   ├── Loading_Screen.png
+│   ├── Logo_IEE.png
+│   ├── QGas_Logo.png
+│   └── TU_Graz.png
+├── Input/
+│   ├── SciGrid_IGGIELGNC_1/
+│   └── Additional Datasets/
+├── js/
+│   ├── core.js
+│   ├── shared/
+│   │   └── node_layers.js
+│   └── ui/
+│       ├── export.js
+│       ├── filter.js
+│       ├── group.js
+│       ├── legend.js
+│       ├── options.js
+│       ├── screenshot.js
+│       ├── statistics.js
+│       ├── tools.js
+│       └── tools/
+│           ├── add_infrastructure.js
+│           ├── add_new_element.js
+│           ├── add_pipeline.js
+│           ├── add_plan.js
+│           ├── change_direction.js
+│           ├── delete.js
+│           ├── distribute_compressors.js
+│           ├── divide_pipeline.js
+│           ├── edit_geometry.js
+│           ├── group_pipelines.js
+│           ├── info_mode.js
+│           ├── integrate_dataset.js
+│           ├── reconnect_infrastructure.js
+│           ├── short_pipe.js
+│           ├── split_node.js
+│           ├── switch_sublayer.js
+│           └── topology_check.js
+├── Plans/
+│   └── Image Infrastructure Plans
+├── environment.yml
+├── Server.py
+├── GUI.html
+└── readme.md
+</code></pre>
+</div>
+
+<h2>Key Entry Points</h2>
+
+<ul>
+<li><strong><code>Server.py</code></strong>: Desktop GUI + HTTP server</li>
+<li><strong><code>GUI.html</code></strong>: Entry point for the web interface</li>
+<li><strong><code>js/core.js</code></strong>: Core front-end logic</li>
+<li><strong><code>docs/</code></strong>: Documentation source (MkDocs)</li>
+</ul>
+
+<h2>Example Project Structure</h2>
+
+<p>Each project lives under <strong><code>Input/&lt;ProjectName&gt;/</code></strong>:</p>
+
+<div class="codehilite">
+<pre><span></span><code>Input/&lt;ProjectName&gt;/
+├── license.txt
+├── config.xlsx
+├── pipelines.geojson
+├── nodes.geojson
+├── Additional_Layers.geojson
+└── Infrastructure_Plans/   # optional
+</code></pre>
+</div>
+
+<h3>Layer Files</h3>
+
+<ul>
+<li><code>pipelines.geojson</code> - Main pipeline network (LineString). Edit geometry and attributes via the tools.</li>
+<li><code>nodes.geojson</code> - Network nodes and junctions (Point). Edit positions and attributes as needed.</li>
+<li><code>Additional_Layers.geojson</code> - Container for extra layers beyond pipelines and nodes. Use this for project-specific point or line layers.</li>
+</ul>
+
+<h3>Project Metadata</h3>
+
+<ul>
+<li><code>license.txt</code> - Data sources, licensing, and notes. This is plain text and can be edited freely.</li>
+<li><code>config.xlsx</code> - Layer configuration used by the UI (layer names, colors, type, and styling). You can edit the legend names, colors, marker type, size, and which files are loaded.</li>
+</ul>
+    </main>
+  </div>
+  <script src="../../assets/script.js"></script>
+</body>
+</html>
