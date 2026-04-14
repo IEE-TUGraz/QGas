@@ -98,6 +98,8 @@
   const editModeHiddenPointLayers = new Set();
   /* Toggle that tracks the edit-geometry visibility state. */
   let editGeometryVisibilityActive = false;
+  /* Registry for additional (integration) datasets keyed by filename. */
+  const additionalDatasets = {};
 
 /* ================================================================================
  * GLOBAL STATE - STYLING AND COLORS
@@ -3551,6 +3553,7 @@ function resetElementStyle(layer) {
       layer._icon.style.filter = "";
       layer._icon.style.border = "";
       layer._icon.style.borderRadius = "";
+      layer._icon.style.outline = "";
     }
   }
 }
@@ -7319,6 +7322,18 @@ function loadSingleDatasetWithCallback(filename, callback) {
   }
 }
 
+function formatFeatureProperties(properties) {
+  let html = '<table style="width:100%; border-collapse: collapse; font-size: 12px;">';
+  for (const [key, value] of Object.entries(properties)) {
+    if (value === null || value === undefined || value === '') continue;
+    const safeKey = String(key).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const safeVal = String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    html += `<tr><td style="padding:2px 6px; font-weight:bold; white-space:nowrap;">${safeKey}</td><td style="padding:2px 6px;">${safeVal}</td></tr>`;
+  }
+  html += '</table>';
+  return html;
+}
+
 function createDatasetLayer(filename, data) {
   // Layer erstellen (unsichtbar)
   const layer = L.geoJSON(data, {
@@ -7330,10 +7345,9 @@ function createDatasetLayer(filename, data) {
     onEachFeature: function(feature, layer) {
       // Popup für Info
       if (feature.properties) {
-        const isINET = filename.toLowerCase().includes('inet');
         let popupContent = `<div style="max-width: 350px;">`;
         popupContent += `<h4 style="margin: 0 0 10px 0; color: #ff6600;">${filename.replace('.geojson', '')}</h4>`;
-        popupContent += formatFeatureProperties(feature.properties, isINET);
+        popupContent += formatFeatureProperties(feature.properties);
         popupContent += '</div>';
         
         layer.bindPopup(popupContent, {maxWidth: 400});

@@ -55,6 +55,10 @@
 
 <p><strong>Statistics Button</strong> - Opens statistical overview window with element counts and pipeline analytics.</p>
 
+<p><strong>Remove Button</strong> - Activates Remove Mode; clicking a legend entry permanently deletes that layer from the project.</p>
+
+<p><strong>Rename Button</strong> - Activates Rename Mode; clicking a layer name opens an inline editor to change its display name.</p>
+
 <p><strong>Contributor Input Box</strong> - Text field to enter contributor name for tracking changes.</p>
 
 <p><strong>OSM Attribution</strong> - OpenStreetMap copyright notice in the bottom-right corner.</p>

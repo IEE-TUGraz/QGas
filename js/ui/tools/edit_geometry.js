@@ -986,7 +986,7 @@ function selectNodeForPositionEdit(nodeMarker) {
   
   /* Highlight the selected node/inline marker. */
   captureOriginalMarkerStyle(nodeMarker, 'highlight');
-  nodeMarker.setStyle({fillColor: "#00ff00", color: "#00aa00", radius: 10, weight: 3});
+  highlightNodeMarkerForEdit(nodeMarker);
   window.selectedNodeMarker = nodeMarker;
   window.selectedNodeConnectedPipelines = [];
   
@@ -1096,6 +1096,18 @@ function showNodeEditButtons(nodeMarker, nodeIdLabel) {
   
   toolsSection.appendChild(saveBtn);
   toolsSection.appendChild(discardBtn);
+}
+
+/* Apply a green highlight to a node marker regardless of type.
+ * CircleMarker (native point) → setStyle; DivIcon Marker (shaped) → CSS filter. */
+function highlightNodeMarkerForEdit(marker) {
+  if (!marker) return;
+  if (marker instanceof L.CircleMarker) {
+    marker.setStyle({ fillColor: '#00ff00', color: '#00aa00', radius: 10, weight: 3 });
+  } else if (marker._icon) {
+    marker._icon.style.filter = 'sepia(1) saturate(10) hue-rotate(80deg) brightness(1.3)';
+    marker._icon.style.outline = '2px solid #00aa00';
+  }
 }
 
 /* Cleanup for node edit mode. */

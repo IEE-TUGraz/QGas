@@ -55,9 +55,18 @@
 
 <h2>Right Side: Legend</h2>
 
-<p>The Legend panel lists all available layers for the currently selected project. Each layer has a checkbox to toggle its visibility on the map.</p>
+<p>The Legend panel lists all available layers for the currently selected project. Each layer has a checkbox to toggle its visibility on the map. Layers added through <strong>Add New Element</strong>, <strong>Switch to Sublayer</strong>, <strong>Integrate Dataset</strong>, or <strong>Add Infrastructure Plans</strong> also appear here automatically.</p>
 
-<p>The <strong>Select All</strong> button at the bottom of the legend enables or disables all infrastructure types simultaneously. In normal mode, the legend stays fixed. It can be moved in screenshot mode if needed. It can also be collapsed to save screen space, and updates in real-time to reflect the current layer state.</p>
+<p>At the bottom of the legend there is a row of four buttons arranged in a 2×2 grid:</p>
+
+<ul>
+<li><strong>Select All</strong> – Toggles all infrastructure layers on or off simultaneously.</li>
+<li><strong>Statistics</strong> – Opens the analytics window (see below).</li>
+<li><strong>Remove</strong> – Activates <em>Remove Mode</em>. While active, each legend entry shows a red ✕ indicator. Clicking an entry permanently removes that layer and all its elements from the project. Click <strong>Remove</strong> again to exit the mode.</li>
+<li><strong>Rename</strong> – Activates <em>Rename Mode</em>. While active, clicking on any layer name opens an inline text field to change the display name. Confirm with Enter or by clicking away. Click <strong>Rename</strong> again to exit the mode.</li>
+</ul>
+
+<p>The legend updates in real-time and can be collapsed to save screen space.</p>
 
 <h3>Statistics Button</h3>
 
@@ -128,7 +137,7 @@
 <h3>Integration Tools</h3>
 <ul>
 <li><strong>Add Infrastructure Plans</strong> - Import infrastructure plan images, georeference them using control points, and use them as a semi-transparent background for tracing</li>
-<li><strong>Integrate Dataset</strong> - Match external GeoJSON datasets to the current project by pairing pipeline segments for attribute transfer</li>
+<li><strong>Integrate Dataset</strong> - Import a full QGas project or a single GeoJSON layer into the active project (with interactive layer mapping and attribute merging), or interactively pair pipeline segments between two datasets for attribute transfer</li>
 </ul>
 
 <p>Each tool provides specific prompts and visual feedback to guide users through the editing process. Detailed descriptions of all tools are available in the Toolkit / Tools section.</p>

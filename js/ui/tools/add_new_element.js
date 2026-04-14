@@ -141,8 +141,6 @@
       const uniqueColor = getUniqueLineColor();
       registerLineColorUsage(uniqueColor);
       const defaultWeight = 4;
-      /* Add to legend. */
-      addToLegend(displayName, 'line', { color: uniqueColor });
       layerGroup._customLineLayer = true;
       layerGroup._customLayerName = displayName;
       layerGroup._customLineColor = uniqueColor;
@@ -176,7 +174,6 @@
       const nodeStyle = getDefaultNodeStyleOptions(layerGroup);
       const defaultColor = nodeStyle.fillColor || '#ff7800';
       const defaultRadius = nodeStyle.radius ?? 6;
-      addToLegend(displayName, 'point', { color: defaultColor });
       layerGroup._customLayerName = displayName;
       layerGroup._customLayerColor = defaultColor;
       const nodeIdPrefix = deriveCustomLayerPrefix(displayName);
@@ -208,8 +205,6 @@
       /* Inline element layer (point layer with special handling). */
       layerGroup = L.layerGroup().addTo(map);
       const defaultColor = '#f03';
-      /* Add to legend. */
-      addToLegend(displayName, 'point', { color: defaultColor });
       isInline = true;
       const defaultRadius = 6;
       const idPrefix = deriveCustomLayerPrefix(displayName);
@@ -240,8 +235,6 @@
       /* Point layer (infrastructure). */
       layerGroup = L.layerGroup().addTo(map);
       const defaultColor = '#f03';
-      /* Add to legend. */
-      addToLegend(displayName, 'point', { color: defaultColor });
       const defaultRadius = 6;
       const idPrefix = deriveCustomLayerPrefix(displayName);
       layerGroup._customLayerName = displayName;
@@ -285,6 +278,7 @@
       configEntry.elementKey = metadata.elementKey;
       configEntry.geometryClass = metadata.geometryClass;
       upsertLayerConfigEntry(configEntry, metadata);
+      if (typeof updateLegendControl === 'function') updateLegendControl();
     }
     
     /* Register custom layer in global registry. */

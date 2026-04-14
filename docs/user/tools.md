@@ -124,7 +124,17 @@
 
 <p><img src="/assets/IntegrateDataset.png" alt="Integrate Dataset" style="max-width:100%; height:auto;"></p>
 
-<p>With the Integrate Dataset functionality, users can integrate external GeoJSON datasets into their QGas project. In this mode, the pipeline layers of both datasets are visible. By clicking on one pipeline segment of the original dataset and then clicking on a pipeline segment of the additional dataset, the two segments are mapped. This is represented by the pairing window in the top right corner of this screen, which features the IDs of the matched pipeline segments. This matching list can then be exported and used to transfer attributes from the additional dataset to the project. Currently, this transfer has to be done externally, but it will be implemented into the tool in the future.</p>
+<p>The Integrate Dataset tool allows users to import external GeoJSON datasets or entire QGas projects into the active project. Two import modes are available:</p>
+
+<h4>Full Element Import</h4>
+<p>Permanently adds data to the project. Two sub-modes are offered:</p>
+<ul>
+  <li><strong>QGas Project</strong> – Select another project folder from the Input directory. A layer mapping table is shown where each imported layer can be assigned to an existing project layer (features are merged while all attributes from both layers are preserved — missing attributes are set to <code>null</code>) or added as a new standalone layer. Layers not explicitly assigned are added automatically as new layers. The legend, all editing tools, styling, and export are fully available for all imported layers.</li>
+  <li><strong>Single Layer</strong> – Import a single <code>.geojson</code> file (preloaded server dataset or local file upload) as a new permanent layer in the project. The layer appears in the legend, can be edited with all tools, and is included in project exports.</li>
+</ul>
+
+<h4>Element Mapping Import</h4>
+<p>An interactive mode for creating a pairwise equivalence list between a dataset and the existing pipelines. After selecting a source dataset, the imported layer is displayed alongside the project pipelines. Click pipeline segments (highlighted green) and then click the corresponding element in the imported dataset (highlighted orange) to create a link. The resulting equivalence list is exported as a <code>integration_equivalences.json</code> file on completion, which can be used externally to transfer attributes.</p>
 </details>
 
 <details class="tool-section">

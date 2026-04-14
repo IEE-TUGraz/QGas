@@ -607,6 +607,8 @@ class CombinedGUI:
                     - /api/layers: List available layers
                     - /api/current_project: Get active project name
                     - /api/layer_stats: Get layer statistics without geometry
+                    - /api/list_projects: List all project folders in Input/
+                    - /api/project_files: List .geojson files for a given project
                     
                     Args:
                         path (str): API endpoint path
@@ -632,6 +634,30 @@ class CombinedGUI:
                             layer_name = params.get('name', [''])[0]
                             stats = self.get_layer_statistics(layer_name)
                             self.send_json_response(stats)
+
+                        elif path == '/api/list_projects':
+                            # Lists all project subdirectories inside Input/
+                            input_dir = os.path.join(self.gui_instance.app_dir, 'Input')
+                            projects = []
+                            if os.path.isdir(input_dir):
+                                for entry in sorted(os.listdir(input_dir)):
+                                    full = os.path.join(input_dir, entry)
+                                    if os.path.isdir(full):
+                                        projects.append(entry)
+                            self.send_json_response({'projects': projects})
+
+                        elif path == '/api/project_files':
+                            # Lists .geojson files inside Input/{project}/
+                            project_name = params.get('project', [''])[0]
+                            # Sanitize: only allow safe characters
+                            safe_project = ''.join(c for c in project_name if c.isalnum() or c in ('_', '-', ' '))
+                            project_dir = os.path.join(self.gui_instance.app_dir, 'Input', safe_project)
+                            files = []
+                            if os.path.isdir(project_dir):
+                                for entry in sorted(os.listdir(project_dir)):
+                                    if entry.lower().endswith('.geojson'):
+                                        files.append(entry)
+                            self.send_json_response({'project': safe_project, 'files': files})
                             
                     except Exception as e:
                         self.send_error(500, f"API Error: {str(e)}")
