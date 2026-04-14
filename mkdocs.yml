@@ -50,3 +50,4 @@ nav:
   - API Reference:
       - "Python: Server.py": api/python-gui.md
       - JavaScript Modules: api/js-modules.md
+  - AI Disclosure: ai-disclosure.md

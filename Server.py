@@ -25,9 +25,9 @@ through the web interface.
 
 Development Information
 ------------------------
-- Author: Dipl.-Ing. Marco Quantschnig
-- Institution: Institut fuer Elektrizitaetswirtschaft und Energieinnovation, TU Graz
-- Created: August 2025
+- Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+- Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of
+Technology, Inffeldgasse 18, Graz, 8010, Austria
 - License: See LICENSE file
 - Disclaimer: AI-assisted tools were used to support development and documentation.
 

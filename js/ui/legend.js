@@ -1,4 +1,4 @@
-/**
+﻿/**
  * QGas - Legend UI Module
  *
  * Module Description:
@@ -6,7 +6,7 @@
  * between legend state and map layers.
  *
  * Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
- * Institution: Institute of Electricity Economics and Energy Innovation, TU Graz
+ * Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Inffeldgasse 18, Graz, 8010, Austria
  * Disclaimer: AI-assisted tools were used to support development and documentation.
  *
  * Inputs:

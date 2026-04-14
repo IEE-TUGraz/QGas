@@ -191,8 +191,8 @@ SOFTWARE.
 
 <div class="codehilite">
 <pre><span></span><code>@misc{QGAS,
-   author = {Marco Quantschnig and Yannick Werner and Thomas Klatzer},
-   title = {{QGas -- Interactive Gas Infrastructure Toolkit}},
+   author = {Marco Quantschnig and Yannick Werner and Thomas Klatzer and Sonja Wogrin},
+   title = {{QGas: Interactive Gas Infrastructure Toolkit}},
    howpublished = {\url{https://github.com/IEE-TUGraz/QGas}},
    year = {2025},
    note = {Developed at the Institute of Electricity Economics 
@@ -204,7 +204,7 @@ SOFTWARE.
 
 <h3>Text Format</h3>
 
-<p>Quantschnig, M., Werner, Y., and Klatzer, T. (2025). <em>QGas - Interactive Gas Infrastructure Toolkit</em>. Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology. https://github.com/IEE-TUGraz/QGas</p>
+<p>M. Quantschnig, Y. Werner, T. Klatzer, and S. Wogrin (2025). <em>QGas: Interactive Gas Infrastructure Toolkit</em>. Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology. https://github.com/IEE-TUGraz/QGas</p>
 
 <h2>Contributing</h2>
 

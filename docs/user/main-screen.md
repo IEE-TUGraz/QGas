@@ -3,7 +3,7 @@
 
 <p>After the startup process, the user lands on the main screen. The web-based map interface provides an interactive Leaflet.js-based map with comprehensive editing tools. This page describes all major interface elements and their functionality in detail.</p>
 
-<p><img src="/assets/Interface.jpg" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
+<p><img src="/assets/Interface.png" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
 
 <h2>Map View</h2>
 
@@ -66,7 +66,7 @@
 <li><strong>Rename</strong> – Activates <em>Rename Mode</em>. While active, clicking on any layer name opens an inline text field to change the display name. Confirm with Enter or by clicking away. Click <strong>Rename</strong> again to exit the mode.</li>
 </ul>
 
-<p>The legend updates in real-time and can be collapsed to save screen space.</p>
+<p>The legend updates in real-time.</p>
 
 <h3>Statistics Button</h3>
 
