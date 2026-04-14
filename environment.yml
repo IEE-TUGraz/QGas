@@ -17,3 +17,5 @@ dependencies:
 
   # pip packages for specialized dependencies
   - pip:
+    - mkdocs>=1.6.0
+    - mkdocstrings[python]

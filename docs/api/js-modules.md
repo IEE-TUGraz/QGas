@@ -1492,110 +1492,19 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <summary><code>integrate_dataset.js</code></summary>
 <div class="module-header">
 <p><strong>QGas - Integrate Dataset Tool</strong></p>
-<p>Enables importing of external GeoJSON datasets or entire QGas projects into the active project, with full editability, styling, legend integration, and export support. Also provides an interactive element-to-pipeline mapping mode for equivalence list export.</p>
-<p><strong>Key Features:</strong></p>
-<ul>
-  <li>Two top-level modes: Full Element Import and Element Mapping Import</li>
-  <li>Full Element Import — QGas Project: fetch project file list from server, interactive layer mapping table with auto-matching, merge into existing layers (attribute union with null back-fill) or add as new layers</li>
-  <li>Full Element Import — Single Layer: import a single GeoJSON file as a new permanent layer</li>
-  <li>All imported layers are fully editable with all tools, included in legend and export</li>
-  <li>Element Mapping Import: interactive pipeline pairing with visual feedback, equivalence list JSON download</li>
-</ul>
-<p><strong>Workflow — Full Import (QGas Project):</strong></p>
-<p>1. Select "QGas Project" sub-mode. 2. Choose source project from server dropdown. 3. Assign each imported layer to an existing layer or "Add as new". 4. Click Import — layers are fetched, merged/registered, legend updated.</p>
-<p><strong>Workflow — Full Import (Single Layer):</strong></p>
-<p>1. Select "Single Layer" sub-mode. 2. Choose preloaded dataset or upload a .geojson file. 3. Layer is registered, made visible, and added to legend.</p>
-<p><strong>Workflow — Element Mapping Import:</strong></p>
-<p>1. Select dataset source. 2. Click QGas pipeline segments (green) then dataset element (orange) to create links. 3. Finish exports <code>integration_equivalences.json</code>.</p>
-<p><strong>Technical Details:</strong></p>
-<ul>
-  <li>Server endpoints: <code>/api/list_projects</code>, <code>/api/project_files</code></li>
-  <li><code>registerNewImportedLayer()</code>: registers in dynamicLayers, window.customLayers, layerConfig, legend; uses handleFeature for full tool interactivity</li>
-  <li><code>mergeIntoExistingLayer()</code>: builds attribute key union, back-fills null for missing keys, inherits style from target layer</li>
-  <li>Validates GeoJSON structure; creates appropriate layer types (point/line)</li>
-</ul>
+<p><strong>Two top-level modes:</strong></p>
+<p>1. Full Element Import a. QGas Project – import multiple layers from another project folder with a layer-mapping UI (merge into existing or add as new). b. Single Layer – add a single .geojson as a new permanent layer. 2. Element Mapping Import – interactively link dataset features to existing pipelines and download an equivalence JSON.</p>
 <p><strong>Development Information:</strong></p>
 <ul>
   <li>Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin</li>
   <li>Institution: Institute of Electricity Economics and Energy Innovation, TU Graz</li>
-  <li>Created: August 2025</li>
+  <li>Created: August 2025 / Revised April 2026</li>
   <li>License: See LICENSE file</li>
-  <li>Disclaimer: AI-assisted tools were used to support development and documentation.</li>
-</ul>
-<p><strong>Inputs:</strong></p>
-<ul>
-  <li>User-selected datasets and file paths.</li>
-  <li>Map instance for temporary layer previews.</li>
 </ul>
 <p><strong>Public API:</strong></p>
 <ul>
-  <li><code>activateIntegrateDatasetTool()</code>: Entry point called by tools.js</li>
-  <li><code>selectImportMode(mode)</code>: Switch between 'full' and 'mapping' modes</li>
-  <li><code>selectFullSubMode(subMode)</code>: Switch between 'project' and 'single' sub-modes</li>
-  <li><code>loadProjectForMapping()</code>: Fetch file list from selected project and show layer mapping UI</li>
-  <li><code>executeProjectImport(projectName)</code>: Execute the project import based on layer mapping selections</li>
-  <li><code>loadPreloadedSingleLayer()</code>: Import a preloaded dataset as a single new layer</li>
-  <li><code>loadFileSingleLayer()</code>: Import an uploaded .geojson file as a single new layer</li>
-  <li><code>loadPreloadedDataset()</code>: Start element mapping mode with a preloaded dataset</li>
-  <li><code>loadFileDataset()</code>: Start element mapping mode with an uploaded file</li>
-  <li><code>finishIntegration()</code>: Export equivalence list and end mapping session</li>
-  <li><code>cancelIntegration()</code>: Cancel mapping session and restore state</li>
-  <li><code>cancelLayerMapping()</code>: Close layer mapping overlay and restore info mode</li>
+  <li>activateIntegrateDatasetTool(): entry point called by tools.js</li>
 </ul>
-<details class="api-functions-section">
-<summary><strong>Public API Functions</strong><span class="api-func-count"> (12)</span></summary>
-<div class="api-functions">
-<details class="api-func">
-<summary class="api-sig"><code>activateIntegrateDatasetTool()</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Entry point for the integrate dataset tool. Validates contributor name, deactivates all other modes, and opens the mode selection popup.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-<details class="api-func">
-<summary class="api-sig"><code>selectImportMode(mode)</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Switches between 'full' (Full Element Import) and 'mapping' (Element Mapping Import) modes. For 'full', opens the sub-option popup. For 'mapping', renders the dataset source section.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-<details class="api-func">
-<summary class="api-sig"><code>selectFullSubMode(subMode)</code></summary>
-<div class="api-func-body">
-<p class="api-desc">For 'project': fetches project list from <code>/api/list_projects</code> and renders a project dropdown. For 'single': renders the preloaded dataset dropdown and file upload input.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-<details class="api-func">
-<summary class="api-sig"><code>loadProjectForMapping()</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Fetches the file list for the selected project via <code>/api/project_files</code> and opens the full-screen layer mapping overlay with auto-matched layer assignments.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-<details class="api-func">
-<summary class="api-sig"><code>executeProjectImport(projectName)</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Iterates all layer mapping rows, fetches each GeoJSON file from the source project, and either merges it into the selected existing layer (via <code>mergeIntoExistingLayer</code>) or adds it as a new layer (via <code>registerNewImportedLayer</code>). Updates the legend on completion.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-<details class="api-func">
-<summary class="api-sig"><code>finishIntegration()</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Serialises the current equivalence list to <code>integration_equivalences.json</code> and triggers a browser download. Cleans up integration mode and shows a summary popup.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-<details class="api-func">
-<summary class="api-sig"><code>cancelIntegration()</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Cancels the element mapping session: removes the integration layer from the map, restores all hidden layers, resets pipeline click handlers, and returns to info mode.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-</div>
-</details>
 </div>
 </details>
 <details class="tool-section">
