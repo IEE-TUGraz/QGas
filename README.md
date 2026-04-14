@@ -38,7 +38,7 @@ Once the environment is activated, all required packages and libraries for runni
 
 # Documentation
 
-A comprehensive **user manual** is available in the Manual.pdf file.  
+A comprehensive **user manual** is available [here](https://qgas.readthedocs.io/).  
 The manual provides detailed guidance on all aspects of QGas, including the creation and modification of pipelines, editing of nodes, management of infrastructure attributes, integration of multiple datasets, and the use of georeferenced background maps.  
 
 ---
