@@ -4,7 +4,7 @@
  * Module Description:
  * Supports visualizing and highlighting pipeline groups created in the UI.
  *
- * Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer
  * Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Inffeldgasse 18, Graz, 8010, Austria
  * Disclaimer: AI-assisted tools were used to support development and documentation.
  *

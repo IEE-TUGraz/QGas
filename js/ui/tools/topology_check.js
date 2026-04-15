@@ -8,7 +8,7 @@
  * on the selected element or isolate a specific network component.
  *
  * Development Information:
- * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer
  * - Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Inffeldgasse 18, Graz, 8010, Austria
  * - Created: March 2026
  * - License: See LICENSE file

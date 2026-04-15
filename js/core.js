@@ -34,7 +34,7 @@
  * - UI helpers and utilities
  * 
  * Development Information:
- * - Authors: Marco Quantschnig, Yannick Werner, Thomas Klatzer and Sonja Wogrin
+ * - Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer
  * - Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Inffeldgasse 18, Graz, 8010, Austria
  * - Created: August 2025
  * - License: See LICENSE file
