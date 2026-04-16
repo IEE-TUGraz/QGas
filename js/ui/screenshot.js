@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QGas - Screenshot Module
  *
  * Module Description:

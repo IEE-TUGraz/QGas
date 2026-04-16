@@ -23,7 +23,7 @@
 
 <h2>Web Interface</h2>
 
-<p><img src="/assets/Interface.jpg" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
+<p><img src="/assets/Interface.png" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
 
 <p><strong>Interactive Map</strong> - Leaflet.js-based map with OpenStreetMap tiles for panning and zooming.</p>
 

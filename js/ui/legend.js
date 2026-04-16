@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QGas - Legend UI Module
  *
  * Module Description:

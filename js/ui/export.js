@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QGas - Export Module
  *
  * Module Description:

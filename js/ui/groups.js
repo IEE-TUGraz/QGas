@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QGas - Pipeline Groups Module
  *
  * Module Description:

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QGas - Options UI Module
  *
  * Module Description:

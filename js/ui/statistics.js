@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QGas - Statistics Module
  *
  * Module Description:
