@@ -109,6 +109,9 @@ All AI-assisted outputs were carefully reviewed and edited by the authors, who t
       <td align="center" valign="top" width="9.5%"><a href="https://github.com/Mquan07-M"><img src="https://avatars.githubusercontent.com/u/200053250?v=4" width="100px;" alt="Marco Quantschnig"/><br /><sub><b>Marco Quantschnig</b></sub></a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tklatzer"><img src="https://avatars.githubusercontent.com/u/85995327?v=4" width="100px;" alt="Thomas Klatzer"/><br /><sub><b>Thomas Klatzer</b></sub></a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yannickwerner"><img src="https://avatars.githubusercontent.com/u/50335568?v=4" width="100px;" alt="Yannick Werner"/><br /><sub><b>Yannick Werner</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/wogrin"><img src="https://avatars.githubusercontent.com/u/52001950?v=4" width="100px;" alt="Wogrin"/><br /><sub><b>Sonja Wogrin</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/datejada"><img src="https://avatars.githubusercontent.com/u/12887482?v=4" width="100px;" alt="Diego Alejandro Tejada Arango"/><br /><sub><b>Diego Alejandro Tejada Arango</b></sub></a></
+      td> 
     </tr>
   </tbody>
 </table>
