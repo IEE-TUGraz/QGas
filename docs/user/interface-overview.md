@@ -5,7 +5,7 @@
 
 <h2>Desktop GUI</h2>
 
-<p><img src="/assets/GUI.jpg" alt="QGas Desktop GUI" style="max-width:100%; height:auto;"></p>
+<p><img src="../assets/GUI.jpg" alt="QGas Desktop GUI" style="max-width:100%; height:auto;"></p>
 
 <p><strong>QGas Logo and Branding</strong> - Displays TU Graz and IEE logos with version information.</p>
 
@@ -23,7 +23,7 @@
 
 <h2>Web Interface</h2>
 
-<p><img src="/assets/Interface.png" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
+<p><img src="../assets/Interface.png" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
 
 <p><strong>Interactive Map</strong> - Leaflet.js-based map with OpenStreetMap tiles for panning and zooming.</p>
 

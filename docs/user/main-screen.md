@@ -3,7 +3,7 @@
 
 <p>After the startup process, the user lands on the main screen. The web-based map interface provides an interactive Leaflet.js-based map with comprehensive editing tools. This page describes all major interface elements and their functionality in detail.</p>
 
-<p><img src="/assets/Interface.png" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
+<p><img src="../assets/Interface.png" alt="QGas Web Interface" style="max-width:100%; height:auto;"></p>
 
 <h2>Map View</h2>
 
