@@ -73,21 +73,22 @@ For more information about the original dataset, see the [Zenodo record](https:/
 
 If you use QGas in your research, publications, or technical work, please cite the toolkit to acknowledge the development team and the supporting institute, and to support reproducibility of your results.  
 
-Currently, you can reference the GitHub repository:
-
 ```bibtex
-@misc{QGAS,
+@article{Quantschnig2026QGas,
    author = {Marco Quantschnig and Yannick Werner and Sonja Wogrin and Thomas Klatzer},
    title = {{QGas: Interactive Gas Infrastructure Toolkit}},
-   howpublished = {\url{https://github.com/IEE-TUGraz/QGas}},
-   year = {2025},
-   note = {Developed at the Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Austria}
+   year = {2026},
+   eprint = {2604.15876},
+   archivePrefix = {arXiv},
+   primaryClass = {eess.SY},
+   doi = {10.48550/arXiv.2604.15876},
+   url = {https://doi.org/10.48550/arXiv.2604.15876}
 }
 ```
 
 Or in text format:
 
-M. Quantschnig, Y. Werner, S. Wogrin, and T. Klatzer (2025). *QGas: Interactive Gas Infrastructure Toolkit*. Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology. https://github.com/IEE-TUGraz/QGas
+M. Quantschnig, Y. Werner, S. Wogrin, and T. Klatzer (2026). *QGas: Interactive Gas Infrastructure Toolkit*. arXiv:2604.15876 [eess.SY]. https://doi.org/10.48550/arXiv.2604.15876
 
 ---
 

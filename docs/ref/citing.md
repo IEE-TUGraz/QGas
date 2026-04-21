@@ -6,18 +6,19 @@
 <h2>BibTeX Format</h2>
 
 <div class="codehilite">
-<pre><span></span><code>@misc{QGAS,
+<pre><span></span><code>@article{Quantschnig2026QGas,
    author = {Marco Quantschnig and Yannick Werner and Sonja Wogrin and Thomas Klatzer},
    title = {{QGas: Interactive Gas Infrastructure Toolkit}},
-   howpublished = {\url{https://github.com/IEE-TUGraz/QGas}},
-   year = {2025},
-   note = {Developed at the Institute of Electricity Economics 
-           and Energy Innovation (IEE), Graz University of 
-           Technology, Austria}
+   year = {2026},
+   eprint = {2604.15876},
+   archivePrefix = {arXiv},
+   primaryClass = {eess.SY},
+   doi = {10.48550/arXiv.2604.15876},
+   url = {https://doi.org/10.48550/arXiv.2604.15876}
 }
 </code></pre>
 </div>
 
 <h2>Text Format</h2>
 
-<p>M. Quantschnig, Y. Werner, S. Wogrin, and T. Klatzer (2025). <em>QGas: Interactive Gas Infrastructure Toolkit</em>. Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology. https://github.com/IEE-TUGraz/QGas</p>
+<p>M. Quantschnig, Y. Werner, S. Wogrin, and T. Klatzer (2026). <em>QGas: Interactive Gas Infrastructure Toolkit</em>. arXiv:2604.15876 [eess.SY]. <a href="https://doi.org/10.48550/arXiv.2604.15876">https://doi.org/10.48550/arXiv.2604.15876</a></p>

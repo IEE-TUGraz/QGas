@@ -556,7 +556,6 @@ function cancelPipelineDivision() {
   }
   selectedPipelineForDivision = null;
   selectedDivisionParentLayer = null;
-  currentMode = 'info';
   
   clearSupportPointMarkers();
   
@@ -577,7 +576,7 @@ function cancelPipelineDivision() {
   divisionLineGroups = [];
   
   closeCustomPopup();
-  activateInfoMode();
+  activateInfoMode(true);
 }
 
 /* ================================================================================

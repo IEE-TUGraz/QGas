@@ -850,10 +850,14 @@ async function exportCompleteDataset() {
   zip.generateAsync({ type: "blob" }).then(function(content) {
     const url = URL.createObjectURL(content);
     const a = document.createElement("a");
+    a.style.display = 'none';
     a.href = url;
     a.download = `Complete_Dataset_${currentProject}_${new Date().toISOString().split('T')[0]}.zip`;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    /* Delay revocation so Edge has time to start the download before the blob is released. */
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
     console.log('✓ Export completed successfully');
   });
 }

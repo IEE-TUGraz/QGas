@@ -527,6 +527,8 @@
     topologyState.hiddenMarkers.clear();
     topologyState.hiddenLines.clear();
     topologyState.filterActive = false;
+    if (typeof resetAllPipelineHighlights === 'function') resetAllPipelineHighlights();
+    if (typeof resetAllElementHighlights === 'function') resetAllElementHighlights();
   }
 
   function focusNode(entry) {
