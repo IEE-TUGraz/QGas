@@ -66,7 +66,7 @@ function openScreenshotMode() {
  */
 function activateScreenshotMode() {
   try {
-    console.log('Aktiviere Screenshot Mode');
+    console.log('Activating Screenshot Mode');
 
     /* Store original legend HTML for restoration. */
     const legendControl = document.querySelector('.legend-control');
@@ -91,6 +91,12 @@ function activateScreenshotMode() {
     if (contributorBox) {
       contributorBox.style.display = 'none';
       window._contributorBoxWasVisible = true;
+    }
+
+    const objectSearchBox = document.getElementById('object-search-box');
+    if (objectSearchBox) {
+      window._objectSearchBoxDisplay = objectSearchBox.style.display;
+      objectSearchBox.style.display = 'none';
     }
 
     const citeBtn = document.getElementById('cite-btn');
@@ -172,7 +178,7 @@ function activateScreenshotMode() {
     /* Bind Escape key to exit screenshot mode. */
     document.addEventListener('keydown', handleScreenshotModeEscape);
 
-    console.log('Screenshot Mode aktiviert');
+    console.log('Screenshot Mode activated');
   } catch (error) {
     console.error('Error in activateScreenshotMode:', error);
   }
@@ -191,7 +197,7 @@ function activateScreenshotMode() {
  */
 function exitScreenshotMode() {
   try {
-    console.log('Verlasse Screenshot Mode');
+    console.log('Exiting Screenshot Mode');
 
     /* Restore function buttons. */
     const functionBtns = document.querySelectorAll('.function-btn');
@@ -210,6 +216,12 @@ function exitScreenshotMode() {
       const contributorBox = document.getElementById('contributor-box');
       if (contributorBox) contributorBox.style.display = '';
       delete window._contributorBoxWasVisible;
+    }
+
+    if (window._objectSearchBoxDisplay !== undefined) {
+      const objectSearchBox = document.getElementById('object-search-box');
+      if (objectSearchBox) objectSearchBox.style.display = window._objectSearchBoxDisplay;
+      delete window._objectSearchBoxDisplay;
     }
 
     if (window._citeBtnWasVisible) {
@@ -275,7 +287,7 @@ function exitScreenshotMode() {
       setActiveBtn(infoBtn);
     }
 
-    console.log('Screenshot Mode verlassen');
+    console.log('Screenshot Mode exited');
   } catch (error) {
     console.error('Error in exitScreenshotMode:', error);
   }
@@ -283,7 +295,7 @@ function exitScreenshotMode() {
 
 function handleScreenshotModeEscape(event) {
   if (event.key === 'Escape') {
-    console.log('Escape gedrückt - verlasse Screenshot Mode');
+    console.log('Escape pressed - exiting Screenshot Mode');
     exitScreenshotMode();
   }
 }

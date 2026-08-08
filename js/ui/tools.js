@@ -87,7 +87,7 @@ function updateActiveToolDisplay(mode) {
     'split-node': '🔀 Split Node',
     'reconnect-infrastructure': '🔌 Reconnect Infrastructure',
     'distribute-compressors': '🔄 Distribute Compressors',
-    'topology-check': '🧭 Topology Check'
+    'topology-check': '🧭 Topology Checker'
   };
   
   displayElement.textContent = modeNames[mode] || 'ℹ️ Info Mode';
@@ -211,7 +211,10 @@ function selectTool(mode) {
               showDiscardDirectionButton();
             }
           },
-          {text: 'Cancel', type: 'secondary', onClick: () => {}}
+          {text: 'Cancel', type: 'secondary', onClick: () => {
+            deactivateAllModes();
+            activateInfoMode(true);
+          }}
         ]
       );
       break;

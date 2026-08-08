@@ -493,6 +493,263 @@
     const sanitizedContributor = (contributor && contributor.trim()) ? contributor.trim().toUpperCase() : 'XX';
     return `${sanitizedPrefix}_${sanitizedContributor}_${number}`;
   }
+
+  function getCurrentContributorNameForChanges() {
+    const inputName = document.getElementById('contributor-input')?.value?.trim() || '';
+    return (contributorName || inputName || 'Unknown').trim();
+  }
+
+  const auditFeatureSnapshots = new WeakMap();
+  const auditDeletedFeatures = new WeakSet();
+
+  const AUDIT_TOOL_NAMES = {
+    info: 'Info Mode',
+    edit: 'Edit Geometry',
+    'add-pipeline': 'Add Pipeline',
+    'add-infrastructure': 'Add Infrastructure',
+    'change-direction': 'Change Direction',
+    'short-pipe': 'Short Pipe',
+    delete: 'Delete',
+    'group-pipelines': 'Group Pipelines',
+    'switch-sublayer': 'Switch to Sublayer',
+    'divide-pipeline': 'Divide Pipeline',
+    'split-node': 'Split Node',
+    'reconnect-infrastructure': 'Reconnect Infrastructure',
+    'distribute-compressors': 'Distribute Compressors',
+    unknown: 'Unknown'
+  };
+
+  const AUDIT_INTERNAL_PROPERTIES = new Set([
+    'last_changed', 'modified', 'Last Changes', '__elementKey', 'element_key'
+  ]);
+
+  function getAuditToolName(explicitTool = '') {
+    if (explicitTool) return explicitTool;
+    const mode = String(typeof currentMode === 'undefined' ? '' : currentMode).trim().toLowerCase();
+    return AUDIT_TOOL_NAMES[mode] || (mode ? mode.replace(/(^|-)([a-z])/g, (_, separator, letter) => `${separator ? ' ' : ''}${letter.toUpperCase()}`) : AUDIT_TOOL_NAMES.unknown);
+  }
+
+  function cloneAuditValue(value) {
+    if (value === undefined) return null;
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (error) {
+      return String(value);
+    }
+  }
+
+  function createAuditSnapshot(featureOrProperties, geometryOverride) {
+    const feature = featureOrProperties?.properties ? featureOrProperties : null;
+    const sourceProperties = feature ? feature.properties : featureOrProperties;
+    const properties = {};
+    Object.keys(sourceProperties || {}).sort().forEach(key => {
+      if (!AUDIT_INTERNAL_PROPERTIES.has(key)) properties[key] = cloneAuditValue(sourceProperties[key]);
+    });
+    const geometry = geometryOverride !== undefined
+      ? cloneAuditValue(geometryOverride)
+      : cloneAuditValue(feature?.geometry || null);
+    return { properties, geometry };
+  }
+
+  function formatAuditValue(value, limit = 240) {
+    if (value === undefined || value === null || value === '') return '<empty>';
+    const text = typeof value === 'string' ? value : JSON.stringify(value);
+    return text.length > limit ? `${text.slice(0, limit - 3)}...` : text;
+  }
+
+  function auditValuesEquivalent(left, right) {
+    const leftEmpty = left === undefined || left === null || left === '';
+    const rightEmpty = right === undefined || right === null || right === '';
+    if (leftEmpty || rightEmpty) return leftEmpty && rightEmpty;
+    if (typeof left === 'object' || typeof right === 'object') {
+      return JSON.stringify(left) === JSON.stringify(right);
+    }
+    return String(left) === String(right);
+  }
+
+  function applyInfoModeInputValue(properties, key, inputValue) {
+    if (!properties || auditValuesEquivalent(properties[key], inputValue)) return false;
+    properties[key] = inputValue;
+    return true;
+  }
+
+  function summarizeAuditGeometry(geometry) {
+    if (!geometry) return '<none>';
+    const coordinates = geometry.coordinates;
+    const formatCoordinate = coordinate => Array.isArray(coordinate)
+      ? `[${coordinate.slice(0, 2).map(value => Number(value).toFixed(6)).join(', ')}]`
+      : '<invalid>';
+    if (geometry.type === 'Point') return formatCoordinate(coordinates);
+    if (geometry.type === 'LineString' && Array.isArray(coordinates)) {
+      return `${formatCoordinate(coordinates[0])} to ${formatCoordinate(coordinates[coordinates.length - 1])} (${coordinates.length} vertices)`;
+    }
+    if (geometry.type === 'MultiLineString' && Array.isArray(coordinates)) {
+      const vertexCount = coordinates.reduce((total, part) => total + (Array.isArray(part) ? part.length : 0), 0);
+      return `${coordinates.length} parts (${vertexCount} vertices)`;
+    }
+    return `${geometry.type}: ${formatAuditValue(coordinates, 320)}`;
+  }
+
+  function describeAuditGeometryChange(beforeGeometry, afterGeometry) {
+    if (beforeGeometry?.type === 'Point' && afterGeometry?.type === 'Point') {
+      return `Node position from ${summarizeAuditGeometry(beforeGeometry)} to ${summarizeAuditGeometry(afterGeometry)}`;
+    }
+    if (beforeGeometry?.type === 'LineString' && afterGeometry?.type === 'LineString') {
+      const beforeCoordinates = Array.isArray(beforeGeometry.coordinates) ? beforeGeometry.coordinates : [];
+      const afterCoordinates = Array.isArray(afterGeometry.coordinates) ? afterGeometry.coordinates : [];
+      const changes = [];
+      const coordinateCount = Math.max(beforeCoordinates.length, afterCoordinates.length);
+      for (let index = 0; index < coordinateCount; index += 1) {
+        const oldCoordinate = beforeCoordinates[index];
+        const newCoordinate = afterCoordinates[index];
+        if (JSON.stringify(oldCoordinate) === JSON.stringify(newCoordinate)) continue;
+        if (oldCoordinate === undefined) {
+          changes.push(`vertex ${index + 1} added at ${summarizeAuditGeometry({ type: 'Point', coordinates: newCoordinate })}`);
+        } else if (newCoordinate === undefined) {
+          changes.push(`vertex ${index + 1} removed from ${summarizeAuditGeometry({ type: 'Point', coordinates: oldCoordinate })}`);
+        } else {
+          changes.push(`vertex ${index + 1} from ${summarizeAuditGeometry({ type: 'Point', coordinates: oldCoordinate })} to ${summarizeAuditGeometry({ type: 'Point', coordinates: newCoordinate })}`);
+        }
+      }
+      if (changes.length <= 12) return `Pipeline geometry: ${changes.join('; ')}`;
+      return `Pipeline geometry changed at ${changes.length} vertices; from ${summarizeAuditGeometry(beforeGeometry)} to ${summarizeAuditGeometry(afterGeometry)}`;
+    }
+    return `Geometry from ${summarizeAuditGeometry(beforeGeometry)} to ${summarizeAuditGeometry(afterGeometry)}`;
+  }
+
+  function auditTimestamp() {
+    const now = new Date();
+    const pad = value => String(value).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  }
+
+  function queueAuditEntries(entries) {
+    window.QGasAuditLog?.queueEntries(entries);
+  }
+
+  function ensureAuditSessionStarted() {
+    return window.QGasAuditLog?.ensureSessionStarted();
+  }
+
+  async function flushAuditEntries(useBeacon = false) {
+    return window.QGasAuditLog?.flush(useBeacon);
+  }
+
+  function buildAuditEntries(before, after, elementId, tool, options = {}) {
+    const timestamp = auditTimestamp();
+    const common = { timestamp, element_id: elementId || 'Unknown', tool };
+    if (options.description) {
+      return [{ ...common, change_type: options.changeType || 'Topology Change', description: options.description }];
+    }
+
+    const entries = [];
+    if (!options.skipGeometry && JSON.stringify(before.geometry) !== JSON.stringify(after.geometry)) {
+      entries.push({
+        ...common,
+        change_type: 'Geometry Change',
+        description: describeAuditGeometryChange(before.geometry, after.geometry)
+      });
+    }
+
+    const keys = new Set([...Object.keys(before.properties), ...Object.keys(after.properties)]);
+    const topologyPattern = /^(node|node_start|node_end|subnode|sub_node|layer_name|sublayer|deleted$)/i;
+    Array.from(keys).sort().forEach(key => {
+      const oldValue = before.properties[key];
+      const newValue = after.properties[key];
+      if (auditValuesEquivalent(oldValue, newValue)) return;
+      const topologyChange = topologyPattern.test(key);
+      entries.push({
+        ...common,
+        change_type: topologyChange ? 'Topology Change' : 'Attribute Change',
+        description: `${topologyChange ? 'Reference' : 'Attribute'} ${key} from ${formatAuditValue(oldValue)} to ${formatAuditValue(newValue)}`
+      });
+    });
+    return entries;
+  }
+
+  function initializeFeatureChangeTracking(featureOrProperties) {
+    const properties = featureOrProperties?.properties || featureOrProperties;
+    if (!properties || typeof properties !== 'object') return properties;
+    const legacyTrackingKeys = ['modified', 'new', 'Last Changes', 'Last_Change', 'Last_Changes'];
+    const hasLegacyTracking = legacyTrackingKeys.some(key =>
+      Object.prototype.hasOwnProperty.call(properties, key)
+    );
+    if (!String(properties.last_changed || '').trim()) {
+      properties.last_changed = String(properties['Last Changes'] || '').trim() || 'original';
+    }
+    legacyTrackingKeys.forEach(key => delete properties[key]);
+    if (hasLegacyTracking) delete properties.Contributor;
+    if (featureOrProperties && typeof featureOrProperties === 'object' && !auditFeatureSnapshots.has(featureOrProperties)) {
+      auditFeatureSnapshots.set(featureOrProperties, createAuditSnapshot(featureOrProperties));
+    }
+    return properties;
+  }
+
+  function markFeatureChanged(featureOrProperties, options = {}) {
+    if (!featureOrProperties || typeof featureOrProperties !== 'object') return;
+    const hadSnapshot = auditFeatureSnapshots.has(featureOrProperties);
+    const before = hadSnapshot
+      ? auditFeatureSnapshots.get(featureOrProperties)
+      : createAuditSnapshot({}, null);
+    const properties = initializeFeatureChangeTracking(featureOrProperties);
+    if (!properties) return;
+    const after = createAuditSnapshot(featureOrProperties, options.geometry);
+    const elementId = properties.id || properties.name || properties.Name || 'Unknown';
+    const resolvedOptions = !hadSnapshot && !options.description
+      ? { ...options, changeType: 'Topology Change', description: `Element created at ${summarizeAuditGeometry(after.geometry)}` }
+      : options;
+    const resolvedTool = getAuditToolName(options.tool);
+    const entries = buildAuditEntries(before, after, elementId, resolvedTool, resolvedOptions);
+    if (entries.length) {
+      const description = String(resolvedOptions.description || '').toLowerCase();
+      const operation = resolvedOptions.undoOperation || (!hadSnapshot
+        ? 'create'
+        : (description.includes('deleted') || description.includes('replaced by') ? 'delete' : 'update'));
+      window.QGasUndo?.recordChange({
+        feature: featureOrProperties,
+        before,
+        after,
+        operation,
+        tool: resolvedTool,
+        entries,
+        contexts: resolvedOptions.undoContexts
+      });
+      properties.last_changed = getCurrentContributorNameForChanges();
+      queueAuditEntries(entries);
+    }
+    auditFeatureSnapshots.set(featureOrProperties, after);
+  }
+
+  function markLayerChanged(layer, options = {}) {
+    if (!layer?.feature) return;
+    let geometry = options.geometry;
+    if (geometry === undefined && typeof layer.toGeoJSON === 'function') {
+      try {
+        geometry = layer.toGeoJSON()?.geometry;
+      } catch (error) {
+        geometry = layer.feature.geometry;
+      }
+    }
+    markFeatureChanged(layer.feature, { ...options, geometry });
+  }
+
+  function isFeatureChanged(properties) {
+    const value = String(properties?.last_changed || '').trim();
+    return Boolean(value && value.toLowerCase() !== 'original');
+  }
+
+  function refreshFeatureChangeSnapshot(feature) {
+    if (!feature || typeof feature !== 'object') return;
+    auditFeatureSnapshots.set(feature, createAuditSnapshot(feature));
+  }
+
+  window.initializeFeatureChangeTracking = initializeFeatureChangeTracking;
+  window.markFeatureChanged = markFeatureChanged;
+  window.markLayerChanged = markLayerChanged;
+  window.isFeatureChanged = isFeatureChanged;
+  window.refreshFeatureChangeSnapshot = refreshFeatureChangeSnapshot;
+  window.flushAuditEntries = (...args) => window.QGasAuditLog?.flush(...args);
+  window.ensureAuditSessionStarted = (...args) => window.QGasAuditLog?.ensureSessionStarted(...args);
   
 /* ================================================================================
  * LEGACY LAYER REFERENCES
@@ -716,7 +973,7 @@ const map = L.map('map', {
    */
   function getLayerNameFromConfig(config) {
     if (!config || !config.filename) return '';
-    return config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    return config.filename.replace(/\.(?:geojson|csv)$/i, '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
   }
 
   /*
@@ -937,6 +1194,7 @@ const map = L.map('map', {
     if (!layer || !metadata) return;
     layer._qgasMeta = metadata;
     if (layer.feature && layer.feature.properties) {
+      initializeFeatureChangeTracking(layer.feature);
       layer.feature.properties.__elementKey = metadata.elementKey;
     }
   }
@@ -1170,7 +1428,7 @@ const map = L.map('map', {
   function buildFeatureIdentity(feature) {
     if (!feature) return '';
     const props = feature.properties || {};
-    const candidateKeys = ['Global_ID', 'GlobalID', 'global_id', 'Unique_ID', 'unique_id', 'PIPELINE_ID', 'Pipeline_ID', 'PIPELINEID', 'ID', 'Id', 'id', 'Name'];
+    const candidateKeys = ['id', 'name'];
     for (const key of candidateKeys) {
       const value = props[key];
       if (value !== undefined && value !== null && String(value).trim() !== '') {
@@ -1288,6 +1546,14 @@ const map = L.map('map', {
       console.warn('recordDeletedFeatureIdentity - no feature provided');
       return;
     }
+    if (!auditDeletedFeatures.has(feature)) {
+      auditDeletedFeatures.add(feature);
+      markFeatureChanged(feature, {
+        changeType: 'Topology Change',
+        tool: 'Delete',
+        description: 'Element deleted'
+      });
+    }
     const identity = buildFeatureIdentity(feature);
     if (!identity) {
       console.warn('recordDeletedFeatureIdentity - could not build identity');
@@ -1310,6 +1576,33 @@ const map = L.map('map', {
     // Sofort alle Vorkommen dieses Features aus allen Layern entfernen
     removeFeatureByIdentityFromAllMapLayers(identity);
   }
+
+  function restoreDeletedFeatureIdentity(feature) {
+    const identity = buildFeatureIdentity(feature);
+    if (!identity) return;
+    deletedElementIdentityRegistry.forEach(registry => registry.delete(identity));
+    auditDeletedFeatures.delete(feature);
+    Object.values(deletedLayerRegistry).forEach(layerGroup => {
+      if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
+      const removalQueue = [];
+      layerGroup.eachLayer(layer => {
+        if (buildFeatureIdentity(layer?.feature) === identity) removalQueue.push(layer);
+      });
+      removalQueue.forEach(layer => layerGroup.removeLayer(layer));
+    });
+    const deletedArrays = [
+      deletedPipelines, deletedNodes, deletedCompressors, deletedStorages,
+      deletedLNGs, deletedPowerplants, deletedCustomElements, deletedDrawnItems
+    ];
+    deletedArrays.forEach(items => {
+      if (!Array.isArray(items)) return;
+      for (let index = items.length - 1; index >= 0; index -= 1) {
+        if (buildFeatureIdentity(items[index]) === identity) items.splice(index, 1);
+      }
+    });
+  }
+
+  window.restoreDeletedFeatureIdentity = restoreDeletedFeatureIdentity;
 
   function resolveElementKeyFromLayerInstance(layerInstance) {
     if (!layerInstance) return null;
@@ -1435,8 +1728,50 @@ const map = L.map('map', {
     return { url: null, response: null };
   }
 
+  function parseCsvCellValue(value) {
+    if (value === undefined || value === null || value === '') return value ?? '';
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+        (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+      try { return JSON.parse(trimmed); } catch (_) { /* Keep original text. */ }
+    }
+    return value;
+  }
+
+  function csvTextToGeoJSON(csvText) {
+    const workbook = XLSX.read(String(csvText || '').replace(/^\uFEFF/, ''), { type: 'string', raw: false });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: true });
+    if (!rows.length) return { type: 'FeatureCollection', features: [] };
+    const geometryKey = Object.keys(rows[0]).find(key => key.toLowerCase() === 'geometry');
+    if (!geometryKey) throw new Error('CSV file has no "geometry" column.');
+    const features = rows.map((row, index) => {
+      let geometry;
+      try {
+        geometry = typeof row[geometryKey] === 'string' ? JSON.parse(row[geometryKey]) : row[geometryKey];
+      } catch (_) {
+        throw new Error(`Invalid geometry in CSV row ${index + 2}.`);
+      }
+      const properties = {};
+      Object.entries(row).forEach(([key, value]) => {
+        if (key !== geometryKey) properties[key] = parseCsvCellValue(value);
+      });
+      return { type: 'Feature', properties, geometry };
+    });
+    return { type: 'FeatureCollection', features };
+  }
+
+  async function parseSpatialDataResponse(response, fileName) {
+    if (/\.csv$/i.test(fileName || '')) return csvTextToGeoJSON(await response.text());
+    return response.json();
+  }
+
+  window.csvTextToGeoJSON = csvTextToGeoJSON;
+  window.parseSpatialDataResponse = parseSpatialDataResponse;
+
   /*
-   * Load a GeoJSON layer if the referenced file exists.
+   * Load a GeoJSON or QGas CSV layer if the referenced file exists.
    */
   function loadLayer(fileName, layerName, styleOptions, onEachFeatureCallback, onLoadCallback) {
     styleOptions = styleOptions || {};
@@ -1462,7 +1797,7 @@ const map = L.map('map', {
           console.log(`File ${fileName} not found at ${url}, skipping.`);
           return null;
         }
-        return response.json();
+        return parseSpatialDataResponse(response, fileName);
       })
       .then(data => {
         if (data) {
@@ -1508,7 +1843,7 @@ const map = L.map('map', {
           invalidateStyleableLayerRegistry();
 
           // Ensure legend state (if available) is respected once the layer finishes loading
-          const toggleId = 'toggle-' + fileName.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const toggleId = 'toggle-' + fileName.replace(/\.(?:geojson|csv)$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
           const legendCheckbox = document.getElementById(toggleId);
           if (legendCheckbox && !legendCheckbox.checked && map.hasLayer(layer)) {
             map.removeLayer(layer);
@@ -1557,7 +1892,7 @@ const map = L.map('map', {
       const config = [];
       const colorAssignmentState = { lineIndex: 0, pointIndex: 0 };
 
-      const firstDataRowIndex = data.findIndex(row => Array.isArray(row) && row.some(cell => typeof cell === 'string' && cell.toLowerCase().includes('.geojson')));
+      const firstDataRowIndex = data.findIndex(row => Array.isArray(row) && row.some(cell => typeof cell === 'string' && /\.(?:geojson|csv)$/i.test(cell)));
       const startIndex = firstDataRowIndex >= 0 ? firstDataRowIndex : 0;
 
       for (let i = startIndex; i < data.length; i++) {
@@ -1571,12 +1906,12 @@ const map = L.map('map', {
         let filename = null;
         let legendName = null;
         
-        // Search for the column that contains .geojson files
+        // Search for the column that contains supported spatial data files.
         for (let col = 0; col < row.length; col++) {
-          if (row[col] && typeof row[col] === 'string' && row[col].includes('.geojson')) {
+          if (row[col] && typeof row[col] === 'string' && /\.(?:geojson|csv)$/i.test(row[col])) {
             filename = row[col];
             // Legend name is probably in column B (index 1)
-            legendName = row[1] || filename.replace('.geojson', '');
+            legendName = row[1] || filename.replace(/\.(?:geojson|csv)$/i, '');
             break;
           }
         }
@@ -2031,7 +2366,7 @@ const map = L.map('map', {
           loadingScreen.style.transition = 'opacity 0.5s ease-out';
           setTimeout(() => {
             loadingScreen.style.display = 'none';
-            console.log('Loading beendet, zeige Contributor Popup...');
+            console.log('Loading completed, showing contributor popup...');
             
             /* Hide any lingering overlays before showing contributor flow. */
             document.getElementById('tools-popup-overlay').style.display = 'none';
@@ -2050,7 +2385,7 @@ const map = L.map('map', {
               populateContributorSelect();
               
               popup.style.display = 'flex';
-              console.log('Contributor Popup angezeigt');
+              console.log('Contributor popup displayed');
               
               /* Wire create-contributor action. */
               createBtn.onclick = function() {
@@ -2059,7 +2394,7 @@ const map = L.map('map', {
               
               /* Wire apply/continue action. */
               applyBtn.onclick = function(e) {
-                console.log('Continue Button geklickt!', e);
+                console.log('Continue button clicked!', e);
                 const selectedRadio = document.querySelector('input[name="contributor-select"]:checked');
                 const selectedId = selectedRadio ? selectedRadio.value : null;
                 console.log('Selected ID:', selectedId);
@@ -2072,17 +2407,18 @@ const map = L.map('map', {
                     document.getElementById('contributor-input').value = fullName;
                     contributorName = fullName;
                     contributorInitials = contributor.fullName.split(/\s+/).map(n => n[0] ? n[0].toUpperCase() : '').join('');
+                    ensureAuditSessionStarted();
                     
                     /* Close popup on successful selection. */
                     popup.style.display = 'none';
-                    console.log('Contributor gesetzt:', fullName);
+                    console.log('Contributor set:', fullName);
                   }
                 } else {
                   showInfoPopup('Please select a contributor or create a new one.');
                 }
               };
             } else {
-              console.error('Popup nicht gefunden');
+              console.error('Popup not found');
             }
           }, 500);
         }
@@ -2194,7 +2530,9 @@ const map = L.map('map', {
     'Parent',
     'Country_Start',
     'Country_End',
-    'modified'
+    'modified',
+    'element_key',
+    '__elementKey'
   ];
   
   // Dynamisch versteckte Attribute basierend auf Benutzereinstellungen
@@ -2208,7 +2546,7 @@ const map = L.map('map', {
   let html = '<table class="popup-table">';
   const orderedKeys = getOrderedAttributeKeys(properties, allHiddenAttributes);
   orderedKeys.forEach(key => {
-    html += `<tr><td>${key}</td><td><input type="text" value="${properties[key] || ''}" data-key="${key}" style="width:20ch"></td></tr>`;
+    html += `<tr><td>${key}</td><td><input type="text" value="${properties[key] ?? ''}" data-key="${key}" style="width:20ch"></td></tr>`;
   });
   html += '</table>';
   html += `<div style="margin-top: 10px;">
@@ -2227,7 +2565,9 @@ const map = L.map('map', {
       'Parent',
       'Country_Start',
       'Country_End',
-      'modified'
+      'modified',
+      'element_key',
+      '__elementKey'
     ];
     
     // Dynamisch versteckte Attribute basierend auf Benutzereinstellungen
@@ -2241,7 +2581,7 @@ const map = L.map('map', {
     let html = '<table class="popup-table">';
     const orderedKeys = getOrderedAttributeKeys(properties, allHiddenAttributes);
     orderedKeys.forEach(key => {
-      html += `<tr><td>${key}</td><td><input type="text" value="${properties[key] || ''}" data-key="${key}" style="width:20ch"></td></tr>`;
+      html += `<tr><td>${key}</td><td><input type="text" value="${properties[key] ?? ''}" data-key="${key}" style="width:20ch"></td></tr>`;
     });
     html += '</table>';
     html += `<div style="margin-top: 10px;">
@@ -2264,7 +2604,9 @@ const map = L.map('map', {
       'Parent',
       'Country_Start',
       'Country_End',
-      'modified'
+      'modified',
+      'element_key',
+      '__elementKey'
     ];
     
     // Dynamisch versteckte Attribute basierend auf Benutzereinstellungen
@@ -2281,7 +2623,7 @@ const map = L.map('map', {
       const value = properties[key];
       content += `<tr>
         <td><strong>${key}:</strong></td>
-        <td><input type="text" value="${value || ''}" data-key="${key}" style="width: 200px;"></td>
+        <td><input type="text" value="${value ?? ''}" data-key="${key}" style="width: 200px;"></td>
       </tr>`;
     });
     
@@ -2311,11 +2653,10 @@ const map = L.map('map', {
           let changed = false;
           inputs.forEach(input => {
             const key = input.getAttribute('data-key');
-            if (layer.feature.properties[key] !== input.value) changed = true;
-            layer.feature.properties[key] = input.value;
+            if (applyInfoModeInputValue(layer.feature.properties, key, input.value)) changed = true;
           });
           // Als bearbeitet markieren, wenn etwas geändert wurde
-          if (changed) layer.feature.properties.modified = true;
+          if (changed) markLayerChanged(layer, { tool: 'Info Mode', skipGeometry: true });
           layer.closePopup();
         };
       }
@@ -2359,7 +2700,7 @@ const map = L.map('map', {
         highlightElement(this);
         const content = createModalPopupContent(this.feature.properties, this);
         const elementType = this.feature.properties.Type || 'Element';
-        const title = `${elementType}: ${this.feature.properties.ID || this.feature.properties.Name || 'Unnamed'}`;
+        const title = `${elementType}: ${this.feature.properties.id || this.feature.properties.name || 'Unnamed'}`;
         showElementModal(title, content, this);
         
         setTimeout(() => {
@@ -2370,10 +2711,9 @@ const map = L.map('map', {
               let changed = false;
               inputs.forEach(input => {
                 const key = input.getAttribute('data-key');
-                if (this.feature.properties[key] !== input.value) changed = true;
-                this.feature.properties[key] = input.value;
+                if (applyInfoModeInputValue(this.feature.properties, key, input.value)) changed = true;
               });
-              if (changed) this.feature.properties.modified = true;
+              if (changed) markLayerChanged(this, { tool: 'Info Mode', skipGeometry: true });
               closeElementModal();
             }.bind(this);
           }
@@ -2409,7 +2749,7 @@ const map = L.map('map', {
       if (layer.editing) layer.editing.disable();
       // Markiere das Feature als geändert
       if (layer.feature && layer.feature.properties) {
-        layer.feature.properties.modified = true;
+        markLayerChanged(layer);
         // Geometrie aktualisieren
         layer.feature.geometry = layer.toGeoJSON().geometry;
       }
@@ -2571,7 +2911,7 @@ const map = L.map('map', {
       }
     });
     if (!applied) {
-      properties.Length_km = lengthValue;
+      properties.length_km = lengthValue;
     }
   }
 
@@ -2732,7 +3072,7 @@ const map = L.map('map', {
         // Modal mit Pipeline-Details anzeigen
         const content = createModalPopupContent(layer.feature.properties, layer);
         const layerDisplayName = getLayerDisplayNameForFeature(layer);
-        const title = `${layerDisplayName}: ${layer.feature.properties.ID || 'Unnamed'}`;
+        const title = `${layerDisplayName}: ${layer.feature.properties.id || 'Unnamed'}`;
         showElementModal(title, content, layer);
         
         setTimeout(() => rebindModalAttributeControls(layer), 100);
@@ -2884,7 +3224,7 @@ const map = L.map('map', {
     for (const config of layerConfig) {
       if (!config.enabled) continue;
       
-      const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      const layerName = config.filename.replace(/\.(?:geojson|csv)$/i, '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
       const metadata = registerLayerMetadata(layerName, config);
       config.layerName = layerName;
       config.elementKey = metadata.elementKey;
@@ -2940,7 +3280,7 @@ const map = L.map('map', {
               layer.on('click', function(e) {
                 // Handle add-pipeline mode
                 if (currentMode === 'add-pipeline' && window.nodeSelectionCallback) {
-                  window.nodeSelectionCallback(this.feature.properties.ID, this.getLatLng());
+                  window.nodeSelectionCallback(this.feature.properties.id, this.getLatLng());
                   e.stopPropagation();
                 } else if (originalClick) {
                   // Call the original click handler from handleFeature
@@ -3145,11 +3485,11 @@ map.on(L.Draw.Event.CREATED, function (e) {
         // Länge der Pipeline berechnen
         const lengthKm = calculatePipelineLength(layer);
 
-        // Setze die Attribute, ID und modified (inkl. Start/End-Nodes und Länge)
-        const properties = { ...defaultAttrs, ID: id, modified: true };
+        // Set attributes and ID, then attribute the new feature to the contributor.
+        const properties = { ...defaultAttrs, id };
         assignPipelineLength(properties, lengthKm);
-        if (startNodeId) properties.Start_Node = startNodeId;
-        if (endNodeId) properties.End_Node = endNodeId;
+        if (startNodeId) properties.node_start = startNodeId;
+        if (endNodeId) properties.node_end = endNodeId;
         
         const feature = {
           type: "Feature",
@@ -3157,6 +3497,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
           geometry: layer.toGeoJSON().geometry
         };
         layer.feature = feature;
+        markLayerChanged(layer, { tool: 'Add Pipeline' });
         layer.closePopup();
         setPipelineInteraction(layer, 'info');
         
@@ -3218,7 +3559,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
         }
         // Map Click-Handler vom Drawing entfernen
         map.off('click', window.markerDrawer._onClick, window.markerDrawer);
-        console.log('Marker-Drawing-Modus vollständig deaktiviert');
+        console.log('Marker drawing mode fully deactivated');
       }
       
       const select = popupContent.querySelector('#point-type-select');
@@ -3260,13 +3601,13 @@ map.on(L.Draw.Event.CREATED, function (e) {
         }
         circleMarker.setStyle(style);
 
-        // 5. Feature-Daten setzen, jetzt auch mit ID, Typ, Standard-Attributen und modified
-        const properties = { ...defaultAttrs, Type: selectedType, ID: userId, modified: true };
+        // Set feature data with ID, type, defaults, and contributor attribution.
+        const properties = { ...defaultAttrs, Type: selectedType, id: userId };
         
         // Wenn ein Node ausgewählt wurde, füge die Node-ID hinzu
         if (window.selectedNodeForInfrastructure) {
-          properties.Node = window.selectedNodeForInfrastructure;
-          console.log('Node-Verbindung hinzugefügt:', window.selectedNodeForInfrastructure);
+          properties.node = window.selectedNodeForInfrastructure;
+          console.log('Node connection added:', window.selectedNodeForInfrastructure);
           // Reset nach Verwendung
           window.selectedNodeForInfrastructure = null;
         }
@@ -3276,6 +3617,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
           properties: properties,
           geometry: { type: "Point", coordinates: [latlng.lng, latlng.lat] }
         };
+        markLayerChanged(circleMarker, { tool: 'Add Infrastructure' });
 
         // Popup mit Info ersetzen
         const infoContent = createPopupContent(circleMarker.feature.properties);
@@ -3324,7 +3666,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
           const elementType = selectedType || 'Element';
           highlightElement(circleMarker);
           const content = createModalPopupContent(circleMarker.feature.properties, circleMarker);
-          const title = `${elementType}: ${circleMarker.feature.properties.ID || circleMarker.feature.properties.Name || 'Unnamed'}`;
+          const title = `${elementType}: ${circleMarker.feature.properties.id || circleMarker.feature.properties.name || 'Unnamed'}`;
           showElementModal(title, content, circleMarker);
           setTimeout(() => rebindModalAttributeControls(circleMarker), 100);
         });
@@ -3348,11 +3690,11 @@ map.on(L.Draw.Event.CREATED, function (e) {
   }
 });
 
-// Beim Bearbeiten das modified-Flag setzen
+// Track the contributor when Leaflet.Draw edits a feature.
 map.on('draw:edited', function (e) {
   e.layers.eachLayer(function (layer) {
     if (layer.feature && layer.feature.properties) {
-      layer.feature.properties.modified = true;
+      markLayerChanged(layer);
     }
   });
 });
@@ -3364,7 +3706,7 @@ map.on('draw:edited', function (e) {
 // Function to export changes (original functionality)
   function createAttributeForm(properties, layer) {
   // Diese Attribute sollen NICHT angezeigt werden (statisch versteckt):
-  const staticHiddenAttributes = ['Parent', 'overlap_percentage', 'overlap_length', 'Owner', 'modified'];
+  const staticHiddenAttributes = ['Parent', 'overlap_percentage', 'overlap_length', 'Owner', 'modified', 'element_key', '__elementKey'];
   
   // Dynamisch versteckte Attribute basierend auf Benutzereinstellungen
   const elementType = layer ? determineElementType(layer) : null;
@@ -3388,7 +3730,7 @@ map.on('draw:edited', function (e) {
     visibleCount++;
     html += `<tr>
       <td>${key}</td>
-      <td><input type="text" data-key="${key}" value="${properties[key] || ''}" style="width:20ch" /></td>
+      <td><input type="text" data-key="${key}" value="${properties[key] ?? ''}" style="width:20ch" /></td>
     </tr>`;
   }
   
@@ -3458,7 +3800,7 @@ if (L && L.CircleMarker && L.CircleMarker.addInitHook) {
 }
 
 function highlightElement(layer) {
-  console.log('highlightElement aufgerufen für Layer:', layer);
+  console.log('highlightElement called for layer:', layer);
   
   // Entferne vorheriges Element-Highlight
   if (activeElement && activeElement !== layer) {
@@ -3507,12 +3849,12 @@ function highlightElement(layer) {
     }
   }
   
-  console.log('Element hervorgehoben:', layer);
+  console.log('Element highlighted:', layer);
 }
 
 // Funktion zum Zurücksetzen des Element-Stils
 function resetElementStyle(layer) {
-  console.log('resetElementStyle aufgerufen für Layer:', layer);
+  console.log('resetElementStyle called for layer:', layer);
   
   if (layer instanceof L.LayerGroup) {
     // Für Layer-Gruppen (Nodes mit erweitertem Klickbereich)
@@ -3567,7 +3909,7 @@ function highlightPipeline(layer) {
   
   // Entferne vorheriges Highlight
   if (activePipeline && activePipeline !== layer) {
-    console.log('Resette vorherige Pipeline:', activePipeline);
+    console.log('Resetting previous pipeline:', activePipeline);
     resetPipelineStyle(activePipeline);
   }
   
@@ -3586,7 +3928,7 @@ function highlightPipeline(layer) {
     
     // Wenn dieser Layer einen Click-Layer hat, verwende den Click-Layer für Highlighting
     if (layer._clickLayer) {
-      console.log('Layer hat Click-Layer, highlighte NUR Click-Layer');
+      console.log('Layer has click layer; highlighting click layer only');
       layerToHighlight = layer._clickLayer.getLayers()[0]; // Erster Layer im ClickLayer
       
       // Mache den Click-Layer sichtbar und rot
@@ -3625,7 +3967,7 @@ function highlightPipeline(layer) {
     }
     
   } else {
-    console.log('Layer ist keine LineString Pipeline:', layer.feature);
+    console.log('Layer is not a LineString pipeline:', layer.feature);
   }
 }
 
@@ -3638,7 +3980,7 @@ function resetPipelineStyle(layer) {
     
     // Wenn der Layer einen Click-Layer hat, verstecke den Click-Layer wieder
     if (layer._clickLayer) {
-      console.log('Layer hat Click-Layer, verstecke NUR Click-Layer');
+      console.log('Layer has click layer; hiding click layer only');
       const clickLayerToReset = layer._clickLayer.getLayers()[0];
       
       // Mache den Click-Layer wieder unsichtbar
@@ -3750,6 +4092,35 @@ function resetAllElementHighlights() {
   }
 }
 
+function resetAllTransientMarkerHighlights() {
+  const visited = new Set();
+  const visit = layer => {
+    if (!layer || visited.has(layer)) return;
+    visited.add(layer);
+    if (layer._highlightBackupStyle) {
+      resetElementStyle(layer);
+    }
+    if (typeof layer.eachLayer === 'function') {
+      layer.eachLayer(visit);
+    }
+  };
+  if (map && typeof map.eachLayer === 'function') map.eachLayer(visit);
+  const registeredGroups = [
+    typeof powerplantsLayer !== 'undefined' ? powerplantsLayer : null,
+    typeof compressorsLayer !== 'undefined' ? compressorsLayer : null,
+    typeof lngLayer !== 'undefined' ? lngLayer : null,
+    typeof storageLayer !== 'undefined' ? storageLayer : null,
+    typeof consumptionLayer !== 'undefined' ? consumptionLayer : null,
+    typeof borderpointsLayer !== 'undefined' ? borderpointsLayer : null,
+    typeof demandsLayer !== 'undefined' ? demandsLayer : null,
+    typeof productionsLayer !== 'undefined' ? productionsLayer : null
+  ].filter(Boolean);
+  if (typeof getAllNodeLayers === 'function') registeredGroups.push(...getAllNodeLayers());
+  if (typeof getAllInlineLayers === 'function') registeredGroups.push(...getAllInlineLayers());
+  registeredGroups.forEach(visit);
+  activeElement = null;
+}
+
 /**
  * Open the attribute info overlay for a pipeline feature.
  *
@@ -3786,11 +4157,14 @@ function bindInfoOverlayActions(layer) {
     saveBtn.onclick = function () {
       const inputs = popup.querySelectorAll('input[data-key]');
       let hasTechnicalAttributeChange = false;
+      let changed = false;
 
       inputs.forEach(input => {
         const key = input.getAttribute('data-key');
         const oldValue = layer.feature.properties[key];
         const newValue = input.value;
+        const valueChanged = !auditValuesEquivalent(oldValue, newValue);
+        if (valueChanged) changed = true;
 
         if ((key === 'Diameter_mm' || key === 'Name' || key === 'Pressure_bar') &&
             newValue && newValue.trim() !== '') {
@@ -3802,7 +4176,7 @@ function bindInfoOverlayActions(layer) {
           }
         }
 
-        layer.feature.properties[key] = newValue;
+        if (valueChanged) layer.feature.properties[key] = newValue;
       });
 
       const protectedSources = ['OpenStreetMap', 'Global Energy Monitor', 'Manual research'];
@@ -3812,7 +4186,10 @@ function bindInfoOverlayActions(layer) {
         layer.feature.properties.Source = 'Contributor';
       }
 
-      layer.feature.properties.modified = true;
+      if (changed) {
+        markLayerChanged(layer, { tool: 'Info Mode', skipGeometry: true });
+        window.hasUnsavedChanges = true;
+      }
       popup.style.display = 'none';
 
       resetPipelineStyle(layer);
@@ -3878,7 +4255,7 @@ function rebindModalAttributeControls(layer) {
           const key = input.getAttribute('data-key');
           const newValue = input.value;
           const oldValue = layer.feature?.properties ? layer.feature.properties[key] : undefined;
-          if (oldValue !== newValue) {
+          if (!auditValuesEquivalent(oldValue, newValue)) {
             changed = true;
             const isLine = layer.feature?.geometry?.type === 'LineString';
             if (isLine && (key === 'Diameter_mm' || key === 'Name' || key === 'Pressure_bar')) {
@@ -3899,7 +4276,7 @@ function rebindModalAttributeControls(layer) {
         }
 
         if (changed && layer.feature && layer.feature.properties) {
-          layer.feature.properties.modified = true;
+          markLayerChanged(layer, { tool: 'Info Mode', skipGeometry: true });
           window.hasUnsavedChanges = true;
         }
 
@@ -4397,7 +4774,7 @@ function generateAttributeList(layer) {
   
   // Add element-type specific protected attributes
   if (elementType === 'pipelines') {
-    protectedAttributes = protectedAttributes.concat(['Length_km', 'Diameter_mm', 'Pressure_bar']);
+    protectedAttributes = protectedAttributes.concat(['length_km', 'diameter_mm', 'max_pressure_bar']);
   }
   
   let html = '';
@@ -4710,7 +5087,7 @@ function addAttributeToAllElements(elementType, attributeName, defaultValue, lay
     layerGroup.eachLayer(layer => {
       if (layer && layer.feature && layer.feature.properties) {
         layer.feature.properties[attributeName] = defaultValue;
-        layer.feature.properties.modified = true;
+        markLayerChanged(layer);
         count++;
       }
     });
@@ -4744,7 +5121,7 @@ function deleteAttributeFromAllElements(elementType, attributeName, layerScope =
     layerGroup.eachLayer(layer => {
       if (layer && layer.feature && layer.feature.properties && Object.prototype.hasOwnProperty.call(layer.feature.properties, attributeName)) {
         delete layer.feature.properties[attributeName];
-        layer.feature.properties.modified = true;
+        markLayerChanged(layer);
         count++;
       }
     });
@@ -4792,7 +5169,7 @@ function getDefaultPipelineAttributes(sourceLayer) {
 
     if (layer.feature && layer.feature.geometry && layer.feature.geometry.type === 'LineString') {
       for (const key in layer.feature.properties) {
-        if (key !== 'modified') attrs[key] = '';
+        if (!['modified', 'element_key', '__elementKey'].includes(key)) attrs[key] = '';
       }
       return true;
     }
@@ -4807,9 +5184,9 @@ function getDefaultPipelineAttributes(sourceLayer) {
 function getDefaultPointAttributes(type) {
   const resolvedType = type || 'Custom Element';
   return {
-    ID: '',
+    id: '',
     Type: resolvedType,
-    Node: ''
+    node: ''
   };
 }
 
@@ -4846,7 +5223,7 @@ function ensureHiddenAttributeBucket(elementType) {
 window.filterAttributes = function(properties, layer) {
   const staticHiddenAttributes = [
     'overlap_percentage', 'overlap_length', 'Owner', 'Parent',
-    'Country_Start', 'Country_End', 'modified'
+    'Country_Start', 'Country_End', 'modified', 'element_key', '__elementKey'
   ];
 
   const elementType = layer ? determineElementType(layer) : null;
@@ -4988,6 +5365,7 @@ document.getElementById('contributor-form').addEventListener('submit', function(
     document.getElementById('contributor-input').value = fullName;
     contributorName = fullName;
     contributorInitials = contributor.fullName.split(/\s+/).map(n => n[0] ? n[0].toUpperCase() : '').join('');
+    ensureAuditSessionStarted();
     
     // Update dropdown and select the new contributor
     populateContributorSelect();
@@ -5050,7 +5428,7 @@ function showContributorDialog() {
     populateContributorSelect();
     
     popup.style.display = 'flex';
-    console.log('Contributor Dialog angezeigt');
+    console.log('Contributor dialog displayed');
   }
 }
 
@@ -5080,7 +5458,7 @@ function checkAndDeleteOrphanedNodes(nodeIds) {
     pipelineLayer.eachLayer(pipelineLayer => {
       if (pipelineLayer.feature && pipelineLayer.feature.properties) {
         const props = pipelineLayer.feature.properties;
-        if (props.Start_Node === nodeId || props.End_Node === nodeId) {
+        if (props.node_start === nodeId || props.node_end === nodeId) {
           isUsed = true;
         }
       }
@@ -5091,7 +5469,7 @@ function checkAndDeleteOrphanedNodes(nodeIds) {
       drawnItems.eachLayer(drawnLayer => {
         if (drawnLayer.feature && drawnLayer.feature.properties) {
           const props = drawnLayer.feature.properties;
-          if (props.Start_Node === nodeId || props.End_Node === nodeId) {
+          if (props.node_start === nodeId || props.node_end === nodeId) {
             isUsed = true;
           }
         }
@@ -5103,8 +5481,13 @@ function checkAndDeleteOrphanedNodes(nodeIds) {
       nodeLayers.forEach(layerGroup => {
         if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
         layerGroup.eachLayer(nodeLayerItem => {
-          if (nodeLayerItem.feature && nodeLayerItem.feature.properties.ID === nodeId && !nodeLayerItem._deletedInSession) {
-            console.log('Lösche verwaisten Node:', nodeId);
+          if (nodeLayerItem.feature && nodeLayerItem.feature.properties.id === nodeId && !nodeLayerItem._deletedInSession) {
+            console.log('Deleting orphaned node:', nodeId);
+            markLayerChanged(nodeLayerItem, {
+              changeType: 'Topology Change',
+              tool: 'Delete',
+              description: 'Orphaned node deleted after removing its last connection'
+            });
             deletedNodes.push(nodeLayerItem.feature);
             try {
               if (typeof layerGroup.removeLayer === 'function') {
@@ -5212,7 +5595,7 @@ function getDefaultNodeStyleOptions(preferredLayer = null) {
  *
  * @param {L.LatLng} latlng - Geographic position for the new node.
  * @param {string} nodeId - Unique identifier to assign to the node
- *   feature (<code>properties.ID</code>).
+ *   feature (<code>properties.id</code>).
  * @param {Object} [options={}] - Optional configuration.
  * @param {L.LayerGroup|null} [options.targetLayer=null] - Target layer
  *   group; falls back to the global <code>nodeLayer</code>.
@@ -5233,7 +5616,9 @@ function createNewNode(latlng, nodeId, options = {}) {
   captureOriginalMarkerStyle(nodeMarker, 'default');
   
   const defaultAttrs = getDefaultPointAttributes('Node');
-  const properties = { ...defaultAttrs, Type: 'Node', ID: nodeId, modified: true };
+  const properties = options.properties
+    ? { ...options.properties, Type: options.properties.Type || 'Node', id: nodeId }
+    : { ...defaultAttrs, Type: 'Node', id: nodeId };
   
   // Feature-Eigenschaft an Marker binden
   nodeMarker.feature = {
@@ -5241,26 +5626,27 @@ function createNewNode(latlng, nodeId, options = {}) {
     properties: properties,
     geometry: { type: "Point", coordinates: [latlng.lng, latlng.lat] }
   };
+  markLayerChanged(nodeMarker, { tool: options.tool || getAuditToolName() });
   
   // Klick-Handler an Marker binden
   const clickHandler = function(e) {
     console.log('Node click handler called, currentMode:', currentMode, 'hasCallback:', !!window.nodeSelectionCallback);
-    console.log('Clicked on node:', this.feature ? this.feature.properties.ID : 'no feature');
+    console.log('Clicked on node:', this.feature ? this.feature.properties.id : 'no feature');
     if (currentMode === 'info') {
-      console.log('Node geklickt:', this.feature.properties.ID);
+      console.log('Node clicked:', this.feature.properties.id);
       
       // Element hervorheben
       highlightElement(this);
       
       // Modal mit Node-Details anzeigen
       const content = createModalPopupContent(this.feature.properties, this);
-      const title = `Node: ${this.feature.properties.ID || this.feature.properties.Name || 'Unnamed'}`;
+      const title = `Node: ${this.feature.properties.id || this.feature.properties.name || 'Unnamed'}`;
       showElementModal(title, content, this);
       
       setTimeout(() => rebindModalAttributeControls(this), 100);
     } else if (currentMode === 'add-pipeline' && window.nodeSelectionCallback) {
-      console.log('Node für Pipeline ausgewählt:', this.feature.properties.ID);
-      window.nodeSelectionCallback(this.feature.properties.ID, this.getLatLng());
+      console.log('Node selected for pipeline:', this.feature.properties.id);
+      window.nodeSelectionCallback(this.feature.properties.id, this.getLatLng());
       e.stopPropagation();
     }
   };
@@ -5278,7 +5664,7 @@ function createNewNode(latlng, nodeId, options = {}) {
     nodeMarker.addTo(map);
   }
   nodeMarker._parentNodeLayer = destinationLayer || null;
-  console.log('Neuer Node erstellt:', nodeId);
+  console.log('New node created:', nodeId);
   return nodeMarker;
 }
 
@@ -5415,7 +5801,7 @@ function createInfrastructurePoint(userId, layerOption, latlng, defaultAttrs) {
     getAllNodeLayers().forEach(layerGroup => {
       if (!layerGroup) return;
       layerGroup.eachLayer(marker => {
-        const id = marker.feature?.properties?.ID;
+        const id = marker.feature?.properties?.id;
         const ll = marker.getLatLng?.();
         if (!id || !ll) return;
         const dist = map.distance(center, ll);
@@ -5436,15 +5822,15 @@ function createInfrastructurePoint(userId, layerOption, latlng, defaultAttrs) {
   };
 
   // Properties setzen
-  const properties = { ...defaultAttrs, ID: userId, modified: true };
+  const properties = { ...defaultAttrs, id: userId };
   if (!('Type' in properties) || !properties.Type) {
     properties.Type = selectedType;
   }
   
   // Node-Verbindung hinzufügen falls vorhanden
   if (window.selectedNodeForInfrastructure) {
-    properties.Node = window.selectedNodeForInfrastructure;
-    console.log('Node-Verbindung hinzugefügt:', window.selectedNodeForInfrastructure);
+    properties.node = window.selectedNodeForInfrastructure;
+    console.log('Node connection added:', window.selectedNodeForInfrastructure);
     window.selectedNodeForInfrastructure = null;
   }
 
@@ -5452,13 +5838,13 @@ function createInfrastructurePoint(userId, layerOption, latlng, defaultAttrs) {
   if (isInlineLayer) {
     const nearby = findNearbyNodes(latlng, 50);
     if (nearby.length >= 2) {
-      properties.Start_Node = nearby[0].id;
-      properties.End_Node = nearby[1].id;
-      properties.Node = '';
+      properties.node_start = nearby[0].id;
+      properties.node_end = nearby[1].id;
+      properties.node = '';
     } else if (nearby.length === 1) {
-      properties.Node = nearby[0].id;
-      properties.Start_Node = '';
-      properties.End_Node = '';
+      properties.node = nearby[0].id;
+      properties.node_start = '';
+      properties.node_end = '';
     }
   }
   
@@ -5466,10 +5852,11 @@ function createInfrastructurePoint(userId, layerOption, latlng, defaultAttrs) {
   
   // For Nodes, use the createNewNode function to ensure consistency
   if (selectedType === 'Node') {
-    marker = createNewNode(latlng, userId, { targetLayer: layerOption?.layer });
-    // Update properties on the marker
-    marker.feature.properties = properties;
-    marker.feature.properties.modified = true;
+    marker = createNewNode(latlng, userId, {
+      targetLayer: layerOption?.layer,
+      properties,
+      tool: 'Add Infrastructure'
+    });
     marker.isNew = true;
   } else {
     // For other infrastructure, create a simple CircleMarker
@@ -5481,6 +5868,7 @@ function createInfrastructurePoint(userId, layerOption, latlng, defaultAttrs) {
       properties: properties,
       geometry: { type: "Point", coordinates: [latlng.lng, latlng.lat] }
     };
+    markLayerChanged(marker, { tool: 'Add Infrastructure' });
     marker.isNew = true;
   }
   
@@ -5627,18 +6015,18 @@ function getNextIdNumber(type, layerOverride = null) {
   // Funktion zum Sammeln von IDs aus einem Layer
   const collectIdsFromLayer = (layer) => {
     if (!layer) return;
-    if (layer.feature && layer.feature.properties && layer.feature.properties.ID) {
-      recordMatch(layer.feature.properties.ID);
+    if (layer.feature && layer.feature.properties && layer.feature.properties.id) {
+      recordMatch(layer.feature.properties.id);
     }
     if (typeof layer.eachLayer === 'function') {
       layer.eachLayer(subLayer => {
-        if (subLayer && subLayer.feature && subLayer.feature.properties && subLayer.feature.properties.ID) {
-          recordMatch(subLayer.feature.properties.ID);
+        if (subLayer && subLayer.feature && subLayer.feature.properties && subLayer.feature.properties.id) {
+          recordMatch(subLayer.feature.properties.id);
         }
         if (subLayer && typeof subLayer.eachLayer === 'function') {
           subLayer.eachLayer(grandSubLayer => {
-            if (grandSubLayer && grandSubLayer.feature && grandSubLayer.feature.properties && grandSubLayer.feature.properties.ID) {
-              recordMatch(grandSubLayer.feature.properties.ID);
+            if (grandSubLayer && grandSubLayer.feature && grandSubLayer.feature.properties && grandSubLayer.feature.properties.id) {
+              recordMatch(grandSubLayer.feature.properties.id);
             }
           });
         }
@@ -5892,11 +6280,11 @@ function getDefaultAttributesForLayerOption(option) {
   if (!('Type' in attrs) || !attrs.Type) {
     attrs.Type = resolvedType;
   }
-  if (!('ID' in attrs)) {
-    attrs.ID = '';
+  if (!('id' in attrs)) {
+    attrs.id = '';
   }
-  if (!('Node' in attrs)) {
-    attrs.Node = '';
+  if (!('node' in attrs)) {
+    attrs.node = '';
   }
 
   return attrs;
@@ -5910,7 +6298,7 @@ function buildAttributeTemplateFromLayer(layer) {
     const props = candidate.feature.properties;
     template = {};
     Object.keys(props).forEach(key => {
-      if (key === 'modified') return;
+      if (['modified', 'element_key', '__elementKey'].includes(key)) return;
       template[key] = '';
     });
   });
@@ -5930,7 +6318,7 @@ function applyGenericPointInfoHandlers(layerGroup, label) {
     candidate.on('click', function () {
       highlightElement(candidate);
       const content = createModalPopupContent(candidate.feature.properties, candidate);
-      const title = `${titleLabel}: ${candidate.feature.properties.ID || candidate.feature.properties.Name || 'Unnamed'}`;
+      const title = `${titleLabel}: ${candidate.feature.properties.id || candidate.feature.properties.name || 'Unnamed'}`;
       showElementModal(title, content, candidate);
       setTimeout(() => rebindModalAttributeControls(candidate), 100);
     });
@@ -6071,7 +6459,7 @@ function buildPointLayerOptions() {
   if (Array.isArray(layerConfig)) {
     layerConfig.forEach(config => {
       if (!config || isLineLayerType(config.type)) return;
-      const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      const layerName = config.filename.replace(/\.(?:geojson|csv)$/i, '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
       const targetLayer = dynamicLayers[layerName];
       if (!targetLayer) return;
       if (!isSelectablePointLayer(targetLayer)) return;
@@ -6222,32 +6610,32 @@ if (shortPipeLayer) {
 }
 
 
-const START_NODE_KEYS = ['Start_Node', 'start_node', 'StartNode', 'startnode', 'START_NODE'];
-const END_NODE_KEYS = ['End_Node', 'end_node', 'EndNode', 'endnode', 'END_NODE'];
+const START_NODE_KEYS = ['node_start'];
+const END_NODE_KEYS = ['node_end'];
 
 // ==================== End of Pipeline Grouping Functions ====================
 
 
 // Funktion zum Hinzufügen von Funktions-Buttons
 function addFunctionBtn(label, onClick) {
-  console.log('Versuche Button zu erstellen:', label);
+  console.log('Attempting to create button:', label);
   const btnContainer = document.getElementById('function-btns');
   if (!btnContainer) {
-    console.error('Button container nicht gefunden! Element function-btns existiert nicht.');
+    console.error('Button container not found! Element function-btns does not exist.');
     return null;
   }
   
-  console.log('Button container gefunden, erstelle Button:', label);
+  console.log('Button container found, creating button:', label);
   const btn = document.createElement('button');
   btn.className = 'function-btn';
   btn.textContent = label;
   btn.onclick = function () {
-    console.log('Button geklickt:', label);
+    console.log('Button clicked:', label);
     setActiveBtn(btn);
     onClick();
   };
   btnContainer.appendChild(btn);
-  console.log('Button erfolgreich hinzugefügt:', label);
+  console.log('Button added successfully:', label);
   return btn;
 }
 
@@ -6275,8 +6663,12 @@ deactivateAllModes();
  */
 function deactivateAllModes() {
   try {
-    console.log('Deaktiviere alle Modi');
+    console.log('Deactivating all modes');
     applyEditGeometryVisibility(false);
+
+    if (typeof window.deactivateReconnectInfrastructureTool === 'function') {
+      window.deactivateReconnectInfrastructureTool();
+    }
     
     // Draw-Tools deaktivieren
     if (window.polylineDrawer && window.polylineDrawer._enabled) window.polylineDrawer.disable();
@@ -6284,10 +6676,18 @@ function deactivateAllModes() {
     
     // Popups schließen
     map.closePopup();
+    if (typeof closeElementModal === 'function') closeElementModal();
 
     if (typeof cleanupDeleteBoxSelection === 'function') {
       cleanupDeleteBoxSelection();
     }
+    if (window.qgasDeleteStateReady && typeof clearPendingDeletionSelections === 'function') {
+      clearPendingDeletionSelections();
+    }
+
+    resetAllElementHighlights();
+    resetAllTransientMarkerHighlights();
+    resetAllPipelineHighlights();
     
     // Edit-Modus beenden
     if (editingLayer && editingLayer.editing) {
@@ -6375,7 +6775,7 @@ function deactivateAllModes() {
     const infoBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Info Mode');
     if (infoBtn) {
       setActiveBtn(infoBtn);
-      console.log('Info Mode Button als aktiv markiert');
+      console.log('Info Mode button marked as active');
     }
   } catch (error) {
     console.error('Error in deactivateAllModes:', error);
@@ -6889,11 +7289,11 @@ function displayChart(countryCode, timestamps, values, properties) {
   chartContainer.appendChild(resetBtn);
 }// Funktions-Buttons mit einfacherer Logik (Fehlerbehandlung)
 try {
-  console.log('Erstelle Buttons...');
+  console.log('Creating buttons...');
   
   addFunctionBtn('Info Mode', () => {
     try {
-      console.log('Info Mode geklickt');
+      console.log('Info Mode clicked');
       currentMode = 'info';
       activateInfoMode();
       // Button-Highlighting wird automatisch durch onClick in addFunctionBtn gemacht
@@ -6905,7 +7305,7 @@ try {
   addFunctionBtn('Edit Geometry', () => {
     try {
       if (!checkContributorName()) return;
-      console.log('Edit Mode geklickt');
+      console.log('Edit Mode clicked');
       // Button wird automatisch durch onClick in addFunctionBtn hervorgehoben
       activateEditMode(); // Edit Mode aktivieren
       showInfoPopup('Edit Mode - Move the pipeline support points via drag and drop!\nChanges are confirmed by clicking "Save Changes".', '✏️ Edit Geometry');
@@ -6917,7 +7317,7 @@ try {
   addFunctionBtn('🗑️ Delete', () => {
     try {
       if (!checkContributorName()) return;
-      console.log('Delete Mode geklickt');
+      console.log('Delete Mode clicked');
       // Button wird automatisch durch onClick in addFunctionBtn hervorgehoben
       activateDeleteMode(); // Delete Mode aktivieren
       showInfoPopup("🗑️ Delete mode active. Click elements to mark or unmark them. Use 'Delete Elements' to confirm or 'Discard Changes' to cancel.", '🗑️ Delete Mode');
@@ -6931,7 +7331,7 @@ try {
   addFunctionBtn('Split Node', () => {
     try {
       if (!checkContributorName()) return;
-      console.log('Split Node geklickt');
+      console.log('Split Node clicked');
       deactivateAllModes();
       const splitBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Split Node');
       if (splitBtn) setActiveBtn(splitBtn);
@@ -6968,7 +7368,7 @@ try {
   addFunctionBtn('Add Infrastructure', () => {
     try {
       if (!checkContributorName()) return;
-      console.log('Add Infrastructure geklickt');
+      console.log('Add Infrastructure clicked');
       deactivateAllModes();
       const addInfraBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Add Infrastructure');
       if (addInfraBtn) setActiveBtn(addInfraBtn);
@@ -6985,8 +7385,8 @@ try {
           }
           showInfoPopup('Please click on a node to connect the infrastructure to it.', '🏗️ Add Infrastructure');
           setNodeSelectionHandlers(marker => {
-            window.selectedNodeForInfrastructure = marker.feature?.properties?.ID;
-            console.log('Node ausgewählt:', window.selectedNodeForInfrastructure);
+            window.selectedNodeForInfrastructure = marker.feature?.properties?.id;
+            console.log('Node selected:', window.selectedNodeForInfrastructure);
             clearNodeSelectionHandlers();
             showCustomPopup(
               '✅ Node Selected',
@@ -7025,7 +7425,7 @@ try {
   addFunctionBtn('Mark as Short-Pipe', () => {
     try {
       if (!checkContributorName()) return;
-      console.log('Short-Pipe geklickt');
+      console.log('Short-Pipe clicked');
       deactivateAllModes();
       const shortPipeBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Mark as Short-Pipe');
       if (shortPipeBtn) setActiveBtn(shortPipeBtn);
@@ -7039,7 +7439,7 @@ try {
   addFunctionBtn('Change Direction', () => {
     try {
       if (!checkContributorName()) return;
-      console.log('Change Direction geklickt');
+      console.log('Change Direction clicked');
       deactivateAllModes();
       const changeDirectionBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent === 'Change Direction');
       if (changeDirectionBtn) setActiveBtn(changeDirectionBtn);
@@ -7060,7 +7460,7 @@ try {
     }
   });
 
-  console.log('Alle Buttons erstellt');
+  console.log('All buttons created');
 } catch (error) {
   console.error('Critical error creating buttons:', error);
 }
@@ -7074,10 +7474,11 @@ function tryActivateInfoModeWhenReady(maxAttempts = 30, delay = 300) {
     attempts++;
     try {
       const infoBtn = Array.from(document.querySelectorAll('.function-btn')).find(btn => btn.textContent && btn.textContent.trim() === 'Info Mode');
-      // Warte auch auf alle wichtigen Layer
-      const layersReady = pipelineLayer && getAllNodeLayers().length && powerplantsLayer && compressorsLayer && lngLayer && storageLayer && consumptionLayer;
-      if (infoBtn && typeof activateInfoMode === 'function' && layersReady) {
-        console.log('Info Button und alle Layer gefunden nach', attempts, 'Versuchen – aktiviere Info Mode');
+      // Layer arrive asynchronously and differ between datasets. loadLayer()
+      // activates Info Mode again for every newly loaded relevant layer.
+      const interfaceReady = map && infoBtn && typeof activateInfoMode === 'function';
+      if (interfaceReady) {
+        console.log('Info interface found after', attempts, 'attempts - activating Info Mode');
         try { setActiveBtn(infoBtn); } catch (e) { console.warn('setActiveBtn failed:', e); }
         try { activateInfoMode(); } catch (e) { console.error('activateInfoMode failed:', e); }
         window._infoAutoActivated = true;
@@ -7089,7 +7490,7 @@ function tryActivateInfoModeWhenReady(maxAttempts = 30, delay = 300) {
     }
     if (attempts >= maxAttempts) {
       clearInterval(id);
-      console.warn('Info Mode konnte nicht automatisch aktiviert werden (Button, Funktion oder Layer nicht gefunden).');
+      console.warn('Info Mode could not be activated automatically (button, function, or layer not found).');
     }
   }, delay);
 }
@@ -7113,6 +7514,7 @@ let pendingLNGDeletions = [];
 let pendingPowerplantDeletions = [];
 let pendingCustomDeletions = [];
 let pendingDrawnItemDeletions = [];
+window.qgasDeleteStateReady = true;
 
 // Modal-System Funktionen
 let currentLayer = null;
@@ -7177,8 +7579,13 @@ document.addEventListener('keydown', function(e) {
     closeStylePickerModal();
     closeSizePickerModal();
     closeLineTypePickerModal();
+    if (currentMode && currentMode !== 'info') {
+      if (typeof closeCustomPopup === 'function') closeCustomPopup();
+      deactivateAllModes();
+      activateInfoMode(true);
+    }
   }
-});
+}, true);
 
 // Klick außerhalb des Modals schließt es
 document.getElementById('element-modal').addEventListener('click', function(e) {
@@ -7502,7 +7909,7 @@ function linkInlineElementsToNearbyNodes(toleranceMeters = 50) {
     nodeLayers.forEach(layerGroup => {
       if (!layerGroup) return;
       layerGroup.eachLayer(marker => {
-        const id = marker.feature?.properties?.ID;
+        const id = marker.feature?.properties?.id;
         const ll = marker.getLatLng?.();
         if (!id || !ll) return;
         nodeIndex.push({ id, latlng: ll });
@@ -7523,17 +7930,17 @@ function linkInlineElementsToNearbyNodes(toleranceMeters = 50) {
     inlineLayers.forEach(layerGroup => {
       layerGroup.eachLayer(marker => {
         const props = marker.feature?.properties || {};
-        if (props.Start_Node || props.End_Node || props.Node) return;
+        if (props.node_start || props.node_end || props.node) return;
         const latlng = marker.getLatLng?.();
         const nearby = findClosestNodes(latlng);
         if (nearby.length >= 2) {
-          props.Start_Node = nearby[0].id;
-          props.End_Node = nearby[1].id;
-          props.Node = '';
+          props.node_start = nearby[0].id;
+          props.node_end = nearby[1].id;
+          props.node = '';
         } else if (nearby.length === 1) {
-          props.Node = nearby[0].id;
-          props.Start_Node = '';
-          props.End_Node = '';
+          props.node = nearby[0].id;
+          props.node_start = '';
+          props.node_end = '';
         }
       });
     });

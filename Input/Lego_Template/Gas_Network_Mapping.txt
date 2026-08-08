@@ -1,0 +1,39 @@
+# QGas -> LEGO Gas_Network.xlsx mapping
+#
+# This is a semicolon-separated configuration file. Lines beginning with # are comments.
+# Empty DEFAULT values mean that the exported cell is left empty.
+#
+# LAYER RULES
+# RULE;CATEGORY;LAYER_TYPE;NAME_CONTAINS
+# - LAYER_TYPE is the "Layer Type" from config.xlsx (Line or In-Line).
+# - NAME_CONTAINS is matched case-insensitively against filename and legend name.
+# - Put specific rules before the "*" fallback rule.
+RULE;shortpipe;Line;short pipe|shortpipe|short-pipe
+RULE;valve;Line;valve
+RULE;compressor;In-Line;compressor
+RULE;valve;In-Line;valve
+RULE;pipeline;Line;*
+RULE;inline;In-Line;*
+#
+# COLUMN MAPPINGS
+# MAP;CATEGORY;COLUMN;TEMPLATE_HEADER;SOURCE_ATTRIBUTE;DEFAULT;TRANSFORM
+# - CATEGORY may be pipeline, shortpipe, compressor, valve, inline, or *.
+# - SOURCE_ATTRIBUTE may contain alternatives separated by |.
+# - $dataset inserts the dataset/layer name.
+# - $qgas_dataset inserts "QGAS " followed by the dataset/layer name.
+# - Supported transforms: divide:NUMBER (for example divide:1000 converts mm to m), text.
+MAP;*;B;Database ID;ID|id;
+MAP;*;C;From Node;node_start;
+MAP;*;D;To Node;node_end;
+MAP;*;E;Loop / Name;__lego_loop;Loop1
+MAP;*;F;Gas Type;gas_type|Gas_Type;NG
+MAP;pipeline;G;Length;length_km;
+MAP;shortpipe;G;Length;;
+MAP;pipeline;H;Diameter;diameter_mm;;divide:1000
+MAP;shortpipe;H;Diameter;;9999
+MAP;valve;H;Diameter;;9999
+MAP;compressor;J;Compression Ratio;compressor_ratio;
+MAP;*;O;Commission Year;year_start;
+MAP;*;P;Decommission Year;year_end;
+MAP;*;R;Data Source;;$qgas_dataset
+MAP;shortpipe;R;Data Source;;QGas Shortpipes

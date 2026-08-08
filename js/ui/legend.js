@@ -241,9 +241,13 @@ function createLegendEventHandlers() {
        * are found correctly in dynamicLayers. */
       const layerName = config.layerName ||
         config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      const configDescriptor = `${config.filename || ''} ${config.legendName || ''}`;
+      const isCompressorConfig = /compressor/i.test(configDescriptor);
       registerToggle({
         toggleId,
-        resolveLayers: () => dynamicLayers[layerName],
+        resolveLayers: () => isCompressorConfig
+          ? (compressorsLayer || dynamicLayers[layerName])
+          : dynamicLayers[layerName],
         key: layerName
       });
     });

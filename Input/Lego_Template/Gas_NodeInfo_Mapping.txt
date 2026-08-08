@@ -1,0 +1,13 @@
+# QGas -> LEGO Gas_NodeInfo.xlsx mapping
+#
+# Semicolon-separated configuration. Lines beginning with # are comments.
+# RULE;CATEGORY;LAYER_TYPE;NAME_CONTAINS
+# Standard project configurations store the Nodes layer as a Point layer.
+RULE;node;Node;*
+RULE;node;Point;Nodes
+#
+# MAP;CATEGORY;COLUMN;TEMPLATE_HEADER;SOURCE_ATTRIBUTE;DEFAULT
+MAP;node;C;Node;ID|id;
+MAP;node;E;Zone;nuts3;
+MAP;node;F;Maximum Pressure;pressure_max;
+MAP;node;G;Minimum Pressure;pressure_min;

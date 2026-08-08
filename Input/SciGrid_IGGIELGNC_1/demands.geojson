@@ -11,10 +11,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "BE3",
+        "id": "BE3",
         "name": "RÃÂÃÂGION WALLONNE",
-        "Node": "NutsCons_0",
-        "NUTS3_ID": "BE351",
+        "node": "NutsCons_0",
+        "nuts3": "BE351",
         "max_demand_M_m3_per_d": 23.793,
         "max_demand_commercial_M_m3_per_d": 5.469,
         "max_demand_household_M_m3_per_d": 15.611,
@@ -43,10 +43,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "CH0",
+        "id": "CH0",
         "name": "SCHWEIZ/SUISSE/SVIZZERA",
-        "Node": "NutsCons_1",
-        "NUTS3_ID": "CH062",
+        "node": "NutsCons_1",
+        "nuts3": "CH062",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -75,10 +75,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE1",
+        "id": "DE1",
         "name": "BADEN-WÃÂÃÂRTTEMBERG",
-        "Node": "INET_N_1504",
-        "NUTS3_ID": "DE112",
+        "node": "INET_N_1504",
+        "nuts3": "DE112",
         "max_demand_M_m3_per_d": 48.601,
         "max_demand_commercial_M_m3_per_d": 13.878,
         "max_demand_household_M_m3_per_d": 23.512,
@@ -107,10 +107,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DEA",
+        "id": "DEA",
         "name": "NORDRHEIN-WESTFALEN",
-        "Node": "NutsCons_4",
-        "NUTS3_ID": "DEA5B",
+        "node": "NutsCons_4",
+        "nuts3": "DEA5B",
         "max_demand_M_m3_per_d": 61.691,
         "max_demand_commercial_M_m3_per_d": 22.966,
         "max_demand_household_M_m3_per_d": 26.612,
@@ -139,10 +139,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "BG3",
+        "id": "BG3",
         "name": "ÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ ÃÂÃÂ ÃÂÃÂ®ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂªÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯",
-        "Node": "NutsCons_5",
-        "NUTS3_ID": "BG322",
+        "node": "NutsCons_5",
+        "nuts3": "BG322",
         "max_demand_M_m3_per_d": 2.554,
         "max_demand_commercial_M_m3_per_d": 0.477,
         "max_demand_household_M_m3_per_d": 0.629,
@@ -171,10 +171,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE7",
+        "id": "DE7",
         "name": "HESSEN",
-        "Node": "NutsCons_6",
-        "NUTS3_ID": "DE71E",
+        "node": "NutsCons_6",
+        "nuts3": "DE71E",
         "max_demand_M_m3_per_d": 29.635,
         "max_demand_commercial_M_m3_per_d": 8.406,
         "max_demand_household_M_m3_per_d": 17.145,
@@ -203,10 +203,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "EL5",
+        "id": "EL5",
         "name": "ÃÂÃÂÃÂÃÂÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ",
-        "Node": "NutsCons_7",
-        "NUTS3_ID": "EL527",
+        "node": "NutsCons_7",
+        "nuts3": "EL527",
         "max_demand_M_m3_per_d": 2.671,
         "max_demand_commercial_M_m3_per_d": 0.514,
         "max_demand_household_M_m3_per_d": 1.914,
@@ -235,10 +235,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "EL6",
+        "id": "EL6",
         "name": "ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃ¢ÂÂ¬ÃÂÃÂ¡ÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ",
-        "Node": "NutsCons_8",
-        "NUTS3_ID": "EL641",
+        "node": "NutsCons_8",
+        "nuts3": "EL641",
         "max_demand_M_m3_per_d": 3.278,
         "max_demand_commercial_M_m3_per_d": 0.484,
         "max_demand_household_M_m3_per_d": 2.545,
@@ -267,10 +267,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE4",
+        "id": "DE4",
         "name": "BRANDENBURG",
-        "Node": "INET_N_172",
-        "NUTS3_ID": "DE300",
+        "node": "INET_N_172",
+        "nuts3": "DE300",
         "max_demand_M_m3_per_d": 11.389,
         "max_demand_commercial_M_m3_per_d": 3.339,
         "max_demand_household_M_m3_per_d": 6.698,
@@ -299,10 +299,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "EE0",
+        "id": "EE0",
         "name": "EESTI",
-        "Node": "NutsCons_10",
-        "NUTS3_ID": "EE004",
+        "node": "NutsCons_10",
+        "nuts3": "EE004",
         "max_demand_M_m3_per_d": 1.597,
         "max_demand_commercial_M_m3_per_d": 0.74,
         "max_demand_household_M_m3_per_d": 0.512,
@@ -331,10 +331,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DEB",
+        "id": "DEB",
         "name": "RHEINLAND-PFALZ",
-        "Node": "NutsCons_11",
-        "NUTS3_ID": "DEB1D",
+        "node": "NutsCons_11",
+        "nuts3": "DEB1D",
         "max_demand_M_m3_per_d": 25.481,
         "max_demand_commercial_M_m3_per_d": 5.043,
         "max_demand_household_M_m3_per_d": 17.253,
@@ -363,10 +363,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "BE2",
+        "id": "BE2",
         "name": "VLAAMS GEWEST",
-        "Node": "NutsCons_12",
-        "NUTS3_ID": "BE100",
+        "node": "NutsCons_12",
+        "nuts3": "BE100",
         "max_demand_M_m3_per_d": 34.752,
         "max_demand_commercial_M_m3_per_d": 11.817,
         "max_demand_household_M_m3_per_d": 16.39,
@@ -395,10 +395,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DEF",
+        "id": "DEF",
         "name": "SCHLESWIG-HOLSTEIN",
-        "Node": "NutsCons_13",
-        "NUTS3_ID": "DEF0B",
+        "node": "NutsCons_13",
+        "nuts3": "DEF0B",
         "max_demand_M_m3_per_d": 11.099,
         "max_demand_commercial_M_m3_per_d": 3.76,
         "max_demand_household_M_m3_per_d": 5.606,
@@ -427,10 +427,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DEC",
+        "id": "DEC",
         "name": "SAARLAND",
-        "Node": "NutsCons_14",
-        "NUTS3_ID": "DEC04",
+        "node": "NutsCons_14",
+        "nuts3": "DEC04",
         "max_demand_M_m3_per_d": 6.757,
         "max_demand_commercial_M_m3_per_d": 1.182,
         "max_demand_household_M_m3_per_d": 4.837,
@@ -459,10 +459,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DEE",
+        "id": "DEE",
         "name": "SACHSEN-ANHALT",
-        "Node": "NutsCons_15",
-        "NUTS3_ID": "DEE05",
+        "node": "NutsCons_15",
+        "nuts3": "DEE05",
         "max_demand_M_m3_per_d": 10.988,
         "max_demand_commercial_M_m3_per_d": 2.676,
         "max_demand_household_M_m3_per_d": 6.783,
@@ -491,10 +491,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "EL3",
+        "id": "EL3",
         "name": "ATTIKÃÂÃÂ",
-        "Node": "NutsCons_17",
-        "NUTS3_ID": null,
+        "node": "NutsCons_17",
+        "nuts3": null,
         "max_demand_M_m3_per_d": 2.284,
         "max_demand_commercial_M_m3_per_d": 1.417,
         "max_demand_household_M_m3_per_d": 0.644,
@@ -523,10 +523,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DEG",
+        "id": "DEG",
         "name": "THÃÂÃÂRINGEN",
-        "Node": "NutsCons_19",
-        "NUTS3_ID": "DEG01",
+        "node": "NutsCons_19",
+        "nuts3": "DEG01",
         "max_demand_M_m3_per_d": 10.503,
         "max_demand_commercial_M_m3_per_d": 2.364,
         "max_demand_household_M_m3_per_d": 6.312,
@@ -555,10 +555,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DK0",
+        "id": "DK0",
         "name": "DANMARK",
-        "Node": "NutsCons_20",
-        "NUTS3_ID": null,
+        "node": "NutsCons_20",
+        "nuts3": null,
         "max_demand_M_m3_per_d": 8.662,
         "max_demand_commercial_M_m3_per_d": 1.676,
         "max_demand_household_M_m3_per_d": 4.758,
@@ -587,10 +587,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE2",
+        "id": "DE2",
         "name": "BAYERN",
-        "Node": "NutsCons_21",
-        "NUTS3_ID": "DE256",
+        "node": "NutsCons_21",
+        "nuts3": "DE256",
         "max_demand_M_m3_per_d": 70.267,
         "max_demand_commercial_M_m3_per_d": 16.477,
         "max_demand_household_M_m3_per_d": 41.475,
@@ -619,10 +619,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE3",
+        "id": "DE3",
         "name": "BERLIN",
-        "Node": "NutsCons_22",
-        "NUTS3_ID": "DE300",
+        "node": "NutsCons_22",
+        "nuts3": "DE300",
         "max_demand_M_m3_per_d": 11.891,
         "max_demand_commercial_M_m3_per_d": 5.563,
         "max_demand_household_M_m3_per_d": 5.347,
@@ -651,10 +651,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE8",
+        "id": "DE8",
         "name": "MECKLENBURG-VORPOMMERN",
-        "Node": "NutsCons_23",
-        "NUTS3_ID": "DE80L",
+        "node": "NutsCons_23",
+        "nuts3": "DE80L",
         "max_demand_M_m3_per_d": 9.41,
         "max_demand_commercial_M_m3_per_d": 1.949,
         "max_demand_household_M_m3_per_d": 6.568,
@@ -683,10 +683,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "CZ0",
+        "id": "CZ0",
         "name": "ÃÂÃÂESKÃÂÃÂ REPUBLIKA",
-        "Node": "NutsCons_24",
-        "NUTS3_ID": "CZ020",
+        "node": "NutsCons_24",
+        "nuts3": "CZ020",
         "max_demand_M_m3_per_d": 33.365,
         "max_demand_commercial_M_m3_per_d": 10.812,
         "max_demand_household_M_m3_per_d": 15.939,
@@ -715,10 +715,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE5",
+        "id": "DE5",
         "name": "BREMEN",
-        "Node": "NutsCons_25",
-        "NUTS3_ID": "DE501",
+        "node": "NutsCons_25",
+        "nuts3": "DE501",
         "max_demand_M_m3_per_d": 5.884,
         "max_demand_commercial_M_m3_per_d": 0.92,
         "max_demand_household_M_m3_per_d": 4.607,
@@ -747,10 +747,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE6",
+        "id": "DE6",
         "name": "HAMBURG",
-        "Node": "NutsCons_26",
-        "NUTS3_ID": "DE600",
+        "node": "NutsCons_26",
+        "nuts3": "DE600",
         "max_demand_M_m3_per_d": 8.756,
         "max_demand_commercial_M_m3_per_d": 3.039,
         "max_demand_household_M_m3_per_d": 4.888,
@@ -779,10 +779,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "BG4",
+        "id": "BG4",
         "name": "ÃÂÃÂ®ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂ ÃÂÃÂ®ÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂ ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂªÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯",
-        "Node": "NutsCons_27",
-        "NUTS3_ID": "BG421",
+        "node": "NutsCons_27",
+        "nuts3": "BG421",
         "max_demand_M_m3_per_d": 2.223,
         "max_demand_commercial_M_m3_per_d": 0.573,
         "max_demand_household_M_m3_per_d": 0.294,
@@ -811,10 +811,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "DE9",
+        "id": "DE9",
         "name": "NIEDERSACHSEN",
-        "Node": "NutsCons_28",
-        "NUTS3_ID": "DE922",
+        "node": "NutsCons_28",
+        "nuts3": "DE922",
         "max_demand_M_m3_per_d": 40.087,
         "max_demand_commercial_M_m3_per_d": 10.042,
         "max_demand_household_M_m3_per_d": 23.78,
@@ -843,10 +843,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "AL0",
+        "id": "AL0",
         "name": "SHQIPÃÂÃÂRIA",
-        "Node": "NutsCons_29",
-        "NUTS3_ID": "AL021",
+        "node": "NutsCons_29",
+        "nuts3": "AL021",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -875,10 +875,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "AT1",
+        "id": "AT1",
         "name": "OSTÃÂÃÂSTERREICH",
-        "Node": "NutsCons_30",
-        "NUTS3_ID": "AT122",
+        "node": "NutsCons_30",
+        "nuts3": "AT122",
         "max_demand_M_m3_per_d": 9.392,
         "max_demand_commercial_M_m3_per_d": 1.796,
         "max_demand_household_M_m3_per_d": 4.881,
@@ -907,10 +907,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ES4",
+        "id": "ES4",
         "name": "CENTRO (ES)",
-        "Node": "NutsCons_31",
-        "NUTS3_ID": "ES300",
+        "node": "NutsCons_31",
+        "nuts3": "ES300",
         "max_demand_M_m3_per_d": 10.754,
         "max_demand_commercial_M_m3_per_d": 3.413,
         "max_demand_household_M_m3_per_d": 5.124,
@@ -939,10 +939,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FI1",
+        "id": "FI1",
         "name": "MANNER-SUOMI",
-        "Node": "NutsCons_33",
-        "NUTS3_ID": "FI1C1",
+        "node": "NutsCons_33",
+        "nuts3": "FI1C1",
         "max_demand_M_m3_per_d": 2.528,
         "max_demand_commercial_M_m3_per_d": 0.317,
         "max_demand_household_M_m3_per_d": 0.226,
@@ -971,10 +971,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "MT0",
+        "id": "MT0",
         "name": "MALTA",
-        "Node": "NutsCons_34",
-        "NUTS3_ID": "MT001",
+        "node": "NutsCons_34",
+        "nuts3": "MT001",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -1003,10 +1003,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "NL4",
+        "id": "NL4",
         "name": "ZUID-NEDERLAND",
-        "Node": "NutsCons_35",
-        "NUTS3_ID": "NL414",
+        "node": "NutsCons_35",
+        "nuts3": "NL414",
         "max_demand_M_m3_per_d": 24.822,
         "max_demand_commercial_M_m3_per_d": 7.933,
         "max_demand_household_M_m3_per_d": 13.782,
@@ -1035,10 +1035,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FR1",
+        "id": "FR1",
         "name": "ILE-DE-FRANCE",
-        "Node": "NutsCons_37",
-        "NUTS3_ID": "FR107",
+        "node": "NutsCons_37",
+        "nuts3": "FR107",
         "max_demand_M_m3_per_d": 25.379,
         "max_demand_commercial_M_m3_per_d": 14.673,
         "max_demand_household_M_m3_per_d": 6.084,
@@ -1067,10 +1067,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRC",
+        "id": "FRC",
         "name": "BOURGOGNE-FRANCHE-COMTÃÂÃÂ",
-        "Node": "NutsCons_38",
-        "NUTS3_ID": "FRC11",
+        "node": "NutsCons_38",
+        "nuts3": "FRC11",
         "max_demand_M_m3_per_d": 17.634,
         "max_demand_commercial_M_m3_per_d": 2.601,
         "max_demand_household_M_m3_per_d": 12.93,
@@ -1099,10 +1099,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRE",
+        "id": "FRE",
         "name": "NORD-PAS DE CALAIS-PICARDIE",
-        "Node": "SEQ_721_p",
-        "NUTS3_ID": "FRE22",
+        "node": "SEQ_721_p",
+        "nuts3": "FRE22",
         "max_demand_M_m3_per_d": 19.87,
         "max_demand_commercial_M_m3_per_d": 5.274,
         "max_demand_household_M_m3_per_d": 11.318,
@@ -1131,10 +1131,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRG",
+        "id": "FRG",
         "name": "PAYS DE LA LOIRE",
-        "Node": "NutsCons_40",
-        "NUTS3_ID": "FRG02",
+        "node": "NutsCons_40",
+        "nuts3": "FRG02",
         "max_demand_M_m3_per_d": 12.802,
         "max_demand_commercial_M_m3_per_d": 3.77,
         "max_demand_household_M_m3_per_d": 6.352,
@@ -1163,10 +1163,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRB",
+        "id": "FRB",
         "name": "CENTRE - VAL DE LOIRE",
-        "Node": "NutsCons_41",
-        "NUTS3_ID": "FRB05",
+        "node": "NutsCons_41",
+        "nuts3": "FRB05",
         "max_demand_M_m3_per_d": 11.289,
         "max_demand_commercial_M_m3_per_d": 2.589,
         "max_demand_household_M_m3_per_d": 6.945,
@@ -1195,10 +1195,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRD",
+        "id": "FRD",
         "name": "NORMANDIE",
-        "Node": "NutsCons_42",
-        "NUTS3_ID": "FRD11",
+        "node": "NutsCons_42",
+        "nuts3": "FRD11",
         "max_demand_M_m3_per_d": 16.144,
         "max_demand_commercial_M_m3_per_d": 2.822,
         "max_demand_household_M_m3_per_d": 11.159,
@@ -1227,10 +1227,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRF",
+        "id": "FRF",
         "name": "ALSACE-CHAMPAGNE-ARDENNE-LORRAINE",
-        "Node": "NutsCons_44",
-        "NUTS3_ID": "FRF32",
+        "node": "NutsCons_44",
+        "nuts3": "FRF32",
         "max_demand_M_m3_per_d": 27.044,
         "max_demand_commercial_M_m3_per_d": 5.117,
         "max_demand_household_M_m3_per_d": 18.023,
@@ -1259,10 +1259,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ES1",
+        "id": "ES1",
         "name": "NOROESTE",
-        "Node": "NutsCons_45",
-        "NUTS3_ID": "ES112",
+        "node": "NutsCons_45",
+        "nuts3": "ES112",
         "max_demand_M_m3_per_d": 8.268,
         "max_demand_commercial_M_m3_per_d": 2.532,
         "max_demand_household_M_m3_per_d": 4.701,
@@ -1291,10 +1291,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ES3",
+        "id": "ES3",
         "name": "COMUNIDAD DE MADRID",
-        "Node": "NutsCons_46",
-        "NUTS3_ID": "ES300",
+        "node": "NutsCons_46",
+        "nuts3": "ES300",
         "max_demand_M_m3_per_d": 9.402,
         "max_demand_commercial_M_m3_per_d": 5.609,
         "max_demand_household_M_m3_per_d": 2.2,
@@ -1323,10 +1323,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ES6",
+        "id": "ES6",
         "name": "SUR",
-        "Node": "SEQ_7244_p",
-        "NUTS3_ID": "ES616",
+        "node": "SEQ_7244_p",
+        "nuts3": "ES616",
         "max_demand_M_m3_per_d": 17.063,
         "max_demand_commercial_M_m3_per_d": 8.739,
         "max_demand_household_M_m3_per_d": 4.987,
@@ -1355,10 +1355,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ES5",
+        "id": "ES5",
         "name": "ESTE",
-        "Node": "NutsCons_48",
-        "NUTS3_ID": null,
+        "node": "NutsCons_48",
+        "nuts3": null,
         "max_demand_M_m3_per_d": 23.782,
         "max_demand_commercial_M_m3_per_d": 11.098,
         "max_demand_household_M_m3_per_d": 5.944,
@@ -1387,10 +1387,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRH",
+        "id": "FRH",
         "name": "BRETAGNE",
-        "Node": "NutsCons_51",
-        "NUTS3_ID": "FRH01",
+        "node": "NutsCons_51",
+        "nuts3": "FRH01",
         "max_demand_M_m3_per_d": 10.938,
         "max_demand_commercial_M_m3_per_d": 3.266,
         "max_demand_household_M_m3_per_d": 5.822,
@@ -1419,10 +1419,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "AT3",
+        "id": "AT3",
         "name": "WESTÃÂÃÂSTERREICH",
-        "Node": "NutsCons_52",
-        "NUTS3_ID": "AT322",
+        "node": "NutsCons_52",
+        "nuts3": "AT322",
         "max_demand_M_m3_per_d": 9.967,
         "max_demand_commercial_M_m3_per_d": 1.121,
         "max_demand_household_M_m3_per_d": 5.155,
@@ -1451,10 +1451,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "BE1",
+        "id": "BE1",
         "name": "RÃÂÃÂGION DE BRUXELLES-CAPITALE/BRUSSELS HOOFDSTEDELIJK GEWEST",
-        "Node": "NutsCons_53",
-        "NUTS3_ID": "BE100",
+        "node": "NutsCons_53",
+        "nuts3": "BE100",
         "max_demand_M_m3_per_d": 5.547,
         "max_demand_commercial_M_m3_per_d": 2.077,
         "max_demand_household_M_m3_per_d": 3.002,
@@ -1483,10 +1483,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRL",
+        "id": "FRL",
         "name": "PROVENCE-ALPES-CÃÂÃÂTE DÃÂ¢ÃÂÃÂAZUR",
-        "Node": "NutsCons_54",
-        "NUTS3_ID": "FRL01",
+        "node": "NutsCons_54",
+        "nuts3": "FRL01",
         "max_demand_M_m3_per_d": 12.458,
         "max_demand_commercial_M_m3_per_d": 4.859,
         "max_demand_household_M_m3_per_d": 5.428,
@@ -1515,10 +1515,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ITH",
+        "id": "ITH",
         "name": "NORD-EST",
-        "Node": "NutsCons_55",
-        "NUTS3_ID": null,
+        "node": "NutsCons_55",
+        "nuts3": null,
         "max_demand_M_m3_per_d": 59.087,
         "max_demand_commercial_M_m3_per_d": 14.732,
         "max_demand_household_M_m3_per_d": 37.235,
@@ -1547,10 +1547,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRI",
+        "id": "FRI",
         "name": "AQUITAINE-LIMOUSIN-POITOU-CHARENTES",
-        "Node": "NutsCons_56",
-        "NUTS3_ID": "FRI31",
+        "node": "NutsCons_56",
+        "nuts3": "FRI31",
         "max_demand_M_m3_per_d": 32.979,
         "max_demand_commercial_M_m3_per_d": 6.57,
         "max_demand_household_M_m3_per_d": 22.717,
@@ -1579,10 +1579,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ITC",
+        "id": "ITC",
         "name": "NORD-OVEST",
-        "Node": "NutsCons_57",
-        "NUTS3_ID": "ITC48",
+        "node": "NutsCons_57",
+        "nuts3": "ITC48",
         "max_demand_M_m3_per_d": 61.115,
         "max_demand_commercial_M_m3_per_d": 20.402,
         "max_demand_household_M_m3_per_d": 31.249,
@@ -1611,10 +1611,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "LT0",
+        "id": "LT0",
         "name": "LIETUVA",
-        "Node": "NutsCons_58",
-        "NUTS3_ID": "LT022",
+        "node": "NutsCons_58",
+        "nuts3": "LT022",
         "max_demand_M_m3_per_d": 3.199,
         "max_demand_commercial_M_m3_per_d": 0.668,
         "max_demand_household_M_m3_per_d": 1.406,
@@ -1643,10 +1643,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "LU0",
+        "id": "LU0",
         "name": "LUXEMBOURG",
-        "Node": "NutsCons_59",
-        "NUTS3_ID": "LU000",
+        "node": "NutsCons_59",
+        "nuts3": "LU000",
         "max_demand_M_m3_per_d": 4.281,
         "max_demand_commercial_M_m3_per_d": 1.149,
         "max_demand_household_M_m3_per_d": 2.425,
@@ -1675,10 +1675,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "LI0",
+        "id": "LI0",
         "name": "LIECHTENSTEIN",
-        "Node": "NutsCons_60",
-        "NUTS3_ID": "LI000",
+        "node": "NutsCons_60",
+        "nuts3": "LI000",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -1707,10 +1707,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRK",
+        "id": "FRK",
         "name": "AUVERGNE-RHÃÂÃÂNE-ALPES",
-        "Node": "NutsCons_61",
-        "NUTS3_ID": "FRK25",
+        "node": "NutsCons_61",
+        "nuts3": "FRK25",
         "max_demand_M_m3_per_d": 24.281,
         "max_demand_commercial_M_m3_per_d": 7.709,
         "max_demand_household_M_m3_per_d": 12.0,
@@ -1739,10 +1739,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "HR0",
+        "id": "HR0",
         "name": "HRVATSKA",
-        "Node": "NutsCons_63",
-        "NUTS3_ID": "HR033",
+        "node": "NutsCons_63",
+        "nuts3": "HR033",
         "max_demand_M_m3_per_d": 8.83,
         "max_demand_commercial_M_m3_per_d": 2.411,
         "max_demand_household_M_m3_per_d": 5.51,
@@ -1771,10 +1771,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "HU1",
+        "id": "HU1",
         "name": "KÃÂÃÂZÃÂÃÂP-MAGYARORSZÃÂÃÂG",
-        "Node": "NutsCons_64",
-        "NUTS3_ID": "HU120",
+        "node": "NutsCons_64",
+        "nuts3": "HU120",
         "max_demand_M_m3_per_d": 14.477,
         "max_demand_commercial_M_m3_per_d": 6.133,
         "max_demand_household_M_m3_per_d": 7.852,
@@ -1803,10 +1803,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ITI",
+        "id": "ITI",
         "name": "CENTRO (IT)",
-        "Node": "NutsCons_65",
-        "NUTS3_ID": "ITI19",
+        "node": "NutsCons_65",
+        "nuts3": "ITI19",
         "max_demand_M_m3_per_d": 68.523,
         "max_demand_commercial_M_m3_per_d": 23.378,
         "max_demand_household_M_m3_per_d": 40.22,
@@ -1835,10 +1835,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "FRJ",
+        "id": "FRJ",
         "name": "LANGUEDOC-ROUSSILLON-MIDI-PYRÃÂÃÂNÃÂÃÂES",
-        "Node": "NutsCons_66",
-        "NUTS3_ID": "FRJ27",
+        "node": "NutsCons_66",
+        "nuts3": "FRJ27",
         "max_demand_M_m3_per_d": 21.873,
         "max_demand_commercial_M_m3_per_d": 5.885,
         "max_demand_household_M_m3_per_d": 13.144,
@@ -1867,10 +1867,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "HU2",
+        "id": "HU2",
         "name": "DUNÃÂÃÂNTÃÂÃÂL",
-        "Node": "NutsCons_68",
-        "NUTS3_ID": "HU213",
+        "node": "NutsCons_68",
+        "nuts3": "HU213",
         "max_demand_M_m3_per_d": 18.342,
         "max_demand_commercial_M_m3_per_d": 4.417,
         "max_demand_household_M_m3_per_d": 12.733,
@@ -1899,10 +1899,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "ITF",
+        "id": "ITF",
         "name": "SUD",
-        "Node": "NutsCons_69",
-        "NUTS3_ID": "ITF51",
+        "node": "NutsCons_69",
+        "nuts3": "ITF51",
         "max_demand_M_m3_per_d": 84.176,
         "max_demand_commercial_M_m3_per_d": 18.892,
         "max_demand_household_M_m3_per_d": 62.819,
@@ -1931,10 +1931,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "HU3",
+        "id": "HU3",
         "name": "ALFÃÂÃÂLD ÃÂÃÂS ÃÂÃÂSZAK",
-        "Node": "NutsCons_70",
-        "NUTS3_ID": "HU312",
+        "node": "NutsCons_70",
+        "nuts3": "HU312",
         "max_demand_M_m3_per_d": 20.095,
         "max_demand_commercial_M_m3_per_d": 5.613,
         "max_demand_household_M_m3_per_d": 13.156,
@@ -1963,10 +1963,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "IE0",
+        "id": "IE0",
         "name": "IRELAND",
-        "Node": "NutsCons_71",
-        "NUTS3_ID": "IE042",
+        "node": "NutsCons_71",
+        "nuts3": "IE042",
         "max_demand_M_m3_per_d": 10.518,
         "max_demand_commercial_M_m3_per_d": 3.209,
         "max_demand_household_M_m3_per_d": 4.276,
@@ -1995,10 +1995,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "AT2",
+        "id": "AT2",
         "name": "SÃÂÃÂDÃÂÃÂSTERREICH",
-        "Node": "NutsCons_73",
-        "NUTS3_ID": "AT226",
+        "node": "NutsCons_73",
+        "nuts3": "AT226",
         "max_demand_M_m3_per_d": 5.559,
         "max_demand_commercial_M_m3_per_d": 0.614,
         "max_demand_household_M_m3_per_d": 2.971,
@@ -2027,10 +2027,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PL4",
+        "id": "PL4",
         "name": "MAKROREGION PÃÂÃÂÃÂÃÂNOCNO-ZACHODNI",
-        "Node": "NutsCons_74",
-        "NUTS3_ID": "PL418",
+        "node": "NutsCons_74",
+        "nuts3": "PL418",
         "max_demand_M_m3_per_d": 9.224,
         "max_demand_commercial_M_m3_per_d": 2.953,
         "max_demand_household_M_m3_per_d": 4.622,
@@ -2059,10 +2059,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PL8",
+        "id": "PL8",
         "name": "MAKROREGION WSCHODNI",
-        "Node": "NutsCons_75",
-        "NUTS3_ID": "PL811",
+        "node": "NutsCons_75",
+        "nuts3": "PL811",
         "max_demand_M_m3_per_d": 8.878,
         "max_demand_commercial_M_m3_per_d": 2.625,
         "max_demand_household_M_m3_per_d": 5.56,
@@ -2091,10 +2091,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "RO2",
+        "id": "RO2",
         "name": "MACROREGIUNEA DOI",
-        "Node": "NutsCons_76",
-        "NUTS3_ID": "RO216",
+        "node": "NutsCons_76",
+        "nuts3": "RO216",
         "max_demand_M_m3_per_d": 10.251,
         "max_demand_commercial_M_m3_per_d": 2.581,
         "max_demand_household_M_m3_per_d": 5.461,
@@ -2123,10 +2123,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PL9",
+        "id": "PL9",
         "name": "MAKROREGION WOJEWÃÂÃÂDZTWO MAZOWIECKIE",
-        "Node": "NutsCons_77",
-        "NUTS3_ID": "PL912",
+        "node": "NutsCons_77",
+        "nuts3": "PL912",
         "max_demand_M_m3_per_d": 7.772,
         "max_demand_commercial_M_m3_per_d": 3.636,
         "max_demand_household_M_m3_per_d": 3.458,
@@ -2155,10 +2155,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "RS2",
+        "id": "RS2",
         "name": "ÃÂÃÂ¡ÃÂÃÂÃÂÃÂ±ÃÂÃÅžÃÂÃÂÃÂÃÂ° - ÃÂÃÂÃÂÃÂÃÂÃÂ³ ",
-        "Node": "NutsCons_78",
-        "NUTS3_ID": "RS217",
+        "node": "NutsCons_78",
+        "nuts3": "RS217",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -2187,10 +2187,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "SE2",
+        "id": "SE2",
         "name": "SÃÂÃÂDRA SVERIGE",
-        "Node": "NutsCons_80",
-        "NUTS3_ID": "SE232",
+        "node": "NutsCons_80",
+        "nuts3": "SE232",
         "max_demand_M_m3_per_d": 2.303,
         "max_demand_commercial_M_m3_per_d": 0.423,
         "max_demand_household_M_m3_per_d": 0.101,
@@ -2219,10 +2219,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PL7",
+        "id": "PL7",
         "name": "MAKROREGION CENTRALNY",
-        "Node": "NutsCons_82",
-        "NUTS3_ID": "PL721",
+        "node": "NutsCons_82",
+        "nuts3": "PL721",
         "max_demand_M_m3_per_d": 5.952,
         "max_demand_commercial_M_m3_per_d": 2.093,
         "max_demand_household_M_m3_per_d": 3.317,
@@ -2251,10 +2251,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "RO4",
+        "id": "RO4",
         "name": "MACROREGIUNEA PATRU",
-        "Node": "NutsCons_83",
-        "NUTS3_ID": "RO412",
+        "node": "NutsCons_83",
+        "nuts3": "RO412",
         "max_demand_M_m3_per_d": 8.209,
         "max_demand_commercial_M_m3_per_d": 1.501,
         "max_demand_household_M_m3_per_d": 5.16,
@@ -2283,10 +2283,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PL2",
+        "id": "PL2",
         "name": "MAKROREGION POÃÂÃÂUDNIOWY",
-        "Node": "NutsCons_84",
-        "NUTS3_ID": "PL214",
+        "node": "NutsCons_84",
+        "nuts3": "PL214",
         "max_demand_M_m3_per_d": 8.694,
         "max_demand_commercial_M_m3_per_d": 4.153,
         "max_demand_household_M_m3_per_d": 3.714,
@@ -2315,10 +2315,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "RS1",
+        "id": "RS1",
         "name": "ÃÂÃÂ¡ÃÂÃÂÃÂÃÂ±ÃÂÃÅžÃÂÃÂÃÂÃÂ° - ÃÂÃÂÃÂÃÂµÃÂÃÂ²ÃÂÃÂµÃÂÃÂ ",
-        "Node": "NutsCons_85",
-        "NUTS3_ID": "RS127",
+        "node": "NutsCons_85",
+        "nuts3": "RS127",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -2347,10 +2347,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKH",
+        "id": "UKH",
         "name": "EAST OF ENGLAND",
-        "Node": "NutsCons_86",
-        "NUTS3_ID": "UKH34",
+        "node": "NutsCons_86",
+        "nuts3": "UKH34",
         "max_demand_M_m3_per_d": 24.822,
         "max_demand_commercial_M_m3_per_d": 5.834,
         "max_demand_household_M_m3_per_d": 16.94,
@@ -2379,10 +2379,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKI",
+        "id": "UKI",
         "name": "LONDON",
-        "Node": "NutsCons_87",
-        "NUTS3_ID": "UKI45",
+        "node": "NutsCons_87",
+        "nuts3": "UKI45",
         "max_demand_M_m3_per_d": 36.039,
         "max_demand_commercial_M_m3_per_d": 9.943,
         "max_demand_household_M_m3_per_d": 25.882,
@@ -2411,10 +2411,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKC",
+        "id": "UKC",
         "name": "NORTH EAST (ENGLAND)",
-        "Node": "NutsCons_88",
-        "NUTS3_ID": "UKC22",
+        "node": "NutsCons_88",
+        "nuts3": "UKC22",
         "max_demand_M_m3_per_d": 12.231,
         "max_demand_commercial_M_m3_per_d": 1.858,
         "max_demand_household_M_m3_per_d": 9.213,
@@ -2443,10 +2443,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKJ",
+        "id": "UKJ",
         "name": "SOUTH EAST (ENGLAND)",
-        "Node": "NutsCons_89",
-        "NUTS3_ID": "UKJ37",
+        "node": "NutsCons_89",
+        "nuts3": "UKJ37",
         "max_demand_M_m3_per_d": 32.96,
         "max_demand_commercial_M_m3_per_d": 9.035,
         "max_demand_household_M_m3_per_d": 21.363,
@@ -2475,10 +2475,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKD",
+        "id": "UKD",
         "name": "NORTH WEST (ENGLAND)",
-        "Node": "NutsCons_90",
-        "NUTS3_ID": "UKD44",
+        "node": "NutsCons_90",
+        "nuts3": "UKD44",
         "max_demand_M_m3_per_d": 35.298,
         "max_demand_commercial_M_m3_per_d": 5.925,
         "max_demand_household_M_m3_per_d": 26.273,
@@ -2507,10 +2507,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKN",
+        "id": "UKN",
         "name": "NORTHERN IRELAND",
-        "Node": "NutsCons_91",
-        "NUTS3_ID": "UKN0E",
+        "node": "NutsCons_91",
+        "nuts3": "UKN0E",
         "max_demand_M_m3_per_d": 13.79,
         "max_demand_commercial_M_m3_per_d": 1.416,
         "max_demand_household_M_m3_per_d": 11.465,
@@ -2539,10 +2539,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "SK0",
+        "id": "SK0",
         "name": "SLOVENSKO",
-        "Node": "NutsCons_92",
-        "NUTS3_ID": "SK032",
+        "node": "NutsCons_92",
+        "nuts3": "SK032",
         "max_demand_M_m3_per_d": 19.735,
         "max_demand_commercial_M_m3_per_d": 6.725,
         "max_demand_household_M_m3_per_d": 11.782,
@@ -2571,10 +2571,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PT1",
+        "id": "PT1",
         "name": "CONTINENTE",
-        "Node": "NutsCons_93",
-        "NUTS3_ID": "PT16I",
+        "node": "NutsCons_93",
+        "nuts3": "PT16I",
         "max_demand_M_m3_per_d": 8.425,
         "max_demand_commercial_M_m3_per_d": 3.627,
         "max_demand_household_M_m3_per_d": 0.988,
@@ -2603,10 +2603,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKE",
+        "id": "UKE",
         "name": "YORKSHIRE AND THE HUMBER",
-        "Node": "NutsCons_96",
-        "NUTS3_ID": "UKE22",
+        "node": "NutsCons_96",
+        "nuts3": "UKE22",
         "max_demand_M_m3_per_d": 27.455,
         "max_demand_commercial_M_m3_per_d": 4.203,
         "max_demand_household_M_m3_per_d": 20.82,
@@ -2635,10 +2635,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PL5",
+        "id": "PL5",
         "name": "MAKROREGION POÃÂÃÂUDNIOWO-ZACHODNI",
-        "Node": "SEQ_11204_p",
-        "NUTS3_ID": "PL518",
+        "node": "SEQ_11204_p",
+        "nuts3": "PL518",
         "max_demand_M_m3_per_d": 5.614,
         "max_demand_commercial_M_m3_per_d": 1.808,
         "max_demand_household_M_m3_per_d": 3.039,
@@ -2667,10 +2667,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKK",
+        "id": "UKK",
         "name": "SOUTH WEST (ENGLAND)",
-        "Node": "SEQ_6255_p",
-        "NUTS3_ID": "UKK43",
+        "node": "SEQ_6255_p",
+        "nuts3": "UKK43",
         "max_demand_M_m3_per_d": 29.241,
         "max_demand_commercial_M_m3_per_d": 5.31,
         "max_demand_household_M_m3_per_d": 22.642,
@@ -2699,10 +2699,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "RO3",
+        "id": "RO3",
         "name": "MACROREGIUNEA TREI",
-        "Node": "NutsCons_99",
-        "NUTS3_ID": "RO314",
+        "node": "NutsCons_99",
+        "nuts3": "RO314",
         "max_demand_M_m3_per_d": 10.629,
         "max_demand_commercial_M_m3_per_d": 3.915,
         "max_demand_household_M_m3_per_d": 5.468,
@@ -2731,10 +2731,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKF",
+        "id": "UKF",
         "name": "EAST MIDLANDS (ENGLAND)",
-        "Node": "NutsCons_100",
-        "NUTS3_ID": "UKF16",
+        "node": "NutsCons_100",
+        "nuts3": "UKF16",
         "max_demand_M_m3_per_d": 23.009,
         "max_demand_commercial_M_m3_per_d": 3.949,
         "max_demand_household_M_m3_per_d": 16.799,
@@ -2763,10 +2763,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "RO1",
+        "id": "RO1",
         "name": "MACROREGIUNEA UNU",
-        "Node": "NutsCons_101",
-        "NUTS3_ID": "RO113",
+        "node": "NutsCons_101",
+        "nuts3": "RO113",
         "max_demand_M_m3_per_d": 8.839,
         "max_demand_commercial_M_m3_per_d": 2.074,
         "max_demand_household_M_m3_per_d": 5.198,
@@ -2795,10 +2795,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "SI0",
+        "id": "SI0",
         "name": "SLOVENIJA",
-        "Node": "NutsCons_102",
-        "NUTS3_ID": "SI034",
+        "node": "NutsCons_102",
+        "nuts3": "SI034",
         "max_demand_M_m3_per_d": 2.955,
         "max_demand_commercial_M_m3_per_d": 0.543,
         "max_demand_household_M_m3_per_d": 1.116,
@@ -2827,10 +2827,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "PL6",
+        "id": "PL6",
         "name": "MAKROREGION PÃÂÃÂÃÂÃÂNOCNY",
-        "Node": "NutsCons_103",
-        "NUTS3_ID": "PL616",
+        "node": "NutsCons_103",
+        "nuts3": "PL616",
         "max_demand_M_m3_per_d": 8.426,
         "max_demand_commercial_M_m3_per_d": 2.718,
         "max_demand_household_M_m3_per_d": 4.278,
@@ -2859,10 +2859,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKG",
+        "id": "UKG",
         "name": "WEST MIDLANDS (ENGLAND)",
-        "Node": "NutsCons_104",
-        "NUTS3_ID": "UKG22",
+        "node": "NutsCons_104",
+        "nuts3": "UKG22",
         "max_demand_M_m3_per_d": 23.532,
         "max_demand_commercial_M_m3_per_d": 4.772,
         "max_demand_household_M_m3_per_d": 16.549,
@@ -2891,10 +2891,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "LV0",
+        "id": "LV0",
         "name": "LATVIJA",
-        "Node": "NutsCons_105",
-        "NUTS3_ID": "LV009",
+        "node": "NutsCons_105",
+        "nuts3": "LV009",
         "max_demand_M_m3_per_d": 2.589,
         "max_demand_commercial_M_m3_per_d": 0.975,
         "max_demand_household_M_m3_per_d": 0.827,
@@ -2923,10 +2923,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "UKL",
+        "id": "UKL",
         "name": "WALES",
-        "Node": "NutsCons_107",
-        "NUTS3_ID": "UKL14",
+        "node": "NutsCons_107",
+        "nuts3": "UKL14",
         "max_demand_M_m3_per_d": 14.43,
         "max_demand_commercial_M_m3_per_d": 2.504,
         "max_demand_household_M_m3_per_d": 10.927,
@@ -2955,10 +2955,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "MK0",
+        "id": "MK0",
         "name": "Severna Makedonija",
-        "Node": "NutsCons_109",
-        "NUTS3_ID": "MK001",
+        "node": "NutsCons_109",
+        "nuts3": "MK001",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -2987,10 +2987,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "NL1",
+        "id": "NL1",
         "name": "NOORD-NEDERLAND",
-        "Node": "N_1608_S_LMGN",
-        "NUTS3_ID": "NL124",
+        "node": "N_1608_S_LMGN",
+        "nuts3": "NL124",
         "max_demand_M_m3_per_d": 25.38,
         "max_demand_commercial_M_m3_per_d": 3.47,
         "max_demand_household_M_m3_per_d": 20.57,
@@ -3019,10 +3019,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "NL2",
+        "id": "NL2",
         "name": "OOST-NEDERLAND",
-        "Node": "NutsCons_111",
-        "NUTS3_ID": "NL226",
+        "node": "NutsCons_111",
+        "nuts3": "NL226",
         "max_demand_M_m3_per_d": 29.733,
         "max_demand_commercial_M_m3_per_d": 7.816,
         "max_demand_household_M_m3_per_d": 19.174,
@@ -3051,10 +3051,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "NL3",
+        "id": "NL3",
         "name": "WEST-NEDERLAND",
-        "Node": "NutsCons_112",
-        "NUTS3_ID": "NL33C",
+        "node": "NutsCons_112",
+        "nuts3": "NL33C",
         "max_demand_M_m3_per_d": 51.32,
         "max_demand_commercial_M_m3_per_d": 19.559,
         "max_demand_household_M_m3_per_d": 27.168,
@@ -3083,10 +3083,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR1",
+        "id": "TR1",
         "name": "ISTANBUL",
-        "Node": "NutsCons_113",
-        "NUTS3_ID": "TR100",
+        "node": "NutsCons_113",
+        "nuts3": "TR100",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3115,10 +3115,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR2",
+        "id": "TR2",
         "name": "BATI MARMARA",
-        "Node": "NutsCons_114",
-        "NUTS3_ID": null,
+        "node": "NutsCons_114",
+        "nuts3": null,
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3147,10 +3147,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TRC",
+        "id": "TRC",
         "name": "GÃÂÃÂNEYDOGU ANADOLU",
-        "Node": "NutsCons_115",
-        "NUTS3_ID": "TRC22",
+        "node": "NutsCons_115",
+        "nuts3": "TRC22",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3179,10 +3179,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR7",
+        "id": "TR7",
         "name": "ORTA ANADOLU",
-        "Node": "NutsCons_116",
-        "NUTS3_ID": "TR723",
+        "node": "NutsCons_116",
+        "nuts3": "TR723",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3211,10 +3211,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR6",
+        "id": "TR6",
         "name": "AKDENIZ",
-        "Node": "NutsCons_117",
-        "NUTS3_ID": "TR622",
+        "node": "NutsCons_117",
+        "nuts3": "TR622",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3243,10 +3243,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR8",
+        "id": "TR8",
         "name": "BATI KARADENIZ",
-        "Node": "NutsCons_118",
-        "NUTS3_ID": "TR823",
+        "node": "NutsCons_118",
+        "nuts3": "TR823",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3275,10 +3275,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR4",
+        "id": "TR4",
         "name": "DOGU MARMARA",
-        "Node": "NutsCons_119",
-        "NUTS3_ID": "TR413",
+        "node": "NutsCons_119",
+        "nuts3": "TR413",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3307,10 +3307,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR3",
+        "id": "TR3",
         "name": "EGE",
-        "Node": "NutsCons_120",
-        "NUTS3_ID": "TR323",
+        "node": "NutsCons_120",
+        "nuts3": "TR323",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3339,10 +3339,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TRA",
+        "id": "TRA",
         "name": "KUZEYDOGU ANADOLU",
-        "Node": "SEQ_1563_p",
-        "NUTS3_ID": "TRA11",
+        "node": "SEQ_1563_p",
+        "nuts3": "TRA11",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3371,10 +3371,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR9",
+        "id": "TR9",
         "name": "DOGU KARADENIZ",
-        "Node": "N_4_M_LMGN",
-        "NUTS3_ID": "TR901",
+        "node": "N_4_M_LMGN",
+        "nuts3": "TR901",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3403,10 +3403,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TR5",
+        "id": "TR5",
         "name": "BATI ANADOLU",
-        "Node": "NutsCons_123",
-        "NUTS3_ID": "TR510",
+        "node": "NutsCons_123",
+        "nuts3": "TR510",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,
@@ -3435,10 +3435,10 @@
     {
       "type": "Feature",
       "properties": {
-        "ID": "TRB",
+        "id": "TRB",
         "name": "ORTADOGU ANADOLU",
-        "Node": "NutsCons_124",
-        "NUTS3_ID": "TRB13",
+        "node": "NutsCons_124",
+        "nuts3": "TRB13",
         "max_demand_M_m3_per_d": null,
         "max_demand_commercial_M_m3_per_d": null,
         "max_demand_household_M_m3_per_d": null,

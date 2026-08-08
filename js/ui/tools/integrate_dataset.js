@@ -165,8 +165,8 @@ window.selectFullSubMode = function(subMode) {
       html += '<button onclick="loadPreloadedSingleLayer()" style="width:100%; padding:8px; margin:4px 0; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">Use Preloaded</button>';
       html += '<hr style="margin:12px 0;">';
     }
-    html += '<p style="margin:8px 0 4px;"><strong>Upload .geojson file:</strong></p>';
-    html += '<input type="file" id="dataset-file-input-full" accept=".geojson" style="width:100%; padding:8px; margin:4px 0;">';
+    html += '<p style="margin:8px 0 4px;"><strong>Upload .geojson or .csv file:</strong></p>';
+    html += '<input type="file" id="dataset-file-input-full" accept=".geojson,.csv" style="width:100%; padding:8px; margin:4px 0;">';
     html += '<button onclick="loadFileSingleLayer()" style="width:100%; padding:8px; margin:4px 0; background:#007bff; color:white; border:none; border-radius:4px; cursor:pointer;">Upload &amp; Import</button>';
     section.innerHTML = html;
   }
@@ -198,9 +198,9 @@ window.loadFileSingleLayer = function() {
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      const data = JSON.parse(e.target.result);
+      const data = /\.csv$/i.test(file.name) ? csvTextToGeoJSON(e.target.result) : JSON.parse(e.target.result);
       closeCustomPopup();
-      registerNewImportedLayer(file.name.replace('.geojson', ''), data);
+      registerNewImportedLayer(file.name.replace(/\.(?:geojson|csv)$/i, ''), data);
       updateLegendControl();
       selectedImportMode = null;
       showCustomPopup('✅ Import Complete',
@@ -247,13 +247,13 @@ function showLayerMappingUI(importedProjectName, importedFiles) {
   /* Build list of current project layers that actually have a layer instance. */
   const currentLayers = (Array.isArray(layerConfig) ? layerConfig : []).map(c => {
     const ln = c.layerName ||
-      (c.filename || '').replace(/[/\\]/g, '_').replace(/\.geojson$/i, '').replace(/[^a-zA-Z0-9_]/g, '') + 'Layer';
+      (c.filename || '').replace(/[/\\]/g, '_').replace(/\.(?:geojson|csv)$/i, '').replace(/[^a-zA-Z0-9_]/g, '') + 'Layer';
     return { legendName: c.legendName || c.filename || ln, layerName: ln };
   }).filter(l => l.layerName && dynamicLayers[l.layerName]);
 
   /* Naive auto-match: last filename segment vs legend name. */
   function bestMatchIdx(filename) {
-    const base   = filename.replace('.geojson', '').toLowerCase();
+    const base   = filename.replace(/\.(?:geojson|csv)$/i, '').toLowerCase();
     const tokens = base.split(/[_\-\s]+/);
     let best = -1, bestScore = 0;
     currentLayers.forEach((l, i) => {
@@ -265,7 +265,7 @@ function showLayerMappingUI(importedProjectName, importedFiles) {
   }
 
   const rows = importedFiles.map((f, i) => {
-    const displayName = f.replace('.geojson', '');
+    const displayName = f.replace(/\.(?:geojson|csv)$/i, '');
     const matchIdx    = bestMatchIdx(f);
     let options = '<option value="__new__">+ Add as new layer</option>';
     currentLayers.forEach((l, li) => {
@@ -376,20 +376,20 @@ window.executeProjectImport = function(importedProjectName) {
           const wb   = XLSX.read(buf, { type: 'array' });
           if (wb.SheetNames.includes('Input_Files')) {
             const rows     = XLSX.utils.sheet_to_json(wb.Sheets['Input_Files'], { header: 1 });
-            const startIdx = rows.findIndex(r => Array.isArray(r) && r.some(c => typeof c === 'string' && c.includes('.geojson')));
+            const startIdx = rows.findIndex(r => Array.isArray(r) && r.some(c => typeof c === 'string' && /\.(?:geojson|csv)$/i.test(c)));
             for (let j = (startIdx >= 0 ? startIdx : 0); j < rows.length; j++) {
               const row = rows[j];
               if (!row) continue;
               let fn = null;
               for (let col = 0; col < row.length; col++) {
-                if (row[col] && typeof row[col] === 'string' && row[col].includes('.geojson')) {
+                if (row[col] && typeof row[col] === 'string' && /\.(?:geojson|csv)$/i.test(row[col])) {
                   fn = row[col].replace(/^.*[\/]/, ''); // strip any leading path
                   break;
                 }
               }
               if (!fn) continue;
               importedStyleMap[fn] = {
-                legendName: row[1] || fn.replace('.geojson', ''),
+                legendName: row[1] || fn.replace(/\.(?:geojson|csv)$/i, ''),
                 color:      (typeof row[2] === 'string' && row[2].trim().startsWith('#')) ? row[2].trim() : null,
                 markerType: row[3] || null,
                 size:       Number.isFinite(parseInt(row[4], 10)) ? parseInt(row[4], 10) : null,
@@ -415,13 +415,13 @@ window.executeProjectImport = function(importedProjectName) {
 
           const url = `Input/${encodeURIComponent(importedProjectName)}/${encodeURIComponent(filename)}?v=${Date.now()}`;
           return fetch(url)
-            .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+            .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return parseSpatialDataResponse(r, filename); })
             .then(data => {
               const features = data.features || [];
               if (targetLayerName === '__new__') {
                 /* Use style from imported project config.xlsx when adding as new. */
                 const styleHint = importedStyleMap[filename] || {};
-                registerNewImportedLayer(filename.replace('.geojson', ''), data, styleHint);
+                registerNewImportedLayer(filename.replace(/\.(?:geojson|csv)$/i, ''), data, styleHint);
                 results.newLayers++;
               } else {
                 const ok = mergeIntoExistingLayer(targetLayerName, features);
@@ -429,7 +429,7 @@ window.executeProjectImport = function(importedProjectName) {
                 else {
                   /* Fallback: add as new layer, still apply imported style. */
                   const styleHint = importedStyleMap[filename] || {};
-                  registerNewImportedLayer(filename.replace('.geojson', ''), data, styleHint);
+                  registerNewImportedLayer(filename.replace(/\.(?:geojson|csv)$/i, ''), data, styleHint);
                   results.newLayers++;
                 }
               }
@@ -500,6 +500,11 @@ function registerNewImportedLayer(label, data, configHint = {}) {
   const geojsonOptions = {
     onEachFeature: (feat, lyr) => {
       assignMetadataToLayer(lyr, metadata);
+      markLayerChanged(lyr, {
+        changeType: 'Topology Change',
+        tool: 'Integrate Dataset',
+        description: 'Element imported into a new project layer'
+      });
       handleFeature(feat, lyr);
       /* Capture original style so resetPipelineStyle can restore after highlight. */
       if (typeof lyr.getLatLngs === 'function') {
@@ -600,9 +605,14 @@ function mergeIntoExistingLayer(targetLayerName, importedFeatures) {
   /* ── 2. Back-fill missing keys in existing features with null. */
   targetLayer.eachLayer(l => {
     if (l.feature && l.feature.properties) {
+      let schemaChanged = false;
       allKeys.forEach(k => {
-        if (!(k in l.feature.properties)) l.feature.properties[k] = null;
+        if (!(k in l.feature.properties)) {
+          l.feature.properties[k] = null;
+          schemaChanged = true;
+        }
       });
+      if (schemaChanged) markLayerChanged(l, { tool: 'Integrate Dataset' });
     }
   });
 
@@ -625,6 +635,11 @@ function mergeIntoExistingLayer(targetLayerName, importedFeatures) {
     const tmpOptions = {
       onEachFeature: (feat, lyr) => {
         if (metadata) assignMetadataToLayer(lyr, metadata);
+        markLayerChanged(lyr, {
+          changeType: 'Topology Change',
+          tool: 'Integrate Dataset',
+          description: `Element imported into layer ${targetLayerName}`
+        });
         handleFeature(feat, lyr);
         /* Capture original style so resetPipelineStyle can restore after highlight. */
         if (typeof lyr.getLatLngs === 'function') {
@@ -709,8 +724,8 @@ function showMappingSourcePopup() {
     html += '<hr style="margin:12px 0;">';
   }
 
-  html += '<p style="margin:8px 0 4px;"><strong>Or upload your own .geojson file:</strong></p>';
-  html += '<input type="file" id="dataset-file-input" accept=".geojson" style="width:100%; padding:8px; margin:4px 0;">';
+  html += '<p style="margin:8px 0 4px;"><strong>Or upload your own .geojson or .csv file:</strong></p>';
+  html += '<input type="file" id="dataset-file-input" accept=".geojson,.csv" style="width:100%; padding:8px; margin:4px 0;">';
   html += '<button onclick="loadFileDataset()" style="width:100%; padding:8px; margin:4px 0; background:#007bff; color:white; border:none; border-radius:4px; cursor:pointer;">Upload &amp; Use File</button>';
 
   showCustomPopup('🔗 Element Mapping Import', html, [
@@ -744,7 +759,7 @@ window.loadFileDataset = function() {
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      const data = JSON.parse(e.target.result);
+      const data = /\.csv$/i.test(file.name) ? csvTextToGeoJSON(e.target.result) : JSON.parse(e.target.result);
       const tempFilename = file.name;
       createDatasetLayer(tempFilename, data);
       setTimeout(() => setupIntegrationModeWithPreloaded(tempFilename), 500);
@@ -808,7 +823,7 @@ function setupIntegrationModeWithPreloaded(filename) {
 
 function selectPipelineElement(feature, layer) {
   if (!feature) return;
-  const id = feature.properties.ID;
+  const id = feature.properties.id;
   if (selectedQGasElements.has(id)) {
     selectedQGasElements.delete(id);
     layer.setStyle({ color: '#3388ff', weight: 3 });
@@ -840,7 +855,7 @@ function selectIntegrationElement(feature, layer) {
   /* Mark linked pipelines orange, unlinked back to default blue. */
   if (pipelineLayer) {
     pipelineLayer.eachLayer(l => {
-      const lid = l.feature && l.feature.properties && l.feature.properties.ID;
+      const lid = l.feature && l.feature.properties && l.feature.properties.id;
       const isLinked = equivalenceList.some(e => e.qgasElements.includes(lid));
       l.setStyle(isLinked ? { color: '#ff9900', weight: 4 } : { color: '#3388ff', weight: 3 });
     });
@@ -853,7 +868,7 @@ function selectIntegrationElement(feature, layer) {
 }
 
 function detectIdField(properties) {
-  const candidates = ['id', 'ID', 'Project_ID', 'project_id', 'element_id', 'Element_ID'];
+  const candidates = ['id'];
   for (const f of candidates) {
     if (Object.prototype.hasOwnProperty.call(properties, f)) return f;
   }

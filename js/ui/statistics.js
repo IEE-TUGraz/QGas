@@ -101,11 +101,14 @@
       productions: 0,
       hydrogenPipes: 0,
       electrolyzers: 0,
-      pipelineSources: {},
-      pipelineSourcesByCount: {},
+      diameterSources: {},
+      diameterSourcesByCount: {},
+      pressureSources: {},
+      pressureSourcesByCount: {},
       pipelineDiameter: { available: 0, total: 0, lengthAvailable: 0, totalLength: 0 },
       pipelineName: { available: 0, total: 0, lengthAvailable: 0, totalLength: 0 },
-      pipelinePressure: { available: 0, total: 0, lengthAvailable: 0, totalLength: 0 },
+      nodePressureMaximum: { available: 0, total: 0 },
+      nodePressureMinimum: { available: 0, total: 0 },
       lineLayerStats: {}
     };
 
@@ -172,7 +175,6 @@
       return 0;
     };
 
-    let hasAnySourceAttribute = false;
     lineGroups.forEach(layerGroup => {
       forEachPolylineFeature(layerGroup, layer => {
         const lineId = getLineIdentifier(layer);
@@ -201,16 +203,21 @@
 
         const props = layer.feature.properties;
         const length = measureGeometryLength(layer.feature.geometry || null);
-        stats.pipelineElements++;
-        stats.totalLength += length;
         
         /* Add to layer-specific stats. */
         stats.lineLayerStats[layerName].count++;
         stats.lineLayerStats[layerName].totalLength += length;
 
-        if (props.Source !== undefined && props.Source !== null) {
-          hasAnySourceAttribute = true;
-        }
+        /* Source/completeness statistics intentionally cover only the
+         * configured Pipelines and Interconnectors layers. Other LineString
+         * layers remain visible in the general line-layer table. */
+        const lineMetadata = layer?._qgasMeta || layerGroup?._qgasMeta || layerGroup?._customLayerSettings || {};
+        const lineDescriptor = `${lineMetadata.filename || ''} ${lineMetadata.legendName || ''} ${lineMetadata.layerName || ''} ${layerGroup?._customLayerName || ''} ${layerName}`.toLowerCase();
+        const isPipelineStatisticsLayer = /pipeline|interconnector/.test(lineDescriptor);
+        if (!isPipelineStatisticsLayer) return;
+
+        stats.pipelineElements++;
+        stats.totalLength += length;
 
         stats.pipelineDiameter.total++;
         stats.pipelineDiameter.totalLength += length;
@@ -228,33 +235,17 @@
           stats.pipelineName.lengthAvailable += length;
         }
 
-        stats.pipelinePressure.total++;
-        stats.pipelinePressure.totalLength += length;
-        const pressureValue = props.Pressure_bar ?? props.max_pressure_bar;
-        if (hasValue(pressureValue)) {
-          stats.pipelinePressure.available++;
-          stats.pipelinePressure.lengthAvailable += length;
-        }
+        const diameterSource = props.diameter_source ?? props.Diameter_Source ?? props.DIAMETER_SOURCE;
+        const diameterSourceLabel = hasValue(diameterSource) ? String(diameterSource) : 'No source specified';
+        stats.diameterSources[diameterSourceLabel] = (stats.diameterSources[diameterSourceLabel] || 0) + length;
+        stats.diameterSourcesByCount[diameterSourceLabel] = (stats.diameterSourcesByCount[diameterSourceLabel] || 0) + 1;
 
-        const source = hasValue(props.Source) ? props.Source : 'No technical attributes';
-        if (!stats.pipelineSources[source]) {
-          stats.pipelineSources[source] = 0;
-        }
-        if (!stats.pipelineSourcesByCount[source]) {
-          stats.pipelineSourcesByCount[source] = 0;
-        }
-        stats.pipelineSources[source] += length;
-        stats.pipelineSourcesByCount[source]++;
+        const pressureSource = props.pressure_source ?? props.Pressure_Source ?? props.PRESSURE_SOURCE;
+        const pressureSourceLabel = hasValue(pressureSource) ? String(pressureSource) : 'No source specified';
+        stats.pressureSources[pressureSourceLabel] = (stats.pressureSources[pressureSourceLabel] || 0) + length;
+        stats.pressureSourcesByCount[pressureSourceLabel] = (stats.pressureSourcesByCount[pressureSourceLabel] || 0) + 1;
       });
     });
-
-    /* If no pipeline has Source attribute, replace the placeholder label. */
-    if (!hasAnySourceAttribute && stats.pipelineSources['No technical attributes']) {
-      stats.pipelineSources['SciGrid_gas'] = stats.pipelineSources['No technical attributes'];
-      stats.pipelineSourcesByCount['SciGrid_gas'] = stats.pipelineSourcesByCount['No technical attributes'];
-      delete stats.pipelineSources['No technical attributes'];
-      delete stats.pipelineSourcesByCount['No technical attributes'];
-    }
 
     /* Count other infrastructure. */
     if (storageLayer) {
@@ -323,7 +314,16 @@
       }
       layerGroup.eachLayer(layer => {
         if (!layer || !layer.feature) return;
+        const nodeProperties = layer.feature.properties || {};
         stats.nodes++;
+        stats.nodePressureMaximum.total++;
+        stats.nodePressureMinimum.total++;
+        if (hasValue(nodeProperties.pressure_max ?? nodeProperties.Pressure_Max)) {
+          stats.nodePressureMaximum.available++;
+        }
+        if (hasValue(nodeProperties.pressure_min ?? nodeProperties.Pressure_Min)) {
+          stats.nodePressureMinimum.available++;
+        }
         if (isSublayer) {
           stats.nodesSublayer++;
         } else {
@@ -371,10 +371,10 @@
       (stats.pipelineName.available / stats.pipelineName.total * 100) : 0;
     const namePercentLengthwise = stats.pipelineName.totalLength > 0 ? 
       (stats.pipelineName.lengthAvailable / stats.pipelineName.totalLength * 100) : 0;
-    const pressurePercentLengthwise = stats.pipelinePressure.totalLength > 0 ? 
-      (stats.pipelinePressure.lengthAvailable / stats.pipelinePressure.totalLength * 100) : 0;
-    const pressurePercentElementwise = stats.pipelinePressure.total > 0 ? 
-      (stats.pipelinePressure.available / stats.pipelinePressure.total * 100) : 0;
+    const maximumPressurePercent = stats.nodePressureMaximum.total > 0
+      ? (stats.nodePressureMaximum.available / stats.nodePressureMaximum.total * 100) : 0;
+    const minimumPressurePercent = stats.nodePressureMinimum.total > 0
+      ? (stats.nodePressureMinimum.available / stats.nodePressureMinimum.total * 100) : 0;
 
     /* Generate HTML content. */
     let content = '';
@@ -496,31 +496,59 @@
             <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${namePercentLengthwise.toFixed(1)}%</td>
             <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${namePercent.toFixed(1)}%</td>
           </tr>
+        </tbody>
+      </table>
+
+      <h3 style="color: #495057;">Node Data Completeness</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+        <thead>
+          <tr>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: left; font-weight: bold;">Attribute</th>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: center; font-weight: bold;">Elementwise</th>
+          </tr>
+        </thead>
+        <tbody>
           <tr>
             <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Maximum Pressure</td>
-            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${pressurePercentLengthwise.toFixed(1)}%</td>
-            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${pressurePercentElementwise.toFixed(1)}%</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${maximumPressurePercent.toFixed(1)}%</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Minimum Pressure</td>
+            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${minimumPressurePercent.toFixed(1)}%</td>
           </tr>
         </tbody>
       </table>
-      
-      <h3 style="color: #495057;">Pipeline Data Sources:</h3>
+
+      <h3 style="color: #495057;">Diameter Source</h3>
       <div style="margin-bottom: 15px;">
         <div style="display: flex; gap: 20px; align-items: stretch; margin-bottom: 15px;">
           <div style="flex: 1; display: flex; flex-direction: column;">
             <div style="position: relative; flex: 1; min-height: 200px;">
-              <canvas id="pipelineSourcesChartElements" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+              <canvas id="diameterSourcesChartElements" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
             </div>
             <div style="text-align: center; margin-top: 5px; font-size: 14px; color: #495057; font-weight: bold;">By element count</div>
           </div>
           <div style="flex: 1; display: flex; flex-direction: column;">
             <div style="position: relative; flex: 1; min-height: 200px;">
-              <canvas id="pipelineSourcesChartLength" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+              <canvas id="diameterSourcesChartLength" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
             </div>
             <div style="text-align: center; margin-top: 5px; font-size: 14px; color: #495057; font-weight: bold;">By length (km)</div>
           </div>
         </div>
-        <div id="charts-legend" style="text-align: center; margin-top: 10px;"></div>
+        <div id="diameter-sources-legend" style="text-align: center; margin-top: 10px;"></div>
+      </div>
+
+      <h3 style="color: #495057;">Pressure Source</h3>
+      <div style="margin-bottom: 15px;">
+        <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+          <div style="width: min(100%, 360px); display: flex; flex-direction: column;">
+            <div style="position: relative; flex: 1; min-height: 200px;">
+              <canvas id="pressureSourcesChartElements" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            </div>
+            <div style="text-align: center; margin-top: 5px; font-size: 14px; color: #495057; font-weight: bold;">By element count</div>
+          </div>
+        </div>
+        <div id="pressure-sources-legend" style="text-align: center; margin-top: 10px;"></div>
       </div>`;
     }
 
@@ -528,124 +556,80 @@
     
     /* Create pipeline charts only if pipelines are loaded. */
     if (stats.pipelineElements > 0) {
-      /* Destroy existing charts if they exist. */
-      const existingChartElements = Chart.getChart('pipelineSourcesChartElements');
-      if (existingChartElements) {
-        existingChartElements.destroy();
-      }
-      const existingChartLength = Chart.getChart('pipelineSourcesChartLength');
-      if (existingChartLength) {
-        existingChartLength.destroy();
-      }
-      
-      /* Create pipeline sources pie charts. */
-      const sourceLabels = Object.keys(stats.pipelineSources);
-      
-      /* Generate colors for the chart; white denotes missing technical attributes. */
+      const obsoletePressureLengthChart = Chart.getChart('pressureSourcesChartLength');
+      if (obsoletePressureLengthChart) obsoletePressureLengthChart.destroy();
       const defaultColors = [
         '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', 
         '#FF9F40', '#C9CBCF', '#9966FF', '#4BC0C0', '#FF9F40'
       ];
-      
-      const backgroundColors = sourceLabels.map((label, index) => 
-        label === 'No technical attributes' ? '#FFFFFF' : defaultColors[index % defaultColors.length]
-      );
-      
-      const borderColors = sourceLabels.map((label, index) => 
-        label === 'No technical attributes' ? '#CCCCCC' : defaultColors[index % defaultColors.length].replace('0.2', '1')
-      );
-      
-      /* Chart for element count. */
-      const ctxElements = document.getElementById('pipelineSourcesChartElements').getContext('2d');
-      const sourceDataElements = Object.values(stats.pipelineSourcesByCount);
-      
-      new Chart(ctxElements, {
-        type: 'pie',
-        data: {
-          labels: sourceLabels,
-          datasets: [{
-            data: sourceDataElements,
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
+
+      const createSourceCharts = (lengthValues, countValues, prefix, legendId, includeLength = true) => {
+        const labels = Object.keys(lengthValues);
+        const missingLabel = 'No source specified';
+        const backgroundColors = labels.map((label, index) =>
+          label === missingLabel ? '#D1D5DB' : defaultColors[index % defaultColors.length]
+        );
+        const borderColors = labels.map((label, index) =>
+          label === missingLabel ? '#CCCCCC' : defaultColors[index % defaultColors.length]
+        );
+        const chartDefinitions = [
+          { id: `${prefix}ChartElements`, values: labels.map(label => countValues[label] || 0), unit: 'elements' }
+        ];
+        if (includeLength) {
+          chartDefinitions.push({ id: `${prefix}ChartLength`, values: labels.map(label => lengthValues[label] || 0), unit: 'km' });
+        }
+
+        chartDefinitions.forEach(definition => {
+          const existingChart = Chart.getChart(definition.id);
+          if (existingChart) existingChart.destroy();
+          const canvas = document.getElementById(definition.id);
+          if (!canvas) return;
+          new Chart(canvas.getContext('2d'), {
+            type: 'pie',
+            data: {
+              labels,
+              datasets: [{
+                data: definition.values,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+              }]
             },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const label = context.label || '';
-                  const value = context.parsed;
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = ((value / total) * 100).toFixed(1);
-                  return label + ': ' + value + ' elements (' + percentage + '%)';
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: context => {
+                      const value = context.parsed;
+                      const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
+                      const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+                      const formatted = definition.unit === 'km' ? value.toFixed(2) : value;
+                      return `${context.label || ''}: ${formatted} ${definition.unit} (${percentage}%)`;
+                    }
+                  }
                 }
               }
             }
-          }
-        }
-      });
-      
-      /* Chart for length. */
-      const ctxLength = document.getElementById('pipelineSourcesChartLength').getContext('2d');
-      const sourceDataLength = Object.values(stats.pipelineSources);
-      
-      new Chart(ctxLength, {
-        type: 'pie',
-        data: {
-          labels: sourceLabels,
-          datasets: [{
-            data: sourceDataLength,
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const label = context.label || '';
-                  const value = context.parsed;
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = ((value / total) * 100).toFixed(1);
-                  return label + ': ' + value.toFixed(2) + ' km (' + percentage + '%)';
-                }
-              }
-            }
-          }
-        }
-      });
-      
-      /* Create shared legend. */
-      const legendContainer = document.getElementById('charts-legend');
-      legendContainer.innerHTML = '<div style="display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 10px;">';
-      
-      sourceLabels.forEach((label, index) => {
-        const color = label === 'No technical attributes' ? '#FFFFFF' : defaultColors[index % defaultColors.length];
-        const borderColor = label === 'No technical attributes' ? '#CCCCCC' : defaultColors[index % defaultColors.length].replace('0.2', '1');
-        
-        legendContainer.innerHTML += `
-          <div style="display: flex; align-items: center; gap: 5px;">
+          });
+        });
+
+        const legendContainer = document.getElementById(legendId);
+        if (!legendContainer) return;
+        legendContainer.innerHTML = `<div style="display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 10px;">${labels.map((label, index) => {
+          const color = label === missingLabel ? '#D1D5DB' : defaultColors[index % defaultColors.length];
+          const borderColor = label === missingLabel ? '#CCCCCC' : defaultColors[index % defaultColors.length];
+          return `<div style="display: flex; align-items: center; gap: 5px;">
             <div style="width: 12px; height: 12px; background-color: ${color}; border: 1px solid ${borderColor}; border-radius: 2px;"></div>
             <span style="font-size: 11px; color: #495057;">${label}</span>
-          </div>
-        `;
-      });
-      
-      legendContainer.innerHTML += '</div>';
+          </div>`;
+        }).join('')}</div>`;
+      };
+
+      createSourceCharts(stats.diameterSources, stats.diameterSourcesByCount, 'diameterSources', 'diameter-sources-legend');
+      createSourceCharts(stats.pressureSources, stats.pressureSourcesByCount, 'pressureSources', 'pressure-sources-legend', false);
     }
   }
 

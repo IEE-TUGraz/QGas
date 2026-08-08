@@ -49,6 +49,28 @@
   let reconnectMode = false;
   let selectedInfrastructureElement = null;
   let originalLayerVisibility = {};
+  let originalInfrastructureStyles = new Map();
+
+  function getInfrastructureLayers() {
+    return [storageLayer, lngLayer, powerplantsLayer, compressorsLayer].filter(Boolean);
+  }
+
+  function captureInfrastructureState() {
+    originalInfrastructureStyles = new Map();
+    getInfrastructureLayers().forEach(layerGroup => {
+      layerGroup.eachLayer(layer => {
+        if (!layer || !layer.options) return;
+        originalInfrastructureStyles.set(layer, {
+          color: layer.options.color,
+          fillColor: layer.options.fillColor,
+          weight: layer.options.weight,
+          opacity: layer.options.opacity,
+          fillOpacity: layer.options.fillOpacity,
+          radius: layer.options.radius
+        });
+      });
+    });
+  }
   
   function startReconnectInfrastructure() {
     reconnectMode = true;
@@ -65,6 +87,7 @@
       consumption: consumptionLayer && map.hasLayer(consumptionLayer),
       shortPipe: shortPipeLayer && map.hasLayer(shortPipeLayer)
     };
+    captureInfrastructureState();
     
     /*
      * Activate click handlers for infrastructure elements.
@@ -181,7 +204,7 @@
     setupNodeClickHandlers();
     
     const infrastructureName = getInfrastructureName(infrastructureLayer);
-    const currentNode = infrastructureLayer.feature.properties.Node || 'No node assigned';
+    const currentNode = infrastructureLayer.feature.properties.node || 'No node assigned';
     
     showCustomPopup(
       '🔌 Reconnect Infrastructure - Step 2',
@@ -276,13 +299,13 @@
   }
   
   function reconnectToNode(nodeLayer) {
-    const nodeId = nodeLayer.feature.properties.ID;
+    const nodeId = nodeLayer.feature.properties.id;
     const nodeName = nodeLayer.feature.properties.Name || nodeId;
     const infrastructureName = getInfrastructureName(selectedInfrastructureElement);
     
     /* Update the node reference in the infrastructure element. */
-    selectedInfrastructureElement.feature.properties.Node = nodeId;
-    selectedInfrastructureElement.feature.properties.modified = true;
+    selectedInfrastructureElement.feature.properties.node = nodeId;
+    markLayerChanged(selectedInfrastructureElement);
     
     /* Show a confirmation popup for the reconnection. */
     showCustomPopup(
@@ -333,70 +356,32 @@
   
   function getInfrastructureName(infrastructureLayer) {
     const props = infrastructureLayer.feature.properties;
-    return props.Name || props.Plant_name || props.Terminal_name || props.Storage_name || props.ID || 'Unknown Infrastructure';
+    return props.name || props.id || 'Unknown Infrastructure';
   }
   
   function restoreInfrastructureVisibility() {
-    /* Restore visibility for all infrastructure elements. */
-    if (storageLayer) {
-      storageLayer.eachLayer(layer => {
-        if (layer.setStyle) {
-          layer.setStyle({
-            opacity: 0.8,
-            fillOpacity: 0.6,
-            color: '#990',
-            fillColor: '#990'
-          });
-        }
-      });
-    }
-    
-    if (lngLayer) {
-      lngLayer.eachLayer(layer => {
-        if (layer.setStyle) {
-          layer.setStyle({
-            opacity: 0.8,
-            fillOpacity: 0.6,
-            color: '#099',
-            fillColor: '#099'
-          });
-        }
-      });
-    }
-    
-    if (powerplantsLayer) {
-      powerplantsLayer.eachLayer(layer => {
-        if (layer.setStyle) {
-          layer.setStyle({
-            opacity: 0.8,
-            fillOpacity: 0.6,
-            color: '#090',
-            fillColor: '#090'
-          });
-        }
-      });
-    }
-    
-    if (compressorsLayer) {
-      compressorsLayer.eachLayer(layer => {
-        if (layer.setStyle) {
-          layer.setStyle({
-            opacity: 0.8,
-            fillOpacity: 0.6,
-            color: '#009',
-            fillColor: '#009'
-          });
-        }
-      });
-    }
+    originalInfrastructureStyles.forEach((style, layer) => {
+      if (!layer) return;
+      if (typeof layer.setStyle === 'function') {
+        const pathStyle = {};
+        ['color', 'fillColor', 'weight', 'opacity', 'fillOpacity'].forEach(key => {
+          if (style[key] !== undefined) pathStyle[key] = style[key];
+        });
+        layer.setStyle(pathStyle);
+      }
+      if (typeof layer.setRadius === 'function' && style.radius !== undefined) {
+        layer.setRadius(style.radius);
+      }
+    });
   }
   
-  function exitReconnectMode() {
+  function exitReconnectMode(activateInfo = true) {
+    if (!reconnectMode && originalInfrastructureStyles.size === 0) return;
     reconnectMode = false;
-    selectedInfrastructureElement = null;
-    
+
     /* Restore visibility for all infrastructure elements. */
     restoreInfrastructureVisibility();
+    selectedInfrastructureElement = null;
     
     /* Restore original layer visibility. */
     if (originalLayerVisibility.consumption && consumptionLayer) {
@@ -408,14 +393,14 @@
     
     /* Reset click handlers to default behavior. */
     resetInfrastructureClickHandlers();
-    
-    /* Switch back to info mode. */
-    currentMode = 'info';
-    activateInfoMode();
-    selectTool('info');
     resetNodeClickHandlers();
-    activateInfoMode();
     closeCustomPopup();
+    originalInfrastructureStyles.clear();
+
+    if (activateInfo) {
+      currentMode = 'info';
+      activateInfoMode(true);
+    }
   }
   
   function resetInfrastructureClickHandlers() {
@@ -466,5 +451,9 @@
     deactivateAllModes();
     currentMode = 'reconnect-infrastructure';
     startReconnectInfrastructure();
+  };
+
+  window.deactivateReconnectInfrastructureTool = function deactivateReconnectInfrastructureTool() {
+    exitReconnectMode(false);
   };
 })();

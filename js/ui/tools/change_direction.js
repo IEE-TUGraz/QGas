@@ -4,7 +4,7 @@
  * ================================================================================
  * 
  * Enables users to reverse the flow direction of pipeline segments by swapping
- * their Start_Node and End_Node references.
+ * their node_start and node_end references.
  * 
  * Key Features:
  * - Visual direction indicators (arrows)
@@ -23,7 +23,7 @@
  * Technical Details:
  * - Uses Leaflet PolylineDecorator for arrow visualization
  * - Tracks state in directionChangeState Map
- * - Swaps Start_Node and End_Node properties
+ * - Swaps node_start and node_end properties
  * - Updates all connected references
  * 
  * Development Information:
@@ -34,7 +34,7 @@
  * - Disclaimer: AI-assisted tools were used to support development and documentation.
  *
  * Inputs:
- * - Selected pipeline features and their Start_Node/End_Node attributes.
+ * - Selected pipeline features and their node_start/node_end attributes.
  * - Map layer references for visual arrows.
  *
  * Public API:
@@ -194,7 +194,7 @@ function refreshDirectionArrow(layer, color) {
 function prepareLineForDirectionMode(layer) {
   if (!layer || directionChangeState.has(layer)) return;
   const props = (layer.feature && layer.feature.properties) || {};
-  const hasNodes = Boolean(props.Start_Node && props.End_Node);
+  const hasNodes = Boolean(props.node_start && props.node_end);
   const originalStyle = {
     color: layer._originalColor || layer.options?.color || '#0070f3',
     weight: layer._originalWeight || layer.options?.weight || 3,
@@ -204,8 +204,8 @@ function prepareLineForDirectionMode(layer) {
 
   directionChangeState.set(layer, {
     originalLatLngs: cloneLatLngStructure(layer.getLatLngs()),
-    originalStart: props.Start_Node,
-    originalEnd: props.End_Node,
+    originalStart: props.node_start,
+    originalEnd: props.node_end,
     originalStyle
   });
 
@@ -236,14 +236,14 @@ function prepareLineForDirectionMode(layer) {
 function toggleLineDirection(layer) {
   if (!layer || !layer.feature || !layer.feature.properties) return;
   const props = layer.feature.properties;
-  if (!props.Start_Node || !props.End_Node) {
+  if (!props.node_start || !props.node_end) {
     showInfoPopup('This element has no Start/End nodes defined.', '🔄 Change Direction');
     return;
   }
 
-  const temp = props.Start_Node;
-  props.Start_Node = props.End_Node;
-  props.End_Node = temp;
+  const temp = props.node_start;
+  props.node_start = props.node_end;
+  props.node_end = temp;
 
   reversePolylineLatLngs(layer);
 
@@ -256,7 +256,7 @@ function toggleLineDirection(layer) {
   const color = reversedDirectionLayers.has(layer) ? '#ff0000' : '#00aa00';
   applyDirectionLayerStyle(layer, color, 5);
   refreshDirectionArrow(layer, color);
-  console.log('Line direction toggled:', props.ID, 'Start:', props.Start_Node, 'End:', props.End_Node);
+  console.log('Line direction toggled:', props.id, 'Start:', props.node_start, 'End:', props.node_end);
 }
 
 function clearDirectionModeArtifacts(restoreGeometry) {
@@ -285,8 +285,8 @@ function clearDirectionModeArtifacts(restoreGeometry) {
         layer.setLatLngs(originalLatLngs);
       }
       if (layer.feature && layer.feature.properties) {
-        layer.feature.properties.Start_Node = state.originalStart;
-        layer.feature.properties.End_Node = state.originalEnd;
+        layer.feature.properties.node_start = state.originalStart;
+        layer.feature.properties.node_end = state.originalEnd;
       }
     }
     layer.off('click');
@@ -354,13 +354,15 @@ function showSaveDirectionButton() {
   btn.style.background = '#28a745';
   
   btn.onclick = function() {
+    const changedLayers = Array.from(reversedDirectionLayers);
+    changedLayers.forEach(layer => markLayerChanged(layer));
     clearDirectionModeArtifacts(false);
     removeDirectionButtons();
     currentMode = 'info';
     activateInfoMode();
     selectTool('info');
     
-    console.log('Saved', reversedDirectionLayers.size, 'direction changes');
+    console.log('Saved', changedLayers.length, 'direction changes');
   };
   
   // Add button to tools section

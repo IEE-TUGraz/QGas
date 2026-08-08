@@ -22,7 +22,7 @@
  * - Locked Endpoints: Pipeline start/end points remain connected to nodes
  * 
  * Technical Details:
- * - Uses Leaflet.Editable for geometry manipulation
+ * - Uses Leaflet Draw editing handlers for geometry manipulation
  * - Tracks original geometry for discard functionality
  * - Updates all connected elements when nodes move
  * - Maintains split node offsets during zoom/pan
@@ -77,7 +77,6 @@ function activateEditModeForExisting() {
 
 /* Initialize Info mode after map load. */
 currentMode = 'info';
-resetNodeClicks();
 function updateSplitNodeOffsets() {
   forEachNodeMarker(marker => {
     if (marker._splitOffset) {
@@ -98,16 +97,22 @@ function updateSplitNodeOffsets() {
     }
   });
 }
-map.on('zoomend moveend', updateSplitNodeOffsets);
+function bindSplitNodeOffsetUpdates() {
+  if (!map || typeof map.on !== 'function' || map._qgasSplitOffsetUpdatesBound) return false;
+  map.on('zoomend moveend', updateSplitNodeOffsets);
+  map._qgasSplitOffsetUpdatesBound = true;
+  return true;
+}
+
+if (!bindSplitNodeOffsetUpdates()) {
+  window.addEventListener('load', bindSplitNodeOffsetUpdates, { once: true });
+}
 
 /*
  * Mode system with simplified error handling.
  */
 function activateInfoMode(force = false) {
   try {
-    if (!force && currentMode === 'info') {
-      return;
-    }
     currentMode = 'info';
     /* Remove edit buttons if present. */
     const saveBtn = document.getElementById('save-edit-btn');
@@ -120,7 +125,7 @@ function activateInfoMode(force = false) {
       cleanupNodeEdit(window.selectedNodeMarker);
     }
     
-    console.log('Info Mode aktiviert');
+    console.log('Info Mode activated');
     applyEditGeometryVisibility(false);
     
     /* Update toolbox button highlights. */
@@ -150,6 +155,7 @@ function activateInfoMode(force = false) {
     
     /* Reset element highlights. */
     resetAllElementHighlights();
+    resetAllTransientMarkerHighlights();
     
     /* Pipeline interactions for Info mode. */
     if (pipelineLayer) {
@@ -161,14 +167,14 @@ function activateInfoMode(force = false) {
             return;
           }
           try {
-            console.log('Pipeline geklickt in Info Mode:', layer);
+            console.log('Pipeline clicked in Info Mode:', layer);
             
             /* Highlight the selected pipeline. */
             highlightPipeline(layer);
             
             /* Show modal with pipeline details. */
             const content = createModalPopupContent(layer.feature.properties, layer);
-            const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
+            const title = `Pipeline: ${layer.feature.properties.id || 'Unnamed'}`;
             showElementModal(title, content, layer);
             
             setTimeout(() => rebindModalAttributeControls(layer), 100);
@@ -194,7 +200,7 @@ function activateInfoMode(force = false) {
             
             /* Show modal with pipeline details. */
             const content = createModalPopupContent(layer.feature.properties, layer);
-            const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
+            const title = `Pipeline: ${layer.feature.properties.id || 'Unnamed'}`;
             showElementModal(title, content, layer);
             
             setTimeout(() => rebindModalAttributeControls(layer), 100);
@@ -215,14 +221,14 @@ function activateInfoMode(force = false) {
             return;
           }
           try {
-            console.log('Short-Pipe geklickt in Info Mode:', layer);
+            console.log('Short-Pipe clicked in Info Mode:', layer);
             
             /* Highlight the selected short pipe. */
             highlightPipeline(layer);
             
             /* Show modal with short-pipe details. */
             const content = createModalPopupContent(layer.feature.properties, layer);
-            const title = `Short-Pipe: ${layer.feature.properties.ID || 'Unnamed'}`;
+            const title = `Short-Pipe: ${layer.feature.properties.id || 'Unnamed'}`;
             showElementModal(title, content, layer);
             
             setTimeout(() => rebindModalAttributeControls(layer), 100);
@@ -242,10 +248,10 @@ function activateInfoMode(force = false) {
         }
         try {
           L.DomEvent.stopPropagation(e);
-          console.log('Node geklickt in Info Mode:', marker.feature.properties.ID);
+          console.log('Node clicked in Info Mode:', marker.feature.properties.id);
           highlightElement(marker);
           const content = createModalPopupContent(marker.feature.properties, marker);
-          const title = `Node: ${marker.feature.properties.ID || marker.feature.properties.Name || 'Unnamed'}`;
+          const title = `Node: ${marker.feature.properties.id || marker.feature.properties.name || 'Unnamed'}`;
           showElementModal(title, content, marker);
           setTimeout(() => rebindModalAttributeControls(marker), 100);
         } catch (error) {
@@ -302,11 +308,11 @@ function updateAllElementInteractions() {
               elementType = 'Consumption Point';
             }
 
-            if (elementType === 'Element' && layer.feature.properties.ID) {
-              if (layer.feature.properties.ID.includes('_N_')) elementType = 'Node';
-              else if (layer.feature.properties.ID.includes('_P_')) elementType = 'Power plant';
-              else if (layer.feature.properties.ID.includes('_L_')) elementType = 'LNG Terminal';
-              else if (layer.feature.properties.ID.includes('_S_')) elementType = 'Storage';
+            if (elementType === 'Element' && layer.feature.properties.id) {
+              if (layer.feature.properties.id.includes('_N_')) elementType = 'Node';
+              else if (layer.feature.properties.id.includes('_P_')) elementType = 'Power plant';
+              else if (layer.feature.properties.id.includes('_L_')) elementType = 'LNG Terminal';
+              else if (layer.feature.properties.id.includes('_S_')) elementType = 'Storage';
             }
 
             highlightElement(layer);
@@ -317,7 +323,7 @@ function updateAllElementInteractions() {
               title = `${elementType}: ${layer.feature.properties.NUTS_ID || layer.feature.properties.NUTS3_ID || layer.feature.properties.NUTS_CODE || 'Unnamed'}`;
             } else {
               content = createModalPopupContent(layer.feature.properties, layer);
-              title = `${elementType}: ${layer.feature.properties.ID || layer.feature.properties.Name || 'Unnamed'}`;
+              title = `${elementType}: ${layer.feature.properties.id || layer.feature.properties.name || 'Unnamed'}`;
             }
             showElementModal(title, content, layer);
 
@@ -487,7 +493,7 @@ function isNodeLayerCandidate(layer, layerName = '') {
       let found = null;
       layerGroup.eachLayer(marker => {
         if (found || !marker || !marker.feature || !marker.feature.properties) return;
-        if (marker.feature.properties.ID === nodeId) {
+        if (marker.feature.properties.id === nodeId) {
           found = layerGroup;
         }
       });
@@ -520,7 +526,7 @@ function isNodeLayerCandidate(layer, layerName = '') {
     nodeLayers.forEach(layerGroup => {
       if (!layerGroup) return;
       layerGroup.eachLayer(marker => {
-        const id = marker.feature?.properties?.ID;
+        const id = marker.feature?.properties?.id;
         const ll = marker.getLatLng?.();
         if (!id || !ll) return;
         nodeIndex.push({ id, latlng: ll });
@@ -541,17 +547,17 @@ function isNodeLayerCandidate(layer, layerName = '') {
     inlineLayers.forEach(layerGroup => {
       layerGroup.eachLayer(marker => {
         const props = marker.feature?.properties || {};
-        if (props.Start_Node || props.End_Node || props.Node) return;
+        if (props.node_start || props.node_end || props.node) return;
         const latlng = marker.getLatLng?.();
         const nearby = findClosestNodes(latlng);
         if (nearby.length >= 2) {
-          props.Start_Node = nearby[0].id;
-          props.End_Node = nearby[1].id;
-          props.Node = '';
+          props.node_start = nearby[0].id;
+          props.node_end = nearby[1].id;
+          props.node = '';
         } else if (nearby.length === 1) {
-          props.Node = nearby[0].id;
-          props.Start_Node = '';
-          props.End_Node = '';
+          props.node = nearby[0].id;
+          props.node_start = '';
+          props.node_end = '';
         }
       });
     });
@@ -587,7 +593,7 @@ function isNodeLayerCandidate(layer, layerName = '') {
     getAllNodeLayers().forEach(layerGroup => {
       if (!layerGroup) return;
       layerGroup.eachLayer(marker => {
-        const markerId = marker.feature?.properties?.ID;
+        const markerId = marker.feature?.properties?.id;
         if (markerId && idSet.has(markerId)) {
           const latlng = marker.getLatLng();
           snapshots.push({
@@ -670,7 +676,7 @@ function isNodeLayerCandidate(layer, layerName = '') {
   function markInlineMarkerDirty(marker) {
     if (!marker) return;
     ensureNodePositionEditBuffer();
-    const markerId = marker.feature?.properties?.ID || null;
+    const markerId = marker.feature?.properties?.id || null;
     const key = getNodeSnapshotKey(marker, markerId);
     nodePositionEditBuffer.dirtyNodeKeys.add(key);
   }
@@ -705,19 +711,19 @@ function isNodeLayerCandidate(layer, layerName = '') {
       if (marker.feature?.geometry) {
         marker.feature.geometry.coordinates = coords;
         if (marker.feature.properties) {
-          marker.feature.properties.modified = true;
+          markLayerChanged(marker);
         }
       }
       if (snapshot.markerId) {
         getAllNodeLayers().forEach(layerGroup => {
           if (!layerGroup) return;
           layerGroup.eachLayer(otherMarker => {
-            if (otherMarker.feature?.properties?.ID === snapshot.markerId) {
+            if (otherMarker.feature?.properties?.id === snapshot.markerId) {
               otherMarker.setLatLng(currentLatLng);
               if (otherMarker.feature?.geometry) {
                 otherMarker.feature.geometry.coordinates = coords;
                 if (otherMarker.feature.properties) {
-                  otherMarker.feature.properties.modified = true;
+                  markLayerChanged(otherMarker);
                 }
               }
             }
@@ -733,11 +739,11 @@ function isNodeLayerCandidate(layer, layerName = '') {
       if (!snapshot || !snapshot.layer) return;
       const layer = snapshot.layer;
       if (layer.feature?.properties) {
-        layer.feature.properties.modified = true;
+        markLayerChanged(layer);
       }
       const lengthKm = calculatePipelineLength(layer);
       if (layer.feature?.properties && Number.isFinite(lengthKm)) {
-        layer.feature.properties.Length_km = lengthKm;
+        layer.feature.properties.length_km = lengthKm;
       }
       syncLayerFeatureGeometry(layer);
       pipelinesUpdated += 1;
@@ -777,7 +783,7 @@ function isNodeLayerCandidate(layer, layerName = '') {
         getAllNodeLayers().forEach(layerGroup => {
           if (!layerGroup) return;
           layerGroup.eachLayer(otherMarker => {
-            if (otherMarker.feature?.properties?.ID === snapshot.markerId) {
+            if (otherMarker.feature?.properties?.id === snapshot.markerId) {
               otherMarker.setLatLng(targetLatLng);
               if (otherMarker.feature?.geometry) {
                 otherMarker.feature.geometry.coordinates = [snapshot.originalLatLng.lng, snapshot.originalLatLng.lat];
@@ -928,14 +934,14 @@ function selectNodeForPositionEdit(nodeMarker) {
   }
 
   const isInline = isInlineMarker(nodeMarker);
-  const primaryNodeId = nodeMarker.feature?.properties?.ID || null;
+  const primaryNodeId = nodeMarker.feature?.properties?.id || null;
   const linkedNodeIds = new Set();
 
   if (!isInline && primaryNodeId) {
     linkedNodeIds.add(primaryNodeId);
   }
 
-  const inlineNodeRef = nodeMarker.feature?.properties?.Node;
+  const inlineNodeRef = nodeMarker.feature?.properties?.node;
   if (isInline && inlineNodeRef) {
     linkedNodeIds.add(inlineNodeRef);
   }
@@ -943,7 +949,7 @@ function selectNodeForPositionEdit(nodeMarker) {
   if (isInline) {
     const colocatedNodes = findNodesAtLatLng(nodeMarker.getLatLng(), 1);
     colocatedNodes.forEach(marker => {
-      const id = marker.feature?.properties?.ID;
+      const id = marker.feature?.properties?.id;
       if (id) linkedNodeIds.add(id);
     });
   }
@@ -977,7 +983,7 @@ function selectNodeForPositionEdit(nodeMarker) {
   const nodePositionSnapshots = collectNodePositionSnapshots(nodeIdsForEdit);
   const inlineSnapshots = isInline ? [{
     marker: nodeMarker,
-    markerId: nodeMarker.feature?.properties?.ID,
+    markerId: nodeMarker.feature?.properties?.id,
     originalLatLng: { ...nodeMarker.getLatLng() },
     originalGeometry: nodeMarker.feature?.geometry ? JSON.parse(JSON.stringify(nodeMarker.feature.geometry)) : null
   }] : [];
@@ -1000,8 +1006,8 @@ function selectNodeForPositionEdit(nodeMarker) {
     if (!layerGroup) return;
     forEachPolylineFeature(layerGroup, layer => {
       const props = layer.feature?.properties || {};
-      if (!nodeIdSet.has(props.Start_Node) && !nodeIdSet.has(props.End_Node)) return;
-      const uniqueKey = props.ID ?? L.stamp(layer);
+      if (!nodeIdSet.has(props.node_start) && !nodeIdSet.has(props.node_end)) return;
+      const uniqueKey = props.id ?? L.stamp(layer);
       if (seenIds.has(uniqueKey)) return;
       seenIds.add(uniqueKey);
       rememberPipelineSnapshot(layer);
@@ -1173,7 +1179,7 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
     allNodeLayers.forEach(nLayer => {
       if (nLayer) {
         nLayer.eachLayer(marker => {
-          const markerId = marker.feature?.properties?.ID;
+          const markerId = marker.feature?.properties?.id;
           if (markerId && nodeIdSet.has(markerId)) {
             marker.setLatLng(newLatLng);
             markNodePositionDirty(markerId);
@@ -1195,13 +1201,13 @@ function enableNodeDragging(nodeMarker, nodeIds, inlineMarkers, connectedPipelin
       const props = pipelineLayer.feature.properties;
       const latlngs = pipelineLayer.getLatLngs();
 
-      if (nodeIdSet.has(props.Start_Node)) {
+      if (nodeIdSet.has(props.node_start)) {
         latlngs[0] = newLatLng;
         pipelineLayer.setLatLngs(latlngs);
         markPipelineDirty(pipelineLayer);
       }
 
-      if (nodeIdSet.has(props.End_Node)) {
+      if (nodeIdSet.has(props.node_end)) {
         latlngs[latlngs.length - 1] = newLatLng;
         pipelineLayer.setLatLngs(latlngs);
         markPipelineDirty(pipelineLayer);
@@ -1237,7 +1243,7 @@ function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
   allNodeLayers.forEach(nLayer => {
     if (nLayer) {
       nLayer.eachLayer(marker => {
-        if (marker.feature && marker.feature.properties.ID === nodeId) {
+        if (marker.feature && marker.feature.properties.id === nodeId) {
           marker.setLatLng(newLatLng);
           marker.feature.geometry.coordinates = [newLatLng.lng, newLatLng.lat];
           console.log('Node moved:', nodeId);
@@ -1257,7 +1263,7 @@ function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
       const props = layer.feature?.properties || {};
       let updated = false;
 
-      if (props.Start_Node === nodeId) {
+      if (props.node_start === nodeId) {
         const latlngs = layer.getLatLngs();
         latlngs[0] = newLatLng;
         layer.setLatLngs(latlngs);
@@ -1268,7 +1274,7 @@ function moveNodeAndConnectedPipelines(nodeId, newLatLng, excludeLayer) {
         updated = true;
       }
 
-      if (props.End_Node === nodeId) {
+      if (props.node_end === nodeId) {
         const latlngs = layer.getLatLngs();
         latlngs[latlngs.length - 1] = newLatLng;
         layer.setLatLngs(latlngs);
@@ -1308,7 +1314,7 @@ function activateEditMode() {
     resetAllElementHighlights();
     
     currentMode = 'edit';
-    console.log('Edit Mode aktiviert');
+    console.log('Edit Mode activated');
     applyEditGeometryVisibility(true);
     
     /* Show selection dialog. */

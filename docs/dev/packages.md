@@ -205,6 +205,32 @@
 </tbody>
 </table>
 
+<h3>Documentation Toolchain</h3>
+
+<p>These packages are installed through the pip section of <code>environment.yml</code>. They are required to build and serve the project documentation, but not to run the QGas application itself.</p>
+
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MkDocs</strong></td>
+<td>1.6.1</td>
+<td>Builds and locally serves the documentation site.</td>
+</tr>
+<tr>
+<td><strong>mkdocstrings[python]</strong></td>
+<td>1.0.3</td>
+<td>Provides Python-aware documentation processing used by the MkDocs configuration and generated API reference.</td>
+</tr>
+</tbody>
+</table>
+
 <h2>Development Tools (Optional)</h2>
 
 <p>These tools are recommended for development but not required for running QGas:</p>

@@ -24,9 +24,11 @@
  * Technical Details:
  * - Creates sub-nodes at compressor positions
  * - Splits pipelines at insertion points
- * - Generates unique IDs for sub-compressors (e.g., C_01A, C_01B)
- * - Maintains visual connection to original location
- * - Updates topology automatically
+ * - Generates case-insensitively unique numeric IDs (e.g., C_01_1, C_01_2)
+ * - Creates standard A/B terminal nodes and inherits endpoint pressure limits
+ * - Uses dashed nearest-neighbour lines as visual aids only
+ * - Synchronizes active/original layers for filtering and export
+ * - Restores legend-controlled visibility when the workflow ends
  * 
  * Development Information:
  * - Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer
@@ -52,9 +54,69 @@ let distributionCount = 0;
 let subCompressors = [];
 let connectionLines = [];
 let mapClickHandler = null;
+const processedDistributionClicks = new WeakSet();
 let originalCompressorStyle = {};
 let originalPipelineVisibility = {};
+let hiddenLayersForDistribution = [];
 let cachedCompressorMarkerStyle = null;
+
+function _readFirstProperty(properties, keys, fallback = '') {
+  if (!properties) return fallback;
+  for (const key of keys) {
+    const value = properties[key];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return fallback;
+}
+
+function _assignFeatureId(properties, id) {
+  delete properties.ID;
+  properties.id = id;
+  return properties;
+}
+
+function _assignRatedPower(properties, power) {
+  /* The configured compressor schema uses rated_power_MW. Keep legacy
+   * variants synchronized only when they are already present. */
+  properties.rated_power_MW = power;
+  if (Object.prototype.hasOwnProperty.call(properties, 'Rated_Power_MW')) properties.Rated_Power_MW = power;
+  if (Object.prototype.hasOwnProperty.call(properties, 'rated_power_mw')) properties.rated_power_mw = power;
+  return properties;
+}
+
+function _getUniqueDistributedCompressorId(baseId, preferredIndex) {
+  const existingIds = new Set();
+  const visit = layer => {
+    if (!layer) return;
+    const properties = layer.feature?.properties;
+    if (properties) {
+      const id = String(_readFirstProperty(properties, ['ID', 'id'], '')).trim().toLowerCase();
+      if (id) existingIds.add(id);
+    }
+    if (typeof layer.eachLayer === 'function') layer.eachLayer(visit);
+  };
+  try { visit(compressorsLayer); } catch (e) {}
+
+  let index = Math.max(0, Number(preferredIndex) || 0) + 1;
+  let candidate = '';
+  do {
+    candidate = `${baseId}_${index}`;
+    index += 1;
+  } while (existingIds.has(candidate.toLowerCase()));
+  return candidate;
+}
+
+function _getCompressorToggleForDistribute() {
+  const config = Array.isArray(layerConfig)
+    ? layerConfig.find(entry => /compressor/i.test(`${entry?.filename || ''} ${entry?.legendName || ''}`))
+    : null;
+  if (config?.filename) {
+    const toggleId = 'toggle-' + config.filename.replace('.geojson', '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const configuredToggle = document.getElementById(toggleId);
+    if (configuredToggle) return configuredToggle;
+  }
+  return document.getElementById('toggle-compressors');
+}
 
 function _getPipelineGroupsForDistribute() {
   const out = [];
@@ -67,34 +129,262 @@ function _getPipelineGroupsForDistribute() {
     out.push(group);
   }
 
-  /* Prefer the currently selected pipeline layer, if available. */
-  try { add(window.selectedPipelineLayer); } catch (e) {}
-
-  /* Legacy global fallback. */
-  try { add(pipelineLayer); } catch (e) {}
-
-  /* Dynamically loaded pipeline-like layers (PL_*.geojson). */
+  /* Resolve configured pipeline files explicitly. The legacy pipelineLayer
+   * reference can be overwritten by a later configured line layer (for
+   * example valves.geojson), so it must only be a last-resort fallback. */
   try {
-    if (typeof dynamicLayers === 'object' && dynamicLayers) {
-      Object.keys(dynamicLayers).forEach(k => {
-        if (!k) return;
-        if (/^PL_/i.test(k) && dynamicLayers[k]) add(dynamicLayers[k]);
+    if (Array.isArray(layerConfig) && typeof dynamicLayers === 'object' && dynamicLayers) {
+      layerConfig.forEach(config => {
+        const filename = String(config && config.filename || '');
+        const layerName = String(config && (config.layerName || config.LayerName) || '');
+        const isPipeline = /pipeline/i.test(filename) || /^PL_/i.test(filename) || /pipeline/i.test(layerName);
+        const isShortPipe = /short.?pipe/i.test(filename) || /short.?pipe/i.test(layerName);
+        if (!isPipeline || isShortPipe) return;
+        add(dynamicLayers[layerName]);
+        add(dynamicLayers[filename]);
       });
     }
   } catch (e) {}
+
+  /* Configuration-free projects may expose pipeline-like dynamic keys. */
+  try {
+    if (!out.length && typeof dynamicLayers === 'object' && dynamicLayers) {
+      Object.keys(dynamicLayers).forEach(key => {
+        if ((/^PL_/i.test(key) || /pipeline/i.test(key)) && !/short.?pipe/i.test(key)) {
+          add(dynamicLayers[key]);
+        }
+      });
+    }
+  } catch (e) {}
+
+  /* Legacy fallbacks only when no configured pipeline group was found. */
+  if (!out.length) {
+    try { add(window.selectedPipelineLayer); } catch (e) {}
+    try { add(pipelineLayer); } catch (e) {}
+  }
 
   return out;
 }
 
 function _findOwningPipelineGroup(featureLayer) {
   const groups = _getPipelineGroupsForDistribute();
-  for (let i = 0; i < groups.length; i++) {
-    const g = groups[i];
+
+  function findDirectOwner(group) {
+    if (!group || typeof group.eachLayer !== 'function') return null;
+    let owner = null;
     try {
-      if (g && typeof g.hasLayer === 'function' && g.hasLayer(featureLayer)) return g;
+      group.eachLayer(child => {
+        if (owner) return;
+        if (child === featureLayer) {
+          owner = group;
+          return;
+        }
+        owner = findDirectOwner(child);
+      });
     } catch (e) {}
+    return owner;
+  }
+
+  for (let i = 0; i < groups.length; i++) {
+    const owner = findDirectOwner(groups[i]);
+    if (owner) return owner;
   }
   return null;
+}
+
+/* Return the actual clickable line features, including lines nested in a
+ * FeatureGroup/GeoJSON layer.  Some imported pipeline layers have an extra
+ * group level, so binding only to group.eachLayer() misses the polylines. */
+function _getPipelineFeatureLayersForDistribute() {
+  const out = [];
+  const seen = new Set();
+
+  function visit(layer) {
+    if (!layer || seen.has(layer)) return;
+    seen.add(layer);
+
+    const geometryType = layer.feature && layer.feature.geometry && layer.feature.geometry.type;
+    if (typeof layer.getLatLngs === 'function' && geometryType === 'LineString') {
+      out.push(layer);
+      return;
+    }
+
+    if (typeof layer.eachLayer === 'function') {
+      try { layer.eachLayer(visit); } catch (e) {}
+    }
+  }
+
+  _getPipelineGroupsForDistribute().forEach(visit);
+  return out;
+}
+
+function _getConfiguredNodeGroupForDistribute() {
+  try {
+    if (typeof getAllNodeLayers === 'function') {
+      const groups = getAllNodeLayers();
+      if (Array.isArray(groups) && groups.length) return groups[0];
+    }
+  } catch (e) {}
+  try { return nodeLayer || null; } catch (e) { return null; }
+}
+
+function _findNodePropertiesForDistribute(nodeId) {
+  const expectedId = String(nodeId || '').trim();
+  if (!expectedId) return null;
+  const visited = new Set();
+  let result = null;
+
+  function visit(layer) {
+    if (!layer || result || visited.has(layer)) return;
+    visited.add(layer);
+    const properties = layer.feature && layer.feature.properties;
+    if (properties) {
+      const candidateId = String(_readFirstProperty(properties, ['ID', 'id'], '')).trim();
+      if (candidateId === expectedId) {
+        result = properties;
+        return;
+      }
+    }
+    if (typeof layer.eachLayer === 'function') {
+      try { layer.eachLayer(visit); } catch (e) {}
+    }
+  }
+
+  try {
+    if (typeof getAllNodeLayers === 'function') getAllNodeLayers().forEach(visit);
+  } catch (e) {}
+  try { visit(originalNodeLayer); } catch (e) {}
+  try { visit(nodeLayer); } catch (e) {}
+  return result;
+}
+
+function _getEndpointPressureProperties(nodeId) {
+  const source = _findNodePropertiesForDistribute(nodeId);
+  if (!source) return {};
+  const result = {};
+  const missing = Symbol('missing-pressure');
+  const maxPressure = _readFirstProperty(source, [
+    'pressure_max', 'max_pressure', 'maximum_pressure', 'Pressure_Max', 'Maximum_Pressure'
+  ], missing);
+  const minPressure = _readFirstProperty(source, [
+    'pressure_min', 'min_pressure', 'minimum_pressure', 'Pressure_Min', 'Minimum_Pressure'
+  ], missing);
+  if (maxPressure !== missing) result.pressure_max = maxPressure;
+  if (minPressure !== missing) result.pressure_min = minPressure;
+  return result;
+}
+
+function _getOriginalNodeGroupForDistribute(activeGroup) {
+  try {
+    if (originalNodeLayer && originalNodeLayer !== activeGroup) return originalNodeLayer;
+  } catch (e) {}
+  return null;
+}
+
+function _getOriginalCompressorGroupForDistribute(activeGroup) {
+  try {
+    if (originalCompressorsLayer && originalCompressorsLayer !== activeGroup) return originalCompressorsLayer;
+  } catch (e) {}
+  return null;
+}
+
+function _getOriginalPipelineGroupForDistribute(activeGroup, featureLayer) {
+  try {
+    if (typeof configuredCountryFilterLayers !== 'undefined' && configuredCountryFilterLayers) {
+      for (const entry of configuredCountryFilterLayers.values()) {
+        if (!entry || !entry.original) continue;
+        if (entry.filtered === activeGroup || (typeof entry.original.hasLayer === 'function' && entry.original.hasLayer(featureLayer))) {
+          return entry.original;
+        }
+      }
+    }
+  } catch (e) {}
+  try {
+    if (originalPipelineLayer && originalPipelineLayer !== activeGroup && originalPipelineLayer.hasLayer(featureLayer)) {
+      return originalPipelineLayer;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function _createDistributionNode(nodeId, latlng, properties, targetNodeGroup) {
+  const extraProperties = { ...properties };
+  const usesType = Object.prototype.hasOwnProperty.call(properties, 'Type');
+  delete extraProperties.ID;
+  extraProperties.id = nodeId;
+  if (typeof createNewNode === 'function') {
+    const marker = createNewNode(L.latLng(latlng.lat, latlng.lng), nodeId, {
+      targetLayer: targetNodeGroup,
+      properties: extraProperties,
+      tool: 'Distribute Compressors'
+    });
+    if (marker?.feature?.properties) {
+      delete marker.feature.properties.ID;
+      marker.feature.properties.id = nodeId;
+    }
+    if (marker?.feature?.properties && !usesType) delete marker.feature.properties.Type;
+    const originalGroup = _getOriginalNodeGroupForDistribute(targetNodeGroup);
+    if (marker && originalGroup && typeof originalGroup.addLayer === 'function' && !originalGroup.hasLayer(marker)) {
+      originalGroup.addLayer(marker);
+    }
+    return marker;
+  }
+  const style = (typeof getDefaultNodeStyleOptions === 'function')
+    ? getDefaultNodeStyleOptions(targetNodeGroup)
+    : { pane: 'nodePane', radius: 6, fillColor: '#ff7800', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.85 };
+  const marker = L.circleMarker(latlng, style);
+  marker.feature = {
+    type: 'Feature',
+    geometry: { type: 'Point', coordinates: [latlng.lng, latlng.lat] },
+    properties: extraProperties
+  };
+  if (targetNodeGroup && typeof targetNodeGroup.addLayer === 'function') targetNodeGroup.addLayer(marker);
+  else marker.addTo(map);
+  const originalGroup = _getOriginalNodeGroupForDistribute(targetNodeGroup);
+  if (originalGroup && typeof originalGroup.addLayer === 'function' && !originalGroup.hasLayer(marker)) originalGroup.addLayer(marker);
+  marker._parentNodeLayer = targetNodeGroup || null;
+  return marker;
+}
+
+function _createDistributionPipelineLayer(feature, sourceLayer, targetGroup, originalGroup = null) {
+  const sourceOptions = sourceLayer && sourceLayer.options ? sourceLayer.options : {};
+  const sourceMeta = sourceLayer && sourceLayer._qgasMeta
+    ? sourceLayer._qgasMeta
+    : (targetGroup && targetGroup._qgasMeta ? targetGroup._qgasMeta : null);
+  const style = {
+    pane: sourceOptions.pane || (targetGroup && targetGroup.options && targetGroup.options.pane) || 'pipelinePane',
+    color: sourceOptions.color || sourceLayer?._originalColor || '#0070F3',
+    weight: sourceOptions.weight ?? sourceLayer?._originalWeight ?? 3,
+    opacity: sourceOptions.opacity ?? sourceLayer?._originalOpacity ?? 0.8,
+    dashArray: Object.prototype.hasOwnProperty.call(sourceOptions, 'dashArray') ? sourceOptions.dashArray : null,
+    lineCap: sourceOptions.lineCap || 'round',
+    lineJoin: sourceOptions.lineJoin || 'round'
+  };
+  const wrapper = L.geoJSON(feature, {
+    pane: style.pane,
+    style,
+    onEachFeature: function (childFeature, layer) {
+      layer._originalColor = style.color;
+      layer._originalWeight = style.weight;
+      layer._originalOpacity = style.opacity;
+      layer._originalDashArray = style.dashArray;
+      if (sourceMeta) {
+        layer._qgasMeta = sourceMeta;
+        try { if (typeof assignMetadataToLayer === 'function') assignMetadataToLayer(layer, sourceMeta); } catch (e) {}
+      }
+      try {
+        if (typeof handleFeature === 'function') handleFeature(childFeature, layer);
+        else if (typeof setPipelineInteraction === 'function') setPipelineInteraction(layer, 'info');
+      } catch (e) {
+        console.error('Could not initialize distributed pipeline interaction:', e);
+      }
+    }
+  });
+  wrapper.eachLayer(layer => {
+    if (targetGroup && typeof targetGroup.addLayer === 'function') targetGroup.addLayer(layer);
+    if (originalGroup && originalGroup !== targetGroup && typeof originalGroup.addLayer === 'function') originalGroup.addLayer(layer);
+  });
+  return wrapper;
 }
 
 
@@ -149,7 +439,7 @@ function startDistributeCompressors() {
   distributionCount = 0;
   subCompressors = [];
   connectionLines = [];
-  
+
   /* Hide all layers except pipelines and compressors. */
   hideLayersForDistribution();
   
@@ -177,8 +467,9 @@ function startDistributeCompressors() {
     ]
   );
 }
-
 function hideLayersForDistribution() {
+  hiddenLayersForDistribution = [];
+
   /* Store visibility for all layers. */
   originalPipelineVisibility = {
     powerplants: powerplantsLayer && map.hasLayer(powerplantsLayer),
@@ -186,19 +477,44 @@ function hideLayersForDistribution() {
     lng: lngLayer && map.hasLayer(lngLayer),
     nodes: nodeLayer && map.hasLayer(nodeLayer),
     consumption: consumptionLayer && map.hasLayer(consumptionLayer),
-    shortPipe: shortPipeLayer && map.hasLayer(shortPipeLayer)
+    shortPipe: shortPipeLayer && map.hasLayer(shortPipeLayer),
+    compressors: compressorsLayer && map.hasLayer(compressorsLayer),
+    compressorToggleChecked: _getCompressorToggleForDistribute()?.checked
   };
   
-  /* Hide all layers except pipelines and compressors. */
-  if (powerplantsLayer && map.hasLayer(powerplantsLayer)) map.removeLayer(powerplantsLayer);
-  if (storageLayer && map.hasLayer(storageLayer)) map.removeLayer(storageLayer);
-  if (lngLayer && map.hasLayer(lngLayer)) map.removeLayer(lngLayer);
-  if (nodeLayer && map.hasLayer(nodeLayer)) map.removeLayer(nodeLayer);
-  if (consumptionLayer && map.hasLayer(consumptionLayer)) map.removeLayer(consumptionLayer);
-  if (shortPipeLayer && map.hasLayer(shortPipeLayer)) map.removeLayer(shortPipeLayer);
+  /* Hide every configured infrastructure layer except the current pipeline
+   * and compressor groups. This also covers project-specific layers such as
+   * Valves, which otherwise sit above pipelines and intercept their clicks. */
+  const allowedLayers = new Set(_getPipelineGroupsForDistribute());
+  if (compressorsLayer) allowedLayers.add(compressorsLayer);
+
+  const candidates = new Set();
+  [
+    powerplantsLayer, storageLayer, lngLayer, nodeLayer, consumptionLayer,
+    shortPipeLayer, compressorsLayer, pipelineLayer
+  ].forEach(layer => { if (layer) candidates.add(layer); });
+
+  try {
+    if (typeof dynamicLayers === 'object' && dynamicLayers) {
+      Object.values(dynamicLayers).forEach(layer => { if (layer) candidates.add(layer); });
+    }
+  } catch (e) {}
+
+  candidates.forEach(layer => {
+    if (allowedLayers.has(layer)) return;
+    try {
+      if (map.hasLayer(layer)) {
+        hiddenLayersForDistribution.push(layer);
+        map.removeLayer(layer);
+      }
+    } catch (e) {}
+  });
   
-  /* Ensure pipelines and compressors remain visible. */
-  if (pipelineLayer && !map.hasLayer(pipelineLayer)) pipelineLayer.addTo(map);
+  /* Ensure the explicitly configured pipeline groups (not the legacy
+   * pipelineLayer, which may point to Valves) and compressors remain visible. */
+  _getPipelineGroupsForDistribute().forEach(group => {
+    try { if (group && !map.hasLayer(group)) group.addTo(map); } catch (e) {}
+  });
   if (compressorsLayer && !map.hasLayer(compressorsLayer)) compressorsLayer.addTo(map);
 }
 
@@ -243,7 +559,11 @@ function selectCompressorForDistribution(compressorLayer) {
   }
   
   const compressorName = getCompressorName(compressorLayer);
-  const currentPower = compressorLayer.feature.properties.Rated_Power_MW || 'Not specified';
+  const currentPower = _readFirstProperty(
+    compressorLayer.feature.properties,
+    ['rated_power_MW', 'Rated_Power_MW', 'rated_power_mw'],
+    'Not specified'
+  );
   
   showCustomPopup(
     '🔄 Distribute Compressors - Step 2',
@@ -257,6 +577,7 @@ function selectCompressorForDistribution(compressorLayer) {
       {
         text: 'Continue',
         type: 'primary',
+        keepOpen: true,
         onClick: () => {
           const count = parseInt(document.getElementById('distribution-count').value);
           if (count >= 2 && count <= 10) {
@@ -283,10 +604,18 @@ function startDistributionPlacement(count) {
   cachedCompressorMarkerStyle = getCompressorMarkerStyle();
   
   /* Store original compressor properties. */
-  const originalPower = selectedCompressor.feature.properties.Rated_Power_MW || 0;
+  const originalPower = Number(_readFirstProperty(
+    selectedCompressor.feature.properties,
+    ['rated_power_MW', 'Rated_Power_MW', 'rated_power_mw'],
+    0
+  )) || 0;
   const distributedPower = originalPower / distributionCount;
   const originalProps = {...selectedCompressor.feature.properties};
+  const originalCompressorId = String(
+    _readFirstProperty(selectedCompressor.feature.properties, ['ID', 'id'], 'Compressor')
+  );
   const originalLatLng = selectedCompressor.getLatLng();
+  const originalCompressorGroup = _getOriginalCompressorGroupForDistribute(compressorsLayer);
   
   console.log('Original power:', originalPower, 'Distributed power:', distributedPower);
   
@@ -294,24 +623,24 @@ function startDistributionPlacement(count) {
   if (compressorsLayer && compressorsLayer.hasLayer(selectedCompressor)) {
     compressorsLayer.removeLayer(selectedCompressor);
   }
+  if (originalCompressorGroup?.hasLayer?.(selectedCompressor)) {
+    originalCompressorGroup.removeLayer(selectedCompressor);
+  }
   
   /* Create the first sub-compressor (replaces the original). */
+  const firstSubCompressorProperties = _assignRatedPower(_assignFeatureId({
+      ...originalProps,
+      Distribution_Group: originalCompressorId
+    }, _getUniqueDistributedCompressorId(originalCompressorId, 0)), distributedPower);
   const firstSubCompressor = {
     type: 'Feature',
     geometry: {
       type: 'Point',
       coordinates: [originalLatLng.lng, originalLatLng.lat]
     },
-    properties: {
-      ...originalProps,
-      ID: originalProps.ID + '_a',
-      Rated_Power_MW: distributedPower,
-      modified: true,
-      Distribution_Group: originalProps.ID,
-      Last_Change: new Date().toISOString().split('T')[0],
-      Contributor: document.getElementById('contributor-input').value
-    }
+    properties: firstSubCompressorProperties
   };
+  markFeatureChanged(firstSubCompressor);
   
   /* Add the first sub-compressor to the compressors layer. */
   const firstCompressorLayer = L.geoJSON(firstSubCompressor, {
@@ -327,228 +656,128 @@ function startDistributionPlacement(count) {
       });
     }
   });
-  
+
   if (compressorsLayer) {
     firstCompressorLayer.eachLayer(layer => {
       compressorsLayer.addLayer(layer);
+      if (originalCompressorGroup?.addLayer && !originalCompressorGroup.hasLayer(layer)) {
+        originalCompressorGroup.addLayer(layer);
+      }
     });
   }
-  
-  /* Initialize sub-compressor array with the first entry. */
+
   subCompressors = [firstCompressorLayer.getLayers()[0]];
   selectedCompressor = firstCompressorLayer.getLayers()[0];
-  
-  console.log('Sub-compressors initialized:', subCompressors.length);
-  console.log('Distribution count:', distributionCount);
-  console.log('Distribute mode:', distributeMode);
-  
-  /* Enable pipeline click handlers for placement. */
+
   setupPipelineClickHandlersForPlacement();
-  
+
   showCustomPopup(
     '🔄 Distribute Compressors - Step 3',
-    `<div style="text-align: center; margin: 15px 0;">
+    `<div style="text-align:center; margin:15px 0;">
       <p><strong>Power per sub-compressor:</strong> ${distributedPower.toFixed(2)} MW</p>
       <p><strong>Remaining placements needed:</strong> ${distributionCount - 1}</p>
-      <p>Click on pipeline segments to place the remaining sub-compressors at their support points.</p>
-      <p><em>Click "Continue Placement" below and then click on pipelines.</em></p>
+      <p>Click on pipeline segments to place the remaining sub-compressors.</p>
     </div>`,
     [
-      {
-        text: 'Continue Placement',
-        type: 'primary',
-        onClick: () => {
-          console.log('Continue Placement clicked, closing popup');
-          closeCustomPopup();
-          console.log('Popup closed, ready for pipeline clicks');
-        }
-      },
-      {
-        text: 'Cancel',
-        type: 'secondary',
-        onClick: () => {
-          exitDistributeMode();
-        }
-      }
+      { text: 'Continue Placement', type: 'primary', onClick: () => closeCustomPopup() },
+      { text: 'Cancel', type: 'secondary', onClick: () => exitDistributeMode() }
     ]
   );
 }
 
-
-
 function _ensurePipelineInteractive(layer) {
   try {
-    if (layer && layer.options) layer.options.interactive = true;
-    // SVG path (default renderer)
-    const path = layer && layer._path;
-    if (path && path.style) {
-      path.style.pointerEvents = 'auto';
-      path.style.cursor = 'crosshair';
+    if (layer?.options) layer.options.interactive = true;
+    const element = typeof layer?.getElement === 'function' ? layer.getElement() : layer?._path;
+    if (element?.style) {
+      element.style.pointerEvents = 'auto';
+      element.style.cursor = 'crosshair';
     }
-    // Leaflet provides getElement() on some layer types
-    if (layer && typeof layer.getElement === 'function') {
-      const el = layer.getElement();
-      if (el && el.style) {
-        el.style.pointerEvents = 'auto';
-        el.style.cursor = 'crosshair';
-      }
-    }
-    if (layer && typeof layer.bringToFront === 'function') layer.bringToFront();
+    if (typeof layer?.bringToFront === 'function') layer.bringToFront();
   } catch (e) {}
 }
 
-function _distancePointToSegmentMeters(p, a, b) {
-  // project to pixels at current zoom, compute nearest point on segment
-  const zoom = (map && map.getZoom) ? map.getZoom() : 10;
-  const pp = map.project(p, zoom);
-  const pa = map.project(a, zoom);
-  const pb = map.project(b, zoom);
-  const vx = pb.x - pa.x;
-  const vy = pb.y - pa.y;
-  const wx = pp.x - pa.x;
-  const wy = pp.y - pa.y;
-  const c1 = vx * wx + vy * wy;
-  let t = 0;
-  if (c1 > 0) {
-    const c2 = vx * vx + vy * vy;
-    t = c2 > 0 ? (c1 / c2) : 0;
-  }
-  if (t < 0) t = 0;
-  if (t > 1) t = 1;
-  const proj = L.point(pa.x + t * vx, pa.y + t * vy);
-  const ll = map.unproject(proj, zoom);
-  return map.distance(p, ll);
+function _distancePointToSegmentMeters(point, start, end) {
+  const zoom = map?.getZoom ? map.getZoom() : 10;
+  const p = map.project(point, zoom);
+  const a = map.project(start, zoom);
+  const b = map.project(end, zoom);
+  const vx = b.x - a.x;
+  const vy = b.y - a.y;
+  const denominator = vx * vx + vy * vy;
+  const factor = denominator > 0
+    ? Math.max(0, Math.min(1, (vx * (p.x - a.x) + vy * (p.y - a.y)) / denominator))
+    : 0;
+  const projected = L.point(a.x + factor * vx, a.y + factor * vy);
+  return map.distance(point, map.unproject(projected, zoom));
 }
 
 function _findNearestPipelineLayer(clickLatLng, thresholdMeters = 45) {
-  const groups = _getPipelineGroupsForDistribute();
   let best = null;
-  let bestDist = Infinity;
-
-  groups.forEach(group => {
+  let bestDistance = Infinity;
+  _getPipelineFeatureLayersForDistribute().forEach(layer => {
     try {
-      group.eachLayer(layer => {
-        try {
-          if (!layer || typeof layer.getLatLngs !== 'function') return;
-          const latlngs = layer.getLatLngs();
-          if (!latlngs || latlngs.length < 2) return;
-          const flat = Array.isArray(latlngs[0]) ? latlngs.flat(2) : latlngs;
-          for (let i = 0; i < flat.length - 1; i++) {
-            const d = _distancePointToSegmentMeters(clickLatLng, flat[i], flat[i + 1]);
-            if (d < bestDist) {
-              bestDist = d;
-              best = layer;
-            }
-          }
-        } catch (e) {}
-      });
+      const latlngs = layer.getLatLngs();
+      const flat = Array.isArray(latlngs?.[0]) ? latlngs.flat(2) : latlngs;
+      if (!flat || flat.length < 2) return;
+      for (let index = 0; index < flat.length - 1; index += 1) {
+        const distance = _distancePointToSegmentMeters(clickLatLng, flat[index], flat[index + 1]);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = layer;
+        }
+      }
     } catch (e) {}
   });
-
-  return (best && bestDist <= thresholdMeters) ? best : null;
+  return best && bestDistance <= thresholdMeters ? best : null;
 }
+
 function setupPipelineClickHandlersForPlacement() {
-  console.log('Setting up pipeline click handlers for placement');
-
-  /* Ensure map panes accept pointer events. */
-  try {
-    if (map && map.getPanes) {
-      const panes = map.getPanes();
-      if (panes && panes.overlayPane && panes.overlayPane.style) panes.overlayPane.style.pointerEvents = 'auto';
-      if (panes && panes.markerPane && panes.markerPane.style) panes.markerPane.style.pointerEvents = 'auto';
-      if (panes && panes.shadowPane && panes.shadowPane.style) panes.shadowPane.style.pointerEvents = 'auto';
-    }
-    if (map && map.getContainer && map.getContainer().style) {
-      map.getContainer().style.pointerEvents = 'auto';
-    }
-  } catch (e) {}
-
-  /* Force map panes to accept clicks if pointer-events were altered. */
-  try {
-    if (map && map.getPanes) {
-      const panes = map.getPanes();
-      if (panes && panes.overlayPane && panes.overlayPane.style) {
-        panes.overlayPane.style.pointerEvents = 'auto';
-      }
-      if (panes && panes.mapPane && panes.mapPane.style) {
-        panes.mapPane.style.pointerEvents = 'auto';
-      }
-    }
-    if (map && map.getContainer && map.getContainer().style) {
-      map.getContainer().style.pointerEvents = 'auto';
-    }
-  } catch (e) {}
-
-  const pipelineGroups = _getPipelineGroupsForDistribute();
-
-  /* Clean previous handlers on all pipeline groups. */
-  pipelineGroups.forEach(group => {
-    try {
-      group.eachLayer(layer => {
-        try { layer.off('click'); } catch (e) {}
-        _ensurePipelineInteractive(layer);
-      });
-    } catch (e) {}
+  const pipelineFeatures = _getPipelineFeatureLayersForDistribute();
+  pipelineFeatures.forEach(layer => {
+    try { layer.off('click'); } catch (e) {}
+    _ensurePipelineInteractive(layer);
   });
 
-  /* Remove previous map fallback handler. */
   if (mapClickHandler) {
     try { map.off('click', mapClickHandler); } catch (e) {}
     mapClickHandler = null;
   }
+  if (!pipelineFeatures.length) return;
 
-  if (!pipelineGroups.length) {
-    console.log('No pipeline layers available for distribution placement');
-    return;
-  }
-
-  /* Direct polyline clicks (preferred). */
-  pipelineGroups.forEach(group => {
-    try {
-      group.eachLayer(layer => {
-        _ensurePipelineInteractive(layer);
-        layer.on('click', function (event) {
-          console.log('Pipeline clicked (direct handler)');
-          if (distributeMode && selectedCompressor && subCompressors.length < distributionCount) {
-            try {
-              placeSubCompressorOnPipeline(layer, event.latlng);
-              if (event && event.originalEvent && typeof event.originalEvent.stopPropagation === 'function') {
-                event.originalEvent.stopPropagation();
-              }
-            } catch (error) {
-              console.error('Error placing sub-compressor:', error);
-            }
-          }
-        });
-      });
-    } catch (e) {}
+  pipelineFeatures.forEach(layer => {
+    layer.on('click', function (event) {
+      if (distributeMode && selectedCompressor && subCompressors.length < distributionCount) {
+        const originalEvent = event && event.originalEvent;
+        if (originalEvent && processedDistributionClicks.has(originalEvent)) return;
+        if (originalEvent) {
+          processedDistributionClicks.add(originalEvent);
+          try { L.DomEvent.stopPropagation(originalEvent); } catch (e) {}
+        }
+        try {
+          placeSubCompressorOnPipeline(layer, event.latlng);
+        } catch (error) {
+          console.error('Error placing sub-compressor:', error);
+        }
+      }
+    });
   });
 
   /* Fallback: resolve nearest pipeline on map click. */
   mapClickHandler = function (e) {
     if (!distributeMode || !selectedCompressor) return;
     if (subCompressors.length >= distributionCount) return;
+    const originalEvent = e && e.originalEvent;
+    if (originalEvent && processedDistributionClicks.has(originalEvent)) return;
     const nearest = _findNearestPipelineLayer(e.latlng);
     if (nearest) {
+      if (originalEvent) processedDistributionClicks.add(originalEvent);
       console.log('Pipeline resolved via map-click fallback');
       try { placeSubCompressorOnPipeline(nearest, e.latlng); } catch (err) { console.error('Error placing via map fallback:', err); }
     }
   };
   try {
-    /* Use capturing click as a last resort if Leaflet events are swallowed. */
     map.on('click', mapClickHandler);
-    const container = map.getContainer();
-    if (container && !container._qgasDistributeClickCapture) {
-      container._qgasDistributeClickCapture = true;
-      container.addEventListener('click', function(ev) {
-        // Only assist when tool is active.
-        if (!distributeMode || !selectedCompressor) return;
-        try {
-          const latlng = map.mouseEventToLatLng(ev);
-          mapClickHandler({ latlng });
-        } catch (err) {}
-      }, true);
-    }
   } catch (e) {}
 }
 
@@ -560,9 +789,8 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
   console.log('subCompressors.length:', subCompressors.length);
   
   const currentIndex = subCompressors.length;
-  const suffix = String.fromCharCode(97 + currentIndex); // a, b, c, d...
   
-  /* Use last placed compressor as reference. */
+  /* Keep the previous compressor for the visual connection line. */
   const lastCompressorLatLng = subCompressors[subCompressors.length - 1].getLatLng();
   console.log('lastCompressorLatLng:', lastCompressorLatLng);
   
@@ -577,9 +805,9 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     const segmentStart = {lat: coords[i][1], lng: coords[i][0]};
     const segmentEnd = {lat: coords[i + 1][1], lng: coords[i + 1][0]};
     
-    /* Compute nearest point on this segment to the last compressor. */
-    const nearestPointOnSegment = getNearestPointOnSegment(lastCompressorLatLng, segmentStart, segmentEnd);
-    const distance = getDistance(lastCompressorLatLng, nearestPointOnSegment);
+    /* Compute the point on this segment nearest to the user's click. */
+    const nearestPointOnSegment = getNearestPointOnSegment(clickLatLng, segmentStart, segmentEnd);
+    const distance = getDistance(clickLatLng, nearestPointOnSegment);
     
     if (distance < minDistance) {
       minDistance = distance;
@@ -598,55 +826,71 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
   /* Split the pipeline at the nearest point. */
   const originalPipelineProps = clickedPipelineFeature.feature.properties;
   const originalProps = selectedCompressor.feature.properties;
-  const compressorBaseID = originalProps.ID.replace('_a', '');
+  const compressorBaseID = String(_readFirstProperty(
+    originalProps,
+    ['Distribution_Group', 'ID', 'id'],
+    'Compressor'
+  ));
+  const originalPipelineId = String(
+    _readFirstProperty(originalPipelineProps, ['ID', 'id'], 'Pipeline')
+  );
+  const originalStartNodeId = String(_readFirstProperty(
+    originalPipelineProps,
+    ['node_start', 'Start_Node', 'start_node', 'StartNode'],
+    ''
+  ));
+  const originalEndNodeId = String(_readFirstProperty(
+    originalPipelineProps,
+    ['node_end', 'End_Node', 'end_node', 'EndNode'],
+    ''
+  ));
   
-  /* Build sub-node IDs (format: C_122_a_a and C_122_a_b). */
-  const subNodeA_ID = `${compressorBaseID}_${suffix}_a`;
-  const subNodeB_ID = `${compressorBaseID}_${suffix}_b`;
+  const newCompressorId = _getUniqueDistributedCompressorId(compressorBaseID, currentIndex);
+  /* Compressor terminal-node convention: <compressor id>_A / _B. */
+  const subNodeA_ID = `${newCompressorId}_A`;
+  const subNodeB_ID = `${newCompressorId}_B`;
   
   /* Create new pipeline coordinate sets with the split point. */
   const firstPipelineCoords = coords.slice(0, closestSegmentIndex + 1);
-  firstPipelineCoords.push([closestPoint.lng, closestPoint.lat]); // Teilungspunkt hinzufügen
+  firstPipelineCoords.push([closestPoint.lng, closestPoint.lat]); // Teilungspunkt hinzufÃ¼gen
   
   const secondPipelineCoords = [[closestPoint.lng, closestPoint.lat]]; // Start mit Teilungspunkt
   secondPipelineCoords.push(...coords.slice(closestSegmentIndex + 1));
   
+  const firstPipelineProperties = _assignFeatureId({
+      ...originalPipelineProps,
+      node_start: originalStartNodeId,
+      node_end: subNodeA_ID,
+      Length_km: calculatePipelineLength(firstPipelineCoords),
+      length_km: calculatePipelineLength(firstPipelineCoords)
+    }, `${originalPipelineId}_a`);
   const firstPipeline = {
     type: 'Feature',
     geometry: {
       type: 'LineString',
       coordinates: firstPipelineCoords
     },
-    properties: {
-      ...originalPipelineProps,
-      ID: originalPipelineProps.ID + '_a',
-      End_Node: subNodeA_ID,
-      Length_km: calculatePipelineLength(firstPipelineCoords),
-      modified: true,
-      Last_Change: new Date().toISOString().split('T')[0],
-      Contributor: document.getElementById('contributor-input').value
-    }
+    properties: firstPipelineProperties
   };
-  
+
+  const secondPipelineProperties = _assignFeatureId({
+      ...originalPipelineProps,
+      node_start: subNodeB_ID,
+      node_end: originalEndNodeId,
+      Length_km: calculatePipelineLength(secondPipelineCoords),
+      length_km: calculatePipelineLength(secondPipelineCoords)
+    }, `${originalPipelineId}_b`);
   const secondPipeline = {
     type: 'Feature',
     geometry: {
       type: 'LineString',
       coordinates: secondPipelineCoords
     },
-    properties: {
-      ...originalPipelineProps,
-      ID: originalPipelineProps.ID + '_b',
-      Start_Node: subNodeB_ID,
-      Length_km: calculatePipelineLength(secondPipelineCoords),
-      modified: true,
-      new: true,
-      Last_Change: new Date().toISOString().split('T')[0],
-      Contributor: document.getElementById('contributor-input').value
-    }
+    properties: secondPipelineProperties
   };
   
   /* Remove original pipeline from its owning group (supports multiple layers). */
+  const originalUndoContexts = window.QGasUndo?.captureContexts(clickedPipelineFeature.feature);
   const targetPipelineGroup = _findOwningPipelineGroup(clickedPipelineFeature) || (typeof pipelineLayer !== 'undefined' ? pipelineLayer : null);
   console.log('Removing original pipeline from layer');
   if (targetPipelineGroup && typeof targetPipelineGroup.hasLayer === 'function' && targetPipelineGroup.hasLayer(clickedPipelineFeature)) {
@@ -656,40 +900,20 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
 
   
   /* Mark original as deleted for export. */
-  clickedPipelineFeature.feature.properties.modified = true;
+  markFeatureChanged(firstPipeline);
+  markFeatureChanged(secondPipeline);
+  markLayerChanged(clickedPipelineFeature, {
+    changeType: 'Topology Change',
+    tool: 'Distribute Compressors',
+    description: `Original pipeline replaced by ${firstPipeline.properties.id} and ${secondPipeline.properties.id}`,
+    undoOperation: 'delete',
+    undoContexts: originalUndoContexts
+  });
   clickedPipelineFeature.feature.properties.deleted = true;
   
   /* Add new pipeline segments back to the same pipeline group. */
-  const firstPipelineLayer = L.geoJSON(firstPipeline, {
-    style: function(feature) {
-      return {
-        color: '#0066CC',
-        weight: 2,
-        opacity: 0.8
-      };
-    },
-    tolerance: 40
-  });
-  const secondPipelineLayer = L.geoJSON(secondPipeline, {
-    style: function(feature) {
-      return {
-        color: '#0066CC', 
-        weight: 2,
-        opacity: 0.8
-      };
-    },
-    tolerance: 40
-  });
-  
-  /* Add new pipeline segments back to the same pipeline group. */
-  if (targetPipelineGroup) {
-    firstPipelineLayer.eachLayer(layer => {
-      targetPipelineGroup.addLayer(layer);
-    });
-    secondPipelineLayer.eachLayer(layer => {
-      targetPipelineGroup.addLayer(layer);
-    });
-  }
+  const firstPipelineLayer = _createDistributionPipelineLayer(firstPipeline, clickedPipelineFeature, targetPipelineGroup);
+  const secondPipelineLayer = _createDistributionPipelineLayer(secondPipeline, clickedPipelineFeature, targetPipelineGroup);
   
   const compressorStyle = cachedCompressorMarkerStyle || getCompressorMarkerStyle();
 
@@ -702,15 +926,13 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     },
     properties: {
       ID: subNodeA_ID,
+      id: subNodeA_ID,
       Name: `Node ${subNodeA_ID}`,
       Type: 'Node',
       Country: originalPipelineProps.Country || '',
       Operator: originalPipelineProps.Operator || '',
       Status: 'Active',
-      Created_By_Compressor_Split: `${compressorBaseID}_${suffix}`,
-      new: true,
-      Last_Change: new Date().toISOString().split('T')[0],
-      Contributor: document.getElementById('contributor-input').value
+      Created_By_Compressor_Split: newCompressorId
     }
   };
   
@@ -722,20 +944,18 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     },
     properties: {
       ID: subNodeB_ID,
+      id: subNodeB_ID,
       Name: `Node ${subNodeB_ID}`,
       Type: 'Node',
       Country: originalPipelineProps.Country || '',
       Operator: originalPipelineProps.Operator || '',
       Status: 'Active',
-      Created_By_Compressor_Split: `${compressorBaseID}_${suffix}`,
-      new: true,
-      Last_Change: new Date().toISOString().split('T')[0],
-      Contributor: document.getElementById('contributor-input').value
+      Created_By_Compressor_Split: newCompressorId
     }
   };
   
   /* Add sub-nodes to the node layer (standard node appearance). */
-  if (nodeLayer) {
+  if (false && nodeLayer) {
     const subNodeALayer = L.geoJSON(subNodeA, {
       pointToLayer: function(feature, latlng) {
         return L.circleMarker(latlng, {
@@ -761,32 +981,56 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
       }
     });
     
-    // Direkt zu nodeLayer hinzufügen
+    // Direkt zu nodeLayer hinzufÃ¼gen
     subNodeALayer.eachLayer(layer => nodeLayer.addLayer(layer));
     subNodeBLayer.eachLayer(layer => nodeLayer.addLayer(layer));
   }
   
+  /* Register both terminal nodes through the standard node factory. This
+   * targets the configured Nodes layer used by topology checks and applies
+   * the same visual style and metadata as existing nodes. */
+  const targetNodeGroup = _getConfiguredNodeGroupForDistribute();
+  const defaultNodeProperties = typeof getDefaultPointAttributes === 'function'
+    ? (getDefaultPointAttributes('Node') || {})
+    : {};
+  const startEndpointProperties = _findNodePropertiesForDistribute(originalStartNodeId);
+  const endEndpointProperties = _findNodePropertiesForDistribute(originalEndNodeId);
+  const buildEndpointNodeProperties = (sourceProperties, nodeId) => {
+    const properties = { ...(sourceProperties || defaultNodeProperties) };
+    delete properties.ID;
+    properties.id = nodeId;
+    if (Object.prototype.hasOwnProperty.call(properties, 'Name')) properties.Name = `Node ${nodeId}`;
+    if (Object.prototype.hasOwnProperty.call(properties, 'name')) properties.name = `Node ${nodeId}`;
+    return properties;
+  };
+  const subNodeAProperties = buildEndpointNodeProperties(startEndpointProperties, subNodeA_ID);
+  const subNodeBProperties = buildEndpointNodeProperties(endEndpointProperties, subNodeB_ID);
+  subNodeA.properties = { ...subNodeAProperties };
+  subNodeB.properties = { ...subNodeBProperties };
+  const createdSubNodeA = _createDistributionNode(subNodeA_ID, closestPoint, subNodeAProperties, targetNodeGroup);
+  const createdSubNodeB = _createDistributionNode(subNodeB_ID, closestPoint, subNodeBProperties, targetNodeGroup);
+
   /* Create a new sub-compressor with sub-node links. */
+  const newCompressorProperties = _assignRatedPower(_assignFeatureId({
+      ...originalProps,
+      node_start: subNodeA_ID,
+      node_end: subNodeB_ID,
+      SubNode_A: subNodeA_ID,
+      SubNode_B: subNodeB_ID,
+      Pipeline_Split: originalPipelineId,
+      Distribution_Group: originalProps.Distribution_Group
+    }, newCompressorId), _readFirstProperty(originalProps, ['rated_power_MW', 'Rated_Power_MW', 'rated_power_mw'], 0));
   const newCompressor = {
     type: 'Feature',
     geometry: {
       type: 'Point',
       coordinates: [closestPoint.lng, closestPoint.lat]
     },
-    properties: {
-      ...originalProps,
-      ID: originalProps.ID.replace('_a', '') + '_' + suffix,
-      Rated_Power_MW: originalProps.Rated_Power_MW, // Bereits angepasste Leistung
-      SubNode_A: subNodeA_ID,
-      SubNode_B: subNodeB_ID,
-      Pipeline_Split: originalPipelineProps.ID,
-      modified: true,
-      new: true,
-      Distribution_Group: originalProps.Distribution_Group,
-      Last_Change: new Date().toISOString().split('T')[0],
-      Contributor: document.getElementById('contributor-input').value
-    }
+    properties: newCompressorProperties
   };
+  if (createdSubNodeA?.feature) markFeatureChanged(createdSubNodeA.feature);
+  if (createdSubNodeB?.feature) markFeatureChanged(createdSubNodeB.feature);
+  markFeatureChanged(newCompressor);
   
   /* Add the sub-compressor to the compressors layer. */
   if (compressorsLayer) {
@@ -804,24 +1048,39 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
       }
     });
     
-    // Direkt zu compressorsLayer hinzufügen
+    // Direkt zu compressorsLayer hinzufÃ¼gen
     newLayer.eachLayer(layer => {
       compressorsLayer.addLayer(layer);
+      const originalCompressorGroup = _getOriginalCompressorGroupForDistribute(compressorsLayer);
+      if (originalCompressorGroup?.addLayer && !originalCompressorGroup.hasLayer(layer)) {
+        originalCompressorGroup.addLayer(layer);
+      }
       subCompressors.push(layer);
     });
   }
   
-  /* Create a connection line to the previous compressor (a->b->c...). */
-  const previousCompressor = subCompressors[subCompressors.length - 2]; // Vorheriger Compressor
-  const previousLatLng = previousCompressor.getLatLng();
-  const connectionLine = L.polyline([previousLatLng, closestPoint], {
-    color: '#000000',
-    weight: 1,
-    opacity: 0.7,
-    dashArray: '5, 5'
-  }).addTo(map);
-  
-  connectionLines.push(connectionLine);
+  /* Connect to the geographically nearest existing sub-compressor. The newly
+   * placed compressor is the final array entry and must not select itself. */
+  const connectionCandidates = subCompressors.slice(0, -1);
+  const nearestCompressor = connectionCandidates.reduce((nearest, candidate) => {
+    if (!candidate?.getLatLng) return nearest;
+    if (!nearest) return candidate;
+    return map.distance(candidate.getLatLng(), closestPoint) < map.distance(nearest.getLatLng(), closestPoint)
+      ? candidate
+      : nearest;
+  }, null);
+  const nearestLatLng = nearestCompressor?.getLatLng?.();
+  if (nearestLatLng) {
+    const connectionLine = L.polyline([nearestLatLng, closestPoint], {
+      color: '#000000',
+      weight: 1,
+      opacity: 0.7,
+      dashArray: '5, 5'
+    });
+    if (compressorsLayer?.addLayer) compressorsLayer.addLayer(connectionLine);
+    else connectionLine.addTo(map);
+    connectionLines.push(connectionLine);
+  }
 
   /* Newly created pipeline segments need click handlers during placement. */
   if (distributeMode && subCompressors.length < distributionCount) {
@@ -835,9 +1094,9 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
     showCustomPopup(
       '🔄 Distribute Compressors - Step 3',
       `<div style="text-align: center; margin: 15px 0;">
-        <p><strong>Placed:</strong> ${newCompressor.properties.ID}</p>
+        <p><strong>Placed:</strong> ${newCompressor.properties.id}</p>
         <p><strong>Sub-Nodes:</strong> ${subNodeA_ID}, ${subNodeB_ID}</p>
-        <p><strong>Pipeline split:</strong> ${originalPipelineProps.ID}</p>
+        <p><strong>Pipeline split:</strong> ${originalPipelineId}</p>
         <p><strong>Remaining placements needed:</strong> ${remaining}</p>
         <p>Click on more pipeline segments to place the remaining sub-compressors.</p>
       </div>`,
@@ -864,8 +1123,10 @@ function placeSubCompressorOnPipeline(clickedPipelineFeature, clickLatLng) {
 }
 
 function completeDistribution() {
-  const compressorNames = subCompressors.map(comp => comp.feature.properties.ID).join(', ');
-  const power = selectedCompressor.feature.properties.Rated_Power_MW;
+  const compressorNames = subCompressors
+    .map(comp => _readFirstProperty(comp.feature.properties, ['ID', 'id'], 'Unknown'))
+    .join(', ');
+  const power = Number(_readFirstProperty(selectedCompressor.feature.properties, ['rated_power_MW', 'Rated_Power_MW', 'rated_power_mw'], 0)) || 0;
   
   showCustomPopup(
     '✅ Distribution Complete',
@@ -907,32 +1168,43 @@ function resetForNewDistribution() {
   originalCompressorStyle = {};
   
   /* Reset click handlers. */
-  if (targetPipelineGroup) {
-    pipelineLayer.eachLayer(layer => {
+  _getPipelineGroupsForDistribute().forEach(group => {
+    group.eachLayer(layer => {
       layer.off('click');
     });
-  }
+  });
   if (mapClickHandler) {
     try { map.off('click', mapClickHandler); } catch(e) {}
     mapClickHandler = null;
   }
 }
 
+function synchronizeDistributionLayerVisibilityWithLegend() {
+  try {
+    if (typeof legendToggleRegistry === 'undefined' || !legendToggleRegistry) return;
+    legendToggleRegistry.forEach(entry => {
+      if (entry && typeof entry.handler === 'function') entry.handler();
+    });
+  } catch (error) {
+    console.warn('Could not synchronize layer visibility after compressor distribution.', error);
+  }
+}
+
 function getCompressorName(compressorLayer) {
   const props = compressorLayer.feature.properties;
-  return props.Name || props.Station_name || props.ID || 'Unknown Compressor';
+  return props.Name || props.name || props.Station_name || props.ID || props.id || 'Unknown Compressor';
 }
 
 function getDistance(latlng1, latlng2) {
   const R = 6371e3; // Earth radius in meters
-  const φ1 = latlng1.lat * Math.PI/180;
-  const φ2 = latlng2.lat * Math.PI/180;
-  const Δφ = (latlng2.lat-latlng1.lat) * Math.PI/180;
-  const Δλ = (latlng2.lng-latlng1.lng) * Math.PI/180;
+  const phi1 = latlng1.lat * Math.PI/180;
+  const phi2 = latlng2.lat * Math.PI/180;
+  const deltaPhi = (latlng2.lat-latlng1.lat) * Math.PI/180;
+  const deltaLambda = (latlng2.lng-latlng1.lng) * Math.PI/180;
 
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
   return R * c;
@@ -993,6 +1265,13 @@ function calculatePipelineLength(coordinates) {
  */
 function exitDistributeMode() {
   distributeMode = false;
+
+  /* Restore all configured layers hidden specifically for this workflow,
+   * including dynamically configured project layers. */
+  hiddenLayersForDistribution.forEach(layer => {
+    try { if (layer && !map.hasLayer(layer)) layer.addTo(map); } catch (e) {}
+  });
+  hiddenLayersForDistribution = [];
   
   /* Restore original layer visibility. */
   if (originalPipelineVisibility.powerplants && powerplantsLayer) {
@@ -1013,6 +1292,18 @@ function exitDistributeMode() {
   if (originalPipelineVisibility.shortPipe && shortPipeLayer) {
     shortPipeLayer.addTo(map);
   }
+  const compressorToggle = _getCompressorToggleForDistribute();
+  if (compressorToggle && originalPipelineVisibility.compressorToggleChecked !== undefined) {
+    compressorToggle.checked = originalPipelineVisibility.compressorToggleChecked;
+  }
+  if (!originalPipelineVisibility.compressors && compressorsLayer && map.hasLayer(compressorsLayer)) {
+    map.removeLayer(compressorsLayer);
+  }
+
+  /* Layer references can change while a country filter or an editing tool is
+   * active. Reapply every legend toggle to its current resolved layer so a
+   * checked entry cannot remain visually hidden after this tool exits. */
+  synchronizeDistributionLayerVisibilityWithLegend();
   
   /* Restore compressor styles. */
   if (selectedCompressor && originalCompressorStyle && selectedCompressor.setStyle) {
@@ -1028,6 +1319,7 @@ function exitDistributeMode() {
   subCompressors = [];
   originalCompressorStyle = {};
   originalPipelineVisibility = {};
+  hiddenLayersForDistribution = [];
   
   closeCustomPopup();
 }
@@ -1039,11 +1331,11 @@ function resetDistributeClickHandlers() {
       layer.off('click');
     });
   }
-  if (targetPipelineGroup) {
-    pipelineLayer.eachLayer(layer => {
+  _getPipelineGroupsForDistribute().forEach(group => {
+    group.eachLayer(layer => {
       layer.off('click');
     });
-  }
+  });
   if (mapClickHandler) {
     try { map.off('click', mapClickHandler); } catch(e) {}
     mapClickHandler = null;

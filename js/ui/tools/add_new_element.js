@@ -149,7 +149,7 @@
       const layerSettings = {
         name: displayName,
         geometryClass: 'line',
-        defaultAttributes: { ID: '', Start_Node: '', End_Node: '' },
+        defaultAttributes: { id: '', node_start: '', node_end: '' },
         idPrefix,
         typeKey: displayName,
         color: uniqueColor,
@@ -213,7 +213,7 @@
       layerGroup._customLayerSettings = {
         name: displayName,
         geometryClass: 'inline',
-        defaultAttributes: { ID: '', Type: displayName, Node: '', Start_Node: '', End_Node: '' },
+        defaultAttributes: { id: '', Type: displayName, node: '', node_start: '', node_end: '' },
         idPrefix,
         typeKey: displayName,
         color: defaultColor,
@@ -242,7 +242,7 @@
       layerGroup._customLayerSettings = {
         name: displayName,
         geometryClass: 'point',
-        defaultAttributes: { ID: '', Type: displayName, Node: '' },
+        defaultAttributes: { id: '', Type: displayName, node: '' },
         idPrefix,
         typeKey: displayName,
         color: defaultColor,

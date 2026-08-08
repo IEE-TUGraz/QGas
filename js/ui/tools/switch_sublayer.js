@@ -544,7 +544,7 @@ function attachSublayerSelectionHandlers(context) {
           L.DomEvent.stopPropagation(domEvent);
         }
       }
-      console.debug('[Sublayer] Feature clicked for selection', candidate.feature?.properties?.ID || candidate.feature?.properties?.Name || layerId);
+      console.debug('[Sublayer] Feature clicked for selection', candidate.feature?.properties?.id || candidate.feature?.properties?.name || layerId);
       toggleSublayerSelection(candidate, context);
     };
 
@@ -777,6 +777,7 @@ function moveLayerToSublayer(layer, context, targetMetadata) {
     return false;
   }
 
+  const undoContexts = window.QGasUndo?.captureContexts(layer.feature);
   resetSublayerHighlight(layer);
   delete layer._originalSublayerStyle;
   context.parentLayer.removeLayer(layer);
@@ -790,7 +791,11 @@ function moveLayerToSublayer(layer, context, targetMetadata) {
   if (feature.properties) {
     feature.properties.Layer_Name = context.targetConfig.legendName;
     feature.properties.SubLayer = context.targetConfig.legendName;
-    feature.properties.modified = true;
+    markFeatureChanged(feature, {
+      tool: 'Switch to Sublayer',
+      undoOperation: 'move',
+      undoContexts
+    });
     feature.properties.__elementKey = targetMetadata?.elementKey || feature.properties.__elementKey;
   }
 

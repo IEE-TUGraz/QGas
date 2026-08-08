@@ -23,6 +23,9 @@ Its design emphasizes **usability, flexibility, and topological consistency**, e
 - **Flexible infrastructure management:** The toolkit supports the addition of new infrastructure types beyond conventional gas pipelines, including hydrogen pipelines, storage facilities, LNG terminals, and other energy-relevant assets as well as repurposing of existing pipelines.  
 - **Advanced attribute management:** QGas provides a robust mechanism for managing metadata and attributes associated with infrastructure elements. Users can create new attributes, edit existing ones, or remove unnecessary attributes through a straightforward interface.  
 - **Georeferenced background map integration:** Users can import infrastructure plans or other spatial data as images, georeference them accurately, and overlay them as a reference for network construction.  
+- **Topology validation for complete or filtered networks:** The Topology Checker reports reference, connectivity, geometry, duplicate-ID, crossing, and disconnected-network issues. With an active country filter, only the filtered subnetwork is analyzed.
+- **Traceable and reversible editing:** A per-session audit log records committed changes, while selective Undo restores grouped actions from an in-memory history.
+- **Flexible exports:** Complete, filtered, or changed data can be exported as GeoJSON or CSV while preserving the project layer structure.
 
 ---
 

@@ -477,7 +477,7 @@ function proceedWithAddPipeline() {
         /* Activate end-node selection handlers. */
         currentMode = 'select-end-node';
         setNodeSelectionHandlers(marker => {
-          endNodeId = marker.feature.properties.ID;
+          endNodeId = marker.feature.properties.id;
           endLatLng = getNodeLatLng(marker);
           console.log('End node selected:', endNodeId);
 
@@ -577,9 +577,10 @@ function proceedWithAddPipeline() {
           const defaultAttrs = getDefaultPipelineAttributes(targetLayer);
           const lengthKm = calculatePipelineLength(polyline);
           const layerDisplayName = getLayerGroupDisplayName(targetLayer) || 'Pipeline';
-          const properties = { ...defaultAttrs, ID: pipelineId, modified: true, Start_Node: startNodeId, End_Node: endNodeId, Layer_Name: layerDisplayName };
+          const properties = { ...defaultAttrs, id: pipelineId, node_start: startNodeId, node_end: endNodeId, Layer_Name: layerDisplayName };
           assignPipelineLength(properties, lengthKm);
           polyline.feature = { type: "Feature", properties: properties, geometry: polyline.toGeoJSON().geometry };
+          markLayerChanged(polyline, { tool: 'Add Pipeline' });
           polyline.isNew = true;
           polyline._originLayerName = layerDisplayName;
           setPipelineInteraction(polyline, 'info');
@@ -684,7 +685,7 @@ function proceedWithAddPipeline() {
 
               currentMode = 'select-start-node';
               setNodeSelectionHandlers(marker => {
-                startNodeId = marker.feature.properties.ID;
+                startNodeId = marker.feature.properties.id;
                 startLatLng = getNodeLatLng(marker);
                 console.log('Start node selected:', startNodeId);
                 
@@ -870,11 +871,12 @@ function finalizeDrawnPipeline(polyline) {
   const pipelineId = formatElementId(idContext.prefix, contributorInitials, getNextIdNumber(idContext.typeKey, targetLayer));
   const defaultAttrs = getDefaultPipelineAttributes(targetLayer);
   const lengthKm = calculatePipelineLength(polyline);
-  console.log('Setting pipeline properties - Start_Node:', startNodeIdLocal, 'End_Node:', endNodeIdLocal);
+  console.log('Setting pipeline properties - node_start:', startNodeIdLocal, 'node_end:', endNodeIdLocal);
   const layerDisplayName = getLayerGroupDisplayName(targetLayer) || 'Pipeline';
-  const properties = { ...defaultAttrs, ID: pipelineId, modified: true, Start_Node: startNodeIdLocal, End_Node: endNodeIdLocal, Layer_Name: layerDisplayName };
+  const properties = { ...defaultAttrs, id: pipelineId, node_start: startNodeIdLocal, node_end: endNodeIdLocal, Layer_Name: layerDisplayName };
   assignPipelineLength(properties, lengthKm);
   polyline.feature = { type: "Feature", properties: properties, geometry: polyline.toGeoJSON().geometry };
+  markLayerChanged(polyline, { tool: 'Add Pipeline' });
   polyline._originLayerName = layerDisplayName;
   polyline.isNew = true;
 
@@ -918,10 +920,10 @@ function toggleFilterPanel() {
 
 function finalizeGrouping() {
   /* Finalize grouping without start/end node selection. */
-  /* Calculate total length (handle Length_km and length_km). */
+  /* Calculate total length using the canonical field. */
   let totalLength = 0;
   selectedPipelinesForGroup.forEach(p => {
-    const length = p.layer.feature.properties.Length_km || p.layer.feature.properties.length_km || 0;
+    const length = p.layer.feature.properties.length_km || 0;
     totalLength += parseFloat(length);
   });
   

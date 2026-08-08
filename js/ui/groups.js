@@ -64,7 +64,7 @@ window.highlightGroup = function highlightGroup(index) {
       /* Skip non-polyline features. */
       if (!layer.feature || layer.feature.geometry.type !== 'LineString') return;
       
-      const featureId = layer?.feature?.properties?.ID;
+      const featureId = layer?.feature?.properties?.id;
       if (!targetedIds.has(featureId)) return;
 
       layer.setStyle({ color: '#ff2b2b', weight: 6 });

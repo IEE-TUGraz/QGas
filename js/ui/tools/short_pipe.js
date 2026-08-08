@@ -79,6 +79,18 @@ function applyShortPipeSelectionStyle(layer) {
   }
 }
 
+function convertPipelineIdToShortPipeId(properties) {
+  if (!properties) return '';
+  const currentId = String(properties.id ?? properties.ID ?? '').trim();
+  if (!currentId) return '';
+  const shortPipeId = /^pl_/i.test(currentId)
+    ? `SP_${currentId.slice(3)}`
+    : currentId;
+  delete properties.ID;
+  properties.id = shortPipeId;
+  return shortPipeId;
+}
+
 function resetLayerAfterShortPipeInteraction(layer) {
   if (!layer) return;
   restoreShortPipeBaseStyle(layer);
@@ -156,25 +168,29 @@ function showShortPipeSaveBtn() {
   saveBtn.onclick = function () {
     /* Move selected pipelines into the short-pipe layer. */
     selectedShortPipes.forEach(layer => {
+      const undoContexts = window.QGasUndo?.captureContexts(layer.feature);
       const owning = (typeof findOwningLayerGroup === 'function' ? findOwningLayerGroup(layer) : null) || (typeof pipelineLayer !== 'undefined' ? pipelineLayer : null);
       if (owning && typeof owning.removeLayer === 'function') owning.removeLayer(layer);
       shortPipeLayer.addLayer(layer);
       /* Set short-pipe attributes (handle uppercase and lowercase). */
       if (layer.feature && layer.feature.properties) {
         const props = layer.feature.properties;
+        /* Short pipes use the SP_ namespace instead of the pipeline PL_
+         * namespace while preserving the original numeric/name suffix. */
+        convertPipelineIdToShortPipeId(props);
         /* Set Diameter (handle Diameter_mm and diameter_mm). */
         if ('Diameter_mm' in props) {
           props.Diameter_mm = 9999;
         } else if ('diameter_mm' in props) {
           props.diameter_mm = 9999;
         }
-        /* Set Length (handle Length_km and length_km). */
-        if ('Length_km' in props) {
-          props.Length_km = 0;
-        } else if ('length_km' in props) {
-          props.length_km = 0;
-        }
-        props.modified = true;
+        /* Store length using the canonical schema. */
+        props.length_km = 0;
+        markLayerChanged(layer, {
+          tool: 'Short Pipe',
+          undoOperation: 'move',
+          undoContexts
+        });
       }
       
       /* Load short-pipe style from layerConfig. */

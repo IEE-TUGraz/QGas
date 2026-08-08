@@ -3,7 +3,9 @@
  *
  * Module Description:
  * Handles export workflows for changed, filtered, and complete datasets,
- * including ZIP assembly and Excel configuration generation.
+ * including ZIP assembly and Excel configuration generation. Filtered exports
+ * apply active country rules consistently and merge synchronized active/original
+ * compressor features without duplicate IDs.
  *
  * Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer
  * Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Inffeldgasse 18, Graz, 8010, Austria
@@ -14,7 +16,7 @@
  * - External libraries: JSZip, XLSX.
  *
  * Public API:
- * - exportChanges(): Export modified and deleted elements.
+ * - exportChanges(): Export changed and deleted elements.
  * - exportFilteredData(folderName): Export filtered datasets to ZIP.
  * - exportCompleteDataset(): Export the full current dataset to ZIP.
  */
@@ -22,10 +24,636 @@
  * Extracted export logic from core.js (v5).
  */
 
+function normalizeExportFormat(format) {
+  const normalized = String(format || 'geojson').toLowerCase();
+  return ['geojson', 'csv', 'lego'].includes(normalized) ? normalized : 'geojson';
+}
+
+function filenameForExportFormat(filename, format) {
+  return String(filename || 'Layer.geojson').replace(/\.(?:geojson|csv)$/i, `.${normalizeExportFormat(format)}`);
+}
+
+function featuresToCsv(features) {
+  const propertyNames = [];
+  const seen = new Set();
+  features.forEach(feature => Object.keys(feature.properties || {}).forEach(key => {
+    if (!seen.has(key)) { seen.add(key); propertyNames.push(key); }
+  }));
+  const rows = features.map(feature => {
+    const row = {};
+    propertyNames.forEach(key => {
+      const value = feature.properties?.[key];
+      row[key] = value && typeof value === 'object' ? JSON.stringify(value) : (value ?? '');
+    });
+    row.geometry = JSON.stringify(feature.geometry);
+    return row;
+  });
+  const worksheet = XLSX.utils.json_to_sheet(rows, { header: [...propertyNames, 'geometry'] });
+  return '\uFEFF' + XLSX.utils.sheet_to_csv(worksheet);
+}
+
+function serializeFeatures(features, format) {
+  return normalizeExportFormat(format) === 'csv'
+    ? featuresToCsv(features)
+    : JSON.stringify({ type: 'FeatureCollection', features }, null, 2);
+}
+
+async function chooseExportDirectory() {
+  if (typeof window.showDirectoryPicker !== 'function') return { handle: null, cancelled: false };
+  try {
+    const handle = await window.showDirectoryPicker({
+      id: 'qgas-export-directory',
+      mode: 'readwrite',
+      startIn: 'downloads'
+    });
+    return { handle, cancelled: false };
+  } catch (error) {
+    if (error?.name === 'AbortError') return { handle: null, cancelled: true };
+    console.warn('Folder selection is unavailable; using the browser download folder.', error);
+    return { handle: null, cancelled: false };
+  }
+}
+
+async function saveExportBlob(blob, filename, directorySelection = null) {
+  const selection = directorySelection || await chooseExportDirectory();
+  if (selection.cancelled) return false;
+  if (selection.handle) {
+    const fileHandle = await selection.handle.getFileHandle(filename, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    return true;
+  }
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.style.display = 'none';
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  return true;
+}
+
+const LEGO_NETWORK_TEMPLATE_PATH = 'Input/Lego_Template/Gas_Network.xlsx';
+const LEGO_NETWORK_MAPPING_PATH = 'Input/Lego_Template/Gas_Network_Mapping.txt';
+const LEGO_NODE_TEMPLATE_PATH = 'Input/Lego_Template/Gas_NodeInfo.xlsx';
+const LEGO_NODE_MAPPING_PATH = 'Input/Lego_Template/Gas_NodeInfo_Mapping.txt';
+const LEGO_NETWORK_FIRST_DATA_ROW = 8;
+
+function parseLegoNetworkMapping(text) {
+  const rules = [];
+  const mappings = [];
+
+  String(text || '').split(/\r?\n/).forEach((rawLine, index) => {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) return;
+    const fields = rawLine.split(';').map(value => value.trim());
+    const recordType = (fields[0] || '').toUpperCase();
+    if (recordType === 'RULE' && fields.length >= 4) {
+      rules.push({
+        category: fields[1].toLowerCase(),
+        layerType: fields[2].toLowerCase(),
+        namePatterns: fields[3].split('|').map(value => value.trim().toLowerCase()).filter(Boolean)
+      });
+      return;
+    }
+    if (recordType === 'MAP' && fields.length >= 6) {
+      mappings.push({
+        category: fields[1].toLowerCase(),
+        column: fields[2].toUpperCase(),
+        header: fields[3],
+        attributes: fields[4].split('|').map(value => value.trim()).filter(Boolean),
+        defaultValue: fields[5] || '',
+        transform: fields.slice(6).join(';')
+      });
+      return;
+    }
+    throw new Error(`Invalid LEGO mapping entry on line ${index + 1}.`);
+  });
+
+  if (!rules.length || !mappings.length) {
+    throw new Error('The LEGO mapping must contain at least one RULE and one MAP entry.');
+  }
+  return { rules, mappings };
+}
+
+function classifyLegoNetworkLayer(config, rules) {
+  const layerType = String(config?.type || '').trim().toLowerCase();
+  const descriptor = `${config?.filename || ''} ${config?.legendName || ''}`.toLowerCase();
+  const matchingRule = rules.find(rule => {
+    if (rule.layerType !== layerType) return false;
+    return rule.namePatterns.includes('*') ||
+      rule.namePatterns.some(pattern => descriptor.includes(pattern));
+  });
+  return matchingRule?.category || null;
+}
+
+function getLegoMappedValue(mapping, properties, datasetName) {
+  let result;
+  for (const attribute of mapping.attributes) {
+    if (!Object.prototype.hasOwnProperty.call(properties, attribute)) continue;
+    const value = properties[attribute];
+    if (value !== null && value !== undefined && value !== '') {
+      result = value;
+      break;
+    }
+  }
+  if (result === undefined) {
+    if (mapping.defaultValue === '$dataset') result = datasetName;
+    else if (mapping.defaultValue === '$qgas_dataset') result = `QGAS ${datasetName}`;
+    else if (/^-?(?:\d+|\d*\.\d+)$/.test(mapping.defaultValue)) result = Number(mapping.defaultValue);
+    else result = mapping.defaultValue;
+  }
+  const divideMatch = String(mapping.transform || '').match(/^divide:(-?(?:\d+|\d*\.\d+))$/i);
+  if (divideMatch && result !== '' && result !== null && result !== undefined) {
+    const numericValue = Number(result);
+    const divisor = Number(divideMatch[1]);
+    if (Number.isFinite(numericValue) && Number.isFinite(divisor) && divisor !== 0) {
+      result = numericValue / divisor;
+    }
+  }
+  if (String(mapping.transform || '').toLowerCase() === 'text' && result !== null && result !== undefined) {
+    result = String(result);
+  }
+  return result;
+}
+
+function collectLegoNetworkRows(mappingConfig, scope = 'complete') {
+  const rows = [];
+  const seenLayerGroups = new Set();
+  const seenFeatureLayers = new WeakSet();
+  const replacedCompressorIds = new Set();
+  const shortPipeGroups = new Set();
+  const shortPipeFeatureLayers = new WeakSet();
+  const onlyChanged = scope === 'changes';
+  const useOriginals = scope === 'complete';
+
+  const registerShortPipeGroup = group => {
+    if (!group || typeof group.eachLayer !== 'function') return;
+    shortPipeGroups.add(group);
+    const visit = layer => {
+      if (!layer) return;
+      if (layer.feature) shortPipeFeatureLayers.add(layer);
+      if (typeof layer.eachLayer === 'function') layer.eachLayer(visit);
+    };
+    group.eachLayer(visit);
+  };
+  try { registerShortPipeGroup(shortPipeLayer); } catch (e) {}
+  try { registerShortPipeGroup(originalShortPipeLayer); } catch (e) {}
+
+  const matchesActiveExportFilter = (feature, category) => {
+    if (scope !== 'filtered') return true;
+    let countryCodes = null;
+    try {
+      if (selectedCountries instanceof Set && selectedCountries.size) countryCodes = selectedCountries;
+    } catch (e) {}
+    if (!countryCodes) return true;
+    if ((category === 'pipeline' || category === 'shortpipe') && typeof shouldShowPipeline === 'function') {
+      return shouldShowPipeline(feature, countryCodes);
+    }
+    if (typeof shouldShowElement === 'function') return shouldShowElement(feature, countryCodes);
+    return true;
+  };
+
+  const addLayer = (layer, config) => {
+    if (!layer || typeof layer.eachLayer !== 'function' || seenLayerGroups.has(layer)) return;
+    const category = classifyLegoNetworkLayer(config, mappingConfig.rules);
+    if (!category) return;
+    if (category !== 'shortpipe' && shortPipeGroups.has(layer)) return;
+    seenLayerGroups.add(layer);
+    const datasetName = String(config.legendName || config.filename || 'Dataset')
+      .replace(/^.*[\\/]/, '')
+      .replace(/\.(geojson|json|csv)$/i, '');
+    layer.eachLayer(featureLayer => {
+      const feature = featureLayer?.feature;
+      if (!feature || feature.properties?.deleted) return;
+      if (category === 'pipeline' && shortPipeFeatureLayers.has(featureLayer)) return;
+      if (seenFeatureLayers.has(featureLayer)) return;
+      if (onlyChanged && !feature.properties?.modified) return;
+      if (!matchesActiveExportFilter(feature, category)) return;
+      if (category === 'compressor') {
+        const distributionGroup = String(feature.properties?.Distribution_Group ?? '').trim().toLowerCase();
+        const featureId = String(feature.properties?.id ?? feature.properties?.ID ?? '').trim().toLowerCase();
+        if (distributionGroup) replacedCompressorIds.add(distributionGroup);
+        else if (featureId && replacedCompressorIds.has(featureId)) return;
+      }
+      seenFeatureLayers.add(featureLayer);
+      rows.push({ category, datasetName, properties: { ...(feature.properties || {}) } });
+    });
+  };
+
+  (Array.isArray(layerConfig) ? layerConfig : []).forEach(config => {
+    const configuredType = String(config?.type || '').trim().toLowerCase();
+    if (configuredType !== 'line' && configuredType !== 'in-line') return;
+    const layerName = typeof getLayerNameFromConfig === 'function'
+      ? getLayerNameFromConfig(config)
+      : String(config.filename || '').replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    let layer = dynamicLayers[layerName];
+    const category = classifyLegoNetworkLayer(config, mappingConfig.rules);
+    if (
+      category !== 'shortpipe' &&
+      typeof shortPipeLayer !== 'undefined' &&
+      layer === shortPipeLayer
+    ) {
+      /* The dedicated short-pipe group must be exported with its own LEGO
+       * category and data-source label, never through a pipeline alias. */
+      return;
+    }
+    if (
+      !useOriginals &&
+      category === 'compressor' &&
+      typeof compressorsLayer !== 'undefined' &&
+      compressorsLayer
+    ) {
+      /* Country filtering can replace the configured dynamic-layer reference.
+       * Distributed compressors are always inserted into the active compressor
+       * group, so filtered/changes exports must read that authoritative group. */
+      layer = compressorsLayer;
+    }
+    if (useOriginals) {
+      if (
+        category === 'pipeline' &&
+        typeof pipelineLayer !== 'undefined' &&
+        layer === pipelineLayer &&
+        typeof originalPipelineLayer !== 'undefined' &&
+        originalPipelineLayer
+      ) {
+        layer = originalPipelineLayer;
+      } else if (
+        category === 'compressor' &&
+        typeof compressorsLayer !== 'undefined' &&
+        layer === compressorsLayer &&
+        typeof originalCompressorsLayer !== 'undefined' &&
+        originalCompressorsLayer
+      ) {
+        layer = originalCompressorsLayer;
+      } else if (
+        category === 'shortpipe' &&
+        typeof shortPipeLayer !== 'undefined' &&
+        layer === shortPipeLayer &&
+        typeof originalShortPipeLayer !== 'undefined' &&
+        originalShortPipeLayer
+      ) {
+        layer = originalShortPipeLayer;
+      }
+    }
+    addLayer(layer, config);
+  });
+
+  /* Compressor references may be replaced when a country filter is applied.
+   * Merge both authoritative groups and apply the active filter per feature;
+   * the WeakSet above prevents shared Leaflet markers from being duplicated. */
+  const compressorConfig = (Array.isArray(layerConfig) ? layerConfig : []).find(config =>
+    classifyLegoNetworkLayer(config, mappingConfig.rules) === 'compressor'
+  ) || { filename: 'compressors.geojson', legendName: 'Compressors', type: 'In-Line' };
+  if (!useOriginals) {
+    try { addLayer(compressorsLayer, compressorConfig); } catch (e) {}
+    try { addLayer(originalCompressorsLayer, compressorConfig); } catch (e) {}
+  }
+
+  if (typeof shortPipeLayer !== 'undefined' && shortPipeLayer) {
+    const shortPipeConfig = (typeof getConfiguredShortPipeConfig === 'function' && getConfiguredShortPipeConfig()) ||
+      { filename: 'Short_Pipes.geojson', legendName: 'Short Pipes', type: 'Line' };
+    const sourceLayer = useOriginals && typeof originalShortPipeLayer !== 'undefined' && originalShortPipeLayer
+      ? originalShortPipeLayer
+      : shortPipeLayer;
+    addLayer(sourceLayer, shortPipeConfig);
+  }
+
+  if (window.customLayers) {
+    Object.entries(window.customLayers).forEach(([name, layer]) => {
+      const settings = layer?._customLayerSettings || {};
+      const geometryClass = settings.geometryClass || (layer?._customLineLayer ? 'line' : '');
+      const type = geometryClass === 'inline' ? 'In-Line' : (geometryClass === 'line' ? 'Line' : '');
+      if (!type) return;
+      addLayer(layer, {
+        filename: settings.filename || `${name}.geojson`,
+        legendName: settings.name || layer._customLayerName || name,
+        type
+      });
+    });
+  }
+
+  /* A moved short pipe can still exist as a separate marker instance in an
+   * original/filtered pipeline group. Object-identity checks cannot detect
+   * that case, so the Short-Pipe ID is authoritative and removes the stale
+   * pipeline row before ordering and workbook generation. */
+  const exportedShortPipeIds = new Set(rows
+    .filter(entry => entry.category === 'shortpipe')
+    .map(entry => String(entry.properties?.id ?? entry.properties?.ID ?? '').trim().toLowerCase())
+    .filter(Boolean));
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    const entry = rows[index];
+    if (entry.category !== 'pipeline') continue;
+    const id = String(entry.properties?.id ?? entry.properties?.ID ?? '').trim().toLowerCase();
+    if (id && exportedShortPipeIds.has(id)) rows.splice(index, 1);
+  }
+  const exportedValveIds = new Set(rows
+    .filter(entry => entry.category === 'valve')
+    .map(entry => String(entry.properties?.id ?? entry.properties?.ID ?? '').trim().toLowerCase())
+    .filter(Boolean));
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    const entry = rows[index];
+    if (entry.category !== 'pipeline') continue;
+    const id = String(entry.properties?.id ?? entry.properties?.ID ?? '').trim().toLowerCase();
+    if (id && exportedValveIds.has(id)) rows.splice(index, 1);
+  }
+
+  const categoryOrder = new Map([
+    ['pipeline', 0],
+    ['compressor', 1],
+    ['valve', 2],
+    ['shortpipe', 3],
+    ['inline', 4]
+  ]);
+  rows.sort((left, right) =>
+    (categoryOrder.get(left.category) ?? 99) - (categoryOrder.get(right.category) ?? 99)
+  );
+
+  const loopCounts = new Map();
+  rows.forEach(entry => {
+    const startNode = String(entry.properties.node_start ?? '').trim();
+    const endNode = String(entry.properties.node_end ?? '').trim();
+    const combination = `${startNode}\u0000${endNode}`;
+    const loopNumber = (loopCounts.get(combination) || 0) + 1;
+    loopCounts.set(combination, loopNumber);
+    entry.properties.__lego_loop = `Loop${loopNumber}`;
+  });
+  return rows;
+}
+
+function collectLegoNodeRows(mappingConfig, scope = 'complete') {
+  const rows = [];
+  const seenLayerGroups = new Set();
+  const onlyChanged = scope === 'changes';
+  const useOriginals = scope === 'complete';
+
+  const addLayer = (layer, config) => {
+    if (!layer || typeof layer.eachLayer !== 'function' || seenLayerGroups.has(layer)) return;
+    const category = classifyLegoNetworkLayer(config, mappingConfig.rules);
+    if (category !== 'node') return;
+    seenLayerGroups.add(layer);
+    const datasetName = String(config.legendName || config.filename || 'Nodes')
+      .replace(/^.*[\\/]/, '')
+      .replace(/\.(geojson|json|csv)$/i, '');
+    layer.eachLayer(featureLayer => {
+      const feature = featureLayer?.feature;
+      if (!feature || feature.properties?.deleted) return;
+      if (onlyChanged && !feature.properties?.modified) return;
+      rows.push({ category, datasetName, properties: feature.properties || {} });
+    });
+  };
+
+  (Array.isArray(layerConfig) ? layerConfig : []).forEach(config => {
+    if (classifyLegoNetworkLayer(config, mappingConfig.rules) !== 'node') return;
+    const layerName = typeof getLayerNameFromConfig === 'function'
+      ? getLayerNameFromConfig(config)
+      : String(config.filename || '').replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    let layer = dynamicLayers[layerName];
+    if (
+      useOriginals &&
+      typeof nodeLayer !== 'undefined' &&
+      layer === nodeLayer &&
+      typeof originalNodeLayer !== 'undefined' &&
+      originalNodeLayer
+    ) {
+      layer = originalNodeLayer;
+    }
+    addLayer(layer, config);
+  });
+
+  const directNodesLayer = useOriginals &&
+    typeof originalNodeLayer !== 'undefined' &&
+    originalNodeLayer
+    ? originalNodeLayer
+    : (typeof nodeLayer !== 'undefined' ? nodeLayer : null);
+  addLayer(directNodesLayer, {
+    filename: 'nodes.geojson',
+    legendName: 'Nodes',
+    type: 'Point'
+  });
+
+  if (window.customLayers) {
+    Object.entries(window.customLayers).forEach(([name, layer]) => {
+      const settings = layer?._customLayerSettings || {};
+      if (settings.typeKey !== 'Node' && settings.elementKey !== 'nodes') return;
+      addLayer(layer, {
+        filename: settings.filename || `${name}.geojson`,
+        legendName: settings.name || layer._customLayerName || name,
+        type: 'Node'
+      });
+    });
+  }
+  return rows;
+}
+
+function getLegoXmlElement(parent, localName) {
+  return Array.from(parent.getElementsByTagNameNS('*', localName))[0] || null;
+}
+
+function setLegoTemplateCellValue(xmlDocument, rowElement, column, rowNumber, value) {
+  const cells = Array.from(rowElement.getElementsByTagNameNS('*', 'c'));
+  const cell = cells.find(candidate => String(candidate.getAttribute('r') || '').replace(/\d+$/, '') === column);
+  if (!cell) return;
+
+  cell.setAttribute('r', `${column}${rowNumber}`);
+  while (cell.firstChild) cell.removeChild(cell.firstChild);
+  cell.removeAttribute('t');
+
+  if (value === null || value === undefined || value === '') return;
+  const namespace = rowElement.namespaceURI;
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    const valueElement = xmlDocument.createElementNS(namespace, 'v');
+    valueElement.textContent = String(value);
+    cell.appendChild(valueElement);
+    return;
+  }
+
+  cell.setAttribute('t', 'inlineStr');
+  const inlineString = xmlDocument.createElementNS(namespace, 'is');
+  const textElement = xmlDocument.createElementNS(namespace, 't');
+  const text = String(value);
+  if (/^\s|\s$/.test(text)) {
+    textElement.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+  }
+  textElement.textContent = text;
+  inlineString.appendChild(textElement);
+  cell.appendChild(inlineString);
+}
+
+async function buildPopulatedLegoWorkbook(templateBuffer, mappingConfig, rows, lastColumn) {
+  const templateArchive = await JSZip.loadAsync(templateBuffer);
+  const worksheetPath = 'xl/worksheets/sheet1.xml';
+  const worksheetFile = templateArchive.file(worksheetPath);
+  if (!worksheetFile) throw new Error(`The template does not contain ${worksheetPath}.`);
+  const parser = new DOMParser();
+  const xmlDocument = parser.parseFromString(await worksheetFile.async('string'), 'application/xml');
+  if (xmlDocument.getElementsByTagName('parsererror').length) {
+    throw new Error('The LEGO worksheet XML could not be read.');
+  }
+
+  const sharedStringsFile = templateArchive.file('xl/sharedStrings.xml');
+  const sharedStrings = [];
+  if (sharedStringsFile) {
+    const sharedDocument = parser.parseFromString(await sharedStringsFile.async('string'), 'application/xml');
+    Array.from(sharedDocument.getElementsByTagNameNS('*', 'si')).forEach(item => {
+      sharedStrings.push(
+        Array.from(item.getElementsByTagNameNS('*', 't')).map(text => text.textContent || '').join('')
+      );
+    });
+  }
+  const readTemplateCellText = address => {
+    const cell = Array.from(xmlDocument.getElementsByTagNameNS('*', 'c'))
+      .find(candidate => candidate.getAttribute('r') === address);
+    if (!cell) return '';
+    const value = getLegoXmlElement(cell, 'v')?.textContent || '';
+    return cell.getAttribute('t') === 's' ? String(sharedStrings[Number(value)] || '') : value;
+  };
+  mappingConfig.mappings.forEach(mapping => {
+    const templateHeader = readTemplateCellText(`${mapping.column}3`).trim();
+    if (templateHeader !== mapping.header) {
+      throw new Error(
+        `Mapping column ${mapping.column} expects "${mapping.header}", but the template contains "${templateHeader}".`
+      );
+    }
+  });
+
+  const sheetData = getLegoXmlElement(xmlDocument, 'sheetData');
+  if (!sheetData) throw new Error('The LEGO worksheet has no sheetData element.');
+  const templateRow = Array.from(sheetData.getElementsByTagNameNS('*', 'row'))
+    .find(row => Number(row.getAttribute('r')) === LEGO_NETWORK_FIRST_DATA_ROW);
+  if (!templateRow) throw new Error(`Template data row ${LEGO_NETWORK_FIRST_DATA_ROW} was not found.`);
+  const rowPattern = templateRow.cloneNode(true);
+  let exactIntegerStyleIndex = '';
+  const stylesPath = 'xl/styles.xml';
+  const stylesFile = templateArchive.file(stylesPath);
+  if (stylesFile) {
+    const stylesDocument = parser.parseFromString(await stylesFile.async('string'), 'application/xml');
+    const cellXfs = getLegoXmlElement(stylesDocument, 'cellXfs');
+    const diameterTemplateCell = Array.from(rowPattern.getElementsByTagNameNS('*', 'c'))
+      .find(cell => String(cell.getAttribute('r') || '').replace(/\d+$/, '') === 'H');
+    const sourceStyleIndex = Number(diameterTemplateCell?.getAttribute('s'));
+    const styles = cellXfs ? Array.from(cellXfs.getElementsByTagNameNS('*', 'xf')) : [];
+    const sourceStyle = Number.isInteger(sourceStyleIndex) ? styles[sourceStyleIndex] : null;
+    if (cellXfs && sourceStyle) {
+      const integerStyle = sourceStyle.cloneNode(true);
+      integerStyle.setAttribute('numFmtId', '0');
+      integerStyle.removeAttribute('applyNumberFormat');
+      cellXfs.appendChild(integerStyle);
+      exactIntegerStyleIndex = String(styles.length);
+      cellXfs.setAttribute('count', String(styles.length + 1));
+      templateArchive.file(stylesPath, new XMLSerializer().serializeToString(stylesDocument));
+    }
+  }
+  Array.from(sheetData.getElementsByTagNameNS('*', 'row')).forEach(row => {
+    if (Number(row.getAttribute('r')) >= LEGO_NETWORK_FIRST_DATA_ROW) sheetData.removeChild(row);
+  });
+
+  rows.forEach((entry, index) => {
+    const targetRow = LEGO_NETWORK_FIRST_DATA_ROW + index;
+    const rowElement = rowPattern.cloneNode(true);
+    rowElement.setAttribute('r', String(targetRow));
+    Array.from(rowElement.getElementsByTagNameNS('*', 'c')).forEach(cell => {
+      const column = String(cell.getAttribute('r') || '').replace(/\d+$/, '');
+      setLegoTemplateCellValue(xmlDocument, rowElement, column, targetRow, '');
+    });
+    mappingConfig.mappings
+      .filter(mapping => mapping.category === '*' || mapping.category === entry.category)
+      .forEach(mapping => {
+        setLegoTemplateCellValue(
+          xmlDocument,
+          rowElement,
+          mapping.column,
+          targetRow,
+          getLegoMappedValue(mapping, entry.properties, entry.datasetName)
+        );
+        if (
+          mapping.column === 'H' &&
+          (entry.category === 'shortpipe' || entry.category === 'valve')
+        ) {
+          const diameterCell = Array.from(rowElement.getElementsByTagNameNS('*', 'c'))
+            .find(cell => cell.getAttribute('r') === `H${targetRow}`);
+          /* Preserve fill/borders from the template while using a General
+           * numeric format, so the numeric sentinel is visibly exactly 9999. */
+          if (diameterCell && exactIntegerStyleIndex) {
+            diameterCell.setAttribute('s', exactIntegerStyleIndex);
+          }
+        }
+      });
+    sheetData.appendChild(rowElement);
+  });
+
+  const lastRow = Math.max(LEGO_NETWORK_FIRST_DATA_ROW - 1, LEGO_NETWORK_FIRST_DATA_ROW + rows.length - 1);
+  const dimension = getLegoXmlElement(xmlDocument, 'dimension');
+  if (dimension) dimension.setAttribute('ref', `A1:${lastColumn}${lastRow}`);
+  templateArchive.file(worksheetPath, new XMLSerializer().serializeToString(xmlDocument));
+  return templateArchive.generateAsync({ type: 'uint8array' });
+}
+
+async function exportLegoFormat(scope = 'complete', requestedName = '') {
+  try {
+    const cacheSuffix = `?v=${Date.now()}`;
+    const [templateResponse, mappingResponse, nodeTemplateResponse, nodeMappingResponse] = await Promise.all([
+      fetch(`${LEGO_NETWORK_TEMPLATE_PATH}${cacheSuffix}`),
+      fetch(`${LEGO_NETWORK_MAPPING_PATH}${cacheSuffix}`),
+      fetch(`${LEGO_NODE_TEMPLATE_PATH}${cacheSuffix}`),
+      fetch(`${LEGO_NODE_MAPPING_PATH}${cacheSuffix}`)
+    ]);
+    if (!templateResponse.ok) throw new Error(`Template not found: ${LEGO_NETWORK_TEMPLATE_PATH}`);
+    if (!mappingResponse.ok) throw new Error(`Mapping not found: ${LEGO_NETWORK_MAPPING_PATH}`);
+    if (!nodeTemplateResponse.ok) throw new Error(`Template not found: ${LEGO_NODE_TEMPLATE_PATH}`);
+    if (!nodeMappingResponse.ok) throw new Error(`Mapping not found: ${LEGO_NODE_MAPPING_PATH}`);
+
+    const networkMapping = parseLegoNetworkMapping(await mappingResponse.text());
+    const nodeMapping = parseLegoNetworkMapping(await nodeMappingResponse.text());
+    const networkRows = collectLegoNetworkRows(networkMapping, scope);
+    const nodeRows = collectLegoNodeRows(nodeMapping, scope);
+    const [networkWorkbook, nodeWorkbook] = await Promise.all([
+      buildPopulatedLegoWorkbook(await templateResponse.arrayBuffer(), networkMapping, networkRows, 'R'),
+      buildPopulatedLegoWorkbook(await nodeTemplateResponse.arrayBuffer(), nodeMapping, nodeRows, 'N')
+    ]);
+    const legoPackage = new JSZip();
+    legoPackage.file('Gas_Network.xlsx', networkWorkbook);
+    legoPackage.file('Gas_NodeInfo.xlsx', nodeWorkbook);
+    const geoJsonProjectFolder = legoPackage.folder('GeoJSON_Project');
+    if (scope === 'filtered') {
+      await exportFilteredData(requestedName || 'Filtered_Data', 'geojson', {
+        zip: geoJsonProjectFolder,
+        download: false
+      });
+    } else {
+      await exportCompleteDataset('geojson', {
+        zip: geoJsonProjectFolder,
+        download: false
+      });
+    }
+    const blob = await legoPackage.generateAsync({
+      type: 'blob',
+      mimeType: 'application/zip'
+    });
+    const safeRequestedName = String(requestedName || '').trim().replace(/[<>:"/\\|?*]+/g, '_');
+    const scopeLabel = scope === 'changes' ? 'Changes' : (scope === 'filtered' ? 'Filtered' : 'Complete');
+    const filename = safeRequestedName
+      ? `${safeRequestedName}.zip`
+      : `LEGO_${scopeLabel}_${currentProject}_${new Date().toISOString().split('T')[0]}.zip`;
+    await saveExportBlob(blob, filename);
+
+    if (!networkRows.length && !nodeRows.length) {
+      showInfoPopup('The LEGO package was exported, but no matching network or node features were found.', 'LEGO Export');
+    }
+  } catch (error) {
+    console.error('LEGO export failed:', error);
+    showInfoPopup(`Could not create the LEGO export: ${error.message}`, 'LEGO Export');
+  }
+}
+
 /**
- * Export all modified and deleted elements as GeoJSON files in a ZIP archive.
+ * Export all changed and deleted elements as GeoJSON files in a ZIP archive.
  *
- * Collects every layer feature marked with <code>modified: true</code> and all
+ * Collects every layer feature whose <code>last_changed</code> value is not
+ * <code>original</code> and all
  * entries in the soft-deletion registry. Organises the output into
  * GeoJSON files per infrastructure type (pipelines, nodes, compressors,
  * storages, power-plants, etc.) and triggers a browser download of the
@@ -33,12 +661,22 @@
  *
  * @returns {void}
  */
-function exportChanges() {
+async function exportChanges(format = 'geojson') {
+  format = normalizeExportFormat(format);
+  if (format === 'lego') {
+    exportLegoFormat('changes');
+    return;
+  }
+  const featureHasChanges = properties => typeof isFeatureChanged === 'function'
+    ? isFeatureChanged(properties)
+    : Boolean(properties?.last_changed && String(properties.last_changed).toLowerCase() !== 'original');
+
   const extractFeatureForExport = (layer) => {
     if (!layer || typeof layer.toGeoJSON !== 'function') return null;
     const geo = layer.toGeoJSON();
     if (!geo || !geo.geometry) return null;
     geo.properties = { ...(layer.feature?.properties || {}), ...(geo.properties || {}) };
+    if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(geo);
     return geo;
   };
 
@@ -52,7 +690,7 @@ function exportChanges() {
 
   /* Pipelines from drawn items. */
   drawnItems.eachLayer(layer => {
-    if (layer.feature && layer.feature.properties && layer.feature.properties.modified) {
+    if (layer.feature && layer.feature.properties && featureHasChanges(layer.feature.properties)) {
       const geomType = layer.feature.geometry.type;
       if (geomType === "LineString") {
         const f = extractFeatureForExport(layer);
@@ -61,7 +699,7 @@ function exportChanges() {
     }
   });
 
-  /* Nodes across all node layers (de-duplicated by ID). */
+  /* Nodes across all node layers (de-duplicated by canonical id). */
   const exportedNodeIds = new Set();
   getAllNodeLayers().forEach(layerGroup => {
     if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
@@ -71,11 +709,10 @@ function exportChanges() {
       if (
         feature &&
         properties &&
-        properties.modified &&
-        feature.geometry?.type === 'Point' &&
-        properties.Type === 'Node'
+        featureHasChanges(properties) &&
+        feature.geometry?.type === 'Point'
       ) {
-        const nodeId = properties.ID;
+        const nodeId = properties.id;
         if (nodeId && exportedNodeIds.has(nodeId)) return;
         const f = extractFeatureForExport(layer);
         if (f) {
@@ -92,7 +729,7 @@ function exportChanges() {
       if (
         layer.feature &&
         layer.feature.properties &&
-        layer.feature.properties.modified &&
+        featureHasChanges(layer.feature.properties) &&
         layer.feature.geometry.type === "Point" &&
         layer.feature.properties.Type === "Compressor"
       ) {
@@ -106,7 +743,7 @@ function exportChanges() {
       if (
         layer.feature &&
         layer.feature.properties &&
-        layer.feature.properties.modified &&
+        featureHasChanges(layer.feature.properties) &&
         layer.feature.geometry.type === "Point" &&
         layer.feature.properties.Type === "Storage"
       ) {
@@ -120,7 +757,7 @@ function exportChanges() {
       if (
         layer.feature &&
         layer.feature.properties &&
-        layer.feature.properties.modified &&
+        featureHasChanges(layer.feature.properties) &&
         layer.feature.geometry.type === "Point" &&
         layer.feature.properties.Type === "LNG"
       ) {
@@ -134,7 +771,7 @@ function exportChanges() {
       if (
         layer.feature &&
         layer.feature.properties &&
-        layer.feature.properties.modified &&
+        featureHasChanges(layer.feature.properties) &&
         layer.feature.geometry.type === "Point" &&
         layer.feature.properties.Type === "Powerplant"
       ) {
@@ -148,47 +785,41 @@ function exportChanges() {
   const shortpipes = [];
   if (shortPipeLayer) {
     shortPipeLayer.eachLayer(layer => {
-      if (layer.feature) {
+      if (layer.feature && featureHasChanges(layer.feature.properties)) {
         const f = extractFeatureForExport(layer);
         if (f) shortpipes.push(f);
       }
     });
   }
 
-  function exportGeoJSON(features, filename) {
+  function buildSpatialExport(features, filename) {
     if (features.length === 0) return;
     features.forEach(f => {
       if (!f.properties) f.properties = {};
-      f.properties["Last Changes"] = contributorName;
+      if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(f);
     });
-    const geojson = {
-      type: "FeatureCollection",
-      features: features
-    };
-    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
+    const outputFilename = filenameForExportFormat(filename, format);
+    const blob = new Blob([serializeFeatures(features, format)], {
+      type: format === 'csv' ? 'text/csv;charset=utf-8' : 'application/geo+json'
+    });
+    return { blob, filename: outputFilename };
   }
 
-  /* Export modified features. */
-  exportGeoJSON(pipelines, "Export_Pipelines_Changed.geojson");
-  exportGeoJSON(compressors, "Export_Compressors_Changed.geojson");
-  exportGeoJSON(storages, "Export_Storages_Changed.geojson");
-  exportGeoJSON(nodes, "Export_Nodes_Changed.geojson");
-  exportGeoJSON(lngs, "Export_LNG_Changed.geojson");
-  exportGeoJSON(powerplants, "Export_Powerplants_Changed.geojson");
-  exportGeoJSON(shortpipes, "Export_Shortpipe_Changed.geojson");
-
-  /* Export deleted features. */
-  exportGeoJSON(deletedPipelines, "Export_Pipelines_Deleted.geojson");
-  exportGeoJSON(deletedCompressors, "Export_Compressors_Deleted.geojson");
-  exportGeoJSON(deletedStorages, "Export_Storages_Deleted.geojson");
-  exportGeoJSON(deletedNodes, "Export_Nodes_Deleted.geojson");
-  exportGeoJSON(deletedLNGs, "Export_LNG_Deleted.geojson");
-  exportGeoJSON(deletedPowerplants, "Export_Powerplants_Deleted.geojson");
+  const exportFiles = [
+    buildSpatialExport(pipelines, "Export_Pipelines_Changed.geojson"),
+    buildSpatialExport(compressors, "Export_Compressors_Changed.geojson"),
+    buildSpatialExport(storages, "Export_Storages_Changed.geojson"),
+    buildSpatialExport(nodes, "Export_Nodes_Changed.geojson"),
+    buildSpatialExport(lngs, "Export_LNG_Changed.geojson"),
+    buildSpatialExport(powerplants, "Export_Powerplants_Changed.geojson"),
+    buildSpatialExport(shortpipes, "Export_Shortpipe_Changed.geojson"),
+    buildSpatialExport(deletedPipelines, "Export_Pipelines_Deleted.geojson"),
+    buildSpatialExport(deletedCompressors, "Export_Compressors_Deleted.geojson"),
+    buildSpatialExport(deletedStorages, "Export_Storages_Deleted.geojson"),
+    buildSpatialExport(deletedNodes, "Export_Nodes_Deleted.geojson"),
+    buildSpatialExport(deletedLNGs, "Export_LNG_Deleted.geojson"),
+    buildSpatialExport(deletedPowerplants, "Export_Powerplants_Deleted.geojson")
+  ].filter(Boolean);
 
   if (
     pipelines.length === 0 &&
@@ -206,13 +837,20 @@ function exportChanges() {
     deletedPowerplants.length === 0
   ) {
     showInfoPopup('No edited, new, or deleted elements to export.', '💾 Export');
+    return;
+  }
+
+  const directorySelection = await chooseExportDirectory();
+  if (directorySelection.cancelled) return;
+  for (const file of exportFiles) {
+    await saveExportBlob(file.blob, file.filename, directorySelection);
   }
 }
 
 /*
  * Show a dialog to collect the export folder name for filtered data.
  */
-function showFolderNameDialog() {
+function showFolderNameDialog(format = 'geojson') {
   const folderModal = document.createElement('div');
   folderModal.style.position = 'fixed';
   folderModal.style.top = '0';
@@ -257,7 +895,11 @@ function showFolderNameDialog() {
       return;
     }
     document.body.removeChild(folderModal);
-    exportFilteredData(folderName);
+    if (normalizeExportFormat(format) === 'lego') {
+      exportLegoFormat('filtered', folderName);
+    } else {
+      exportFilteredData(folderName, format);
+    }
   };
 
   /* Cancel button. */
@@ -282,13 +924,14 @@ function showFolderNameDialog() {
  *   downloaded filename.
  * @returns {Promise<void>}
  */
-async function exportFilteredData(folderName) {
-  const zip = new JSZip();
+async function exportFilteredData(folderName, format = 'geojson', options = {}) {
+  format = normalizeExportFormat(format);
+  const zip = options.zip || new JSZip();
   const exportedFilenames = new Set();
   const exportedConfigFilenames = new Set();
   const configList = Array.isArray(layerConfig) ? layerConfig : [];
   const knownConfigFilenames = new Set(
-    configList.map(cfg => normalizeFilenameReference(cfg?.filename))
+    configList.map(cfg => normalizeFilenameReference(filenameForExportFormat(cfg?.filename, format)))
   );
   const additionalConfigEntries = [];
   const deletedIdentities = (typeof collectAllDeletedIdentities === 'function')
@@ -327,35 +970,67 @@ async function exportFilteredData(folderName) {
     const geo = layer.toGeoJSON();
     if (!geo || !geo.geometry) return null;
     geo.properties = { ...(layer.feature?.properties || {}), ...(geo.properties || {}) };
+    if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(geo);
     if (isDeletedFeature(layer.feature || geo)) return null;
     return geo;
   };
 
   function addGeoJSONToZip(features, filename) {
     if (features.length === 0) return;
-    const geojson = {
-      type: "FeatureCollection",
-      features: features
-    };
-    zip.file(filename, JSON.stringify(geojson, null, 2));
-    exportedFilenames.add(normalizeFilenameReference(filename));
+    const outputFilename = filenameForExportFormat(filename, format);
+    zip.file(outputFilename, serializeFeatures(features, format));
+    exportedFilenames.add(normalizeFilenameReference(outputFilename));
   }
+
+  const collectConfiguredFeatures = (config, configuredLayer) => {
+    const isCompressorConfig = /compressor/i.test(`${config?.filename || ''} ${config?.legendName || ''}`);
+    const sources = isCompressorConfig
+      ? Array.from(new Set([
+          (typeof compressorsLayer !== 'undefined' ? compressorsLayer : null),
+          configuredLayer,
+          (typeof originalCompressorsLayer !== 'undefined' ? originalCompressorsLayer : null)
+        ].filter(Boolean)))
+      : [configuredLayer].filter(Boolean);
+    const candidates = [];
+    sources.forEach(source => source.eachLayer?.(layer => {
+      const feature = layer?.feature;
+      if (!feature) return;
+      if (isCompressorConfig) {
+        try {
+          if (selectedCountries instanceof Set && selectedCountries.size &&
+              typeof shouldShowElement === 'function' &&
+              !shouldShowElement(feature, selectedCountries)) return;
+        } catch (e) {}
+      }
+      const exported = extractFeatureForExport(layer);
+      if (exported) candidates.push(exported);
+    }));
+    if (!isCompressorConfig) return candidates;
+
+    const replacedIds = new Set(candidates
+      .map(feature => String(feature.properties?.Distribution_Group ?? '').trim().toLowerCase())
+      .filter(Boolean));
+    const byId = new Map();
+    candidates.forEach(feature => {
+      const id = String(feature.properties?.id ?? feature.properties?.ID ?? '').trim().toLowerCase();
+      const group = String(feature.properties?.Distribution_Group ?? '').trim();
+      if (!group && id && replacedIds.has(id)) return;
+      const key = id || JSON.stringify(feature.geometry);
+      if (!byId.has(key)) byId.set(key, feature);
+    });
+    return Array.from(byId.values());
+  };
 
   /* Collect data dynamically from all layers in layerConfig. */
   configList.forEach(config => {
     const layerName = typeof getLayerNameFromConfig === 'function'
       ? getLayerNameFromConfig(config)
-      : config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+      : config.filename.replace(/\.(?:geojson|csv)$/i, '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
     const layer = dynamicLayers[layerName];
-    if (!layer) return;
-    const features = [];
-    layer.eachLayer(l => {
-      const f = extractFeatureForExport(l);
-      if (f) features.push(f);
-    });
+    const features = collectConfiguredFeatures(config, layer);
     if (features.length > 0) {
       addGeoJSONToZip(features, config.filename);
-      exportedConfigFilenames.add(normalizeFilenameReference(config.filename));
+      exportedConfigFilenames.add(normalizeFilenameReference(filenameForExportFormat(config.filename, format)));
       console.log(`Exported ${features.length} features to ${config.filename}`);
     }
   });
@@ -392,7 +1067,7 @@ async function exportFilteredData(folderName) {
       if (!layer) return;
       const settings = layer._customLayerSettings || {};
       const fallbackFilename = settings.filename || `${name}.geojson`;
-      if (exportedFilenames.has(normalizeFilenameReference(fallbackFilename))) {
+      if (exportedFilenames.has(normalizeFilenameReference(filenameForExportFormat(fallbackFilename, format)))) {
         return;
       }
       const features = [];
@@ -402,8 +1077,8 @@ async function exportFilteredData(folderName) {
       });
       if (features.length > 0) {
         addGeoJSONToZip(features, fallbackFilename);
-        exportedConfigFilenames.add(normalizeFilenameReference(fallbackFilename));
-        const normalized = normalizeFilenameReference(fallbackFilename);
+        exportedConfigFilenames.add(normalizeFilenameReference(filenameForExportFormat(fallbackFilename, format)));
+        const normalized = normalizeFilenameReference(filenameForExportFormat(fallbackFilename, format));
         if (!knownConfigFilenames.has(normalized)) {
           additionalConfigEntries.push(buildCustomConfigEntry(layer, name, fallbackFilename));
         }
@@ -422,12 +1097,12 @@ async function exportFilteredData(folderName) {
     ];
 
     configList.forEach(config => {
-      const normalized = normalizeFilenameReference(config?.filename || '');
+      const normalized = normalizeFilenameReference(filenameForExportFormat(config?.filename || '', format));
       if (!exportedConfigFilenames.has(normalized)) {
         return;
       }
       wsData.push([
-        config.filename,
+        filenameForExportFormat(config.filename, format),
         config.legendName,
         config.color,
         config.markerType,
@@ -438,7 +1113,7 @@ async function exportFilteredData(folderName) {
     });
 
     additionalConfigEntries.forEach(config => {
-      const normalized = normalizeFilenameReference(config.filename);
+      const normalized = normalizeFilenameReference(filenameForExportFormat(config.filename, format));
       if (!exportedConfigFilenames.has(normalized)) {
         return;
       }
@@ -446,7 +1121,7 @@ async function exportFilteredData(folderName) {
         return;
       }
       wsData.push([
-        config.filename,
+        filenameForExportFormat(config.filename, format),
         config.legendName,
         config.color,
         config.markerType,
@@ -460,7 +1135,7 @@ async function exportFilteredData(folderName) {
     if (!hasShortPipeConfig && shortPipeLayerHasFeatures()) {
       const shortPipeConfig = getShortPipeConfigTemplate();
       wsData.push([
-        shortPipeConfig.filename,
+        filenameForExportFormat(shortPipeConfig.filename, format),
         shortPipeConfig.legendName,
         shortPipeConfig.color,
         shortPipeConfig.markerType,
@@ -503,14 +1178,9 @@ async function exportFilteredData(folderName) {
   }
 
   /* Generate and download ZIP. */
-  zip.generateAsync({ type: "blob" }).then(function(content) {
-    const url = URL.createObjectURL(content);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${folderName}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+  if (options.download === false) return zip;
+  const content = await zip.generateAsync({ type: "blob" });
+  await saveExportBlob(content, `${folderName}.zip`);
 }
 
 /*
@@ -532,8 +1202,13 @@ async function exportFilteredData(folderName) {
  *   console.log('complete_dataset.zip downloaded');
  * });
  */
-async function exportCompleteDataset() {
-  const zip = new JSZip();
+async function exportCompleteDataset(format = 'geojson', options = {}) {
+  format = normalizeExportFormat(format);
+  if (format === 'lego') {
+    await exportLegoFormat('complete');
+    return;
+  }
+  const zip = options.zip || new JSZip();
   const exportedFilenames = new Set();
   const deletedIdentities = (typeof collectAllDeletedIdentities === 'function')
     ? collectAllDeletedIdentities()
@@ -541,7 +1216,7 @@ async function exportCompleteDataset() {
   const exportedConfigFilenames = new Set();
   const configList = Array.isArray(layerConfig) ? layerConfig : [];
   const knownConfigFilenames = new Set(
-    configList.map(cfg => normalizeFilenameReference(cfg?.filename))
+    configList.map(cfg => normalizeFilenameReference(filenameForExportFormat(cfg?.filename, format)))
   );
   const additionalConfigEntries = [];
 
@@ -577,6 +1252,7 @@ async function exportCompleteDataset() {
     const geo = layer.toGeoJSON();
     if (!geo || !geo.geometry) return null;
     geo.properties = { ...(layer.feature?.properties || {}), ...(geo.properties || {}) };
+    if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(geo);
     if (isDeletedFeature(layer.feature || geo)) return null;
     return geo;
   };
@@ -586,38 +1262,53 @@ async function exportCompleteDataset() {
     if (features.length === 0) return;
     features.forEach(f => {
       if (!f.properties) f.properties = {};
-      /* Only add "Last Changes" for modified features. */
-      if (f.properties.modified) {
-        f.properties["Last Changes"] = contributorName;
-      }
+      if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(f);
     });
-    const geojson = {
-      type: "FeatureCollection",
-      features: features
-    };
-    zip.file(filename, JSON.stringify(geojson, null, 2));
-    exportedFilenames.add(normalizeFilenameReference(filename));
+    const outputFilename = filenameForExportFormat(filename, format);
+    zip.file(outputFilename, serializeFeatures(features, format));
+    exportedFilenames.add(normalizeFilenameReference(outputFilename));
   }
+
+  const collectConfiguredFeatures = (config, configuredLayer) => {
+    const isCompressorConfig = /compressor/i.test(`${config?.filename || ''} ${config?.legendName || ''}`);
+    const sources = isCompressorConfig
+      ? Array.from(new Set([
+          (typeof originalCompressorsLayer !== 'undefined' ? originalCompressorsLayer : null),
+          (typeof compressorsLayer !== 'undefined' ? compressorsLayer : null),
+          configuredLayer
+        ].filter(Boolean)))
+      : [configuredLayer].filter(Boolean);
+    const candidates = [];
+    sources.forEach(source => source.eachLayer?.(layer => {
+      const exported = extractFeatureForExport(layer);
+      if (exported) candidates.push(exported);
+    }));
+    if (!isCompressorConfig) return candidates;
+
+    const replacedIds = new Set(candidates
+      .map(feature => String(feature.properties?.Distribution_Group ?? '').trim().toLowerCase())
+      .filter(Boolean));
+    const byId = new Map();
+    candidates.forEach(feature => {
+      const id = String(feature.properties?.id ?? feature.properties?.ID ?? '').trim().toLowerCase();
+      const group = String(feature.properties?.Distribution_Group ?? '').trim();
+      if (!group && id && replacedIds.has(id)) return;
+      const key = id || JSON.stringify(feature.geometry);
+      if (!byId.has(key)) byId.set(key, feature);
+    });
+    return Array.from(byId.values());
+  };
 
   /* Collect data dynamically from all layers in layerConfig. */
   configList.forEach(config => {
-    const layerName = config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
+    const layerName = config.filename.replace(/\.(?:geojson|csv)$/i, '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
     const layer = dynamicLayers[layerName];
-    
-    if (layer) {
-      const features = [];
-      layer.eachLayer(l => {
-        const f = extractFeatureForExport(l);
-        if (f) {
-          features.push(f);
-        }
-      });
-      
-      if (features.length > 0) {
-        addGeoJSONToZip(features, config.filename);
-        exportedConfigFilenames.add(normalizeFilenameReference(config.filename));
-        console.log(`Exported ${features.length} features to ${config.filename}`);
-      }
+    const features = collectConfiguredFeatures(config, layer);
+
+    if (features.length > 0) {
+      addGeoJSONToZip(features, config.filename);
+      exportedConfigFilenames.add(normalizeFilenameReference(filenameForExportFormat(config.filename, format)));
+      console.log(`Exported ${features.length} features to ${config.filename}`);
     }
   });
 
@@ -654,7 +1345,7 @@ async function exportCompleteDataset() {
       if (!layer) return;
       const settings = layer._customLayerSettings || {};
       const fallbackFilename = settings.filename || `${name}.geojson`;
-      if (exportedFilenames.has(normalizeFilenameReference(fallbackFilename))) {
+      if (exportedFilenames.has(normalizeFilenameReference(filenameForExportFormat(fallbackFilename, format)))) {
         return;
       }
       const features = [];
@@ -664,8 +1355,8 @@ async function exportCompleteDataset() {
       });
       if (features.length > 0) {
         addGeoJSONToZip(features, fallbackFilename);
-        exportedConfigFilenames.add(normalizeFilenameReference(fallbackFilename));
-        const normalized = normalizeFilenameReference(fallbackFilename);
+        exportedConfigFilenames.add(normalizeFilenameReference(filenameForExportFormat(fallbackFilename, format)));
+        const normalized = normalizeFilenameReference(filenameForExportFormat(fallbackFilename, format));
         if (!knownConfigFilenames.has(normalized)) {
           additionalConfigEntries.push(buildCustomConfigEntry(layer, name, fallbackFilename));
         }
@@ -774,12 +1465,12 @@ async function exportCompleteDataset() {
     
     /* Add all layers from layerConfig with current settings. */
     configList.forEach(config => {
-      const normalized = normalizeFilenameReference(config.filename);
+      const normalized = normalizeFilenameReference(filenameForExportFormat(config.filename, format));
       if (!exportedConfigFilenames.has(normalized)) {
         return;
       }
       wsData.push([
-        config.filename,
+        filenameForExportFormat(config.filename, format),
         config.legendName,
         config.color,
         config.markerType,
@@ -790,7 +1481,7 @@ async function exportCompleteDataset() {
     });
 
     additionalConfigEntries.forEach(config => {
-      const normalized = normalizeFilenameReference(config.filename);
+      const normalized = normalizeFilenameReference(filenameForExportFormat(config.filename, format));
       if (!exportedConfigFilenames.has(normalized)) {
         return;
       }
@@ -798,7 +1489,7 @@ async function exportCompleteDataset() {
         return;
       }
       wsData.push([
-        config.filename,
+        filenameForExportFormat(config.filename, format),
         config.legendName,
         config.color,
         config.markerType,
@@ -812,7 +1503,7 @@ async function exportCompleteDataset() {
     if (!hasShortPipeConfig && shortPipeLayerHasFeatures()) {
       const shortPipeConfig = getShortPipeConfigTemplate();
       wsData.push([
-        shortPipeConfig.filename,
+        filenameForExportFormat(shortPipeConfig.filename, format),
         shortPipeConfig.legendName,
         shortPipeConfig.color,
         shortPipeConfig.markerType,
@@ -846,18 +1537,12 @@ async function exportCompleteDataset() {
     console.log('No Data and Licensing file found');
   }
 
+  if (options.download === false) return zip;
+
   /* Generate and download ZIP. */
-  zip.generateAsync({ type: "blob" }).then(function(content) {
-    const url = URL.createObjectURL(content);
-    const a = document.createElement("a");
-    a.style.display = 'none';
-    a.href = url;
-    a.download = `Complete_Dataset_${currentProject}_${new Date().toISOString().split('T')[0]}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    /* Delay revocation so Edge has time to start the download before the blob is released. */
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  return zip.generateAsync({ type: "blob" }).then(function(content) {
+    const filename = `Complete_Dataset_${currentProject}_${new Date().toISOString().split('T')[0]}.zip`;
+    return saveExportBlob(content, filename);
     console.log('✓ Export completed successfully');
   });
 }
@@ -886,22 +1571,28 @@ function getShortPipeResolvedExportPath() {
 function openExportDialog() {
   showCustomPopup(
     '💾 Export Data',
-    '<p style="text-align: center; margin: 15px 0;">Choose export type:</p>',
+    `<p style="text-align: center; margin: 15px 0 8px;">Choose export type:</p>
+     <label for="export-file-format" style="display:block; margin:0 0 6px;">File format</label>
+     <select id="export-file-format" style="width:100%; padding:8px; margin-bottom:12px;">
+       <option value="geojson">GeoJSON (.geojson)</option>
+       <option value="csv">CSV (.csv)</option>
+       <option value="lego">LEGO Format</option>
+     </select>`,
     [
       {
         text: 'Export Changes',
         type: 'primary',
-        onClick: exportChanges
+        onClick: () => exportChanges(document.getElementById('export-file-format')?.value)
       },
       {
         text: 'Export Filtered Data',
         type: 'primary',
-        onClick: showFolderNameDialog
+        onClick: () => showFolderNameDialog(document.getElementById('export-file-format')?.value)
       },
       {
         text: 'Export Complete Dataset',
         type: 'primary',
-        onClick: exportCompleteDataset
+        onClick: () => exportCompleteDataset(document.getElementById('export-file-format')?.value)
       },
       {
         text: 'Cancel',

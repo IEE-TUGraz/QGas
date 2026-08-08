@@ -135,7 +135,7 @@
                       }
                       setNodeSelectionHandlers((marker) => {
                         clearNodeSelectionHandlers();
-                        window.selectedNodeForInfrastructure = marker.feature?.properties?.ID;
+                        window.selectedNodeForInfrastructure = marker.feature?.properties?.id;
                         showCustomPopup(
                           '✅ Node Selected',
                           `<p style="text-align: center; margin: 15px 0;">Node selected: ${window.selectedNodeForInfrastructure}<br>Now place your infrastructure point on the map.</p>`,

@@ -46,8 +46,8 @@
 		<span class="guide-text">See the Python and JavaScript libraries used by QGas.</span>
 	</div>
 	<div class="guide-item">
-		<a class="guide-btn" href="dev/architecture/">Architecture Notes</a>
-		<span class="guide-text">Understand the system components and data flow.</span>
+		<a class="guide-btn" href="dev/node-reference-manipulations/">Node Reference Manipulations</a>
+		<span class="guide-text">Understand topology-safe changes to node references and connected elements.</span>
 	</div>
 </div>
 

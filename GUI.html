@@ -40,6 +40,7 @@
       --tile-padding: clamp(0.75rem, 1vw, 1.1rem);
       --tile-font-size: clamp(0.78rem, 0.9vw, 0.92rem);
       --menu-btn-width: clamp(7.5rem, 9vw, 8.6rem);
+      --menu-panel-width: calc(var(--menu-btn-width) + clamp(0.4rem, 1vw, 0.75rem) + clamp(0.75rem, 1.5vw, 1rem) + clamp(0.75rem, 1.5vw, 1rem) + 4px);
       --menu-btn-font-size: clamp(0.78rem, 0.9vw, 0.92rem);
       --menu-btn-padding-y: clamp(0.45rem, 0.8vh, 0.6rem);
       --menu-btn-padding-x: clamp(0.7rem, 1vw, 1rem);
@@ -583,7 +584,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: calc(var(--menu-btn-width) + clamp(0.4rem, 1vw, 0.75rem));
+  box-sizing: border-box;
+  width: var(--menu-panel-width);
   gap: clamp(0.4rem, 1.2vh, 0.75rem);
   background: rgba(255, 255, 255, 0.92);
   border: 2px solid #0070f3;
@@ -603,7 +605,163 @@
 #other-buttons {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
+  width: calc(var(--menu-panel-width) + 94px);
+}
+
+#other-buttons > .main-menu-btn {
+  box-sizing: border-box;
+  min-width: var(--menu-panel-width);
+  width: var(--menu-panel-width);
+}
+
+.options-audit-row {
+  position: relative;
+  width: var(--menu-panel-width);
+}
+
+.options-audit-group {
+  display: flex;
+  flex: 0 0 var(--menu-panel-width);
+  gap: 6px;
+  width: var(--menu-panel-width);
+}
+
+.options-audit-group .main-menu-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 0;
+  box-sizing: border-box;
+  padding-left: 2px;
+  padding-right: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.main-menu-btn.audit-log-btn {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.main-menu-btn.undo-changes-btn {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 0;
+  min-width: 88px;
+  width: 88px;
+  padding-left: 8px;
+  padding-right: 8px;
+  white-space: nowrap;
+}
+
+.custom-popup.custom-popup--audit-log {
+  width: min(720px, calc(100vw - 40px));
+  max-width: min(720px, calc(100vw - 40px));
+  box-sizing: border-box;
+}
+
+.custom-popup.custom-popup--undo {
+  width: min(720px, calc(100vw - 40px));
+  max-width: min(720px, calc(100vw - 40px));
+  box-sizing: border-box;
+}
+
+.undo-action-list {
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.undo-action {
+  margin-bottom: 7px;
+  border: 1px solid #d6dbe1;
+  border-radius: 6px;
+  background: #f7f8fa;
+}
+
+.undo-action summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.undo-action-checkbox {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.undo-action-body {
+  padding: 0 12px 12px 38px;
+  font: 12px/1.55 Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.undo-change-item + .undo-change-item {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #d6dbe1;
+}
+
+.undo-empty {
+  color: #666;
+  text-align: center;
+  padding: 24px 10px;
+}
+
+.audit-log-viewer {
+  width: 100%;
+  min-height: 180px;
+  max-height: 55vh;
+  overflow: auto;
+  box-sizing: border-box;
+  color: #20252b;
+  user-select: text;
+}
+
+.audit-log-session-header {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #eef4fb;
+  font-weight: 600;
+}
+
+.audit-log-entry {
+  margin-bottom: 7px;
+  border: 1px solid #d6dbe1;
+  border-radius: 6px;
+  background: #f7f8fa;
+}
+
+.audit-log-entry summary {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.audit-log-entry-body {
+  padding: 0 12px 12px 30px;
+  font: 12px/1.55 Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.audit-log-change + .audit-log-change {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #d6dbe1;
+}
+
+.audit-log-change strong {
+  display: block;
+  margin-bottom: 3px;
+  font-family: Arial, sans-serif;
 }
 
 .main-menu-btn {
@@ -1081,6 +1239,49 @@
 }
 
 /* Contributor Input Box */
+#object-search-box {
+  position: fixed;
+  bottom: 105px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1500;
+  font-size: 14px;
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 40px));
+}
+
+#object-search-box label {
+  font-weight: bold;
+}
+
+#object-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#object-search-button {
+  padding: 4px 9px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #f2f2f2;
+  cursor: pointer;
+}
+
+#object-search-button:hover {
+  background: #e5e5e5;
+}
+
 #contributor-box {
   position: fixed;
   bottom: 40px;
@@ -1092,6 +1293,10 @@
   z-index: 1500;
   font-size: 14px;
   border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 40px));
 }
 
 #contributor-box label {
@@ -1100,10 +1305,12 @@
 }
 
 #contributor-box input {
+  flex: 1 1 auto;
+  min-width: 0;
   padding: 4px 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 200px;
+  width: auto;
 }
 
 /* OSM Attribution */
@@ -1670,7 +1877,13 @@
     <button class="main-menu-btn" onclick="openExportDialog()">💾 Export</button>
     <button class="main-menu-btn" onclick="openGroupsPanel()">📦 Groups</button>
     <button class="main-menu-btn" onclick="toggleFilterPanel()">🔍 Filter</button>
-    <button class="main-menu-btn" onclick="toggleOptionsPanel()">⚙️ Options</button>
+    <div class="options-audit-row">
+      <div class="options-audit-group">
+        <button class="main-menu-btn" onclick="toggleOptionsPanel()" title="Open application options" aria-label="Open application options">Options</button>
+        <button class="main-menu-btn audit-log-btn" onclick="openAuditLogPopup()" title="Open the session audit log" aria-label="Open the session audit log">Log</button>
+      </div>
+      <button class="main-menu-btn undo-changes-btn" onclick="openUndoChangesPopup()" title="Review and undo changes" aria-label="Review and undo changes">↶ Undo</button>
+    </div>
   </div>
 </div>
 
@@ -1722,7 +1935,7 @@
       🔌<br>Reconnect Infrastructure
     </button>
     <button class="tool-tile" data-mode="topology-check" onclick="selectTool('topology-check')">
-      🧭<br>Topology Check
+      🧭<br>Topology Checker
     </button>
     <button class="tool-tile" data-mode="distribute-compressors" onclick="selectTool('distribute-compressors')">
       🔄<br>Distribute Compressors
@@ -1787,6 +2000,11 @@
 <button id="plan-georef-resume-btn" class="plan-georef-resume-btn">Return to plan image</button>
 
 <div id="function-btns"></div>
+<div id="object-search-box">
+  <label for="object-search-input">Find ID:</label>
+  <input type="text" id="object-search-input" placeholder="Enter object ID" autocomplete="off">
+  <button type="button" id="object-search-button" title="Find object" aria-label="Find object">🔍</button>
+</div>
 <div id="contributor-box">
   <label for="contributor-input">Contributor:</label>
   <input type="text" id="contributor-input" placeholder="Enter your name" value="Max Mustermann">
@@ -1829,6 +2047,9 @@
 
 <script src="js/ui/tools.js"></script>
 <script src="js/ui/filter.js"></script>
+<script src="js/ui/search.js"></script>
+<script src="js/ui/audit_log.js"></script>
+<script src="js/ui/undo.js"></script>
   <script src="js/core.js"></script>
 
 <script>

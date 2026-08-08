@@ -724,8 +724,8 @@ function markPipelineLayerForDeletion(layer, parentLayer) {
     layer,
     parentLayer,
     feature: layer.feature,
-    startNodeId: layer.feature?.properties?.Start_Node,
-    endNodeId: layer.feature?.properties?.End_Node
+    startNodeId: layer.feature?.properties?.node_start,
+    endNodeId: layer.feature?.properties?.node_end
     });
   }
   layer._markedForDeletion = true;
@@ -769,6 +769,7 @@ function applyMarkerDeletionStyle(marker) {
       weight: marker.options?.weight,
       fillColor: marker.options?.fillColor,
       fillOpacity: marker.options?.fillOpacity,
+      opacity: marker.options?.opacity,
       radius: marker.options?.radius
     };
   }
@@ -792,12 +793,14 @@ function restoreMarkerDeletionStyle(marker) {
     color: baseStyle.color || '#000',
     weight: baseStyle.weight ?? 1,
     fillColor: baseStyle.fillColor || '#ff7800',
-    fillOpacity: typeof baseStyle.fillOpacity === 'number' ? baseStyle.fillOpacity : 0.85
+    fillOpacity: typeof baseStyle.fillOpacity === 'number' ? baseStyle.fillOpacity : 0.85,
+    opacity: typeof baseStyle.opacity === 'number' ? baseStyle.opacity : 1
   });
   if (typeof marker.setRadius === 'function' && baseStyle.radius !== undefined) {
     marker.setRadius(baseStyle.radius);
   }
   marker._markedForDeletion = false;
+  delete marker._deleteBackupMarkerStyle;
 }
 
 function togglePointDeletion(marker, pendingList, parentLayer) {
@@ -982,7 +985,7 @@ function activateDeleteMode() {
     resetAllPipelineHighlights();
     
     /* Capture state before entering delete mode. */
-    console.log('Speichere aktuellen Karten-Zustand vor Delete Mode');
+    console.log('Saving current map state before Delete Mode');
     deleteModeBackup = {
       pipelines: pipelineLayer ? getLayerFeatures(pipelineLayer) : [],
       nodes: nodeLayer ? getLayerFeatures(nodeLayer) : [],
@@ -1000,7 +1003,7 @@ function activateDeleteMode() {
     pendingPowerplantDeletions.length = 0;
     pendingCustomDeletions.length = 0;
     pendingDrawnItemDeletions.length = 0;
-    console.log('Backup erstellt:', {
+    console.log('Backup created:', {
       pipelines: deleteModeBackup.pipelines.length,
       nodes: deleteModeBackup.nodes.length,
       powerplants: deleteModeBackup.powerplants.length,
@@ -1011,7 +1014,7 @@ function activateDeleteMode() {
     
     currentMode = 'delete';
     updateActiveToolDisplay('delete');
-    console.log('Delete Mode aktiviert');
+    console.log('Delete Mode activated');
     updateDeleteModeButtonsState();
     
     /* Setup delete handlers for pipeline layers. */

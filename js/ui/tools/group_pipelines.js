@@ -56,7 +56,7 @@ function __computeLineLengthKm(layer) {
   try {
     if (!layer) return 0;
     const props = (layer.feature && layer.feature.properties) ? layer.feature.properties : {};
-    const raw = (props.Length_km ?? props.length_km ?? props.LENGTH_KM ?? null);
+    const raw = props.length_km ?? null;
     const num = raw !== null ? parseFloat(raw) : NaN;
     if (!isNaN(num) && isFinite(num)) return num;
     if (typeof layer.getLatLngs === 'function' && typeof map !== 'undefined' && map && typeof map.distance === 'function') {
@@ -209,7 +209,7 @@ function activatePipelineSelection() {
       layer.on('click', function(e) {
         if (!groupingMode) return;
         
-        const pipelineId = layer.feature.properties.ID;
+        const pipelineId = layer.feature.properties.id;
         const index = selectedPipelinesForGroup.findIndex(p => p.id === pipelineId);
         
         if (index === -1) {
@@ -281,7 +281,7 @@ function activateStartPointSelection() {
     clearNodeSelectionHandlers();
     const feature = marker.feature || {};
     const props = feature.properties || {};
-    groupStartPoint = props.ID;
+    groupStartPoint = props.id;
     selectEndPoint();
   });
 }
@@ -310,7 +310,7 @@ function activateEndPointSelection() {
     clearNodeSelectionHandlers();
     const feature = marker.feature || {};
     const props = feature.properties || {};
-    groupEndPoint = props.ID;
+    groupEndPoint = props.id;
     finalizePipelineGroup();
   });
 }
@@ -390,28 +390,28 @@ function orderPipelinesByFlow(pipelines, startNode, endNode) {
       const p = remaining[i];
       const props = p.layer.feature.properties;
       
-      if (props.Start_Node === currentNode) {
+      if (props.node_start === currentNode) {
         /* Correct orientation. */
         ordered.push(p);
-        currentNode = props.End_Node;
+        currentNode = props.node_end;
         remaining.splice(i, 1);
         found = true;
         break;
-      } else if (props.End_Node === currentNode) {
+      } else if (props.node_end === currentNode) {
         /* Reverse orientation. */
-        const temp = props.Start_Node;
-        props.Start_Node = props.End_Node;
-        props.End_Node = temp;
+        const temp = props.node_start;
+        props.node_start = props.node_end;
+        props.node_end = temp;
         
         /* Reverse the LatLng order. */
         const latlngs = p.layer.getLatLngs();
         p.layer.setLatLngs(latlngs.reverse());
         
-        /* Mark modified. */
-        props.modified = true;
+        /* Track the contributor who changed the direction. */
+        markLayerChanged(p.layer);
         
         ordered.push(p);
-        currentNode = props.End_Node;
+        currentNode = props.node_end;
         remaining.splice(i, 1);
         found = true;
         break;

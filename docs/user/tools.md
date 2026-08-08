@@ -64,7 +64,7 @@
 
 <p><img src="../../assets/Shortpipe.png" alt="Short Pipe" style="max-width:100%; height:auto;"></p>
 
-<p>In publicly available sources, looped pipelines are often visualized as two or three parallel pipelines with a relatively large distance in between for better visibility. In reality, however, they are usually right next to each other and might be physically coupled at certain locations, e.g., when they are connected to other pipelines. This may require adding connections between the parallel pipelines, which should not restrict the actual gas flow. We call these connections Short Pipes and assign them a 9999 mm diameter and 0 m length. Existing pipelines can be changed to short pipes with the corresponding tool. This leads to additional pipeline segments at locations where the individual pipelines are connected to each other. These additional pipeline segments should not limit the gas flow of the network, as they are no physical elements.</p>
+<p>In publicly available sources, looped pipelines are often visualized as two or three parallel pipelines with a relatively large distance in between for better visibility. In reality, however, they are usually right next to each other and might be physically coupled at certain locations, e.g., when they are connected to other pipelines. This may require adding connections between the parallel pipelines, which should not restrict the actual gas flow. We call these connections Short Pipes and assign them a 9999 mm diameter and zero physical length. Existing pipelines can be moved into the dedicated Short Pipes layer with this tool. Their IDs change from the <code>PL_</code> namespace to <code>SP_</code> while preserving the remaining suffix.</p>
 </details>
 
 <details class="tool-section">
@@ -158,7 +158,11 @@
 
 <p><img src="../../assets/Distribute_Compressor.png" alt="Distribute Compressors" style="max-width:100%; height:auto;"></p>
 
-<p>When working with looped pipeline systems, such as the Trans Austria Gas Pipeline, individual loops often share infrastructure components, including compressor stations. In some datasets, these compressor stations are aggregated into a single entity that is associated with only one pipeline of the system. To enable individual modelling of each loop, such aggregated compressor stations can be disaggregated using the Distribute Compressors tool. Using this functionality, the original compressor station is divided into multiple substations, each assigned an averaged power value. The distributed compressor stations are indicated by a small dotted line. In the dataset, these substations are represented as individual compressors and can be manipulated independently. To correctly model all compressor stations, the pipeline is clipped at the compressor locations, splitting it into two segments at each newly created compressor.</p>
+<p>When working with looped pipeline systems, individual loops often share aggregated compressor stations. The Distribute Compressors tool replaces one compressor with a user-defined number of independently editable compressors in the same Compressor layer. IDs are assigned numerically: the replacement at the original location receives <code>&lt;original ID&gt;_1</code>, followed by <code>_2</code>, <code>_3</code>, and so on. Rated power is divided evenly.</p>
+
+<p>For every additional compressor, the selected pipeline is split at the closest point. Two terminal nodes (<code>&lt;compressor ID&gt;_A</code> and <code>_B</code>) are created with the standard node attribute schema. Their pressure limits are inherited from the corresponding original pipeline endpoints. The compressor connects these terminals through <code>node_start</code> and <code>node_end</code>, so it acts as a network edge in topology analysis and export. The split pipeline segments reference the respective terminal nodes.</p>
+
+<p>Dashed lines between geographically nearest distributed compressors are visual aids only: they are not topology connections and are not exported as dataset features. When the workflow ends, all legend visibility states are reapplied. Distributed compressors and their nodes are synchronized with active/original filtered layers so they are included consistently in complete and filtered project exports.</p>
 </details>
 
 <details class="tool-section">
@@ -172,17 +176,32 @@
 <details class="tool-section">
 <summary>Topology Checker</summary>
 
-<p><img src="../../assets/Topology_Check.jpg" alt="Topology Checker" style="max-width:100%; height:auto;"></p>
+<p><img src="../../assets/Topology_Check.png" alt="Topology Checker" style="max-width:100%; height:auto;"></p>
 
-<p>The Topology Checker validates the network after edits to ensure that pipelines and nodes remain consistent. It scans the dataset for common topology problems introduced by geometry changes or edits.</p>
+<p>The Topology Checker analyzes all active node, line-type, and in-line element layers to identify inconsistencies between network references and geometries. When the tool is opened, the current dataset is checked and a summary of all detected issues and connected networks is displayed.</p>
 
-<p>Typical checks include:</p>
+<p>If a country filter is active, the checker analyzes only the filtered subnetwork. Pipelines that have at least one endpoint in a selected country and both endpoint nodes retained by the filter are included; unrelated elements outside the filtered scope are excluded from Connection Issues, zero-length checks, geometry checks, and network-island construction. Layer visibility alone is not used as a substitute for the country-filter rules.</p>
+
+<p>The Topology Checker identifies:</p>
 <ul>
-<li>Disconnected pipeline endpoints (start or end node missing)</li>
-<li>Nodes without any connected pipelines</li>
-<li>Count of isolated network islands (unconnected sub-networks)</li>
+<li>Connection issues, including unconnected nodes and missing, empty, or invalid node references of line-type, point-type, and in-line elements</li>
+<li>Self-loops whose start and end node references are identical</li>
+<li>Duplicate element IDs and parallel pipelines connecting the same pair of nodes</li>
+<li>Pipeline geometries whose endpoints differ by more than 10 m from their referenced nodes</li>
+<li>Pipeline crossings without a shared node</li>
+<li>Different nodes located within 1 m of each other</li>
+<li>Line geometries with zero length or invalid coordinates</li>
+<li>Disconnected networks, which are listed as individual network islands</li>
 </ul>
 
-<p>Run the checker after larger edits (routing, splitting, grouping, or deletion) and before exporting. This helps prevent invalid networks and reduces errors in downstream analyses.</p>
+<p>Compressors and other in-line elements with two terminal references are treated as network edges. A compressor therefore connects its <code>node_start</code> and <code>node_end</code> nodes when connected-network islands are calculated. Decorative helper lines are ignored.</p>
+
+<p>The individual result categories can be expanded and collapsed. Within each category, the detected elements are grouped by layer. Nodes at the same location are additionally grouped according to whether both nodes are connected by a valve, compressor, pipeline, another element, or have no shared connection.</p>
+
+<p>Nodes without a connection and elements with missing, empty, or invalid node references are shown together under "Connection Issues".</p>
+
+<p>Each issue in the result window can be selected to highlight the affected element and temporarily hide the remaining dataset. Selecting a network displays only the nodes, lines, and in-line elements belonging to this network island. The "Show All" button restores the complete map, while "Refresh" repeats the analysis after changes to the dataset.</p>
+
+<p>The checker should be used after larger edits, such as rerouting, splitting, grouping, reconnecting, or deleting elements, and before exporting the project. The tool only reports possible inconsistencies and does not modify the dataset automatically.</p>
 </details>
 

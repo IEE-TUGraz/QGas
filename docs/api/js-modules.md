@@ -177,7 +177,7 @@
 <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr><td><code>latlng</code></td><td><code>L.LatLng</code></td><td>Geographic position for the new node.</td></tr>
-<tr><td><code>nodeId</code></td><td><code>string</code></td><td>Unique identifier to assign to the node feature (<code>properties.ID</code>).</td></tr>
+<tr><td><code>nodeId</code></td><td><code>string</code></td><td>Unique identifier to assign to the node feature (<code>properties.id</code>).</td></tr>
 </tbody></table>
 <p class="api-returns"><strong>Returns:</strong> <code>L.CircleMarker</code> — The created node marker.</p>
 <div class="api-example">
@@ -346,11 +346,18 @@ console.log(&#x27;Total nodes:&#x27;, count);</code></pre>
 </div>
 </details>
 <details class="tool-section">
+<summary><code>audit_log.js</code></summary>
+<div class="module-header">
+<p><strong>QGas Session Audit Log</strong></p>
+<p>Owns the browser-session log, buffered server writes, current-log reader, and the collapsible Audit Log popup. Dataset change detection remains in core.js and submits already formatted entries through this module.</p>
+</div>
+</details>
+<details class="tool-section">
 <summary><code>export.js</code></summary>
 <div class="module-header">
 <p><strong>QGas - Export Module</strong></p>
 <p><strong>Module Description:</strong></p>
-<p>Handles export workflows for changed, filtered, and complete datasets, including ZIP assembly and Excel configuration generation.</p>
+<p>Handles export workflows for changed, filtered, and complete datasets, including ZIP assembly and Excel configuration generation. Filtered exports apply active country rules consistently and merge synchronized active/original compressor features without duplicate IDs.</p>
 <p>Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Inffeldgasse 18, Graz, 8010, Austria Disclaimer: AI-assisted tools were used to support development and documentation.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
@@ -359,7 +366,7 @@ console.log(&#x27;Total nodes:&#x27;, count);</code></pre>
 </ul>
 <p><strong>Public API:</strong></p>
 <ul>
-  <li>exportChanges(): Export modified and deleted elements.</li>
+  <li>exportChanges(): Export changed and deleted elements.</li>
   <li>exportFilteredData(folderName): Export filtered datasets to ZIP.</li>
   <li>exportCompleteDataset(): Export the full current dataset to ZIP.</li>
 </ul>
@@ -367,14 +374,14 @@ console.log(&#x27;Total nodes:&#x27;, count);</code></pre>
 <summary><strong>Public API Functions</strong><span class="api-func-count"> (4)</span></summary>
 <div class="api-functions">
 <details class="api-func">
-<summary class="api-sig"><code>exportChanges()</code></summary>
+<summary class="api-sig"><code>exportChanges(format = &#x27;geojson&#x27;)</code></summary>
 <div class="api-func-body">
-<p class="api-desc">Export all modified and deleted elements as GeoJSON files in a ZIP archive. Collects every layer feature marked with <code>modified: true</code> and all entries in the soft-deletion registry. Organises the output into GeoJSON files per infrastructure type (pipelines, nodes, compressors, storages, power-plants, etc.) and triggers a browser download of the resulting ZIP archive (<code>changes.zip</code>).</p>
+<p class="api-desc">Export all changed and deleted elements as GeoJSON files in a ZIP archive. Collects every layer feature whose <code>last_changed</code> value is not <code>original</code> and all entries in the soft-deletion registry. Organises the output into GeoJSON files per infrastructure type (pipelines, nodes, compressors, storages, power-plants, etc.) and triggers a browser download of the resulting ZIP archive (<code>changes.zip</code>).</p>
 <p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
 </div>
 </details>
 <details class="api-func">
-<summary class="api-sig"><code>exportFilteredData(folderName)</code></summary>
+<summary class="api-sig"><code>exportFilteredData(folderName, format = &#x27;geojson&#x27;, options = {})</code></summary>
 <div class="api-func-body">
 <p class="api-desc">Export the currently filtered dataset as a ZIP archive. Iterates all active layer configurations, applies the current attribute filter state, and serialises each layer to a GeoJSON file. Supplementary files (Excel configuration workbook, short-pipe definitions) are appended and the archive is offered for browser download as <code>&lt;folderName&gt;.zip</code>.</p>
 <table class="api-params">
@@ -386,7 +393,7 @@ console.log(&#x27;Total nodes:&#x27;, count);</code></pre>
 </div>
 </details>
 <details class="api-func">
-<summary class="api-sig"><code>exportCompleteDataset()</code></summary>
+<summary class="api-sig"><code>exportCompleteDataset(format = &#x27;geojson&#x27;, options = {})</code></summary>
 <div class="api-func-body">
 <p class="api-desc">Export the complete current dataset as a ZIP archive. Serialises all registered dynamic layers — including layers that have no unsaved modifications — together with the Excel configuration workbook and short-pipe definitions. The archive is downloaded as <code>complete_dataset.zip</code>. Useful for creating a full project snapshot or preparing input for a fresh run.</p>
 <p class="api-returns"><strong>Returns:</strong> <code>Promise&lt;void&gt;</code></p>
@@ -651,6 +658,13 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 </details>
 </div>
 </details>
+</div>
+</details>
+<details class="tool-section">
+<summary><code>search.js</code></summary>
+<div class="module-header">
+<p><strong>QGas object-ID search.</strong></p>
+<p>Finds features in currently active map layers without changing visibility.</p>
 </div>
 </details>
 <details class="tool-section">
@@ -1064,7 +1078,7 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <summary><code>change_direction.js</code></summary>
 <div class="module-header">
 <p><strong>QGas - Change Direction Tool</strong></p>
-<p>Enables users to reverse the flow direction of pipeline segments by swapping their Start_Node and End_Node references.</p>
+<p>Enables users to reverse the flow direction of pipeline segments by swapping their node_start and node_end references.</p>
 <p><strong>Key Features:</strong></p>
 <ul>
   <li>Visual direction indicators (arrows)</li>
@@ -1079,7 +1093,7 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <ul>
   <li>Uses Leaflet PolylineDecorator for arrow visualization</li>
   <li>Tracks state in directionChangeState Map</li>
-  <li>Swaps Start_Node and End_Node properties</li>
+  <li>Swaps node_start and node_end properties</li>
   <li>Updates all connected references</li>
 </ul>
 <p><strong>Development Information:</strong></p>
@@ -1092,7 +1106,7 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 </ul>
 <p><strong>Inputs:</strong></p>
 <ul>
-  <li>Selected pipeline features and their Start_Node/End_Node attributes.</li>
+  <li>Selected pipeline features and their node_start/node_end attributes.</li>
   <li>Map layer references for visual arrows.</li>
 </ul>
 <p><strong>Public API:</strong></p>
@@ -1210,9 +1224,11 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <ul>
   <li>Creates sub-nodes at compressor positions</li>
   <li>Splits pipelines at insertion points</li>
-  <li>Generates unique IDs for sub-compressors (e.g., C_01A, C_01B)</li>
-  <li>Maintains visual connection to original location</li>
-  <li>Updates topology automatically</li>
+  <li>Generates case-insensitively unique numeric IDs (e.g., C_01_1, C_01_2)</li>
+  <li>Creates standard A/B terminal nodes and inherits endpoint pressure limits</li>
+  <li>Uses dashed nearest-neighbour lines as visual aids only</li>
+  <li>Synchronizes active/original layers for filtering and export</li>
+  <li>Restores legend-controlled visibility when the workflow ends</li>
 </ul>
 <p><strong>Development Information:</strong></p>
 <ul>
@@ -1331,7 +1347,7 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 </ul>
 <p><strong>Technical Details:</strong></p>
 <ul>
-  <li>Uses Leaflet.Editable for geometry manipulation</li>
+  <li>Uses Leaflet Draw editing handlers for geometry manipulation</li>
   <li>Tracks original geometry for discard functionality</li>
   <li>Updates all connected elements when nodes move</li>
   <li>Maintains split node offsets during zoom/pan</li>
@@ -1635,7 +1651,7 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <ul>
   <li>Subnodes positioned with pixel offsets from parent</li>
   <li>Offsets maintained during map zoom/pan</li>
-  <li>Start_Node/End_Node references updated in pipeline properties</li>
+  <li>node_start/node_end references updated in pipeline properties</li>
   <li>Supports multiple subnode creation from single parent</li>
   <li>Interactive highlighting for pipeline selection</li>
 </ul>
@@ -1788,8 +1804,8 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <details class="tool-section">
 <summary><code>topology_check.js</code></summary>
 <div class="module-header">
-<p><strong>QGas - Topology Check Tool</strong></p>
-<p>Analyzes network connectivity to identify unconnected nodes, unconnected lines, and disconnected network islands. Provides clickable results that focus the map on the selected element or isolate a specific network component.</p>
+<p><strong>QGas - Topology Checker Tool</strong></p>
+<p>Analyzes active network references, geometry, IDs, connectivity, and disconnected network islands. With an active country filter, the analysis is restricted to the filtered subnetwork using the same pipeline/point country rules as the Filter UI. Compressors and other two-terminal in-line elements act as network edges, while decorative helper layers are ignored. Results can focus individual issues or isolate a connected network component without modifying the dataset.</p>
 <p><strong>Development Information:</strong></p>
 <ul>
   <li>Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer</li>
@@ -1808,12 +1824,19 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <details class="api-func">
 <summary class="api-sig"><code>activateTopologyCheckTool()</code></summary>
 <div class="api-func-body">
-<p class="api-desc">Run the network topology analysis and display results. Resets all active editing modes, performs a full topological analysis of the loaded node and line layers (via <code>buildTopologyAnalysis</code>), and renders the results in a popup. The analysis identifies: (a) isolated nodes not connected to any pipeline, (b) pipelines not connected at either endpoint to a node, (c) disconnected network sub-graphs (islands). Each result entry is clickable and pans/zooms the map to the offending element.</p>
+<p class="api-desc">Run the network topology analysis and display results. Resets all active editing modes, performs a full topological analysis of the loaded node and line layers (via <code>buildTopologyAnalysis</code>), and renders the results in a popup. The analysis identifies: (a) isolated nodes not connected to any pipeline, (b) pipelines not connected at either endpoint to a node, (c) self-loops whose start and end node are identical, and (d) dangling node references across all feature layers, (e) duplicate feature IDs, (f) parallel pipelines sharing the same unordered endpoint pair, and (g) geometric endpoint mismatches, unexplained pipeline crossings, (h) co-located nodes, zero-length lines, and invalid geometries, and (i) disconnected network sub-graphs (islands). Each result entry is clickable and pans/zooms the map to the offending element.</p>
 <p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
 </div>
 </details>
 </div>
 </details>
+</div>
+</details>
+<details class="tool-section">
+<summary><code>undo.js</code></summary>
+<div class="module-header">
+<p><strong>QGas Selective Undo Module</strong></p>
+<p>Keeps up to 50 committed actions (maximum 25 MB of feature snapshots) in memory. Only affected features are retained; complete map layers are never copied. Multi-feature tool operations are grouped into one selectable step.</p>
 </div>
 </details>
 <hr>

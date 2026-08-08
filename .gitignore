@@ -17,6 +17,8 @@ site/
 Input/*
 !Input/.gitkeep
 !Input/SciGrid_IGGIELGNC_1
+!Input/Lego_Template/
+!Input/Lego_Template/**
 
 Plans/*
 !Plans/.gitkeep

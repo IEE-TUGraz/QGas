@@ -124,6 +124,11 @@ SOFTWARE.
 <td>MIT</td>
 <td>Same as QGas license</td>
 </tr>
+<tr>
+<td><strong>chartjs-plugin-zoom</strong></td>
+<td>MIT</td>
+<td>Same as QGas license</td>
+</tr>
 </tbody>
 </table>
 

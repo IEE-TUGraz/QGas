@@ -63,9 +63,6 @@
    */
   window.activateInfoMode = function activateInfoMode(force = false) {
     try {
-      if (!force && currentMode === 'info') {
-        return;
-      }
       currentMode = 'info';
       /* Remove edit buttons if present. */
       const saveBtn = document.getElementById('save-edit-btn');
@@ -78,7 +75,7 @@
         cleanupNodeEdit(window.selectedNodeMarker);
       }
       
-      console.log('Info Mode aktiviert');
+      console.log('Info Mode activated');
       applyEditGeometryVisibility(false);
       
       /* Update toolbox button highlights. */
@@ -108,6 +105,7 @@
       
       /* Reset element highlights. */
       resetAllElementHighlights();
+      resetAllTransientMarkerHighlights();
       
       /* Pipeline interactions for Info mode. */
       if (pipelineLayer) {
@@ -119,14 +117,14 @@
               return;
             }
             try {
-              console.log('Pipeline geklickt in Info Mode:', layer);
+              console.log('Pipeline clicked in Info Mode:', layer);
               
               /* Highlight the selected pipeline. */
               highlightPipeline(layer);
               
               /* Show modal with pipeline details. */
               const content = createModalPopupContent(layer.feature.properties, layer);
-              const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
+              const title = `Pipeline: ${layer.feature.properties.id || 'Unnamed'}`;
               showElementModal(title, content, layer);
               
               setTimeout(() => rebindModalAttributeControls(layer), 100);
@@ -152,7 +150,7 @@
               
               /* Show modal with pipeline details. */
               const content = createModalPopupContent(layer.feature.properties, layer);
-              const title = `Pipeline: ${layer.feature.properties.ID || 'Unnamed'}`;
+              const title = `Pipeline: ${layer.feature.properties.id || 'Unnamed'}`;
               showElementModal(title, content, layer);
               
               setTimeout(() => rebindModalAttributeControls(layer), 100);
@@ -173,14 +171,14 @@
               return;
             }
             try {
-              console.log('Short-Pipe geklickt in Info Mode:', layer);
+              console.log('Short-Pipe clicked in Info Mode:', layer);
               
               /* Highlight the selected short pipe. */
               highlightPipeline(layer);
               
               /* Show modal with short-pipe details. */
               const content = createModalPopupContent(layer.feature.properties, layer);
-              const title = `Short-Pipe: ${layer.feature.properties.ID || 'Unnamed'}`;
+              const title = `Short-Pipe: ${layer.feature.properties.id || 'Unnamed'}`;
               showElementModal(title, content, layer);
               
               setTimeout(() => rebindModalAttributeControls(layer), 100);
@@ -200,10 +198,10 @@
           }
           try {
             L.DomEvent.stopPropagation(e);
-            console.log('Node geklickt in Info Mode:', marker.feature.properties.ID);
+            console.log('Node clicked in Info Mode:', marker.feature.properties.id);
             highlightElement(marker);
             const content = createModalPopupContent(marker.feature.properties, marker);
-            const title = `Node: ${marker.feature.properties.ID || marker.feature.properties.Name || 'Unnamed'}`;
+            const title = `Node: ${marker.feature.properties.id || marker.feature.properties.name || 'Unnamed'}`;
             showElementModal(title, content, marker);
             setTimeout(() => rebindModalAttributeControls(marker), 100);
           } catch (error) {

@@ -472,7 +472,7 @@ function applyColorChange() {
 }
 
 function updateLayerColor(layerKey, newColor) {
-  console.log(`Ändere ${layerKey} Farbe zu ${newColor}`);
+  console.log(`Changing ${layerKey} color to ${newColor}`);
   const entry = getStyleableLayerEntry(layerKey);
   if (!entry) return;
 
@@ -688,7 +688,7 @@ function openStylePicker(layerKey) {
 }
 
 function selectShape(shape, sourceElement = null) {
-  console.log('selectShape aufgerufen mit:', shape);
+  console.log('selectShape called with:', shape);
   selectedShape = shape;
   
   document.querySelectorAll('.shape-option').forEach(option => {
@@ -699,21 +699,21 @@ function selectShape(shape, sourceElement = null) {
   if (selectedOption) {
     selectedOption.classList.add('selected');
     selectedOption.focus();
-    console.log('Shape-Option markiert:', shape);
+    console.log('Shape option selected:', shape);
   } else {
-    console.log('Fehler: Shape-Option nicht gefunden:', shape);
+    console.log('Error: Shape option not found:', shape);
   }
 }
 
 function applyShapeChange() {
-  console.log('applyShapeChange aufgerufen');
+  console.log('applyShapeChange called');
   console.log('currentLayerBeingChanged:', currentLayerBeingChanged);
   console.log('selectedShape:', selectedShape);
   
   if (currentLayerBeingChanged && selectedShape) {
     const entry = getStyleableLayerEntry(currentLayerBeingChanged);
     if (entry && entry.geometry !== 'line') {
-      console.log('Ändere Shape von', entry.name, 'zu', selectedShape);
+      console.log('Changing shape of', entry.name, 'to', selectedShape);
       entry.shape = selectedShape;
       if (entry.configRef) {
         entry.configRef.shape = selectedShape;
@@ -733,7 +733,7 @@ function applyShapeChange() {
       updateAllElementInteractions();
     }
   } else {
-    console.log('Fehler: currentLayerBeingChanged oder selectedShape nicht gesetzt');
+    console.log('Error: currentLayerBeingChanged or selectedShape is not set');
   }
   closeStylePickerModal();
 }
@@ -857,7 +857,7 @@ function applyLineTypeChange() {
  * Layer shape and size update helpers.
  */
 function updateLayerShape(layerKey, newShape) {
-  console.log(`updateLayerShape aufgerufen: ${layerKey} zu ${newShape}`);
+  console.log(`updateLayerShape called: ${layerKey} to ${newShape}`);
   const entry = getStyleableLayerEntry(layerKey);
   if (!entry || entry.geometry === 'line') return;
   if (Array.isArray(entry.layerRefs)) {
@@ -881,7 +881,7 @@ function updateLineType(layerKey, newLineType) {
 }
 
 function updateLayerSize(layerKey, newSize) {
-  console.log(`Ändere ${layerKey} Größe zu ${newSize}`);
+  console.log(`Changing ${layerKey} size to ${newSize}`);
   const entry = getStyleableLayerEntry(layerKey);
   if (!entry) return;
 
@@ -916,16 +916,16 @@ function updateLayerSize(layerKey, newSize) {
 }
 
 function recreateElementMarkersWithShape(elementLayer, newShape, styleEntry = null) {
-  console.log('recreateElementMarkersWithShape aufgerufen:', elementLayer, newShape);
+  console.log('recreateElementMarkersWithShape called:', elementLayer, newShape);
 
   if (!elementLayer) {
-    console.log('elementLayer ist undefined/null');
+    console.log('elementLayer is undefined/null');
     return;
   }
 
   const entry = styleEntry || resolveStyleEntryForLayer(elementLayer);
   if (!entry) {
-    console.log('Kein Style-Eintrag für Layer gefunden');
+    console.log('No style entry found for layer');
     return;
   }
 
@@ -1163,10 +1163,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const tilePane = document.querySelector('.leaflet-tile-pane');
       if (this.checked) {
         tilePane.classList.add('map-grayscale');
-        console.log('Graustufen-Modus aktiviert - nur Hintergrundkarte');
+        console.log('Grayscale mode activated - background map only');
       } else {
         tilePane.classList.remove('map-grayscale');
-        console.log('Graustufen-Modus deaktiviert');
+        console.log('Grayscale mode deactivated');
       }
     });
   }
@@ -1210,7 +1210,10 @@ function createModalPopupContent(properties, layer) {
     'overlap_percentage',
     'overlap_length',
     'Owner',
-    'Parent'
+    'Parent',
+    'modified',
+    'element_key',
+    '__elementKey'
   ];
   
   // Dynamisch versteckte Attribute basierend auf Benutzereinstellungen
@@ -1226,7 +1229,7 @@ function createModalPopupContent(properties, layer) {
     const value = properties[key];
     content += `<tr>
       <td><strong>${key}:</strong></td>
-      <td><input type="text" value="${value || ''}" data-key="${key}" style="width: 200px;"></td>
+      <td><input type="text" value="${value ?? ''}" data-key="${key}" style="width: 200px;"></td>
     </tr>`;
   });
   

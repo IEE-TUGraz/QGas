@@ -26,7 +26,7 @@
  * Technical Details:
  * - Subnodes positioned with pixel offsets from parent
  * - Offsets maintained during map zoom/pan
- * - Start_Node/End_Node references updated in pipeline properties
+ * - node_start/node_end references updated in pipeline properties
  * - Supports multiple subnode creation from single parent
  * - Interactive highlighting for pipeline selection
  * 
@@ -119,10 +119,7 @@ function replaceNodeReferenceValue(props, keys, fromId, toId) {
       changed = true;
     }
   }
-  if (changed) {
-    props.modified = true;
-    window.hasUnsavedChanges = true;
-  }
+  if (changed) window.hasUnsavedChanges = true;
   return changed;
 }
 
@@ -137,6 +134,7 @@ function updateLineNodeReferences(layer, fromId, toId) {
     endChanged
   };
   if (result.updated) {
+    markLayerChanged(layer);
     const baseStyle = layer._splitHighlightBaseStyle || getPathStyleSnapshot(layer);
     if (baseStyle) {
       layer.setStyle(baseStyle);
@@ -191,7 +189,7 @@ function updateSplitLineGeometryEndpoint(layer, endpoint, latlng) {
   }
   updateSplitLineFeatureGeometry(layer.feature, endpoint, targetLatLng);
   if (layer.feature && layer.feature.properties) {
-    layer.feature.properties.modified = true;
+    markLayerChanged(layer);
   }
   window.hasUnsavedChanges = true;
 }
@@ -420,7 +418,7 @@ function splitNode(nodeLayerObj) {
   if (!nodeLayerObj || !nodeLayerObj.feature || !nodeLayerObj.feature.properties) {
     return;
   }
-  const origId = nodeLayerObj.feature.properties.ID;
+  const origId = nodeLayerObj.feature.properties.id;
   const latlng = nodeLayerObj.getLatLng();
   showInputPrompt({
     title: '🔀 Split Node',
@@ -474,7 +472,7 @@ function performSplitNode(nodeLayerObj, latlng, origId, count) {
     const angle = (2 * Math.PI * i) / count;
     const suffix = String.fromCharCode(97 + i);
     const newId = `${origId}_${suffix}`;
-    const newProps = { ...nodeLayerObj.feature.properties, ID: newId, Type: 'Node', modified: true };
+    const newProps = { ...nodeLayerObj.feature.properties, id: newId, Type: 'Node' };
     const offsetVector = {
       x: Math.cos(angle) * pxOffset,
       y: Math.sin(angle) * pxOffset
@@ -487,6 +485,7 @@ function performSplitNode(nodeLayerObj, latlng, origId, count) {
       properties: newProps,
       geometry: { type: 'Point', coordinates: [offsetLatLng.lng, offsetLatLng.lat] }
     };
+    markLayerChanged(marker, { tool: 'Split Node' });
     owningLayer.addLayer(marker);
     subnodes.push(marker);
   }
@@ -509,7 +508,7 @@ function performSplitNode(nodeLayerObj, latlng, origId, count) {
 function resetCustomPopupDocking() {
   const popup = document.getElementById('custom-popup');
   const overlay = document.getElementById('custom-popup-overlay');
-  if (popup) popup.classList.remove('custom-popup--bottom-right');
+  if (popup) popup.classList.remove('custom-popup--bottom-right', 'custom-popup--audit-log', 'custom-popup--undo');
   if (overlay) {
     overlay.classList.remove('custom-popup-overlay--nonmodal');
     overlay.style.pointerEvents = 'auto';
@@ -873,7 +872,7 @@ function assignPipelinesToSubnodes(subnodes, origId, highlightedEntries = []) {
 
   const assignSelectionToSubnode = (subnodeMarker, selectionSet) => {
     if (!selectionSet || !selectionSet.size || !subnodeMarker) return;
-    const subnodeId = subnodeMarker?.feature?.properties?.ID;
+    const subnodeId = subnodeMarker?.feature?.properties?.id;
     const subnodeLatLng = subnodeMarker.getLatLng?.();
     selectionSet.forEach(layer => {
       const changeInfo = updateLineNodeReferences(layer, origId, subnodeId);
@@ -905,7 +904,7 @@ function assignPipelinesToSubnodes(subnodes, origId, highlightedEntries = []) {
       return;
     }
 
-    const subnodeId = subnode.feature.properties.ID;
+    const subnodeId = subnode.feature.properties.id;
     const selectionSet = new Set();
 
     setActiveSplitSubnodeMarker(subnode);

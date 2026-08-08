@@ -363,30 +363,24 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
 
     const { firstCoordinates, secondCoordinates, divisionCoord } = splitResult;
     const properties = { ...feature.properties };
-    const contributor = getCurrentContributor();
-    const originalId = properties.ID || 'PIPE';
+    const originalId = properties.id || 'PIPE';
     const originalName = properties.Name || originalId;
     const newNodeId = getNextNodeId();
 
     const firstProps = {
       ...properties,
-      ID: `${originalId}_a`,
+      id: `${originalId}_a`,
       Name: `${originalName}_a`,
-      length_km: calculateLineLength(firstCoordinates),
-      Contributor: contributor,
-      modified: true
+      length_km: calculateLineLength(firstCoordinates)
     };
     const secondProps = {
       ...properties,
-      ID: `${originalId}_b`,
+      id: `${originalId}_b`,
       Name: `${originalName}_b`,
-      length_km: calculateLineLength(secondCoordinates),
-      Contributor: contributor,
-      modified: true
+      length_km: calculateLineLength(secondCoordinates)
     };
-
-    if ('End_Node' in firstProps) firstProps.End_Node = newNodeId;
-    if ('Start_Node' in secondProps) secondProps.Start_Node = newNodeId;
+    firstProps.node_end = newNodeId;
+    secondProps.node_start = newNodeId;
 
     const firstPipeline = {
       type: 'Feature',
@@ -398,7 +392,10 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
       properties: secondProps,
       geometry: { type: 'LineString', coordinates: secondCoordinates }
     };
+    markFeatureChanged(firstPipeline, { tool: 'Divide Pipeline' });
+    markFeatureChanged(secondPipeline, { tool: 'Divide Pipeline' });
 
+    const originalUndoContexts = window.QGasUndo?.captureContexts(selectedPipelineLayer.feature);
     const parentGroup = resolveDivisionParentLayer(selectedPipelineLayer);
     if (parentGroup && typeof parentGroup.removeLayer === 'function') {
       if (!parentGroup.hasLayer || parentGroup.hasLayer(selectedPipelineLayer)) {
@@ -412,6 +409,13 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
       drawnItems.removeLayer(selectedPipelineLayer);
     }
     if (selectedPipelineLayer?.feature) {
+      markLayerChanged(selectedPipelineLayer, {
+        changeType: 'Topology Change',
+        tool: 'Divide Pipeline',
+        description: `Original element replaced by ${firstProps.id} and ${secondProps.id}`,
+        undoOperation: 'delete',
+        undoContexts: originalUndoContexts
+      });
       deletedPipelines.push(selectedPipelineLayer.feature);
     }
 
@@ -437,10 +441,19 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
       }
     }
 
-    const startNodeLayerRef = findNodeLayerForNodeId(properties.Start_Node);
-    const endNodeLayerRef = findNodeLayerForNodeId(properties.End_Node);
-    const targetNodeLayer = startNodeLayerRef || endNodeLayerRef || getActivePipelineNodeLayer();
-    addDivisionNodeMarker(divisionCoord, newNodeId, properties, targetNodeLayer);
+    const startNodeContext = findDivisionNodeContext(properties.node_start);
+    const endNodeContext = findDivisionNodeContext(properties.node_end);
+    const targetNodeLayer = startNodeContext.layer || endNodeContext.layer || getActivePipelineNodeLayer();
+    const sampleNodeProperties = typeof findSampleNodeMarker === 'function'
+      ? findSampleNodeMarker(targetNodeLayer)?.feature?.properties
+      : null;
+    const nodeProperties = buildDivisionNodeProperties(
+      startNodeContext.properties,
+      endNodeContext.properties,
+      newNodeId,
+      sampleNodeProperties
+    );
+    addDivisionNodeMarker(divisionCoord, newNodeId, nodeProperties, targetNodeLayer);
 
     window.hasUnsavedChanges = true;
     selectedPipelineForDivision = null;
@@ -451,8 +464,8 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
       '✅ Line Divided',
       `<p style="text-align: center; margin: 15px 0;">Line successfully divided!<br><br>
       <strong>New Node:</strong> ${newNodeId}<br>
-      <strong>Segment 1:</strong> ${firstProps.ID} (${firstProps.length_km.toFixed(2)} km)<br>
-      <strong>Segment 2:</strong> ${secondProps.ID} (${secondProps.length_km.toFixed(2)} km)</p>`,
+      <strong>Segment 1:</strong> ${firstProps.id} (${firstProps.length_km.toFixed(2)} km)<br>
+      <strong>Segment 2:</strong> ${secondProps.id} (${secondProps.length_km.toFixed(2)} km)</p>`,
       [{ text: 'OK', type: 'primary', onClick: () => { cancelPipelineDivision(); } }]
     );
   } catch (error) {
@@ -461,42 +474,77 @@ function dividePipelineAtLatLng(selectedPipelineLayer, clickLatLng) {
   }
 }
 
-function addDivisionNodeMarker(coordinates, nodeId, baseProperties = {}, targetLayer = null) {
-  if (!Array.isArray(coordinates)) return;
-  const destinationLayer = targetLayer || getActivePipelineNodeLayer();
-  if (!destinationLayer) return;
-  const latlng = [coordinates[1], coordinates[0]];
-  const defaultAttrs = getDefaultPointAttributes('Node') || {};
-  const nodeStyle = getDefaultNodeStyleOptions(destinationLayer);
-  const newNode = {
-    type: 'Feature',
-    properties: {
-      ...defaultAttrs,
-      ID: nodeId,
-      Type: 'Node',
-      Name: nodeId,
-      Country: baseProperties.Country || defaultAttrs.Country || '',
-      Contributor: getCurrentContributor(),
-      modified: true
-    },
-    geometry: {
-      type: 'Point',
-      coordinates
+function findDivisionNodeContext(nodeId) {
+  const result = { layer: null, properties: null };
+  if (!nodeId) return result;
+  const nodeLayers = typeof getAllNodeLayers === 'function' ? getAllNodeLayers() : [];
+
+  const visit = (candidate, parentLayer) => {
+    if (!candidate || result.properties) return;
+    const properties = candidate.feature?.properties;
+    if (properties && String(properties.id ?? properties.ID ?? '') === String(nodeId)) {
+      result.layer = parentLayer;
+      result.properties = properties;
+      return;
+    }
+    if (typeof candidate.eachLayer === 'function') {
+      candidate.eachLayer(child => visit(child, parentLayer));
     }
   };
 
-  const nodeMarker = L.circleMarker(latlng, nodeStyle);
-  nodeMarker.feature = newNode;
-  captureOriginalMarkerStyle(nodeMarker, 'default');
-  destinationLayer.addLayer(nodeMarker);
+  nodeLayers.forEach(layer => visit(layer, layer));
+  return result;
+}
 
-  nodeMarker.on('click', function () {
-    if (currentMode === 'info') {
-      const content = createModalPopupContent(newNode.properties, nodeMarker);
-      const title = `Node: ${newNode.properties.ID || 'Unnamed'}`;
-      showElementModal(title, content, nodeMarker);
-    }
+function buildDivisionNodeProperties(startProperties, endProperties, nodeId, sampleProperties = null) {
+  const defaultProperties = typeof getDefaultPointAttributes === 'function'
+    ? (getDefaultPointAttributes('Node') || {})
+    : {};
+  const template = startProperties || endProperties || sampleProperties || defaultProperties;
+  const properties = { ...template };
+
+  /* Preserve the complete configured node schema if the two endpoint records
+   * are not perfectly symmetrical. Values from the start node remain the
+   * template; missing fields are filled from the end node. */
+  [sampleProperties, endProperties].filter(Boolean).forEach(sourceProperties => {
+    Object.keys(sourceProperties).forEach(key => {
+      if (!Object.prototype.hasOwnProperty.call(properties, key)) {
+        properties[key] = sourceProperties[key];
+      }
+    });
   });
+
+  delete properties.ID;
+  properties.id = nodeId;
+  if (Object.prototype.hasOwnProperty.call(properties, 'Name')) properties.Name = nodeId;
+  if (Object.prototype.hasOwnProperty.call(properties, 'name')) properties.name = nodeId;
+
+  const numericEndpointValues = (key) => [startProperties?.[key], endProperties?.[key]]
+    .filter(value => value !== null && value !== '' && Number.isFinite(Number(value)))
+    .map(Number);
+  const maximumPressures = numericEndpointValues('pressure_max');
+  const minimumPressures = numericEndpointValues('pressure_min');
+  if (maximumPressures.length) properties.pressure_max = Math.min(...maximumPressures);
+  if (minimumPressures.length) properties.pressure_min = Math.max(...minimumPressures);
+
+  return properties;
+}
+
+function addDivisionNodeMarker(coordinates, nodeId, nodeProperties = {}, targetLayer = null) {
+  if (!Array.isArray(coordinates)) return;
+  const destinationLayer = targetLayer || getActivePipelineNodeLayer();
+  if (!destinationLayer) return;
+  const latlng = L.latLng(coordinates[1], coordinates[0]);
+  const sourceUsesType = Object.prototype.hasOwnProperty.call(nodeProperties, 'Type');
+  const nodeMarker = createNewNode(latlng, nodeId, {
+    targetLayer: destinationLayer,
+    properties: nodeProperties,
+    tool: 'Divide Pipeline'
+  });
+  if (nodeMarker?.feature?.properties && !sourceUsesType) {
+    delete nodeMarker.feature.properties.Type;
+  }
+  return nodeMarker;
 }
 
 function getNextNodeId() {
@@ -506,7 +554,7 @@ function getNextNodeId() {
   layersToScan.forEach(layerGroup => {
     if (!layerGroup || typeof layerGroup.eachLayer !== 'function') return;
     layerGroup.eachLayer(layer => {
-      const id = layer?.feature?.properties?.ID;
+      const id = layer?.feature?.properties?.id;
       if (!id || !id.startsWith('N_')) return;
       const num = parseInt(id.substring(2));
       if (!Number.isNaN(num) && num > maxId) {

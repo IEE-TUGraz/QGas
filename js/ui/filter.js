@@ -51,6 +51,139 @@
  * ================================================================================
  */
 
+/* Additional configured line layers that are not represented by the legacy
+ * pipeline references. Each entry keeps the original layer and its filtered
+ * counterpart so country filtering works consistently across all line layers. */
+const additionalCountryLineFilters = new Map();
+let countryFilterNodeFeatureIndex = new Map();
+
+function refreshCountryFilterNodeFeatureIndex() {
+  const index = new Map();
+  const source = originalNodeLayer || nodeLayer;
+  if (source && typeof source.eachLayer === 'function') {
+    source.eachLayer(layer => {
+      const properties = layer?.feature?.properties;
+      const id = String(properties?.ID ?? properties?.id ?? '').trim().toLowerCase();
+      if (id) index.set(id, layer.feature);
+    });
+  }
+  countryFilterNodeFeatureIndex = index;
+}
+
+function matchSingleReferencedNodeCountry(feature, selectedCountryCodes) {
+  const values = getValuesForCandidateKeys(feature?.properties, [
+    'node', 'node_id', 'nodeid', 'node_ref', 'node_reference'
+  ]);
+  const nodeIds = Array.from(new Set(values
+    .map(value => String(value ?? '').trim().toLowerCase())
+    .filter(Boolean)));
+
+  if (nodeIds.length !== 1) return null;
+  const referencedNode = countryFilterNodeFeatureIndex.get(nodeIds[0]);
+  if (!referencedNode) return false;
+  return doesFeatureMatchCountryFilter(
+    referencedNode.properties,
+    selectedCountryCodes,
+    elementCountryKeys
+  );
+}
+
+function prepareAdditionalCountryLineFilters() {
+  if (additionalCountryLineFilters.size || typeof getAllLineLayers !== 'function') return;
+  const knownLayers = new Set([
+    originalPipelineLayer, originalEstimatedPipelinesLayer,
+    originalShortPipeLayer, originalHydrogenPipeLayer,
+    pipelineLayer, estimatedPipelinesLayer, shortPipeLayer, hydrogenPipeLayer
+  ].filter(Boolean));
+
+  getAllLineLayers().forEach(original => {
+    if (!original || knownLayers.has(original) || typeof original.eachLayer !== 'function') return;
+    const filtered = L.layerGroup();
+    if (original._qgasMeta) filtered._qgasMeta = original._qgasMeta;
+    additionalCountryLineFilters.set(original, {
+      original,
+      filtered,
+      wasVisible: map.hasLayer(original)
+    });
+  });
+}
+
+function applyAdditionalCountryLineFilters(selectedCountryCodes) {
+  prepareAdditionalCountryLineFilters();
+  additionalCountryLineFilters.forEach(entry => {
+    const { original, filtered, wasVisible } = entry;
+    filtered.clearLayers();
+    original.eachLayer(layer => {
+      if (layer?._clickLayer && map.hasLayer(layer._clickLayer)) map.removeLayer(layer._clickLayer);
+      if (layer.feature && shouldShowPipeline(layer.feature, selectedCountryCodes)) {
+        filtered.addLayer(layer);
+      }
+    });
+    applyDeletedIdentitiesToLayer(filtered);
+    if (map.hasLayer(original)) map.removeLayer(original);
+    if (wasVisible && !map.hasLayer(filtered)) map.addLayer(filtered);
+    synchronizeLayerReferences(null, original, filtered);
+  });
+}
+
+function restoreAdditionalCountryLineLayers() {
+  additionalCountryLineFilters.forEach(entry => {
+    const { original, filtered, wasVisible } = entry;
+    if (map.hasLayer(filtered)) map.removeLayer(filtered);
+    applyDeletedIdentitiesToLayer(original);
+    if (wasVisible && !map.hasLayer(original)) map.addLayer(original);
+    synchronizeLayerReferences(null, filtered, original);
+  });
+  additionalCountryLineFilters.clear();
+}
+
+function collectEndpointNodeIdsForCountryFilter(selectedCountryCodes) {
+  const nodeIds = new Set();
+  const lineLayers = new Set([
+    originalPipelineLayer,
+    originalEstimatedPipelinesLayer,
+    originalShortPipeLayer,
+    originalHydrogenPipeLayer
+  ].filter(Boolean));
+
+  prepareAdditionalCountryLineFilters();
+  additionalCountryLineFilters.forEach(entry => {
+    if (entry?.original) lineLayers.add(entry.original);
+  });
+
+  const startKeys = Array.isArray(window.START_NODE_KEYS) && window.START_NODE_KEYS.length
+    ? window.START_NODE_KEYS
+    : ['node_start'];
+  const endKeys = Array.isArray(window.END_NODE_KEYS) && window.END_NODE_KEYS.length
+    ? window.END_NODE_KEYS
+    : ['node_end'];
+
+  const addReference = (properties, keys) => {
+    const values = getValuesForCandidateKeys(properties, keys);
+    values.forEach(value => {
+      const nodeId = String(value ?? '').trim();
+      if (nodeId) nodeIds.add(nodeId);
+    });
+  };
+
+  const visit = layer => {
+    if (!layer) return;
+    if (layer.feature?.properties && shouldShowPipeline(layer.feature, selectedCountryCodes)) {
+      addReference(layer.feature.properties, startKeys);
+      addReference(layer.feature.properties, endKeys);
+      return;
+    }
+    if (typeof layer.eachLayer === 'function') {
+      try { layer.eachLayer(visit); } catch (error) {
+        console.warn('Could not inspect line layer endpoints during country filtering.', error);
+      }
+    }
+  };
+
+  lineLayers.forEach(visit);
+  return nodeIds;
+}
+
 /**
  * Open the main filter selection modal.
  *
@@ -396,6 +529,7 @@ function restoreAllOriginalLayers() {
   if (window.selectedPipelineLayer === prevPipelineLayer) {
     window.selectedPipelineLayer = pipelineLayer;
   }
+  restoreAdditionalCountryLineLayers();
 }
 
 function removeAllCurrentLayers() {
@@ -471,6 +605,8 @@ function removeAllCurrentLayers() {
 function filterAllElementsByCountries(selectedCountryCodes) {
   console.log('filterAllElementsByCountries called with:', Array.from(selectedCountryCodes));
 
+  refreshCountryFilterNodeFeatureIndex();
+
   const prevPipelineLayer = pipelineLayer;
   const prevEstimatedLayer = estimatedPipelinesLayer;
   const prevNodeLayer = nodeLayer;
@@ -511,6 +647,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
     }
     console.log(`Added ${label} layer with ${layerGroup.getLayers().length} features`);
   };
+  const requiredPipelineNodeIds = collectEndpointNodeIdsForCountryFilter(selectedCountryCodes);
 
   /* Filter pipelines. */
   if (originalPipelineLayer) {
@@ -540,7 +677,10 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   if (originalNodeLayer && filteredNodeLayer) {
     let nodeCount = 0;
     originalNodeLayer.eachLayer(layer => {
-      if (layer.feature && shouldShowElement(layer.feature, selectedCountryCodes)) {
+      const nodeProperties = layer.feature?.properties;
+      const nodeId = String(nodeProperties?.ID ?? nodeProperties?.id ?? '').trim();
+      const isPipelineEndpoint = nodeId && requiredPipelineNodeIds.has(nodeId);
+      if (layer.feature && (shouldShowElement(layer.feature, selectedCountryCodes) || isPipelineEndpoint)) {
         filteredNodeLayer.addLayer(layer);
         nodeCount++;
       }
@@ -710,6 +850,7 @@ function filterAllElementsByCountries(selectedCountryCodes) {
   addFilteredLayerToMap(filteredProductionsLayer, 'production');
   addFilteredLayerToMap(filteredHydrogenPipeLayer, 'hydrogen pipeline');
   addFilteredLayerToMap(filteredElectrolyzersLayer, 'electrolyzer');
+  applyAdditionalCountryLineFilters(selectedCountryCodes);
 
   /* Update current layer references (originals remain intact). */
   pipelineLayer = filteredPipelineLayer;
@@ -786,6 +927,10 @@ function enforceFilteredLayerPresence() {
   ensurePair(originalProductionsLayer, productionsLayer);
   ensurePair(originalHydrogenPipeLayer, hydrogenPipeLayer);
   ensurePair(originalElectrolyzersLayer, electrolyzersLayer);
+  additionalCountryLineFilters.forEach(({ original, filtered, wasVisible }) => {
+    if (map.hasLayer(original)) map.removeLayer(original);
+    if (wasVisible && !map.hasLayer(filtered)) map.addLayer(filtered);
+  });
 }
 
 /*
@@ -893,6 +1038,8 @@ const pipelineStartCountryKeys = [
   'Country_Start',
   'country_start',
   'Start_Country',
+  'nuts3_start',
+  'NUTS3_Start',
   'NUTS3_ID_Start',
   'NUTS_ID_Start'
 ];
@@ -901,6 +1048,8 @@ const pipelineEndCountryKeys = [
   'Country_End',
   'country_end',
   'End_Country',
+  'nuts3_end',
+  'NUTS3_End',
   'NUTS3_ID_End',
   'NUTS_ID_End'
 ];
@@ -1045,6 +1194,11 @@ function shouldShowElement(feature, selectedCountryCodes) {
   if (!feature?.properties) {
     console.log('shouldShowElement: No properties', feature);
     return false;
+  }
+
+  const referencedNodeMatches = matchSingleReferencedNodeCountry(feature, selectedCountryCodes);
+  if (referencedNodeMatches !== null) {
+    return referencedNodeMatches;
   }
 
   if (doesFeatureMatchCountryFilter(feature.properties, selectedCountryCodes, elementCountryKeys)) {
