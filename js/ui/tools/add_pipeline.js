@@ -240,6 +240,34 @@ function detectExistingNodeLayer() {
   return entries.length ? entries[0].layer : null;
 }
 
+function getNodePressureProperties(nodeId, preferredLayer = null) {
+  if (!nodeId) return {};
+  const layers = [preferredLayer, ...getAllNodeLayers()].filter((layer, index, all) => layer && all.indexOf(layer) === index);
+  let matchedProperties = null;
+
+  const visit = layer => {
+    if (matchedProperties || !layer) return;
+    if (layer.feature?.properties?.id === nodeId) {
+      matchedProperties = layer.feature.properties;
+      return;
+    }
+    if (typeof layer.eachLayer === 'function') {
+      layer.eachLayer(child => visit(child));
+    }
+  };
+
+  layers.forEach(layer => visit(layer));
+  if (!matchedProperties) return {};
+
+  const pressureProperties = {};
+  ['pressure_max', 'pressure_min'].forEach(key => {
+    if (Object.prototype.hasOwnProperty.call(matchedProperties, key)) {
+      pressureProperties[key] = matchedProperties[key];
+    }
+  });
+  return pressureProperties;
+}
+
 function resolveNodeLayer(options = {}) {
   const { createIfMissing = false } = options;
   if (nodeLayer) {
@@ -528,6 +556,12 @@ function proceedWithAddPipeline() {
             return;
           }
 
+          const inheritedPressureProperties = needsNewStartNode && !needsNewEndNode
+            ? getNodePressureProperties(endNodeId, targetLayerRef)
+            : (needsNewEndNode && !needsNewStartNode
+              ? getNodePressureProperties(startNodeId, targetLayerRef)
+              : {});
+
           if (needsNewStartNode) {
             const nodeIdContext = getNodeIdContext(targetLayerRef);
             const newNodeId = formatElementId(
@@ -535,7 +569,11 @@ function proceedWithAddPipeline() {
               contributorInitials,
               getNextIdNumber(nodeIdContext.typeKey, targetLayerRef)
             );
-            createNewNode(startLatLng, newNodeId, { targetLayer: targetLayerRef });
+            createNewNode(startLatLng, newNodeId, {
+              targetLayer: targetLayerRef,
+              properties: inheritedPressureProperties,
+              tool: 'Add Pipeline'
+            });
             startNodeId = newNodeId;
             hasStartNode = true;
           }
@@ -547,7 +585,11 @@ function proceedWithAddPipeline() {
               contributorInitials,
               getNextIdNumber(nodeIdContext.typeKey, targetLayerRef)
             );
-            createNewNode(endLatLng, newNodeId, { targetLayer: targetLayerRef });
+            createNewNode(endLatLng, newNodeId, {
+              targetLayer: targetLayerRef,
+              properties: inheritedPressureProperties,
+              tool: 'Add Pipeline'
+            });
             endNodeId = newNodeId;
             hasEndNode = true;
           }
@@ -832,6 +874,11 @@ function finalizeDrawnPipeline(polyline) {
   let startLatLng = context.startLatLng;
   const contextNodeLayer = context.nodeLayer || getActivePipelineNodeLayer();
   const nodeIdContext = getNodeIdContext(contextNodeLayer);
+  const inheritedPressureProperties = context.startNodeId && !context.endNodeId
+    ? getNodePressureProperties(context.startNodeId, contextNodeLayer)
+    : (context.endNodeId && !context.startNodeId
+      ? getNodePressureProperties(context.endNodeId, contextNodeLayer)
+      : {});
 
   /* Start node: use existing or create a new one. */
   let startNodeIdLocal;
@@ -846,7 +893,11 @@ function finalizeDrawnPipeline(polyline) {
       contributorInitials,
       getNextIdNumber(nodeIdContext.typeKey, contextNodeLayer)
     );
-    createNewNode(startLatLng, startNodeIdLocal, { targetLayer: contextNodeLayer });
+    createNewNode(startLatLng, startNodeIdLocal, {
+      targetLayer: contextNodeLayer,
+      properties: inheritedPressureProperties,
+      tool: 'Add Pipeline'
+    });
   }
 
   /* End node: use existing or create a new one. */
@@ -862,7 +913,11 @@ function finalizeDrawnPipeline(polyline) {
       contributorInitials,
       getNextIdNumber(nodeIdContext.typeKey, contextNodeLayer)
     );
-    createNewNode(endLatLng, endNodeIdLocal, { targetLayer: contextNodeLayer });
+    createNewNode(endLatLng, endNodeIdLocal, {
+      targetLayer: contextNodeLayer,
+      properties: inheritedPressureProperties,
+      tool: 'Add Pipeline'
+    });
   }
   
   /* Set pipeline properties and metadata. */

@@ -472,21 +472,17 @@ function performSplitNode(nodeLayerObj, latlng, origId, count) {
     const angle = (2 * Math.PI * i) / count;
     const suffix = String.fromCharCode(97 + i);
     const newId = `${origId}_${suffix}`;
-    const newProps = { ...nodeLayerObj.feature.properties, id: newId, Type: 'Node' };
+    const newProps = { ...nodeLayerObj.feature.properties, id: newId };
     const offsetVector = {
       x: Math.cos(angle) * pxOffset,
       y: Math.sin(angle) * pxOffset
     };
     const offsetLatLng = computeSplitSubnodeLatLng(latlng, offsetVector);
-    const marker = L.circleMarker([offsetLatLng.lat, offsetLatLng.lng], { ...baseNodeStyle });
-    captureOriginalMarkerStyle(marker, 'default');
-    marker.feature = {
-      type: 'Feature',
+    const marker = createNewNode(offsetLatLng, newId, {
+      targetLayer: owningLayer,
       properties: newProps,
-      geometry: { type: 'Point', coordinates: [offsetLatLng.lng, offsetLatLng.lat] }
-    };
-    markLayerChanged(marker, { tool: 'Split Node' });
-    owningLayer.addLayer(marker);
+      tool: 'Split Node'
+    });
     subnodes.push(marker);
   }
   subnodes.forEach(marker => {
@@ -508,7 +504,7 @@ function performSplitNode(nodeLayerObj, latlng, origId, count) {
 function resetCustomPopupDocking() {
   const popup = document.getElementById('custom-popup');
   const overlay = document.getElementById('custom-popup-overlay');
-  if (popup) popup.classList.remove('custom-popup--bottom-right', 'custom-popup--audit-log', 'custom-popup--undo');
+  if (popup) popup.classList.remove('custom-popup--bottom-right', 'custom-popup--logs', 'custom-popup--undo');
   if (overlay) {
     overlay.classList.remove('custom-popup-overlay--nonmodal');
     overlay.style.pointerEvents = 'auto';

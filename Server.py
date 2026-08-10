@@ -550,7 +550,7 @@ class CombinedGUI:
             os.chdir(self.script_dir)
             
             # Optimized handler with compression and API endpoints
-            audit_log_lock = threading.Lock()
+            log_lock = threading.Lock()
 
             class OptimizedHandler(http.server.SimpleHTTPRequestHandler):
                 """
@@ -558,7 +558,7 @@ class CombinedGUI:
                 
                 Features:
                 - API endpoints for data queries
-                - Append-only per-session audit logging
+                - Append-only per-session logging
                 - GeoJSON compression for large files
                 - Dynamic project path routing
                 - Cache control headers
@@ -605,7 +605,7 @@ class CombinedGUI:
                 def do_POST(self):
                     """Handle write-only local API endpoints."""
                     parsed_path = urlparse(self.path)
-                    if parsed_path.path != '/api/audit-log':
+                    if parsed_path.path != '/api/logs':
                         self.send_error(404, "API endpoint not found")
                         return
 
@@ -615,15 +615,15 @@ class CombinedGUI:
                             self.send_error(400, "Invalid request body size")
                             return
                         payload = json.loads(self.rfile.read(content_length).decode('utf-8'))
-                        result = self.append_audit_log(payload)
+                        result = self.append_log(payload)
                         self.send_json_response(result)
                     except (ValueError, json.JSONDecodeError) as error:
-                        self.send_error(400, f"Invalid audit log request: {error}")
+                        self.send_error(400, f"Invalid log request: {error}")
                     except Exception as error:
-                        self.send_error(500, f"Audit log error: {error}")
+                        self.send_error(500, f"Log error: {error}")
 
-                def append_audit_log(self, payload):
-                    """Append validated audit entries to the active project's session log."""
+                def append_log(self, payload):
+                    """Append validated entries to the active project's session log."""
                     if not isinstance(payload, dict):
                         raise ValueError("Request body must be a JSON object")
 
@@ -642,9 +642,9 @@ class CombinedGUI:
                     contributor = clean(payload.get('contributor'), 'Unknown', 200) or 'Unknown'
                     entries = payload.get('entries', [])
                     if not isinstance(entries, list):
-                        raise ValueError("Audit entries must be a list")
+                        raise ValueError("Log entries must be a list")
                     if len(entries) > 250:
-                        raise ValueError("Too many audit entries in one request")
+                        raise ValueError("Too many log entries in one request")
 
                     project_name = getattr(self.gui_instance, 'selected_project', 'Standard') or 'Standard'
                     safe_project = ''.join(
@@ -656,9 +656,9 @@ class CombinedGUI:
                     if os.path.commonpath([project_dir, input_dir]) != input_dir:
                         raise ValueError("Invalid project path")
 
-                    audit_dir = os.path.join(project_dir, 'Audit_Logs')
-                    os.makedirs(audit_dir, exist_ok=True)
-                    audit_path = os.path.join(audit_dir, f'Session_{session_id}.txt')
+                    logs_dir = os.path.join(project_dir, 'logs')
+                    os.makedirs(logs_dir, exist_ok=True)
+                    log_path = os.path.join(logs_dir, f'Session_{session_id}.txt')
 
                     formatted_entries = []
                     for entry in entries:
@@ -674,23 +674,23 @@ class CombinedGUI:
                             f'Tool: {tool} | {description}\n'
                         )
                     if entries and not formatted_entries:
-                        raise ValueError("No valid audit entries supplied")
+                        raise ValueError("No valid log entries supplied")
 
-                    with audit_log_lock:
-                        is_new_file = not os.path.exists(audit_path) or os.path.getsize(audit_path) == 0
-                        with open(audit_path, 'a', encoding='utf-8', newline='') as audit_file:
+                    with log_lock:
+                        is_new_file = not os.path.exists(log_path) or os.path.getsize(log_path) == 0
+                        with open(log_path, 'a', encoding='utf-8', newline='') as log_file:
                             if is_new_file:
-                                audit_file.write(f'Session {session_id} - Contributor: {contributor}\n')
-                                audit_file.write('=' * 80 + '\n')
-                            audit_file.writelines(formatted_entries)
+                                log_file.write(f'Session {session_id} - Contributor: {contributor}\n')
+                                log_file.write('=' * 80 + '\n')
+                            log_file.writelines(formatted_entries)
 
                     return {
                         'ok': True,
                         'session_id': session_id,
-                        'file': os.path.relpath(audit_path, self.gui_instance.app_dir).replace('\\', '/')
+                        'file': os.path.relpath(log_path, self.gui_instance.app_dir).replace('\\', '/')
                     }
 
-                def read_audit_log(self, session_id):
+                def read_log(self, session_id):
                     """Return the current session log without exposing arbitrary files."""
                     session_id = ''.join(
                         character for character in str(session_id or '')[:80]
@@ -705,17 +705,17 @@ class CombinedGUI:
                         if character.isalnum() or character in ('_', '-', ' ')
                     ) or 'Standard'
                     input_dir = os.path.abspath(os.path.join(self.gui_instance.app_dir, 'Input'))
-                    audit_path = os.path.abspath(os.path.join(
-                        input_dir, safe_project, 'Audit_Logs', f'Session_{session_id}.txt'
+                    log_path = os.path.abspath(os.path.join(
+                        input_dir, safe_project, 'logs', f'Session_{session_id}.txt'
                     ))
-                    if os.path.commonpath([audit_path, input_dir]) != input_dir:
-                        raise ValueError("Invalid audit log path")
+                    if os.path.commonpath([log_path, input_dir]) != input_dir:
+                        raise ValueError("Invalid log path")
 
-                    with audit_log_lock:
-                        if not os.path.isfile(audit_path):
-                            raise FileNotFoundError("Audit log not found")
-                        with open(audit_path, 'r', encoding='utf-8') as audit_file:
-                            content = audit_file.read()
+                    with log_lock:
+                        if not os.path.isfile(log_path):
+                            raise FileNotFoundError("Log not found")
+                        with open(log_path, 'r', encoding='utf-8') as log_file:
+                            content = log_file.read()
 
                     return {'ok': True, 'session_id': session_id, 'content': content}
                 
@@ -729,7 +729,7 @@ class CombinedGUI:
                     - /api/layer_stats: Get layer statistics without geometry
                     - /api/list_projects: List all project folders in Input/
                     - /api/project_files: List .geojson files for a given project
-                    - POST /api/audit-log: Append entries to the active project's session log
+                    - POST /api/logs: Append entries to the active project's session log
                     
                     Args:
                         path (str): API endpoint path
@@ -741,10 +741,10 @@ class CombinedGUI:
                         
                         params = parse_qs(query)
                         
-                        if path == '/api/audit-log':
+                        if path == '/api/logs':
                             session_id = params.get('session_id', [''])[0]
                             try:
-                                self.send_json_response(self.read_audit_log(session_id))
+                                self.send_json_response(self.read_log(session_id))
                             except FileNotFoundError as error:
                                 self.send_error(404, str(error))
 

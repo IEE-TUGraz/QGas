@@ -4,6 +4,13 @@
  * Keeps up to 50 committed actions (maximum 25 MB of feature snapshots) in
  * memory. Only affected features are retained; complete map layers are never
  * copied. Multi-feature tool operations are grouped into one selectable step.
+ *
+ * Public API:
+ * - QGasUndo.recordChange(change): Store a committed change in undo history.
+ * - QGasUndo.captureContexts(feature): Capture the layer contexts for a feature.
+ * - QGasUndo.openPopup(): Open the selective undo dialog.
+ * - QGasUndo.undoSelected(): Restore the selected actions.
+ * - openUndoChangesPopup(): Entry point used by the GUI button.
  */
 (function () {
   const MAX_ACTIONS = 50;
@@ -37,7 +44,12 @@
     }
   }
 
-  function findLayerContexts(feature) {
+  /**
+   * Capture the active layer contexts containing a feature.
+   * @param {Object} feature GeoJSON feature whose layer contexts should be found.
+   * @returns {Array} Matching layer context descriptors.
+   */
+  function captureContexts(feature) {
     const contexts = [];
     if (typeof map === 'undefined' || !map || !feature) return contexts;
     const visited = new Set();
@@ -62,7 +74,7 @@
   }
 
   function findCurrentContexts(change) {
-    const direct = findLayerContexts(change.feature);
+    const direct = captureContexts(change.feature);
     if (direct.length) return direct;
     const targetId = featureId(change.feature, change.after || change.before);
     const contexts = [];
@@ -83,6 +95,11 @@
     }
   }
 
+  /**
+   * Store a committed change in the selective undo history.
+   * @param {Object} change Change descriptor containing feature snapshots and context.
+   * @returns {void}
+   */
   function recordChange(change) {
     if (applyingUndo || !change || !change.feature) return;
     const now = Date.now();
@@ -101,7 +118,7 @@
       after,
       operation: change.operation || 'update',
       elementId: featureId(change.feature, change.after || change.before),
-      contexts: Array.isArray(change.contexts) ? change.contexts : findLayerContexts(change.feature),
+      contexts: Array.isArray(change.contexts) ? change.contexts : captureContexts(change.feature),
       descriptions: Array.isArray(change.entries)
         ? change.entries.map(entry => `${entry.change_type}: ${entry.description}`)
         : []
@@ -303,9 +320,13 @@
         description: `Reverted ${action.tool}: ${description}`
       }));
     });
-    window.QGasAuditLog?.queueEntries(entries);
+    window.QGasLogs?.queueEntries(entries);
   }
 
+  /**
+   * Restore the actions currently selected in the undo dialog.
+   * @returns {void}
+   */
   function undoSelected() {
     const selectedIds = new Set(Array.from(
       document.querySelectorAll('.undo-action-checkbox:checked'), checkbox => checkbox.dataset.actionId
@@ -329,6 +350,10 @@
     }
   }
 
+  /**
+   * Open the selective undo dialog and render the current history.
+   * @returns {void}
+   */
   function openPopup() {
     showCustomPopup(
       'Undo changes',
@@ -347,7 +372,7 @@
 
   window.QGasUndo = {
     recordChange,
-    captureContexts: findLayerContexts,
+    captureContexts,
     openPopup,
     undoSelected,
     get isApplying() { return applyingUndo; },

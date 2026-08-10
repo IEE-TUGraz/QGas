@@ -21,7 +21,7 @@
 |   |-- shared/
 |   |   `-- node_layers.js         # Shared node-layer discovery
 |   `-- ui/
-|       |-- audit_log.js           # Per-session audit-log client
+|       |-- logs.js                # Per-session logs client
 |       |-- export.js              # GeoJSON and CSV export workflows
 |       |-- filter.js              # Country filtering and layer synchronization
 |       |-- groups.js              # Pipeline-group panel
@@ -49,7 +49,7 @@
 |           |-- short_pipe.js
 |           |-- split_node.js
 |           |-- switch_sublayer.js
-|           `-- topology_check.js
+|           `-- topology_checker.js
 `-- docs/
     |-- api/                        # Generated Python/JavaScript API reference
     |-- assets/                     # Documentation images and styling
@@ -63,7 +63,7 @@
 <h2>Key Entry Points</h2>
 
 <ul>
-<li><strong><code>Server.py</code></strong> starts the desktop launcher, serves the web application and project files, and provides local endpoints such as audit-log persistence.</li>
+<li><strong><code>Server.py</code></strong> starts the desktop launcher, serves the web application and project files, and provides local endpoints such as log persistence.</li>
 <li><strong><code>GUI.html</code></strong> defines the map interface and loads the JavaScript modules in dependency order.</li>
 <li><strong><code>js/core.js</code></strong> owns shared map state, configured/dynamic layer registries, feature creation, change tracking, and common interaction helpers.</li>
 <li><strong><code>js/ui/</code></strong> contains independent interface services. Editing workflows are kept under <code>js/ui/tools/</code>.</li>
@@ -85,9 +85,9 @@
 |-- storages.geojson
 |-- valves.geojson
 |-- ...                            # Further configured GeoJSON/CSV layers
-|-- Audit_Logs/
+|-- logs/
 |   `-- Session_&lt;session ID&gt;.txt
-`-- Infrastructure_Plans/         # Optional project-specific plans
+`-- plans/                        # Optional project-specific plans
 </code></pre>
 </div>
 
@@ -99,6 +99,6 @@
 
 <p>Country filtering keeps original layer groups and creates active filtered groups containing the matching Leaflet features. Editing tools that create or replace topology elements must synchronize both representations. Export and topology analysis apply the active country rules explicitly so stale or hidden original groups do not leak into filtered results.</p>
 
-<h3>Audit Logs and Undo</h3>
+<h3>Logs and Undo</h3>
 
-<p><code>js/ui/audit_log.js</code> buffers committed changes and writes them through the local server to <code>Input/&lt;ProjectName&gt;/Audit_Logs/</code>. <code>js/ui/undo.js</code> is separate: it retains affected before/after feature snapshots in browser memory, limited to 50 actions and 25 MB. Undo state is not persisted across application restarts.</p>
+<p><code>js/ui/logs.js</code> buffers committed changes and writes them through the local server to <code>Input/&lt;ProjectName&gt;/logs/</code>. <code>js/ui/undo.js</code> is separate: it retains affected before/after feature snapshots in browser memory, limited to 50 actions and 25 MB. Undo state is not persisted across application restarts.</p>

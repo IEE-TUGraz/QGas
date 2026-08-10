@@ -196,6 +196,8 @@
 
 <p>Compressors and other in-line elements with two terminal references are treated as network edges. A compressor therefore connects its <code>node_start</code> and <code>node_end</code> nodes when connected-network islands are calculated. Decorative helper lines are ignored.</p>
 
+<p>When two pipelines reference the same endpoint node, an intersection within 10 m of that node is treated as a valid connection rather than a pipeline crossing. Intersections away from the shared node continue to be reported.</p>
+
 <p>The individual result categories can be expanded and collapsed. Within each category, the detected elements are grouped by layer. Nodes at the same location are additionally grouped according to whether both nodes are connected by a valve, compressor, pipeline, another element, or have no shared connection.</p>
 
 <p>Nodes without a connection and elements with missing, empty, or invalid node references are shown together under "Connection Issues".</p>

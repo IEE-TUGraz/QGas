@@ -99,6 +99,12 @@ function activateScreenshotMode() {
       objectSearchBox.style.display = 'none';
     }
 
+    const bottomLogBtn = document.getElementById('bottom-log-btn');
+    if (bottomLogBtn) {
+      window._bottomLogBtnDisplay = bottomLogBtn.style.display;
+      bottomLogBtn.style.display = 'none';
+    }
+
     const citeBtn = document.getElementById('cite-btn');
     if (citeBtn) {
       window._citeBtnDisplay = citeBtn.style.display; // Original speichern
@@ -222,6 +228,12 @@ function exitScreenshotMode() {
       const objectSearchBox = document.getElementById('object-search-box');
       if (objectSearchBox) objectSearchBox.style.display = window._objectSearchBoxDisplay;
       delete window._objectSearchBoxDisplay;
+    }
+
+    if (window._bottomLogBtnDisplay !== undefined) {
+      const bottomLogBtn = document.getElementById('bottom-log-btn');
+      if (bottomLogBtn) bottomLogBtn.style.display = window._bottomLogBtnDisplay;
+      delete window._bottomLogBtnDisplay;
     }
 
     if (window._citeBtnWasVisible) {

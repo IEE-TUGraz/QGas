@@ -1367,7 +1367,7 @@ async function exportCompleteDataset(format = 'geojson', options = {}) {
 
   /* Include georeferenced infrastructure plans. */
   if (Array.isArray(planLayers) && planLayers.length) {
-    const plansFolder = zip.folder('Infrastructure_Plans');
+    const plansFolder = zip.folder('plans');
     const planManifestEntries = [];
 
     const sanitizeSegment = (value, fallback) => {

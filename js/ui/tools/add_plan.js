@@ -719,9 +719,9 @@ async function fetchPlanImageDataUrl(relativePath) {
 
 async function fetchPlanManifestEntries() {
   const manifestFiles = [
-    'Infrastructure_Plans/plans_manifest.json',
-    'Infrastructure_Plans/manifest.json',
-    'Infrastructure_Plans/index.json'
+    'plans/plans_manifest.json',
+    'plans/manifest.json',
+    'plans/index.json'
   ];
   for (const candidate of manifestFiles) {
     const data = await fetchJsonAtProjectPath(candidate);
@@ -733,7 +733,7 @@ async function fetchPlanManifestEntries() {
       return data;
     }
   }
-  const fallbackMetadata = await fetchJsonAtProjectPath('Infrastructure_Plans/metadata.json');
+  const fallbackMetadata = await fetchJsonAtProjectPath('plans/metadata.json');
   if (fallbackMetadata) {
     return [{
       folder: '',
@@ -789,7 +789,7 @@ async function fetchFolderListing(relativeFolder) {
 }
 
 async function discoverPlanFoldersFromListing() {
-  const listing = await fetchFolderListing('Infrastructure_Plans');
+  const listing = await fetchFolderListing('plans');
   const folders = listing?.folders;
   if (!folders || !folders.length) return null;
   return folders.map(name => ({
@@ -853,7 +853,7 @@ async function resolvePlanImageAsset(basePath, descriptor = {}, metadata = {}) {
 async function loadPlanEntryFromDescriptor(descriptor, index) {
   if (!descriptor) return;
   const folderSegment = sanitizePlanFolderSegment(descriptor.folder || descriptor.path || '');
-  const basePath = folderSegment ? `Infrastructure_Plans/${folderSegment}` : 'Infrastructure_Plans';
+  const basePath = folderSegment ? `plans/${folderSegment}` : 'plans';
   const metadataFile = descriptor.metadataFile || descriptor.metadataPath || descriptor.metadata || 'metadata.json';
   const metadataPath = `${basePath}/${metadataFile}`;
   const metadata = await fetchJsonAtProjectPath(metadataPath);
@@ -892,7 +892,7 @@ async function loadPersistedInfrastructurePlans() {
   planManifestLoadPromise = (async () => {
     const descriptors = await fetchPlanManifestEntries();
     if (!descriptors || !descriptors.length) {
-      console.log('No Infrastructure_Plans manifest or metadata found – skipping automatic plan loading.');
+      console.log('No plans manifest or metadata found – skipping automatic plan loading.');
       return;
     }
     for (let i = 0; i < descriptors.length; i++) {

@@ -30,7 +30,7 @@ markdown_extensions:
   - admonition
   - codehilite
   - toc:
-      permalink: true
+      permalink: false
   - tables
   - footnotes
 
@@ -45,7 +45,7 @@ nav:
       - Project Structure: dev/project-structure.md
       - Development Setup: dev/setup-development.md
       - Dependencies & Packages: dev/packages.md
-      - Node Reference Manipulations: dev/node-reference-manipulations.md
+      - Node Reference Manipulation: dev/node-reference-manipulations.md
       - Licensing: dev/licensing.md
   - Reference:
       - Citing: ref/citing.md

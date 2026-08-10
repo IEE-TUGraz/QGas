@@ -901,7 +901,7 @@ function normalizePlanControlPairs(controlPairs = []) {
 function sanitizePlanFolderSegment(segment) {
   const cleaned = sanitizeRelativePath(segment || '')
     .replace(/^\.+\/+/, '')
-    .replace(/^Infrastructure_Plans\/+/, '')
+    .replace(/^plans\/+/, '')
     .replace(/\.\./g, '')
     .replace(/^\//, '');
   return cleaned;

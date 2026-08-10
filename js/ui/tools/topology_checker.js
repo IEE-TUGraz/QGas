@@ -644,6 +644,13 @@
     });
 
     const crossingPipelines = [];
+    const nodeCoordinatesById = new Map();
+    nodeList.forEach(node => {
+      const position = node.marker?.getLatLng?.();
+      if (node.normId && position) {
+        nodeCoordinatesById.set(node.normId, [Number(position.lng), Number(position.lat)]);
+      }
+    });
     const segmentGrid = new Map();
     const checkedSegmentPairs = new Set();
     const reportedLinePairs = new Set();
@@ -671,7 +678,16 @@
                 const segmentPairKey = [segment.id, other.id].sort((m, n) => m - n).join('|');
                 if (checkedSegmentPairs.has(segmentPairKey)) return;
                 checkedSegmentPairs.add(segmentPairKey);
-                if (!properSegmentIntersection(segment.a, segment.b, other.a, other.b)) return;
+                const intersection = properSegmentIntersectionPoint(segment.a, segment.b, other.a, other.b);
+                if (!intersection) return;
+                const entryNodeIds = new Set([entry.startNorm, entry.endNorm].filter(Boolean));
+                const sharedNodeIds = [other.entry.startNorm, other.entry.endNorm]
+                  .filter(nodeId => nodeId && entryNodeIds.has(nodeId));
+                const intersectionIsSharedNode = sharedNodeIds.some(nodeId => {
+                  const nodeCoordinate = nodeCoordinatesById.get(nodeId);
+                  return nodeCoordinate && coordinateDistanceMeters(intersection, nodeCoordinate) <= 10;
+                });
+                if (intersectionIsSharedNode) return;
                 const linePairKey = [entry.key, other.entry.key].sort().join('|');
                 if (reportedLinePairs.has(linePairKey)) return;
                 reportedLinePairs.add(linePairKey);
@@ -1100,16 +1116,26 @@
     return 6371000 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
   }
 
-  function properSegmentIntersection(a, b, c, d) {
+  function properSegmentIntersectionPoint(a, b, c, d) {
     const cross = (p, q, r) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
     const abC = cross(a, b, c);
     const abD = cross(a, b, d);
     const cdA = cross(c, d, a);
     const cdB = cross(c, d, b);
     const epsilon = 1e-12;
-    return Math.abs(abC) > epsilon && Math.abs(abD) > epsilon &&
+    const intersects = Math.abs(abC) > epsilon && Math.abs(abD) > epsilon &&
       Math.abs(cdA) > epsilon && Math.abs(cdB) > epsilon &&
       ((abC > 0) !== (abD > 0)) && ((cdA > 0) !== (cdB > 0));
+    if (!intersects) return null;
+
+    const denominator = (a[0] - b[0]) * (c[1] - d[1]) - (a[1] - b[1]) * (c[0] - d[0]);
+    if (Math.abs(denominator) <= epsilon) return null;
+    const firstDeterminant = a[0] * b[1] - a[1] * b[0];
+    const secondDeterminant = c[0] * d[1] - c[1] * d[0];
+    return [
+      (firstDeterminant * (c[0] - d[0]) - (a[0] - b[0]) * secondDeterminant) / denominator,
+      (firstDeterminant * (c[1] - d[1]) - (a[1] - b[1]) * secondDeterminant) / denominator
+    ];
   }
 
   function restoreDetachedPointFeatures() {

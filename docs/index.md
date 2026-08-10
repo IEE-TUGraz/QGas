@@ -46,7 +46,7 @@
 		<span class="guide-text">See the Python and JavaScript libraries used by QGas.</span>
 	</div>
 	<div class="guide-item">
-		<a class="guide-btn" href="dev/node-reference-manipulations/">Node Reference Manipulations</a>
+		<a class="guide-btn" href="dev/node-reference-manipulations/">Node Reference Manipulation</a>
 		<span class="guide-text">Understand topology-safe changes to node references and connected elements.</span>
 	</div>
 </div>

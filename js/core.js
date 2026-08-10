@@ -624,15 +624,15 @@
   }
 
   function queueAuditEntries(entries) {
-    window.QGasAuditLog?.queueEntries(entries);
+    window.QGasLogs?.queueEntries(entries);
   }
 
-  function ensureAuditSessionStarted() {
-    return window.QGasAuditLog?.ensureSessionStarted();
+  function ensureLogSessionStarted() {
+    return window.QGasLogs?.ensureSessionStarted();
   }
 
-  async function flushAuditEntries(useBeacon = false) {
-    return window.QGasAuditLog?.flush(useBeacon);
+  async function flushLogEntries(useBeacon = false) {
+    return window.QGasLogs?.flush(useBeacon);
   }
 
   function buildAuditEntries(before, after, elementId, tool, options = {}) {
@@ -748,8 +748,8 @@
   window.markLayerChanged = markLayerChanged;
   window.isFeatureChanged = isFeatureChanged;
   window.refreshFeatureChangeSnapshot = refreshFeatureChangeSnapshot;
-  window.flushAuditEntries = (...args) => window.QGasAuditLog?.flush(...args);
-  window.ensureAuditSessionStarted = (...args) => window.QGasAuditLog?.ensureSessionStarted(...args);
+  window.flushLogEntries = (...args) => window.QGasLogs?.flush(...args);
+  window.ensureLogSessionStarted = (...args) => window.QGasLogs?.ensureSessionStarted(...args);
   
 /* ================================================================================
  * LEGACY LAYER REFERENCES
@@ -2407,7 +2407,7 @@ const map = L.map('map', {
                     document.getElementById('contributor-input').value = fullName;
                     contributorName = fullName;
                     contributorInitials = contributor.fullName.split(/\s+/).map(n => n[0] ? n[0].toUpperCase() : '').join('');
-                    ensureAuditSessionStarted();
+                    ensureLogSessionStarted();
                     
                     /* Close popup on successful selection. */
                     popup.style.display = 'none';
@@ -5365,7 +5365,7 @@ document.getElementById('contributor-form').addEventListener('submit', function(
     document.getElementById('contributor-input').value = fullName;
     contributorName = fullName;
     contributorInitials = contributor.fullName.split(/\s+/).map(n => n[0] ? n[0].toUpperCase() : '').join('');
-    ensureAuditSessionStarted();
+    ensureLogSessionStarted();
     
     // Update dropdown and select the new contributor
     populateContributorSelect();
@@ -5583,12 +5583,53 @@ function getDefaultNodeStyleOptions(preferredLayer = null) {
   return { ...fallback };
 }
 
+function buildNodePropertiesFromLayer(targetLayer, nodeId, suppliedProperties = null) {
+  const sampleProperties = findSampleNodeMarker(targetLayer)?.feature?.properties || null;
+
+  if (!sampleProperties) {
+    const fallback = { ...getDefaultPointAttributes('Node'), ...(suppliedProperties || {}) };
+    fallback.id = nodeId;
+    if (Object.prototype.hasOwnProperty.call(fallback, 'Name')) fallback.Name = nodeId;
+    if (Object.prototype.hasOwnProperty.call(fallback, 'name')) fallback.name = nodeId;
+    return fallback;
+  }
+
+  const properties = {};
+  Object.keys(sampleProperties).forEach(key => {
+    if (key === 'id') {
+      properties.id = nodeId;
+    } else if (key === 'ID') {
+      properties.ID = nodeId;
+    } else if (key === 'Name' || key === 'name') {
+      properties[key] = nodeId;
+    } else if (key === 'Type' || key.startsWith('__')) {
+      properties[key] = cloneAuditValue(sampleProperties[key]);
+    } else {
+      properties[key] = null;
+    }
+  });
+
+  if (suppliedProperties) {
+    Object.keys(properties).forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(suppliedProperties, key)) {
+        properties[key] = cloneAuditValue(suppliedProperties[key]);
+      }
+    });
+  }
+
+  properties.id = nodeId;
+  if (Object.prototype.hasOwnProperty.call(properties, 'ID')) properties.ID = nodeId;
+  if (Object.prototype.hasOwnProperty.call(properties, 'Name')) properties.Name = nodeId;
+  if (Object.prototype.hasOwnProperty.call(properties, 'name')) properties.name = nodeId;
+  return properties;
+}
+
 /**
  * Create and register a new node marker on the map.
  *
  * Creates a Leaflet CircleMarker at <code>latlng</code> with the default
- * node style, attaches a GeoJSON feature with <code>Type: 'Node'</code>
- * and the provided <code>nodeId</code>, and adds it to the appropriate
+ * node style, copies the target node layer's attribute schema, assigns the
+ * provided <code>nodeId</code>, and adds it to the appropriate
  * node layer (determined via <code>options.targetLayer</code> or the
  * global <code>nodeLayer</code>). Wires up mode-aware click handlers for
  * info display and pipeline-connection callbacks.
@@ -5610,15 +5651,12 @@ function getDefaultNodeStyleOptions(preferredLayer = null) {
  * });
  */
 function createNewNode(latlng, nodeId, options = {}) {
-  const targetLayer = options.targetLayer || null;
-  const nodeStyle = getDefaultNodeStyleOptions(targetLayer);
+  const destinationLayer = options.targetLayer || getActivePipelineNodeLayer() || resolveNodeLayer({ createIfMissing: true });
+  const nodeStyle = getDefaultNodeStyleOptions(destinationLayer);
   const nodeMarker = L.circleMarker(latlng, nodeStyle);
   captureOriginalMarkerStyle(nodeMarker, 'default');
-  
-  const defaultAttrs = getDefaultPointAttributes('Node');
-  const properties = options.properties
-    ? { ...options.properties, Type: options.properties.Type || 'Node', id: nodeId }
-    : { ...defaultAttrs, Type: 'Node', id: nodeId };
+
+  const properties = buildNodePropertiesFromLayer(destinationLayer, nodeId, options.properties || null);
   
   // Feature-Eigenschaft an Marker binden
   nodeMarker.feature = {
@@ -5653,11 +5691,10 @@ function createNewNode(latlng, nodeId, options = {}) {
   
   nodeMarker.on('click', clickHandler);
 
-  if (targetLayer && targetLayer._qgasMeta) {
-    assignMetadataToLayer(nodeMarker, targetLayer._qgasMeta);
+  if (destinationLayer && destinationLayer._qgasMeta) {
+    assignMetadataToLayer(nodeMarker, destinationLayer._qgasMeta);
   }
-  
-  const destinationLayer = targetLayer || resolveNodeLayer({ createIfMissing: true });
+
   if (destinationLayer && typeof destinationLayer.addLayer === 'function') {
     destinationLayer.addLayer(nodeMarker);
   } else {

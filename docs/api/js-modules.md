@@ -172,7 +172,7 @@
 <details class="api-func">
 <summary class="api-sig"><code>createNewNode(latlng, nodeId, options = {})</code></summary>
 <div class="api-func-body">
-<p class="api-desc">Create and register a new node marker on the map. Creates a Leaflet CircleMarker at <code>latlng</code> with the default node style, attaches a GeoJSON feature with <code>Type: &#x27;Node&#x27;</code> and the provided <code>nodeId</code>, and adds it to the appropriate node layer (determined via <code>options.targetLayer</code> or the global <code>nodeLayer</code>). Wires up mode-aware click handlers for info display and pipeline-connection callbacks.</p>
+<p class="api-desc">Create and register a new node marker on the map. Creates a Leaflet CircleMarker at <code>latlng</code> with the default node style, copies the target node layer&#x27;s attribute schema, assigns the provided <code>nodeId</code>, and adds it to the appropriate node layer (determined via <code>options.targetLayer</code> or the global <code>nodeLayer</code>). Wires up mode-aware click handlers for info display and pipeline-connection callbacks.</p>
 <table class="api-params">
 <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
@@ -343,13 +343,6 @@ console.log(&#x27;Total nodes:&#x27;, count);</code></pre>
 </details>
 </div>
 </details>
-</div>
-</details>
-<details class="tool-section">
-<summary><code>audit_log.js</code></summary>
-<div class="module-header">
-<p><strong>QGas Session Audit Log</strong></p>
-<p>Owns the browser-session log, buffered server writes, current-log reader, and the collapsible Audit Log popup. Dataset change detection remains in core.js and submits already formatted entries through this module.</p>
 </div>
 </details>
 <details class="tool-section">
@@ -591,6 +584,22 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <ul>
   <li>updateLegendControl(): Rebuild and refresh the legend UI.</li>
   <li>updateLegendSymbols(): Refresh legend swatches after style updates.</li>
+</ul>
+</div>
+</details>
+<details class="tool-section">
+<summary><code>logs.js</code></summary>
+<div class="module-header">
+<p><strong>QGas Session Logs</strong></p>
+<p>Owns the browser-session logs, buffered server writes, current-log reader, and the collapsible Logs popup. Dataset change detection remains in core.js and submits already formatted entries through this module.</p>
+<p><strong>Public API:</strong></p>
+<ul>
+  <li>QGasLogs.ensureSessionStarted(): Initialize logging for the current session.</li>
+  <li>QGasLogs.queueEntries(entries): Queue entries for persistent storage.</li>
+  <li>QGasLogs.flush(useBeacon): Persist queued entries immediately.</li>
+  <li>QGasLogs.loadCurrent(): Load the current session log.</li>
+  <li>QGasLogs.openPopup(): Open the session logs dialog.</li>
+  <li>openLogsPopup(): Entry point used by the GUI button.</li>
 </ul>
 </div>
 </details>
@@ -1802,7 +1811,7 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 </div>
 </details>
 <details class="tool-section">
-<summary><code>topology_check.js</code></summary>
+<summary><code>topology_checker.js</code></summary>
 <div class="module-header">
 <p><strong>QGas - Topology Checker Tool</strong></p>
 <p>Analyzes active network references, geometry, IDs, connectivity, and disconnected network islands. With an active country filter, the analysis is restricted to the filtered subnetwork using the same pipeline/point country rules as the Filter UI. Compressors and other two-terminal in-line elements act as network edges, while decorative helper layers are ignored. Results can focus individual issues or isolate a connected network component without modifying the dataset.</p>
@@ -1837,6 +1846,57 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <div class="module-header">
 <p><strong>QGas Selective Undo Module</strong></p>
 <p>Keeps up to 50 committed actions (maximum 25 MB of feature snapshots) in memory. Only affected features are retained; complete map layers are never copied. Multi-feature tool operations are grouped into one selectable step.</p>
+<p><strong>Public API:</strong></p>
+<ul>
+  <li>QGasUndo.recordChange(change): Store a committed change in undo history.</li>
+  <li>QGasUndo.captureContexts(feature): Capture the layer contexts for a feature.</li>
+  <li>QGasUndo.openPopup(): Open the selective undo dialog.</li>
+  <li>QGasUndo.undoSelected(): Restore the selected actions.</li>
+  <li>openUndoChangesPopup(): Entry point used by the GUI button.</li>
+</ul>
+<details class="api-functions-section">
+<summary><strong>Public API Functions</strong><span class="api-func-count"> (4)</span></summary>
+<div class="api-functions">
+<details class="api-func">
+<summary class="api-sig"><code>captureContexts(feature)</code></summary>
+<div class="api-func-body">
+<p class="api-desc">Capture the active layer contexts containing a feature.</p>
+<table class="api-params">
+<thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>feature</code></td><td><code>Object</code></td><td>GeoJSON feature whose layer contexts should be found.</td></tr>
+</tbody></table>
+<p class="api-returns"><strong>Returns:</strong> <code>Array</code> — Matching layer context descriptors.</p>
+</div>
+</details>
+<details class="api-func">
+<summary class="api-sig"><code>recordChange(change)</code></summary>
+<div class="api-func-body">
+<p class="api-desc">Store a committed change in the selective undo history.</p>
+<table class="api-params">
+<thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>change</code></td><td><code>Object</code></td><td>Change descriptor containing feature snapshots and context.</td></tr>
+</tbody></table>
+<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
+</div>
+</details>
+<details class="api-func">
+<summary class="api-sig"><code>undoSelected()</code></summary>
+<div class="api-func-body">
+<p class="api-desc">Restore the actions currently selected in the undo dialog.</p>
+<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
+</div>
+</details>
+<details class="api-func">
+<summary class="api-sig"><code>openPopup()</code></summary>
+<div class="api-func-body">
+<p class="api-desc">Open the selective undo dialog and render the current history.</p>
+<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
+</div>
+</details>
+</div>
+</details>
 </div>
 </details>
 <hr>

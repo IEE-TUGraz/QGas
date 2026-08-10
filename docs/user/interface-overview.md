@@ -56,7 +56,7 @@
 <details class="tool-section">
 <summary>Screenshot</summary>
 
-<p>Activates a clean screenshot mode that hides the interface controls and legend. Press <strong>ESC</strong> to leave Screenshot Mode. The Find ID controls are also hidden while this mode is active.</p>
+<p>Activates a clean screenshot mode that hides the interface controls and legend. Press <strong>ESC</strong> to leave Screenshot Mode. The Search ID controls are also hidden while this mode is active.</p>
 </details>
 
 <details class="tool-section">
@@ -92,19 +92,19 @@
 </details>
 
 <details class="tool-section">
-<summary>Log</summary>
+<summary>Logs</summary>
 
-<p>QGas creates one text-based audit log for each browser session after the contributor is selected. Logs are stored in <code>Input/&lt;project&gt;/Audit_Logs/Session_&lt;session ID&gt;.txt</code>. Each entry records the local time, change type, element ID, active tool, and relevant previous and new values or positions.</p>
+<p>QGas creates one text-based log for each browser session after the contributor is selected. Logs are stored in <code>Input/&lt;project&gt;/logs/Session_&lt;session ID&gt;.txt</code>. Each entry records the local time, change type, element ID, active tool, and relevant previous and new values or positions.</p>
 
-<p>The <strong>Log</strong> button next to <strong>Options</strong> opens the current session log. Consecutive entries belonging to one committed tool action are grouped and collapsible. Preview selections and discarded edits are not recorded.</p>
+<p>The <strong>Logs</strong> button beside the OpenStreetMap attribution opens the current session log. Consecutive entries belonging to one committed tool action are grouped and collapsible. Preview selections and discarded edits are not recorded.</p>
 
-<p><img src="../../assets/Audit_Log.png" alt="QGas Session Audit Log" style="max-width:100%; height:auto;"></p>
+<p><img src="../../assets/Logs.png" alt="QGas Session Logs" style="max-width:100%; height:auto;"></p>
 </details>
 
 <details class="tool-section">
 <summary>↶ Undo</summary>
 
-<p>Opens the selective session undo history. QGas retains affected feature snapshots for up to 50 actions or 25 MB without copying complete layers. Select one or more actions and press <strong>Undo Changes</strong> to restore them. Multi-element operations are reverted together and every reversal is written to the Session Audit Log. The undo history is cleared when QGas is restarted.</p>
+<p>Opens the selective session undo history. QGas retains affected feature snapshots for up to 50 actions or 25 MB without copying complete layers. Select one or more actions and press <strong>Undo Changes</strong> to restore them. Multi-element operations are reverted together and every reversal is written to the session logs. The undo history is cleared when QGas is restarted.</p>
 
 <p><img src="../../assets/Undo.png" alt="QGas Undo History" style="max-width:100%; height:auto;"></p>
 </details>
@@ -129,11 +129,11 @@
 </details>
 
 <details class="tool-section">
-<summary>Find ID</summary>
+<summary>Search ID</summary>
 
-<p>Enter an object ID and start the search to center and highlight the matching active feature. Matching is case-insensitive. Other elements remain visible and the current layer visibility states do not change. The search controls are hidden in Screenshot Mode.</p>
+<p>Enter an element ID and start the search to center and highlight the matching active feature. Matching is case-insensitive. Other elements remain visible and the current layer visibility states do not change. The search controls are hidden in Screenshot Mode.</p>
 
-<p><img src="../../assets/Search.png" alt="QGas Find ID Search" style="max-width:100%; height:auto;"></p>
+<p><img src="../../assets/Search.png" alt="QGas Search ID field" style="max-width:100%; height:auto;"></p>
 </details>
 
 <details class="tool-section">
