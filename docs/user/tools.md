@@ -154,15 +154,13 @@
 </details>
 
 <details class="tool-section">
-<summary>Distribute Compressors</summary>
+<summary>Create Compressor</summary>
 
-<p><img src="../../assets/Distribute_Compressor.png" alt="Distribute Compressors" style="max-width:100%; height:auto;"></p>
+<p>The Create Compressor tool creates compressor topology compatible with the Europe_Finished project structure. It requires configured Compressors, Compressor Lines, Nodes, and pipeline layers.</p>
 
-<p>When working with looped pipeline systems, individual loops often share aggregated compressor stations. The Distribute Compressors tool replaces one compressor with a user-defined number of independently editable compressors in the same Compressor layer. IDs are assigned numerically: the replacement at the original location receives <code>&lt;original ID&gt;_1</code>, followed by <code>_2</code>, <code>_3</code>, and so on. Rated power is divided evenly.</p>
+<p><strong>Node Compressor:</strong> Select an existing node. The node is replaced by a new compressor at the same location. Every incident pipeline is shortened to its own terminal node named <code>&lt;compressor ID&gt;_A</code>, <code>_B</code>, <code>_C</code>, and so on. A Compressor Pipe connects each terminal node to the central compressor.</p>
 
-<p>For every additional compressor, the selected pipeline is split at the closest point. Two terminal nodes (<code>&lt;compressor ID&gt;_A</code> and <code>_B</code>) are created with the standard node attribute schema. Their pressure limits are inherited from the corresponding original pipeline endpoints. The compressor connects these terminals through <code>node_start</code> and <code>node_end</code>, so it acts as a network edge in topology analysis and export. The split pipeline segments reference the respective terminal nodes.</p>
-
-<p>Dashed lines between geographically nearest distributed compressors are visual aids only: they are not topology connections and are not exported as dataset features. When the workflow ends, all legend visibility states are reapplied. Distributed compressors and their nodes are synchronized with active/original filtered layers so they are included consistently in complete and filtered project exports.</p>
+<p><strong>Line Compressor:</strong> Select between one and five pipeline segments and then click the desired main-compressor location. Each pipeline is split into two segments. The first pipeline uses terminal nodes and segment suffixes <code>_A/_B</code>, the second <code>_C/_D</code>, and so on. Each terminal pair is positioned 50 metres apart along its pipeline, and all terminals connect to the central compressor through Compressor Pipes.</p>
 </details>
 
 <details class="tool-section">

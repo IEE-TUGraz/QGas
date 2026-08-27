@@ -515,7 +515,7 @@
     'divide-pipeline': 'Divide Pipeline',
     'split-node': 'Split Node',
     'reconnect-infrastructure': 'Reconnect Infrastructure',
-    'distribute-compressors': 'Distribute Compressors',
+    'create-compressor': 'Create Compressor',
     unknown: 'Unknown'
   };
 
@@ -1740,16 +1740,83 @@ const map = L.map('map', {
   }
 
   function csvTextToGeoJSON(csvText) {
-    const workbook = XLSX.read(String(csvText || '').replace(/^\uFEFF/, ''), { type: 'string', raw: false });
+    const normalizedCsvText = String(csvText || '').replace(/^\uFEFF/, '');
+    const firstLine = normalizedCsvText.split(/\r?\n/, 1)[0] || '';
+    const separator = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : ',';
+    const workbook = XLSX.read(normalizedCsvText, { type: 'string', raw: false, FS: separator });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: true });
     if (!rows.length) return { type: 'FeatureCollection', features: [] };
     const geometryKey = Object.keys(rows[0]).find(key => key.toLowerCase() === 'geometry');
     if (!geometryKey) throw new Error('CSV file has no "geometry" column.');
+    const parseWktGeometry = value => {
+      const input = String(value || '').trim().replace(/^SRID=\d+\s*;\s*/i, '');
+      const match = input.match(/^([A-Z]+)(?:\s+(?:Z|M|ZM))?\s*(.*)$/i);
+      if (!match) throw new Error('Invalid WKT geometry.');
+      const type = match[1].toUpperCase();
+      const body = match[2].trim();
+      if (/^EMPTY$/i.test(body)) {
+        const geoJsonTypes = {
+          POINT: 'Point', MULTIPOINT: 'MultiPoint', LINESTRING: 'LineString',
+          MULTILINESTRING: 'MultiLineString', POLYGON: 'Polygon', MULTIPOLYGON: 'MultiPolygon'
+        };
+        if (!geoJsonTypes[type] && type !== 'GEOMETRYCOLLECTION') {
+          throw new Error(`Unsupported WKT geometry type: ${type}`);
+        }
+        return type === 'GEOMETRYCOLLECTION'
+          ? { type: 'GeometryCollection', geometries: [] }
+          : { type: geoJsonTypes[type], coordinates: [] };
+      }
+      const splitGroups = text => {
+        const groups = [];
+        let depth = 0;
+        let start = 0;
+        for (let i = 0; i < text.length; i++) {
+          if (text[i] === '(') depth++;
+          else if (text[i] === ')') depth--;
+          else if (text[i] === ',' && depth === 0) {
+            groups.push(text.slice(start, i).trim());
+            start = i + 1;
+          }
+        }
+        groups.push(text.slice(start).trim());
+        return groups.filter(Boolean);
+      };
+      const unwrap = text => {
+        const trimmed = text.trim();
+        if (trimmed[0] !== '(' || trimmed[trimmed.length - 1] !== ')') throw new Error('Invalid WKT parentheses.');
+        return trimmed.slice(1, -1).trim();
+      };
+      const point = text => {
+        const coordinates = text.trim().replace(/^\(|\)$/g, '').trim().split(/\s+/).map(Number);
+        if (coordinates.length < 2 || coordinates.some(value => !Number.isFinite(value))) {
+          throw new Error('Invalid WKT coordinate.');
+        }
+        return coordinates;
+      };
+      const line = text => splitGroups(unwrap(text)).map(point);
+      const polygon = text => splitGroups(unwrap(text)).map(line);
+      switch (type) {
+        case 'POINT': return { type: 'Point', coordinates: point(unwrap(body)) };
+        case 'MULTIPOINT': return { type: 'MultiPoint', coordinates: splitGroups(unwrap(body)).map(point) };
+        case 'LINESTRING': return { type: 'LineString', coordinates: line(body) };
+        case 'MULTILINESTRING': return { type: 'MultiLineString', coordinates: splitGroups(unwrap(body)).map(line) };
+        case 'POLYGON': return { type: 'Polygon', coordinates: polygon(body) };
+        case 'MULTIPOLYGON': return { type: 'MultiPolygon', coordinates: splitGroups(unwrap(body)).map(polygon) };
+        case 'GEOMETRYCOLLECTION': return { type: 'GeometryCollection', geometries: splitGroups(unwrap(body)).map(parseWktGeometry) };
+        default: throw new Error(`Unsupported WKT geometry type: ${type}`);
+      }
+    };
+    const parseCsvGeometry = value => {
+      if (value && typeof value === 'object') return value;
+      const text = String(value || '').trim();
+      if (text.startsWith('{')) return JSON.parse(text);
+      return parseWktGeometry(text);
+    };
     const features = rows.map((row, index) => {
       let geometry;
       try {
-        geometry = typeof row[geometryKey] === 'string' ? JSON.parse(row[geometryKey]) : row[geometryKey];
+        geometry = parseCsvGeometry(row[geometryKey]);
       } catch (_) {
         throw new Error(`Invalid geometry in CSV row ${index + 2}.`);
       }
@@ -1880,9 +1947,9 @@ const map = L.map('map', {
       const arrayBuffer = await response.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
       
-      const sheetName = 'Input_Files';
-      if (!workbook.SheetNames.includes(sheetName)) {
-        console.log('Input_Files sheet not found, using defaults');
+      const sheetName = ['Input_Files', 'Layers'].find(name => workbook.SheetNames.includes(name));
+      if (!sheetName) {
+        console.log('Neither Input_Files nor Layers sheet found, using defaults');
         return getDefaultLayerConfiguration();
       }
       
@@ -5664,8 +5731,6 @@ function createNewNode(latlng, nodeId, options = {}) {
     properties: properties,
     geometry: { type: "Point", coordinates: [latlng.lng, latlng.lat] }
   };
-  markLayerChanged(nodeMarker, { tool: options.tool || getAuditToolName() });
-  
   // Klick-Handler an Marker binden
   const clickHandler = function(e) {
     console.log('Node click handler called, currentMode:', currentMode, 'hasCallback:', !!window.nodeSelectionCallback);
@@ -5701,6 +5766,21 @@ function createNewNode(latlng, nodeId, options = {}) {
     nodeMarker.addTo(map);
   }
   nodeMarker._parentNodeLayer = destinationLayer || null;
+  markLayerChanged(nodeMarker, {
+    tool: options.tool || getAuditToolName(),
+    undoContexts: [{
+      layer: nodeMarker,
+      parent: destinationLayer || map,
+      style: {
+        color: nodeMarker.options?.color,
+        weight: nodeMarker.options?.weight,
+        opacity: nodeMarker.options?.opacity,
+        fillColor: nodeMarker.options?.fillColor,
+        fillOpacity: nodeMarker.options?.fillOpacity,
+        radius: nodeMarker.options?.radius
+      }
+    }]
+  });
   console.log('New node created:', nodeId);
   return nodeMarker;
 }
@@ -6702,6 +6782,10 @@ function deactivateAllModes() {
   try {
     console.log('Deactivating all modes');
     applyEditGeometryVisibility(false);
+
+    if (currentMode === 'create-compressor' && typeof window.cancelCreateCompressor === 'function') {
+      window.cancelCreateCompressor();
+    }
 
     if (typeof window.deactivateReconnectInfrastructureTool === 'function') {
       window.deactivateReconnectInfrastructureTool();

@@ -251,26 +251,11 @@ function showLayerMappingUI(importedProjectName, importedFiles) {
     return { legendName: c.legendName || c.filename || ln, layerName: ln };
   }).filter(l => l.layerName && dynamicLayers[l.layerName]);
 
-  /* Naive auto-match: last filename segment vs legend name. */
-  function bestMatchIdx(filename) {
-    const base   = filename.replace(/\.(?:geojson|csv)$/i, '').toLowerCase();
-    const tokens = base.split(/[_\-\s]+/);
-    let best = -1, bestScore = 0;
-    currentLayers.forEach((l, i) => {
-      const ln = l.legendName.toLowerCase();
-      const score = tokens.reduce((acc, t) => acc + (ln.includes(t) || base.includes(ln) ? 1 : 0), 0);
-      if (score > bestScore) { bestScore = score; best = i; }
-    });
-    return bestScore > 0 ? best : -1;
-  }
-
   const rows = importedFiles.map((f, i) => {
     const displayName = f.replace(/\.(?:geojson|csv)$/i, '');
-    const matchIdx    = bestMatchIdx(f);
-    let options = '<option value="__new__">+ Add as new layer</option>';
-    currentLayers.forEach((l, li) => {
-      const sel = li === matchIdx ? ' selected' : '';
-      options += `<option value="${l.layerName}"${sel}>${l.legendName}</option>`;
+    let options = '<option value="__new__" selected>+ Add as separate layer</option>';
+    currentLayers.forEach(l => {
+      options += `<option value="${l.layerName}">Merge + map attributes into ${l.legendName}</option>`;
     });
     return `
       <tr>
@@ -298,8 +283,8 @@ function showLayerMappingUI(importedProjectName, importedFiles) {
           📥 Layer Mapping — <span style="color:#28a745;">${importedProjectName}</span>
         </h2>
         <p style="margin:0 0 14px; font-size:13px; color:#aaa;">
-          Assign each imported layer to an existing layer (features will be merged while
-          preserving all attributes) or add it as a new layer.
+          Each imported file stays separate by default. Select “Merge + map attributes”
+          explicitly only when its features should be merged into an existing layer.
         </p>
         <div style="overflow-y:auto; flex:1; border:1px solid #333; border-radius:6px;">
           <table style="width:100%; border-collapse:collapse;">
@@ -338,6 +323,17 @@ window.cancelLayerMapping = function() {
   selectTool('info');
 };
 
+function buildSeparateProjectLayerLabel(projectName, filename, styleHint = {}) {
+  const sanitizeLabelPart = value => String(value || '')
+    .trim()
+    .replace(/\.(?:geojson|csv)$/i, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  const projectPart = sanitizeLabelPart(projectName) || 'Imported_Dataset';
+  const layerPart = sanitizeLabelPart(styleHint.legendName || filename) || 'Layer';
+  return `${projectPart}_${layerPart}`;
+}
+
 /* ─── Execute the project import ────────────────────────────────────────── */
 window.executeProjectImport = function(importedProjectName) {
   /* Collect mapping selections. */
@@ -374,8 +370,9 @@ window.executeProjectImport = function(importedProjectName) {
       if (buf && typeof XLSX !== 'undefined') {
         try {
           const wb   = XLSX.read(buf, { type: 'array' });
-          if (wb.SheetNames.includes('Input_Files')) {
-            const rows     = XLSX.utils.sheet_to_json(wb.Sheets['Input_Files'], { header: 1 });
+          const configSheetName = ['Input_Files', 'Layers'].find(name => wb.SheetNames.includes(name));
+          if (configSheetName) {
+            const rows     = XLSX.utils.sheet_to_json(wb.Sheets[configSheetName], { header: 1 });
             const startIdx = rows.findIndex(r => Array.isArray(r) && r.some(c => typeof c === 'string' && /\.(?:geojson|csv)$/i.test(c)));
             for (let j = (startIdx >= 0 ? startIdx : 0); j < rows.length; j++) {
               const row = rows[j];
@@ -406,30 +403,30 @@ window.executeProjectImport = function(importedProjectName) {
     })
     .catch(() => ({}))
     .then(importedStyleMap => {
-      /* Sequential promise chain for individual layer files. */
-      return mappings.reduce((chain, mapping) => {
-        return chain.then(() => {
+      /* Fetch independent layer files concurrently instead of waiting for each
+       * large GeoJSON file to finish before starting the next request. */
+      let completed = 0;
+      const total = mappings.length;
+      return Promise.all(mappings.map(mapping => {
           const { filename, targetLayerName } = mapping;
-          const progressEl = document.getElementById('import-progress');
-          if (progressEl) progressEl.textContent = `Loading ${filename}…`;
-
           const url = `Input/${encodeURIComponent(importedProjectName)}/${encodeURIComponent(filename)}?v=${Date.now()}`;
           return fetch(url)
             .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return parseSpatialDataResponse(r, filename); })
             .then(data => {
               const features = data.features || [];
+              const styleHint = importedStyleMap[filename] || {};
               if (targetLayerName === '__new__') {
-                /* Use style from imported project config.xlsx when adding as new. */
-                const styleHint = importedStyleMap[filename] || {};
-                registerNewImportedLayer(filename.replace(/\.(?:geojson|csv)$/i, ''), data, styleHint);
+                const separateLabel = buildSeparateProjectLayerLabel(importedProjectName, filename, styleHint);
+                registerNewImportedLayer(separateLabel, data, { ...styleHint, legendName: separateLabel });
                 results.newLayers++;
               } else {
                 const ok = mergeIntoExistingLayer(targetLayerName, features);
                 if (ok) { results.merged++; }
                 else {
-                  /* Fallback: add as new layer, still apply imported style. */
-                  const styleHint = importedStyleMap[filename] || {};
-                  registerNewImportedLayer(filename.replace(/\.(?:geojson|csv)$/i, ''), data, styleHint);
+                  /* A failed explicit merge remains separate and never falls
+                   * through to another similarly named existing layer. */
+                  const separateLabel = buildSeparateProjectLayerLabel(importedProjectName, filename, styleHint);
+                  registerNewImportedLayer(separateLabel, data, { ...styleHint, legendName: separateLabel });
                   results.newLayers++;
                 }
               }
@@ -437,9 +434,13 @@ window.executeProjectImport = function(importedProjectName) {
             .catch(err => {
               console.error(`Failed to import ${filename}:`, err);
               results.errors.push(filename);
+            })
+            .finally(() => {
+              completed++;
+              const progressEl = document.getElementById('import-progress');
+              if (progressEl) progressEl.textContent = `Loaded ${completed}/${total}: ${filename}`;
             });
-        });
-      }, Promise.resolve());
+      }));
     })
     .then(() => {
       const oldOverlay = document.getElementById('layer-mapping-overlay');
@@ -473,7 +474,9 @@ function registerNewImportedLayer(label, data, configHint = {}) {
   const features  = (data && data.features) || [];
   const firstGeom = features.length > 0 ? (features[0].geometry || {}).type : '';
   const isLine    = ['LineString', 'MultiLineString'].includes(firstGeom);
-  const geomClass = isLine ? 'line' : 'point';
+  const configuredType = String(configHint.type || '').trim();
+  const normalizedType = configuredType.toLowerCase();
+  const geomClass = isLine ? 'line' : (normalizedType === 'in-line' || normalizedType === 'inline' ? 'inline' : 'point');
 
   const color      = configHint.color      || (isLine ? '#ff6600' : '#ff7800');
   const size       = configHint.size       || (isLine ? 3 : 8);
@@ -488,7 +491,7 @@ function registerNewImportedLayer(label, data, configHint = {}) {
     legendName:    configHint.legendName || label,
     color,
     size,
-    type:          isLine ? 'Line' : 'Point',
+    type:          configuredType || (isLine ? 'Line' : 'Point'),
     markerType,
     elementKey:    safeName,
     geometryClass: geomClass,
@@ -500,11 +503,6 @@ function registerNewImportedLayer(label, data, configHint = {}) {
   const geojsonOptions = {
     onEachFeature: (feat, lyr) => {
       assignMetadataToLayer(lyr, metadata);
-      markLayerChanged(lyr, {
-        changeType: 'Topology Change',
-        tool: 'Integrate Dataset',
-        description: 'Element imported into a new project layer'
-      });
       handleFeature(feat, lyr);
       /* Capture original style so resetPipelineStyle can restore after highlight. */
       if (typeof lyr.getLatLngs === 'function') {
@@ -519,8 +517,8 @@ function registerNewImportedLayer(label, data, configHint = {}) {
   /* Derive the correct Leaflet pane for new standalone imported layers. */
   const importedPane = (() => {
     const hint = (config.filename || '').toLowerCase();
-    if (hint.match(/\bpl_|pipeline/)) return 'pipelinePane';
-    if (hint.match(/\bn_|\bnode/))    return 'nodePane';
+    if (isLine || hint.match(/\bpl_|pipeline/)) return 'pipelinePane';
+    if (normalizedType === 'node' || hint.match(/\bn_|\bnode/)) return 'nodePane';
     return 'overlayPane';
   })();
 
@@ -605,20 +603,17 @@ function mergeIntoExistingLayer(targetLayerName, importedFeatures) {
   /* ── 2. Back-fill missing keys in existing features with null. */
   targetLayer.eachLayer(l => {
     if (l.feature && l.feature.properties) {
-      let schemaChanged = false;
       allKeys.forEach(k => {
         if (!(k in l.feature.properties)) {
           l.feature.properties[k] = null;
-          schemaChanged = true;
         }
       });
-      if (schemaChanged) markLayerChanged(l, { tool: 'Integrate Dataset' });
     }
   });
 
-  /* ── 3. Add each imported feature with unified schema + full interactivity. */
-  importedFeatures.forEach(feature => {
-    /* Build unified properties. */
+  /* ── 3. Build one unified FeatureCollection. Creating a separate L.GeoJSON
+   * wrapper for every feature is prohibitively expensive for full projects. */
+  const unifiedFeatures = importedFeatures.map(feature => {
     const unifiedProps = {};
     allKeys.forEach(k => {
       unifiedProps[k] = (feature.properties && k in feature.properties)
@@ -626,80 +621,61 @@ function mergeIntoExistingLayer(targetLayerName, importedFeatures) {
         : null;
     });
 
-    const unifiedFeature = {
+    return {
       type: 'Feature',
       geometry:   feature.geometry,
       properties: unifiedProps
     };
-
-    const tmpOptions = {
-      onEachFeature: (feat, lyr) => {
-        if (metadata) assignMetadataToLayer(lyr, metadata);
-        markLayerChanged(lyr, {
-          changeType: 'Topology Change',
-          tool: 'Integrate Dataset',
-          description: `Element imported into layer ${targetLayerName}`
-        });
-        handleFeature(feat, lyr);
-        /* Capture original style so resetPipelineStyle can restore after highlight. */
-        if (typeof lyr.getLatLngs === 'function') {
-          lyr._originalColor    = lyr.options.color;
-          lyr._originalWeight   = lyr.options.weight;
-          lyr._originalOpacity  = typeof lyr.options.opacity === 'number' ? lyr.options.opacity : 0.8;
-          lyr._originalDashArray = lyr.options.dashArray || null;
-        }
-      }
-    };
-
-    /* Inherit style from the target layer's layerConfig entry. */
-    const geomType = (feature.geometry || {}).type;
-    if (geomType === 'LineString' || geomType === 'MultiLineString') {
-      /* Lines: use config colour + weight; fall back to sub-layer inspection. */
-      let color = '#3388ff', weight = 3;
-      if (targetConfig) {
-        color  = targetConfig.color || color;
-        weight = targetConfig.size  || weight;
-      } else {
-        targetLayer.eachLayer(l => {
-          if (l.options) {
-            if (l.options.color)  color  = l.options.color;
-            if (l.options.weight) weight = l.options.weight;
-          }
-        });
-      }
-      /* pane must be in the GeoJSON root options (not in style()) because
-       * L.Path ignores pane changes after construction. */
-      tmpOptions.pane  = targetPane;
-      tmpOptions.style = () => ({ color, weight, opacity: 0.8, lineCap: 'round', lineJoin: 'round' });
-    } else {
-      /* Points: use createShapedMarker with the target layer's config. */
-      let color = '#ff7800', size = 8, shape = 'circle';
-      if (targetConfig) {
-        color = targetConfig.color      || color;
-        size  = targetConfig.size       || size;
-        shape = targetConfig.markerType || shape;
-      } else {
-        /* Fall back: inspect existing markers for style hints. */
-        targetLayer.eachLayer(l => {
-          const s = l._customMarkerStyle || l.options;
-          if (s) {
-            if (s.color)      color = s.color;
-            if (s.size)       size  = s.size;
-            if (s.markerType) shape = s.markerType;
-          }
-        });
-      }
-      tmpOptions.pointToLayer = (feat, latlng) => {
-        const marker = createShapedMarker(latlng, { shape, size, color, pane: targetPane });
-        marker.feature = feat;
-        if (typeof captureOriginalMarkerStyle === 'function') captureOriginalMarkerStyle(marker, 'default');
-        return marker;
-      };
-    }
-
-    const tmpLayer = L.geoJSON(unifiedFeature, tmpOptions);
-    tmpLayer.eachLayer(lyr => targetLayer.addLayer(lyr));
   });
+
+  let lineColor = '#3388ff', lineWeight = 3;
+  let pointColor = '#ff7800', pointSize = 8, pointShape = 'circle';
+  if (targetConfig) {
+    lineColor  = targetConfig.color      || lineColor;
+    lineWeight = targetConfig.size       || lineWeight;
+    pointColor = targetConfig.color      || pointColor;
+    pointSize  = targetConfig.size       || pointSize;
+    pointShape = targetConfig.markerType || pointShape;
+  } else {
+    /* Inspect the existing target only once, not once per imported feature. */
+    targetLayer.eachLayer(l => {
+      const style = l._customMarkerStyle || l.options;
+      if (!style) return;
+      if (style.color) {
+        lineColor = style.color;
+        pointColor = style.color;
+      }
+      if (style.weight) lineWeight = style.weight;
+      if (style.size) pointSize = style.size;
+      if (style.markerType) pointShape = style.markerType;
+    });
+  }
+
+  const tmpOptions = {
+    pane: targetPane,
+    style: () => ({ color: lineColor, weight: lineWeight, opacity: 0.8, lineCap: 'round', lineJoin: 'round' }),
+    pointToLayer: (feat, latlng) => {
+      const marker = createShapedMarker(latlng, {
+        shape: pointShape, size: pointSize, color: pointColor, pane: targetPane
+      });
+      marker.feature = feat;
+      if (typeof captureOriginalMarkerStyle === 'function') captureOriginalMarkerStyle(marker, 'default');
+      return marker;
+    },
+    onEachFeature: (feat, lyr) => {
+      if (metadata) assignMetadataToLayer(lyr, metadata);
+      handleFeature(feat, lyr);
+      if (typeof lyr.getLatLngs === 'function') {
+        lyr._originalColor = lyr.options.color;
+        lyr._originalWeight = lyr.options.weight;
+        lyr._originalOpacity = typeof lyr.options.opacity === 'number' ? lyr.options.opacity : 0.8;
+        lyr._originalDashArray = lyr.options.dashArray || null;
+      }
+    }
+  };
+
+  const tmpLayer = L.geoJSON({ type: 'FeatureCollection', features: unifiedFeatures }, tmpOptions);
+  tmpLayer.eachLayer(lyr => targetLayer.addLayer(lyr));
 
   console.log(`✅ Merged ${importedFeatures.length} features into ${targetLayerName}`);
   return true;

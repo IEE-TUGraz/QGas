@@ -8,6 +8,8 @@
  * Public API:
  * - QGasUndo.recordChange(change): Store a committed change in undo history.
  * - QGasUndo.captureContexts(feature): Capture the layer contexts for a feature.
+ * - QGasUndo.beginGroup(tool): Start an explicit multi-feature undo action.
+ * - QGasUndo.endGroup(groupId): Finish an explicit multi-feature undo action.
  * - QGasUndo.openPopup(): Open the selective undo dialog.
  * - QGasUndo.undoSelected(): Restore the selected actions.
  * - openUndoChangesPopup(): Entry point used by the GUI button.
@@ -20,6 +22,8 @@
   let totalBytes = 0;
   let applyingUndo = false;
   let actionSequence = 0;
+  let groupSequence = 0;
+  let activeGroup = null;
 
   const clone = value => {
     if (value === undefined) return null;
@@ -103,7 +107,7 @@
   function recordChange(change) {
     if (applyingUndo || !change || !change.feature) return;
     const now = Date.now();
-    const tool = change.tool || 'Unknown';
+    const tool = activeGroup?.tool || change.tool || 'Unknown';
     const before = clone(change.before);
     const after = clone(change.after);
     ['element_key', '__elementKey'].forEach(key => {
@@ -125,7 +129,11 @@
     };
     const bytes = estimateBytes({ before: storedChange.before, after: storedChange.after });
     const previous = actions[actions.length - 1];
-    if (previous && previous.tool === tool && now - previous.lastChangeAt <= GROUP_WINDOW_MS) {
+    const belongsToActiveGroup = Boolean(
+      activeGroup && previous && previous.groupId === activeGroup.id
+    );
+    if (previous && (belongsToActiveGroup ||
+        (!activeGroup && previous.tool === tool && now - previous.lastChangeAt <= GROUP_WINDOW_MS))) {
       previous.changes.push(storedChange);
       previous.lastChangeAt = now;
       previous.bytes += bytes;
@@ -135,6 +143,7 @@
       const action = {
         id: `UNDO_${++actionSequence}`,
         tool,
+        groupId: activeGroup?.id || null,
         createdAt: timestamp,
         lastChangeAt: now,
         changes: [storedChange],
@@ -144,6 +153,18 @@
       totalBytes += bytes;
     }
     trimHistory();
+  }
+
+  function beginGroup(tool = 'Unknown') {
+    if (activeGroup) return activeGroup.id;
+    activeGroup = { id: `GROUP_${++groupSequence}`, tool };
+    return activeGroup.id;
+  }
+
+  function endGroup(groupId = null) {
+    if (!activeGroup) return;
+    if (groupId && activeGroup.id !== groupId) return;
+    activeGroup = null;
   }
 
   function latLngsFromCoordinates(coordinates) {
@@ -373,6 +394,8 @@
   window.QGasUndo = {
     recordChange,
     captureContexts,
+    beginGroup,
+    endGroup,
     openPopup,
     undoSelected,
     get isApplying() { return applyingUndo; },

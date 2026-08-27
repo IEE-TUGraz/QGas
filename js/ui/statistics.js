@@ -310,26 +310,36 @@
         layerGroup._customLayerName ||
         'Nodes';
       if (!stats.nodeLayerStats[layerLabel]) {
-        stats.nodeLayerStats[layerLabel] = { count: 0, isSublayer };
+        stats.nodeLayerStats[layerLabel] = {
+          count: 0,
+          isSublayer,
+          pressureMaximum: { available: 0, total: 0 },
+          pressureMinimum: { available: 0, total: 0 }
+        };
       }
       layerGroup.eachLayer(layer => {
         if (!layer || !layer.feature) return;
         const nodeProperties = layer.feature.properties || {};
+        const layerStats = stats.nodeLayerStats[layerLabel];
         stats.nodes++;
         stats.nodePressureMaximum.total++;
         stats.nodePressureMinimum.total++;
+        layerStats.pressureMaximum.total++;
+        layerStats.pressureMinimum.total++;
         if (hasValue(nodeProperties.pressure_max ?? nodeProperties.Pressure_Max)) {
           stats.nodePressureMaximum.available++;
+          layerStats.pressureMaximum.available++;
         }
         if (hasValue(nodeProperties.pressure_min ?? nodeProperties.Pressure_Min)) {
           stats.nodePressureMinimum.available++;
+          layerStats.pressureMinimum.available++;
         }
         if (isSublayer) {
           stats.nodesSublayer++;
         } else {
           stats.nodesBase++;
         }
-        stats.nodeLayerStats[layerLabel].count++;
+        layerStats.count++;
       });
     });
     if (borderpointsLayer) {
@@ -371,11 +381,6 @@
       (stats.pipelineName.available / stats.pipelineName.total * 100) : 0;
     const namePercentLengthwise = stats.pipelineName.totalLength > 0 ? 
       (stats.pipelineName.lengthAvailable / stats.pipelineName.totalLength * 100) : 0;
-    const maximumPressurePercent = stats.nodePressureMaximum.total > 0
-      ? (stats.nodePressureMaximum.available / stats.nodePressureMaximum.total * 100) : 0;
-    const minimumPressurePercent = stats.nodePressureMinimum.total > 0
-      ? (stats.nodePressureMinimum.available / stats.nodePressureMinimum.total * 100) : 0;
-
     /* Generate HTML content. */
     let content = '';
 
@@ -472,6 +477,39 @@
       </table>`;
     }
 
+    const nodePressureLayerEntries = Object.entries(stats.nodeLayerStats || {})
+      .filter(([, entry]) => entry && entry.count > 0)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+
+    if (nodePressureLayerEntries.length > 0) {
+      const formatCompleteness = pressureStats => {
+        const available = pressureStats?.available || 0;
+        const total = pressureStats?.total || 0;
+        const percent = total > 0 ? available / total * 100 : 0;
+        return `${available.toLocaleString('en-US')} / ${total.toLocaleString('en-US')} (${percent.toFixed(1)}%)`;
+      };
+      const nodePressureRows = nodePressureLayerEntries.map(([layerName, entry]) => `
+        <tr>
+          <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">${layerName}</td>
+          <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${formatCompleteness(entry.pressureMaximum)}</td>
+          <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${formatCompleteness(entry.pressureMinimum)}</td>
+        </tr>
+      `).join('');
+
+      content += `
+      <h3 style="color: #495057;">Node Data Completeness</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+        <thead>
+          <tr>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: left; font-weight: bold;">Node Layer</th>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: center; font-weight: bold;">Maximum Pressure</th>
+            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: center; font-weight: bold;">Minimum Pressure</th>
+          </tr>
+        </thead>
+        <tbody>${nodePressureRows}</tbody>
+      </table>`;
+    }
+
     /* Add pipeline data completeness section only if pipelines are loaded. */
     if (stats.pipelineElements > 0) {
       content += `
@@ -495,26 +533,6 @@
             <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Name</td>
             <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${namePercentLengthwise.toFixed(1)}%</td>
             <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${namePercent.toFixed(1)}%</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3 style="color: #495057;">Node Data Completeness</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
-        <thead>
-          <tr>
-            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: left; font-weight: bold;">Attribute</th>
-            <th style="padding: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; text-align: center; font-weight: bold;">Elementwise</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Maximum Pressure</td>
-            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${maximumPressurePercent.toFixed(1)}%</td>
-          </tr>
-          <tr>
-            <td style="padding: 4px 8px; border: 1px solid #dee2e6; font-weight: bold;">Minimum Pressure</td>
-            <td style="padding: 4px 8px; border: 1px solid #dee2e6; text-align: center;">${minimumPressurePercent.toFixed(1)}%</td>
           </tr>
         </tbody>
       </table>

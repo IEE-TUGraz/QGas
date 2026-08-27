@@ -30,7 +30,7 @@
  * - Integrate Dataset: Import external data
  * - Split Node: Divide nodes for network restructuring
  * - Reconnect Infrastructure: Update element connections
- * - Distribute Compressors: Auto-place compressors
+ * - Create Compressor: Convert a node or split parallel pipelines around a compressor
  * 
  * Global Scope: This module maintains global scope for compatibility with
  * inline HTML event handlers (e.g., onclick="openToolsPopup()")
@@ -86,7 +86,7 @@ function updateActiveToolDisplay(mode) {
     'integrate-dataset': '🔗 Integrate Dataset',
     'split-node': '🔀 Split Node',
     'reconnect-infrastructure': '🔌 Reconnect Infrastructure',
-    'distribute-compressors': '🔄 Distribute Compressors',
+    'create-compressor': '⚙️ Create Compressor',
     'topology-check': '🧭 Topology Checker'
   };
   
@@ -275,9 +275,9 @@ function selectTool(mode) {
       if (!checkContributorName()) return;
       activateReconnectInfrastructureTool();
       break;
-    case 'distribute-compressors':
+    case 'create-compressor':
       if (!checkContributorName()) return;
-      activateDistributeCompressorsTool();
+      activateCreateCompressorTool();
       break;
     case 'add-new-element':
       if (!checkContributorName()) return;

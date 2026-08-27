@@ -23,7 +23,7 @@ Infrastructure with a single connection uses `node`.
 | Add Infrastructure | Creates `node`, or `node_start` and `node_end` for inline infrastructure | `∅ → I(a)` or `∅ → C(a → b)` |
 | Reconnect Infrastructure | Replaces `node` | `I(a) → I(b)` |
 | Divide Pipeline | Replaces one pipeline with two segments and inserts a node | `P(a → b) → P₁(a → v) + P₂(v → b)` |
-| Distribute Compressors | Splits a pipeline around a compressor using two connection nodes | `P(a → b) → P₁(a → c₁) + C(c₁ → c₂) + P₂(c₂ → b)` |
+| Create Compressor | Replaces a node or splits selected pipelines and connects their terminals to a central compressor | `P(a → b) → P₁(a → cₐ) + CP(cₐ → C) + CP(cᵇ → C) + P₂(cᵇ → b)` |
 | Split Node | Reassigns selected pipeline endpoints from one node to separate subnodes | `b → b₁, b₂` |
 | Change Direction | Swaps `node_start` and `node_end` | `P(a → b) → P(b → a)` |
 | Edit Geometry | Does not change node references | `P(a → b) → P(a → b)` |
@@ -103,32 +103,6 @@ The first segment inherits `node_start=a` and receives `node_end=v`. The second
 segment receives `node_start=v` and inherits `node_end=b`. Node `v` is created
 in the node layer of the connected endpoint nodes and uses that layer's
 attribute schema.
-
-## Distribute Compressors
-
-When QGas inserts a distributed compressor into a pipeline, it creates two
-separate connection nodes at the compressor location. The compressor remains a
-distinct network element between these nodes:
-
-```text
-Before:
-
-P(a → b)
-a ─────────────────────────────────────→ b
-
-After:
-
-P₁(a → c₁)       C(c₁ → c₂)       P₂(c₂ → b)
-a ─────────→ c₁ ──[ compressor ]──→ c₂ ─────────→ b
-```
-
-The resulting references are:
-
-| Element | `node_start` | `node_end` |
-| --- | --- | --- |
-| First pipeline segment | `a` | `c₁` |
-| Compressor | `c₁` | `c₂` |
-| Second pipeline segment | `c₂` | `b` |
 
 ## Split Node
 

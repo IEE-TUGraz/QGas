@@ -447,6 +447,16 @@ function isNodeLayerCandidate(layer, layerName = '') {
       registerEntry(nodeLayer, 'core:nodes', resolveLayerMetadata(nodeLayer));
     }
 
+    /* Europe_FINAL defines compressors as network nodes.  The canonical
+     * compressorsLayer is not guaranteed to be present in dynamicLayers (for
+     * example after filtering), so register it explicitly when its configured
+     * type is Node. */
+    if (typeof compressorsLayer !== 'undefined' &&
+        compressorsLayer &&
+        isNodeLayerCandidate(compressorsLayer, 'Compressors')) {
+      registerEntry(compressorsLayer, 'core:compressors', resolveLayerMetadata(compressorsLayer));
+    }
+
     if (dynamicLayers && typeof dynamicLayers === 'object') {
       Object.entries(dynamicLayers).forEach(([layerName, layer]) => {
         if (!layer) return;
@@ -863,6 +873,10 @@ function isNodeLayerCandidate(layer, layerName = '') {
     currentMode = 'edit-node-position';
   nodePositionEditActive = true;
   initializeNodePositionEditBuffer();
+  /* Point layers are hidden while the user chooses between route and node
+   * editing. Restore them before binding node handlers; otherwise node-type
+   * compressor markers disappear and cannot be selected. */
+  applyEditGeometryVisibility(false);
   setInlineEditingElevation(true);
   
   // Deaktiviere Pipeline-Klicks um Node-Klicks zu ermöglichen

@@ -752,7 +752,7 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
   <li>Integrate Dataset: Import external data</li>
   <li>Split Node: Divide nodes for network restructuring</li>
   <li>Reconnect Infrastructure: Update element connections</li>
-  <li>Distribute Compressors: Auto-place compressors</li>
+  <li>Create Compressor: Create node-based or line-based compressor topology</li>
 </ul>
 <p>Global Scope: This module maintains global scope for compatibility with inline HTML event handlers (e.g., onclick=&quot;openToolsPopup()&quot;)</p>
 <p><strong>Development Information:</strong></p>
@@ -1207,70 +1207,6 @@ console.log(&#x27;complete_dataset.zip downloaded&#x27;);
 <summary class="api-sig"><code>showSaveDeleteButton()</code></summary>
 <div class="api-func-body">
 <p class="api-desc">Show the save/confirm delete button in the UI. Creates a button that executes batch deletion of all marked elements.</p>
-</div>
-</details>
-</div>
-</details>
-</div>
-</details>
-<details class="tool-section">
-<summary><code>distribute_compressors.js</code></summary>
-<div class="module-header">
-<p><strong>QGas - Distribute Compressors Tool</strong></p>
-<p>Distributes a single compressor into multiple sub-compressors along pipelines. Useful for representing distributed compression infrastructure.</p>
-<p><strong>Key Features:</strong></p>
-<ul>
-  <li>Interactive compressor selection</li>
-  <li>Automatic distribution count input</li>
-  <li>Visual connection lines</li>
-  <li>Sub-compressor auto-placement</li>
-  <li>Pipeline splitting at placement points</li>
-  <li>Node generation for connections</li>
-</ul>
-<p><strong>Workflow:</strong></p>
-<p>1. User selects compressor to distribute 2. Enters number of sub-compressors 3. Clicks pipeline locations for placement 4. Visual connection lines show relationships 5. Original compressor replaced with distributed units</p>
-<p><strong>Technical Details:</strong></p>
-<ul>
-  <li>Creates sub-nodes at compressor positions</li>
-  <li>Splits pipelines at insertion points</li>
-  <li>Generates case-insensitively unique numeric IDs (e.g., C_01_1, C_01_2)</li>
-  <li>Creates standard A/B terminal nodes and inherits endpoint pressure limits</li>
-  <li>Uses dashed nearest-neighbour lines as visual aids only</li>
-  <li>Synchronizes active/original layers for filtering and export</li>
-  <li>Restores legend-controlled visibility when the workflow ends</li>
-</ul>
-<p><strong>Development Information:</strong></p>
-<ul>
-  <li>Authors: Marco Quantschnig, Yannick Werner, Sonja Wogrin and Thomas Klatzer</li>
-  <li>Institution: Institute of Electricity Economics and Energy Innovation (IEE), Graz University of Technology, Inffeldgasse 18, Graz, 8010, Austria</li>
-  <li>Created: August 2025</li>
-  <li>License: See LICENSE file</li>
-  <li>Disclaimer: AI-assisted tools were used to support development and documentation.</li>
-</ul>
-<p><strong>Inputs:</strong></p>
-<ul>
-  <li>Selected compressor feature and target pipeline locations.</li>
-  <li>User-entered distribution counts.</li>
-</ul>
-<p><strong>Public API:</strong></p>
-<ul>
-  <li>activateDistributeCompressors(): Start compressor distribution workflow.</li>
-</ul>
-<details class="api-functions-section">
-<summary><strong>Public API Functions</strong><span class="api-func-count"> (2)</span></summary>
-<div class="api-functions">
-<details class="api-func">
-<summary class="api-sig"><code>startDistributeCompressors()</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Start the compressor distribution workflow. Initialises distribution state, hides all map layers except pipelines and compressors to reduce visual clutter, and activates click handlers on every compressor marker. The user selects a source compressor, then specifies how many sub-compressors to place along pipeline segments. Sub-compressor positions are computed geometrically on the selected pipeline and persisted via the standard layer write-back mechanism.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
-</div>
-</details>
-<details class="api-func">
-<summary class="api-sig"><code>exitDistributeMode()</code></summary>
-<div class="api-func-body">
-<p class="api-desc">Exit distribute-compressor mode and restore normal map state. Re-adds any layers that were hidden during distribution (power-plants, storages, nodes, etc.), removes all temporary connection-line polylines and sub-compressor markers from the map, and resets all internal distribution state variables. Safe to call both after a completed distribution and after an explicit cancellation.</p>
-<p class="api-returns"><strong>Returns:</strong> <code>void</code></p>
 </div>
 </details>
 </div>

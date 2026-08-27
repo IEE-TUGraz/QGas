@@ -241,11 +241,14 @@ function createLegendEventHandlers() {
        * are found correctly in dynamicLayers. */
       const layerName = config.layerName ||
         config.filename.replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
-      const configDescriptor = `${config.filename || ''} ${config.legendName || ''}`;
-      const isCompressorConfig = /compressor/i.test(configDescriptor);
+      const isPrimaryCompressorConfig = config.elementKey === 'compressors' && !isLineLayerType(config.type);
       registerToggle({
         toggleId,
-        resolveLayers: () => isCompressorConfig
+        /* Only the canonical compressor config follows the replaceable legacy
+         * compressorsLayer reference (for example after country filtering).
+         * Separately imported compressor datasets must always resolve their own
+         * dynamic layer, even though their names also contain "compressor". */
+        resolveLayers: () => isPrimaryCompressorConfig
           ? (compressorsLayer || dynamicLayers[layerName])
           : dynamicLayers[layerName],
         key: layerName

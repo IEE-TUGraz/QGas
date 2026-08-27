@@ -38,8 +38,8 @@
 |           |-- add_pipeline.js
 |           |-- add_plan.js
 |           |-- change_direction.js
+|           |-- create_compressor.js
 |           |-- delete.js
-|           |-- distribute_compressors.js
 |           |-- divide_pipeline.js
 |           |-- edit_geometry.js
 |           |-- group_pipelines.js

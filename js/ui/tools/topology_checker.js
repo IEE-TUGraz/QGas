@@ -152,6 +152,17 @@
       groups.push(layer);
     };
 
+    const addConfiguredInlineLayer = layer => {
+      if (!layer) return;
+      const geometryHint = (typeof getLayerGeometryClassHint === 'function')
+        ? String(getLayerGeometryClassHint(layer) || '').toLowerCase()
+        : '';
+      const typeHint = String(layer._qgasMeta?.typeHint || '').toLowerCase();
+      if (geometryHint === 'inline' || typeHint === 'in-line' || typeHint === 'inline') {
+        add(layer);
+      }
+    };
+
     if (typeof getAllInlineLayers === 'function') {
       try {
         (getAllInlineLayers() || []).forEach(add);
@@ -160,14 +171,13 @@
       }
     }
 
-    /* Distributed compressors are stored in the active compressor group and
-     * act as inline edges between their A/B terminal nodes. This reference is
-     * deliberately resolved directly because core layer variables use global
-     * lexical bindings and therefore are not necessarily properties of window. */
+    /* A compressor group only represents network edges when its configuration
+     * declares it as In-Line. Node-type compressor layers are network nodes in
+     * their own right and intentionally have no node/node_start/node_end fields. */
     try {
-      if (typeof compressorsLayer !== 'undefined') add(compressorsLayer);
+      if (typeof compressorsLayer !== 'undefined') addConfiguredInlineLayer(compressorsLayer);
     } catch (e) {}
-    add(window.compressorsLayer);
+    addConfiguredInlineLayer(window.compressorsLayer);
 
     return groups;
   }

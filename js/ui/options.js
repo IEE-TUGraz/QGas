@@ -158,6 +158,20 @@ function buildStyleableLayerRegistry() {
     Object.entries(window.customLayers).forEach(([name, layer]) => {
       if (!layer) return;
       const settings = layer._customLayerSettings || {};
+      /* Imported project layers are registered in both layerConfig and
+       * customLayers so complete export can discover them. Deduplicate by the
+       * actual Leaflet instance, not only by independently generated keys. */
+      const existingLayerEntry = Array.from(registry.values()).find(entry =>
+        (Array.isArray(entry.layerRefs) && entry.layerRefs.includes(layer)) ||
+        (entry.layerName && dynamicLayers[entry.layerName] === layer)
+      );
+      if (existingLayerEntry) {
+        if (!existingLayerEntry.customLayer) existingLayerEntry.customLayer = layer;
+        if (!Array.isArray(existingLayerEntry.layerRefs)) existingLayerEntry.layerRefs = [];
+        if (!existingLayerEntry.layerRefs.includes(layer)) existingLayerEntry.layerRefs.push(layer);
+        layer._optionsKey = existingLayerEntry.key;
+        return;
+      }
       let geometry = settings.geometryClass || (layer._customLineLayer ? 'line' : 'point');
       if (geometry !== 'line') {
         geometry = 'point';

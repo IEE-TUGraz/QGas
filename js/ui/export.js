@@ -34,28 +34,62 @@ function filenameForExportFormat(filename, format) {
 }
 
 function featuresToCsv(features) {
+  const delimiter = ';';
   const propertyNames = [];
   const seen = new Set();
   features.forEach(feature => Object.keys(feature.properties || {}).forEach(key => {
     if (!seen.has(key)) { seen.add(key); propertyNames.push(key); }
   }));
-  const rows = features.map(feature => {
-    const row = {};
-    propertyNames.forEach(key => {
-      const value = feature.properties?.[key];
-      row[key] = value && typeof value === 'object' ? JSON.stringify(value) : (value ?? '');
-    });
-    row.geometry = JSON.stringify(feature.geometry);
-    return row;
-  });
-  const worksheet = XLSX.utils.json_to_sheet(rows, { header: [...propertyNames, 'geometry'] });
-  return '\uFEFF' + XLSX.utils.sheet_to_csv(worksheet);
+  const geometryToWkt = geometry => {
+    if (!geometry || !geometry.type) return '';
+    const coordinate = values => values.map(value => Number.isFinite(value) ? String(value) : '').join(' ');
+    const ring = values => `(${values.map(coordinate).join(', ')})`;
+    const polygon = values => `(${values.map(ring).join(', ')})`;
+    switch (geometry.type) {
+      case 'Point': return geometry.coordinates?.length ? `POINT (${coordinate(geometry.coordinates)})` : 'POINT EMPTY';
+      case 'MultiPoint': return geometry.coordinates?.length ? `MULTIPOINT (${geometry.coordinates.map(values => `(${coordinate(values)})`).join(', ')})` : 'MULTIPOINT EMPTY';
+      case 'LineString': return geometry.coordinates?.length ? `LINESTRING ${ring(geometry.coordinates)}` : 'LINESTRING EMPTY';
+      case 'MultiLineString': return geometry.coordinates?.length ? `MULTILINESTRING (${geometry.coordinates.map(ring).join(', ')})` : 'MULTILINESTRING EMPTY';
+      case 'Polygon': return geometry.coordinates?.length ? `POLYGON ${polygon(geometry.coordinates)}` : 'POLYGON EMPTY';
+      case 'MultiPolygon': return geometry.coordinates?.length ? `MULTIPOLYGON (${geometry.coordinates.map(polygon).join(', ')})` : 'MULTIPOLYGON EMPTY';
+      case 'GeometryCollection': {
+        const geometries = (geometry.geometries || []).map(geometryToWkt).filter(Boolean);
+        return geometries.length ? `GEOMETRYCOLLECTION (${geometries.join(', ')})` : 'GEOMETRYCOLLECTION EMPTY';
+      }
+      default: return JSON.stringify(geometry);
+    }
+  };
+  const escapeCsvCell = value => {
+    const text = value === null || value === undefined
+      ? ''
+      : (typeof value === 'object' ? JSON.stringify(value) : String(value));
+    return text.includes(delimiter) || /["\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  };
+  const header = [...propertyNames, 'geometry'];
+  const rows = features.map(feature => header.map(key => {
+    const value = key === 'geometry' ? geometryToWkt(feature.geometry) : feature.properties?.[key];
+    return escapeCsvCell(value);
+  }).join(delimiter));
+  return '\uFEFF' + [header.map(escapeCsvCell).join(delimiter), ...rows].join('\r\n');
 }
 
 function serializeFeatures(features, format) {
+  const exportFeatures = features.map(feature => {
+    const properties = { ...(feature?.properties || {}) };
+    delete properties.__elementKey;
+    delete properties.element_key;
+    return { ...feature, properties };
+  });
   return normalizeExportFormat(format) === 'csv'
-    ? featuresToCsv(features)
-    : JSON.stringify({ type: 'FeatureCollection', features }, null, 2);
+    ? featuresToCsv(exportFeatures)
+    : JSON.stringify({ type: 'FeatureCollection', features: exportFeatures }, null, 2);
+}
+
+function removeInternalExportProperties(feature) {
+  if (!feature?.properties) return feature;
+  delete feature.properties.__elementKey;
+  delete feature.properties.element_key;
+  return feature;
 }
 
 async function chooseExportDirectory() {
@@ -147,7 +181,14 @@ function classifyLegoNetworkLayer(config, rules) {
     return rule.namePatterns.includes('*') ||
       rule.namePatterns.some(pattern => descriptor.includes(pattern));
   });
-  return matchingRule?.category || null;
+  if (matchingRule?.category) return matchingRule.category;
+
+  /* Layer type is authoritative for LEGO routing. Mapping rules may refine a
+   * Line layer (for example to valve or shortpipe), but they must never cause
+   * an otherwise valid network or node layer to disappear from the export. */
+  if (layerType === 'line') return 'pipeline';
+  if (layerType === 'node') return 'node';
+  return null;
 }
 
 function getLegoMappedValue(mapping, properties, datasetName) {
@@ -184,7 +225,6 @@ function collectLegoNetworkRows(mappingConfig, scope = 'complete') {
   const rows = [];
   const seenLayerGroups = new Set();
   const seenFeatureLayers = new WeakSet();
-  const replacedCompressorIds = new Set();
   const shortPipeGroups = new Set();
   const shortPipeFeatureLayers = new WeakSet();
   const onlyChanged = scope === 'changes';
@@ -233,12 +273,6 @@ function collectLegoNetworkRows(mappingConfig, scope = 'complete') {
       if (seenFeatureLayers.has(featureLayer)) return;
       if (onlyChanged && !feature.properties?.modified) return;
       if (!matchesActiveExportFilter(feature, category)) return;
-      if (category === 'compressor') {
-        const distributionGroup = String(feature.properties?.Distribution_Group ?? '').trim().toLowerCase();
-        const featureId = String(feature.properties?.id ?? feature.properties?.ID ?? '').trim().toLowerCase();
-        if (distributionGroup) replacedCompressorIds.add(distributionGroup);
-        else if (featureId && replacedCompressorIds.has(featureId)) return;
-      }
       seenFeatureLayers.add(featureLayer);
       rows.push({ category, datasetName, properties: { ...(feature.properties || {}) } });
     });
@@ -267,9 +301,8 @@ function collectLegoNetworkRows(mappingConfig, scope = 'complete') {
       typeof compressorsLayer !== 'undefined' &&
       compressorsLayer
     ) {
-      /* Country filtering can replace the configured dynamic-layer reference.
-       * Distributed compressors are always inserted into the active compressor
-       * group, so filtered/changes exports must read that authoritative group. */
+      /* Country filtering can replace the configured dynamic-layer reference,
+       * so filtered/changes exports read the active compressor group. */
       layer = compressorsLayer;
     }
     if (useOriginals) {
@@ -301,17 +334,6 @@ function collectLegoNetworkRows(mappingConfig, scope = 'complete') {
     }
     addLayer(layer, config);
   });
-
-  /* Compressor references may be replaced when a country filter is applied.
-   * Merge both authoritative groups and apply the active filter per feature;
-   * the WeakSet above prevents shared Leaflet markers from being duplicated. */
-  const compressorConfig = (Array.isArray(layerConfig) ? layerConfig : []).find(config =>
-    classifyLegoNetworkLayer(config, mappingConfig.rules) === 'compressor'
-  ) || { filename: 'compressors.geojson', legendName: 'Compressors', type: 'In-Line' };
-  if (!useOriginals) {
-    try { addLayer(compressorsLayer, compressorConfig); } catch (e) {}
-    try { addLayer(originalCompressorsLayer, compressorConfig); } catch (e) {}
-  }
 
   if (typeof shortPipeLayer !== 'undefined' && shortPipeLayer) {
     const shortPipeConfig = (typeof getConfiguredShortPipeConfig === 'function' && getConfiguredShortPipeConfig()) ||
@@ -407,7 +429,8 @@ function collectLegoNodeRows(mappingConfig, scope = 'complete') {
   };
 
   (Array.isArray(layerConfig) ? layerConfig : []).forEach(config => {
-    if (classifyLegoNetworkLayer(config, mappingConfig.rules) !== 'node') return;
+    const configuredType = String(config?.type || '').trim().toLowerCase();
+    if (configuredType !== 'node' && classifyLegoNetworkLayer(config, mappingConfig.rules) !== 'node') return;
     const layerName = typeof getLayerNameFromConfig === 'function'
       ? getLayerNameFromConfig(config)
       : String(config.filename || '').replace('.geojson', '').replace(/[^a-zA-Z0-9]/g, '') + 'Layer';
@@ -432,7 +455,7 @@ function collectLegoNodeRows(mappingConfig, scope = 'complete') {
   addLayer(directNodesLayer, {
     filename: 'nodes.geojson',
     legendName: 'Nodes',
-    type: 'Point'
+    type: 'Node'
   });
 
   if (window.customLayers) {
@@ -673,11 +696,11 @@ async function exportChanges(format = 'geojson') {
 
   const extractFeatureForExport = (layer) => {
     if (!layer || typeof layer.toGeoJSON !== 'function') return null;
-    const geo = layer.toGeoJSON();
+    const geo = layer.toGeoJSON(false);
     if (!geo || !geo.geometry) return null;
     geo.properties = { ...(layer.feature?.properties || {}), ...(geo.properties || {}) };
     if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(geo);
-    return geo;
+    return removeInternalExportProperties(geo);
   };
 
   /* Collect features by type. */
@@ -967,12 +990,12 @@ async function exportFilteredData(folderName, format = 'geojson', options = {}) 
 
   const extractFeatureForExport = (layer) => {
     if (!layer || typeof layer.toGeoJSON !== 'function') return null;
-    const geo = layer.toGeoJSON();
+    const geo = layer.toGeoJSON(false);
     if (!geo || !geo.geometry) return null;
     geo.properties = { ...(layer.feature?.properties || {}), ...(geo.properties || {}) };
     if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(geo);
     if (isDeletedFeature(layer.feature || geo)) return null;
-    return geo;
+    return removeInternalExportProperties(geo);
   };
 
   function addGeoJSONToZip(features, filename) {
@@ -983,42 +1006,14 @@ async function exportFilteredData(folderName, format = 'geojson', options = {}) 
   }
 
   const collectConfiguredFeatures = (config, configuredLayer) => {
-    const isCompressorConfig = /compressor/i.test(`${config?.filename || ''} ${config?.legendName || ''}`);
-    const sources = isCompressorConfig
-      ? Array.from(new Set([
-          (typeof compressorsLayer !== 'undefined' ? compressorsLayer : null),
-          configuredLayer,
-          (typeof originalCompressorsLayer !== 'undefined' ? originalCompressorsLayer : null)
-        ].filter(Boolean)))
-      : [configuredLayer].filter(Boolean);
     const candidates = [];
-    sources.forEach(source => source.eachLayer?.(layer => {
+    configuredLayer?.eachLayer?.(layer => {
       const feature = layer?.feature;
       if (!feature) return;
-      if (isCompressorConfig) {
-        try {
-          if (selectedCountries instanceof Set && selectedCountries.size &&
-              typeof shouldShowElement === 'function' &&
-              !shouldShowElement(feature, selectedCountries)) return;
-        } catch (e) {}
-      }
       const exported = extractFeatureForExport(layer);
       if (exported) candidates.push(exported);
-    }));
-    if (!isCompressorConfig) return candidates;
-
-    const replacedIds = new Set(candidates
-      .map(feature => String(feature.properties?.Distribution_Group ?? '').trim().toLowerCase())
-      .filter(Boolean));
-    const byId = new Map();
-    candidates.forEach(feature => {
-      const id = String(feature.properties?.id ?? feature.properties?.ID ?? '').trim().toLowerCase();
-      const group = String(feature.properties?.Distribution_Group ?? '').trim();
-      if (!group && id && replacedIds.has(id)) return;
-      const key = id || JSON.stringify(feature.geometry);
-      if (!byId.has(key)) byId.set(key, feature);
     });
-    return Array.from(byId.values());
+    return candidates;
   };
 
   /* Collect data dynamically from all layers in layerConfig. */
@@ -1249,12 +1244,12 @@ async function exportCompleteDataset(format = 'geojson', options = {}) {
 
   const extractFeatureForExport = (layer) => {
     if (!layer || typeof layer.toGeoJSON !== 'function') return null;
-    const geo = layer.toGeoJSON();
+    const geo = layer.toGeoJSON(false);
     if (!geo || !geo.geometry) return null;
     geo.properties = { ...(layer.feature?.properties || {}), ...(geo.properties || {}) };
     if (typeof initializeFeatureChangeTracking === 'function') initializeFeatureChangeTracking(geo);
     if (isDeletedFeature(layer.feature || geo)) return null;
-    return geo;
+    return removeInternalExportProperties(geo);
   };
 
   /* Helper to add GeoJSON to ZIP. */
@@ -1270,33 +1265,12 @@ async function exportCompleteDataset(format = 'geojson', options = {}) {
   }
 
   const collectConfiguredFeatures = (config, configuredLayer) => {
-    const isCompressorConfig = /compressor/i.test(`${config?.filename || ''} ${config?.legendName || ''}`);
-    const sources = isCompressorConfig
-      ? Array.from(new Set([
-          (typeof originalCompressorsLayer !== 'undefined' ? originalCompressorsLayer : null),
-          (typeof compressorsLayer !== 'undefined' ? compressorsLayer : null),
-          configuredLayer
-        ].filter(Boolean)))
-      : [configuredLayer].filter(Boolean);
     const candidates = [];
-    sources.forEach(source => source.eachLayer?.(layer => {
+    configuredLayer?.eachLayer?.(layer => {
       const exported = extractFeatureForExport(layer);
       if (exported) candidates.push(exported);
-    }));
-    if (!isCompressorConfig) return candidates;
-
-    const replacedIds = new Set(candidates
-      .map(feature => String(feature.properties?.Distribution_Group ?? '').trim().toLowerCase())
-      .filter(Boolean));
-    const byId = new Map();
-    candidates.forEach(feature => {
-      const id = String(feature.properties?.id ?? feature.properties?.ID ?? '').trim().toLowerCase();
-      const group = String(feature.properties?.Distribution_Group ?? '').trim();
-      if (!group && id && replacedIds.has(id)) return;
-      const key = id || JSON.stringify(feature.geometry);
-      if (!byId.has(key)) byId.set(key, feature);
     });
-    return Array.from(byId.values());
+    return candidates;
   };
 
   /* Collect data dynamically from all layers in layerConfig. */
