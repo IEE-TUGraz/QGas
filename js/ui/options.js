@@ -213,6 +213,39 @@ function buildStyleableLayerRegistry() {
     });
   }
 
+  /* Short pipes can be created at runtime even when the opened dataset has no
+   * Short_Pipes file/config entry. Expose that fallback layer in Options too. */
+  if (typeof shortPipeLayer !== 'undefined' && shortPipeLayer) {
+    const existingShortPipeEntry = Array.from(registry.values()).find(entry =>
+      entry.elementKey === 'shortPipes' ||
+      (Array.isArray(entry.layerRefs) && entry.layerRefs.includes(shortPipeLayer))
+    );
+    if (!existingShortPipeEntry) {
+      const settings = shortPipeLayer._customLayerSettings || {};
+      const entry = {
+        key: 'shortPipeLayer',
+        name: shortPipeLayer._qgasMeta?.legendName || shortPipeLayer._customLayerName || 'Short-Pipes',
+        geometry: 'line',
+        color: shortPipeLayer._customLineColor || settings.color || '#ff8800',
+        size: shortPipeLayer._customLineWeight || settings.size || 4,
+        shape: null,
+        lineStyle: settings.lineStyle || 'segmented',
+        customLayer: shortPipeLayer,
+        elementKey: 'shortPipes',
+        layerName: 'shortPipeLayer',
+        layerRefs: [shortPipeLayer]
+      };
+      shortPipeLayer._customLayerSettings = {
+        ...settings,
+        geometryClass: 'line',
+        color: entry.color,
+        size: entry.size,
+        lineStyle: entry.lineStyle
+      };
+      registry.set(entry.key, entry);
+    }
+  }
+
   return registry;
 }
 
@@ -293,7 +326,7 @@ function populateLayerList() {
           iconStyle += ' clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);';
           break;
         case 'cross':
-          iconStyle += ' clip-path: polygon(20% 0%, 80% 0%, 80% 20%, 100% 20%, 100% 80%, 80% 80%, 80% 100%, 20% 100%, 20% 80%, 0% 80%, 0% 20%, 20% 20%);';
+          iconStyle += ' border-radius: 0; clip-path: polygon(36% 0%, 64% 0%, 64% 36%, 100% 36%, 100% 64%, 64% 64%, 64% 100%, 36% 100%, 36% 64%, 0% 64%, 0% 36%, 36% 36%);';
           break;
         default:
           iconStyle += ' border-radius: 50%;';
@@ -461,6 +494,9 @@ function applyColorChange() {
   if (entry.customLayer) {
     if (entry.geometry === 'line') {
       entry.customLayer._customLineColor = newColor;
+      if (entry.customLayer._customLayerSettings) {
+        entry.customLayer._customLayerSettings.color = newColor;
+      }
     } else {
       entry.customLayer._customLayerColor = newColor;
       if (entry.customLayer._customLayerSettings) {
@@ -820,6 +856,9 @@ function applySizeChange() {
       if (entry.customLayer) {
         if (entry.geometry === 'line') {
           entry.customLayer._customLineWeight = selectedSize;
+          if (entry.customLayer._customLayerSettings) {
+            entry.customLayer._customLayerSettings.size = selectedSize;
+          }
         } else if (entry.customLayer._customLayerSettings) {
           entry.customLayer._customLayerSettings.radius = selectedSize;
           entry.customLayer._customLayerSettings.size = selectedSize;
@@ -1029,11 +1068,10 @@ function createCustomIcon(shape, color, radius) {
       svgContent = `<polygon points="${starPoints}" fill="${color}" stroke="#333" stroke-width="1"/>`;
       break;
     case 'cross':
-      const crossWidth = size/4;
-      svgContent = `
-        <rect x="${size/2-crossWidth/2}" y="2" width="${crossWidth}" height="${size-4}" fill="${color}" stroke="#333" stroke-width="1"/>
-        <rect x="2" y="${size/2-crossWidth/2}" width="${size-4}" height="${crossWidth}" fill="${color}" stroke="#333" stroke-width="1"/>
-      `;
+      const inset = size * 0.36;
+      const outset = size - inset;
+      const crossPoints = `${inset},1 ${outset},1 ${outset},${inset} ${size-1},${inset} ${size-1},${outset} ${outset},${outset} ${outset},${size-1} ${inset},${size-1} ${inset},${outset} 1,${outset} 1,${inset} ${inset},${inset}`;
+      svgContent = `<polygon points="${crossPoints}" fill="${color}" stroke="#333" stroke-width="1"/>`;
       break;
     default:
       /* Fallback to a circular marker. */
@@ -1083,11 +1121,11 @@ function generateLegendIcon(color, shape, size = 6) {
       return `<span class="legend-icon" style="${baseStyle} background:${color}; clip-path:polygon(50% 0%, 0% 100%, 100% 100%); border-radius:0;"></span>`;
     }
     case 'diamond':
-      return `<span class="legend-icon" style="${baseStyle} background:${color}; transform:rotate(45deg); transform-origin:center;"></span>`;
+      return `<span class="legend-icon" style="${baseStyle} background:${color}; border-radius:0; transform:rotate(45deg) scale(0.78); transform-origin:center;"></span>`;
     case 'star':
-      return `<span class="legend-icon" style="${baseStyle} background:${color}; clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);"></span>`;
+      return `<span class="legend-icon" style="${baseStyle} background:${color}; border-radius:0; clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);"></span>`;
     case 'cross':
-      return `<span class="legend-icon" style="${baseStyle} background:${color}; clip-path:polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);"></span>`;
+      return `<span class="legend-icon" style="${baseStyle} background:${color}; border-radius:0; clip-path:polygon(36% 0%, 64% 0%, 64% 36%, 100% 36%, 100% 64%, 64% 64%, 64% 100%, 36% 100%, 36% 64%, 0% 64%, 0% 36%, 36% 36%);"></span>`;
     default:
       /* Default circle swatch. */
       return `<span class="legend-icon" style="${baseStyle} background:${color}; border-radius:50%;"></span>`;
@@ -1122,6 +1160,9 @@ function getLegendToggleIdForEntry(entry) {
   }
   if (entry.customLayer && entry.name) {
     candidates.push('toggle-' + entry.name.toLowerCase().replace(/\s+/g, '-'));
+  }
+  if (entry.elementKey === 'shortPipes' || entry.layerName === 'shortPipeLayer') {
+    candidates.unshift('toggle-shortpipes');
   }
   if (!candidates.length) return null;
   const existing = candidates.find(id => document.getElementById(id));

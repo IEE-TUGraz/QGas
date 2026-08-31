@@ -6678,10 +6678,17 @@ function initializeFallbackShortPipeLayer() {
     legendName: 'Short-Pipes',
     geometryClass: 'line'
   };
+  shortPipeLayer._customLayerSettings = {
+    geometryClass: 'line',
+    color: '#ff8800',
+    size: 4,
+    lineStyle: 'segmented'
+  };
   rememberLayerInstanceForElementKey('shortPipes', shortPipeLayer);
   registerLegacyLayerReference('shortPipes', shortPipeLayer);
   registerLineColorUsage('#ff8800');
   originalShortPipeLayer = shortPipeLayer;
+  invalidateStyleableLayerRegistry();
   return shortPipeLayer;
 }
 
