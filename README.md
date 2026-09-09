@@ -52,6 +52,26 @@ QGas is released under the **MIT License**, allowing free use, modification, and
 
 ---
 
+# Cite QGas
+
+If you use QGas in your research, we would appreciate it if you would cite the following paper:
+
+M. Quantschnig, Y. Werner, S. Wogrin, and T. Klatzer, “QGas: Interactive gas infrastructure toolkit,” SoftwareX, vol. 35, p. 103013, 2026. doi: https://doi.org/10.1016/j.softx.2026.103013.
+
+```bibtex
+@article{Quantschnig2026QGas,
+   author = {Marco Quantschnig and Yannick Werner and Sonja Wogrin and Thomas Klatzer},
+   title = {{QGas}: Interactive gas infrastructure toolkit},
+   journal={SoftwareX},
+   volume={35},
+   pages={103013},
+   year={2026},
+   doi={https://doi.org/10.1016/j.softx.2026.103013}
+}
+```
+
+---
+
 # Acknowledgements
 
 To facilitate testing and to demonstrate the data structure used by QGas, a sample dataset has been included in the repository.  
@@ -69,29 +89,6 @@ For more information about the original dataset, see the [Zenodo record](https:/
   url    = {https://doi.org/10.5281/zenodo.5509988}
 }
 ```
-
----
-
-# Cite QGas
-
-If you use QGas in your research, publications, or technical work, please cite the toolkit to acknowledge the development team and the supporting institute, and to support reproducibility of your results.  
-
-```bibtex
-@article{Quantschnig2026QGas,
-   author = {Marco Quantschnig and Yannick Werner and Sonja Wogrin and Thomas Klatzer},
-   title = {{QGas: Interactive Gas Infrastructure Toolkit}},
-   year = {2026},
-   eprint = {2604.15876},
-   archivePrefix = {arXiv},
-   primaryClass = {eess.SY},
-   doi = {10.48550/arXiv.2604.15876},
-   url = {https://doi.org/10.48550/arXiv.2604.15876}
-}
-```
-
-Or in text format:
-
-M. Quantschnig, Y. Werner, S. Wogrin, and T. Klatzer (2026). *QGas: Interactive Gas Infrastructure Toolkit*. arXiv:2604.15876 [eess.SY]. https://doi.org/10.48550/arXiv.2604.15876
 
 ---
 
