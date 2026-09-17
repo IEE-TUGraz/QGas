@@ -525,12 +525,14 @@ class CombinedGUI:
         # This method is now handled by create_widgets
         pass
     
-    class ReusableTCPServer(socketserver.TCPServer):
+    class ReusableTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         """
-        Custom TCP server with address reuse enabled
-        Prevents "Address already in use" errors on rapid restart
+        Serve concurrent browser requests without blocking on idle connections.
+        Address reuse permits rapid restart; daemon workers permit clean shutdown.
         """
         allow_reuse_address = True
+        daemon_threads = True
+        request_queue_size = 32
     
     def start_server(self):
         """
@@ -591,6 +593,15 @@ class CombinedGUI:
                     from urllib.parse import urlparse, parse_qs
                     parsed_path = urlparse(self.path)
                     path = parsed_path.path
+
+                    # Optional discovery is allowed to find nothing. Keep real
+                    # resource requests on the normal 404/error path.
+                    if (path.startswith('/Input/')
+                            and parse_qs(parsed_path.query).get('optional') == ['1']
+                            and not os.path.exists(self.translate_path(path))):
+                        self.send_response(204)
+                        self.end_headers()
+                        return
                     
                     # API Endpoints für optimierte Datenabfrage
                     if path.startswith('/api/'):

@@ -1696,7 +1696,7 @@ const map = L.map('map', {
   }
 
   async function fetchProjectResource(fileName, options = {}) {
-    const { fallbackToRoot = true, logAttempts = false } = options;
+    const { fallbackToRoot = true, logAttempts = false, optional = false } = options;
     const timestamp = Date.now();
     const sanitized = sanitizeRelativePath(fileName);
     const candidates = [];
@@ -1707,12 +1707,13 @@ const map = L.map('map', {
       candidates.push(sanitized);
     }
     for (const relative of candidates) {
-      const url = `Input/${relative}?v=${timestamp}`;
+      const url = `Input/${relative}?v=${timestamp}${optional ? '&optional=1' : ''}`;
       if (logAttempts) {
         console.log(`Loading ${fileName} from: ${url}`);
       }
       try {
         const response = await fetch(url);
+        if (optional && response.status === 204) continue;
         if (response.ok) {
           return { url, response };
         }
@@ -1837,8 +1838,25 @@ const map = L.map('map', {
   window.csvTextToGeoJSON = csvTextToGeoJSON;
   window.parseSpatialDataResponse = parseSpatialDataResponse;
 
+  // Retry transient transport/server failures, but report missing files immediately.
+  async function fetchLayerResponse(url, attempts = 3) {
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      let response;
+      try {
+        response = await fetch(url);
+      } catch (error) {
+        if (attempt === attempts) throw error;
+      }
+      if (response?.ok) return response;
+      if (response && (response.status < 500 || attempt === attempts)) {
+        throw new Error(`HTTP ${response.status}: ${url}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 300 * attempt));
+    }
+  }
+
   /*
-   * Load a GeoJSON or QGas CSV layer if the referenced file exists.
+   * Resolve only after a configured layer has been loaded and registered.
    */
   function loadLayer(fileName, layerName, styleOptions, onEachFeatureCallback, onLoadCallback) {
     styleOptions = styleOptions || {};
@@ -1846,7 +1864,7 @@ const map = L.map('map', {
     const url = buildInputUrl(resolvedPath, { skipProjectPrefix: true });
     if (!url) {
       console.warn(`No valid path resolved for layer ${layerName}`);
-      return;
+      return Promise.reject(new Error(`No valid path resolved for layer ${layerName}`));
     }
     console.log(`Loading layer from: ${url}`);
     let metadata = layerMetadataRegistry[layerName];
@@ -1858,12 +1876,8 @@ const map = L.map('map', {
         type: inferredType
       });
     }
-    fetch(url)
+    return fetchLayerResponse(url)
       .then(response => {
-        if (!response.ok) {
-          console.log(`File ${fileName} not found at ${url}, skipping.`);
-          return null;
-        }
         return parseSpatialDataResponse(response, fileName);
       })
       .then(data => {
@@ -1926,7 +1940,8 @@ const map = L.map('map', {
         }
       })
       .catch(error => {
-        console.log(`Error loading ${fileName}:`, error);
+        console.error(`Error loading ${fileName}:`, error);
+        throw error;
       });
   }
 
@@ -2256,7 +2271,7 @@ const map = L.map('map', {
     
     try {
       // Load the data and licensing file from the current project folder
-      const { response } = await fetchProjectResource('license.txt');
+      const { response } = await fetchProjectResource('license.txt', { optional: true });
       
       if (response) {
         const text = await response.text();
@@ -3187,7 +3202,7 @@ const map = L.map('map', {
     if (layerConfig.some(isShortPipeConfigEntry)) {
       return;
     }
-    const { response } = await fetchProjectResource(SHORT_PIPE_CONFIG_DEFAULTS.filename, { logAttempts: true });
+    const { response } = await fetchProjectResource(SHORT_PIPE_CONFIG_DEFAULTS.filename, { optional: true });
     if (!response) {
       return;
     }
@@ -3287,7 +3302,8 @@ const map = L.map('map', {
     const finalShortPipeConfigExists = layerConfig.some(isShortPipeConfigEntry);
     console.log('Configuration loaded, will load', layerConfig.length, 'layers');
     invalidateStyleableLayerRegistry();
-    
+    const pendingLayers = [];
+
     for (const config of layerConfig) {
       if (!config.enabled) continue;
       
@@ -3303,12 +3319,14 @@ const map = L.map('map', {
       const isNodeLayer = metadata.elementKey === 'nodes' || typeHint === 'node' || lowerFilename.includes('node') || lowerFilename.startsWith('n_');
       const resolvedPane = resolveDefaultPaneForConfig(config);
       const targetPane = resolvedPane || (isPipelineLayer ? 'pipelinePane' : (isNodeLayer ? 'nodePane' : null));
+      dynamicLayers[layerName] = null;
+      let loading;
       
       if ((config.type || '').toLowerCase() === 'line' || isShortPipeType) {
         if (config.color) {
           registerLineColorUsage(config.color);
         }
-        loadLayer(config.filename, layerName, {
+        loading = loadLayer(config.filename, layerName, {
           pane: targetPane,
           style: {
             color: config.color,
@@ -3327,7 +3345,7 @@ const map = L.map('map', {
         });
       } else {
         // Point or In-Line
-        loadLayer(config.filename, layerName, {
+        loading = loadLayer(config.filename, layerName, {
           pane: targetPane,
           pointToLayer: (feature, latlng) => {
             const marker = createShapedMarker(latlng, {
@@ -3363,19 +3381,23 @@ const map = L.map('map', {
         } : null);
       }
       
-      // Store layer reference placeholder for later assignment
-      dynamicLayers[layerName] = null;
+      pendingLayers.push({ config, loading });
     }
     
     // Update legend after all layers configured
     if (!finalShortPipeConfigExists && !shortPipeLayer) {
       initializeFallbackShortPipeLayer();
     }
-    setTimeout(() => {
-      updateLegendControl();
-      loadPersistedInfrastructurePlans();
-      linkInlineElementsToNearbyNodes();
-    }, 2000);
+    updateLegendControl();
+    const results = await Promise.allSettled(pendingLayers.map(entry => entry.loading));
+    loadPersistedInfrastructurePlans();
+    linkInlineElementsToNearbyNodes();
+    const failures = results.flatMap((result, index) => result.status === 'rejected'
+      ? [`${pendingLayers[index].config.filename}: ${result.reason?.message || result.reason}`]
+      : []);
+    if (failures.length) {
+      alert(`Some layers could not be loaded:\n\n${failures.join('\n')}\n\nReload the project to try again.`);
+    }
   }
 
   function ensureLayerInstanceForConfig(config) {
@@ -6770,8 +6792,12 @@ function setActiveBtn(activeBtn) {
   });
 }
 
-// Standardmäßig alle Modi deaktivieren
-deactivateAllModes();
+// Initialize tools only after all script state (including currentLayer) is ready.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => deactivateAllModes(), { once: true });
+} else {
+  queueMicrotask(() => deactivateAllModes());
+}
 
 // Funktion zum Aktivieren des Bearbeitungsmodus für bestehende Features
 /**

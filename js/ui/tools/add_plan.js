@@ -694,7 +694,7 @@ async function fetchJsonAtProjectPath(relativePath) {
   try {
     const sanitized = sanitizeRelativePath(relativePath);
     if (!sanitized) return null;
-    const { response } = await fetchProjectResource(sanitized);
+    const { response } = await fetchProjectResource(sanitized, { optional: true });
     if (!response) return null;
     return await response.json();
   } catch (error) {
@@ -707,7 +707,7 @@ async function fetchPlanImageDataUrl(relativePath) {
   try {
     const sanitized = sanitizeRelativePath(relativePath);
     if (!sanitized) return null;
-    const { response } = await fetchProjectResource(sanitized);
+    const { response } = await fetchProjectResource(sanitized, { optional: true });
     if (!response) return null;
     const blob = await response.blob();
     return await blobToDataURL(blob);
@@ -753,7 +753,7 @@ async function fetchPlanManifestEntries() {
 async function fetchFolderListing(relativeFolder) {
   const sanitized = sanitizeRelativePath(relativeFolder).replace(/\/+$/, '') + '/';
   try {
-    const { response } = await fetchProjectResource(sanitized);
+    const { response } = await fetchProjectResource(sanitized, { optional: true });
     if (!response || !response.ok) return null;
     const contentType = response.headers.get('content-type') || '';
     if (!contentType.includes('text')) return null;

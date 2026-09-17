@@ -1,0 +1,97 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Layer loading regression tests</title>
+<pre id="result">RUNNING</pre>
+<script>
+(async () => {
+  const assert = (value, message) => { if (!value) throw new Error(message); };
+  const source = (await (await fetch('../js/core.js')).text()).replace(/\r\n/g, '\n');
+  // Parse the complete script, then exercise the real loader functions in isolation.
+  new Function(source);
+  const extract = (start, end) => source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)));
+  const resourceSource = extract('async function fetchProjectResource(', '  function parseCsvCellValue(');
+  const urls = [];
+  const resource = new Function('fetch', `
+    const currentProject = 'example', sanitizeRelativePath = value => value;
+    ${resourceSource}; return fetchProjectResource;
+  `)(async url => {
+    urls.push(url);
+    return {ok: true, status: urls.length === 1 ? 204 : 200};
+  });
+  const found = await resource('plans/manifest.json', {optional: true});
+  assert(urls.length === 2 && urls.every(url => url.includes('&optional=1')), 'Optional discovery did not check fallback');
+  assert(found.response.status === 200, 'Empty optional response was treated as a file');
+  urls.length = 0;
+  await resource('config.xlsx');
+  assert(!urls[0].includes('optional=1'), 'Required resource errors were suppressed');
+
+  const startupSource = extract('// Initialize tools only after all script state', '// Funktion zum Aktivieren des Bearbeitungsmodus');
+  for (const readyState of ['loading', 'complete']) {
+    let deferred;
+    const state = new Function('document', 'queueMicrotask', `
+      let calls = 0;
+      function deactivateAllModes() { if (currentLayer !== null) throw new Error('Invalid modal state'); calls++; }
+      ${startupSource}
+      let currentLayer = null;
+      return () => calls;
+    `)({readyState, addEventListener: (name, callback) => { assert(name === 'DOMContentLoaded', 'Incorrect startup event'); deferred = callback; }}, callback => { deferred = callback; });
+    assert(state() === 0, 'Startup ran before state initialization');
+    deferred();
+    assert(state() === 1, 'Startup did not run after initialization');
+  }
+  const retrySource = extract('async function fetchLayerResponse(', '  /*\n   * Resolve only');
+  const makeRetry = fetch => new Function('fetch', 'setTimeout', `${retrySource}; return fetchLayerResponse;`)(fetch, fn => fn());
+  let calls = 0;
+  const success = { ok: true };
+  assert(await makeRetry(async () => { if (++calls < 3) throw new TypeError('Network error'); return success; })('test') === success, 'Transport retry failed');
+  assert(calls === 3, 'Incorrect transport retry count');
+  calls = 0;
+  await makeRetry(async () => (++calls < 3 ? {ok: false, status: 503} : success))('test');
+  assert(calls === 3, 'Server errors were not retried');
+  calls = 0;
+  try {
+    await makeRetry(async () => { calls++; return {ok: false, status: 404}; })('missing');
+    throw new Error('Missing file did not reject');
+  } catch (error) {
+    assert(error.message.includes('HTTP 404'), 'Missing filename/status not reported');
+  }
+  assert(calls === 1, 'Permanent errors should not be retried');
+  calls = 0;
+  try {
+    await makeRetry(async () => { calls++; throw new TypeError('Offline'); })('test');
+    throw new Error('Permanent network failure did not reject');
+  } catch (error) { assert(error.message === 'Offline', 'Network failure was swallowed'); }
+  assert(calls === 3, 'Network retries are not bounded');
+
+  const loadSource = extract('async function loadAllLayersFromConfig()', '  function ensureLayerInstanceForConfig(');
+  const run = new Function(`
+    let layerConfig, completed = false, linked = false, plans = false, alertText = '';
+    const currentProject = 'test', dynamicLayers = {}, shortPipeLayer = null;
+    const config = ['productions', 'storages'].map(name => ({filename: name + '.geojson', type: 'Point', enabled: true}));
+    const loadLayerConfiguration = async () => config;
+    const shouldSkipLayerConfig = () => false, isShortPipeConfigEntry = () => true;
+    const invalidateStyleableLayerRegistry = () => {}, resolveDefaultPaneForConfig = () => null;
+    const registerLayerMetadata = () => ({elementKey: 'productions', geometryClass: 'point'});
+    const updateLegendControl = () => {};
+    const loadPersistedInfrastructurePlans = () => { plans = true; };
+    const linkInlineElementsToNearbyNodes = () => { linked = true; };
+    const alert = message => { alertText = message; };
+    const resolvers = [];
+    const loadLayer = () => new Promise((resolve, reject) => resolvers.push({resolve, reject}));
+    ${loadSource}
+    return {start: () => loadAllLayersFromConfig().then(() => { completed = true; }), resolvers,
+      state: () => ({completed, linked, plans, alertText})};
+  `)();
+  const pending = run.start();
+  await Promise.resolve();
+  assert(run.resolvers.length === 2, 'Not all configured layers started');
+  run.resolvers[0].resolve();
+  await Promise.resolve();
+  assert(!run.state().completed && !run.state().linked && !run.state().plans, 'Initialization ran before the last layer settled');
+  run.resolvers[1].reject(new Error('HTTP 500'));
+  await pending;
+  assert(run.state().completed && run.state().linked && run.state().plans, 'Failed layer blocked initialization');
+  assert(run.state().alertText.includes('storages.geojson: HTTP 500'), 'Failed layer was not identified');
+  document.getElementById('result').textContent = 'PASS: optional discovery, startup initialization, retries, permanent failures, completion ordering, failure reporting, JavaScript syntax';
+})().catch(error => { document.getElementById('result').textContent = 'FAIL: ' + error.stack; });
+</script>
